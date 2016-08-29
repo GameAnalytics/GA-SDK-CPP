@@ -23,5 +23,5 @@ script:
 # only test master
 branches:
   only:
-    - master
+    - develop
 
