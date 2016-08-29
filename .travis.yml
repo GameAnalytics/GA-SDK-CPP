@@ -20,7 +20,7 @@ install:
 script:
     - (cd tests && cd build && xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug && ./Debug/GameAnalyticsTests)
 
-# only test master
+# only test develop
 branches:
   only:
     - develop
