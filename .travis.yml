@@ -1,0 +1,27 @@
+osx_image: xcode7
+language: objective-c
+xcode_project: GameAnalyticsTests.xcodeproj
+xcode_scheme:
+    - GameAnalyticsTests
+
+notifications:
+    email:
+        - nikolaj@gameanalytics.com
+        - mts@gameanalytics.com
+
+before_install:
+    - brew update
+    - brew install p7zip
+    - travis_wait python build/jenkins/main.py -s
+
+install:
+    - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -G Xcode ..)
+
+script:
+    - (cd tests && cd build && xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug && ./Debug/GameAnalyticsTests)
+
+# only test master
+branches:
+  only:
+    - master
+
