@@ -141,3 +141,9 @@ Example:
  gameanalytics::GameAnalytics::addResourceEvent(gameanalytics::Source, "gems", 10, "lives", "extra_life");
  gameanalytics::GameAnalytics::addProgressionEvent(gameanalytics::Start, "progression01", "progression02");
 ```
+
+Changelog
+---------
+
+**1.0.0**
+* Initial version with Windows and Mac OS X support
