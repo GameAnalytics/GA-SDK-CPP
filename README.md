@@ -1,7 +1,7 @@
 GA-SDK-CPP
 ==========
 
-GameAnalytics C++ SDK 
+GameAnalytics C++ SDK
 
 Supported platforms:
 
@@ -32,7 +32,7 @@ Or you can run the actual build script directly found at **build/jenkins/main.py
 How to develop
 --------------
 
-If you developing the SDK, you can use the generated project files to work with. 
+If you developing the SDK, you can use the generated project files to work with.
 
 They are located under **build/jenkins/build/[target]** after calling the **build.sh** or **build.bat**.
 
@@ -42,7 +42,7 @@ Folderstructure
 
 * **build** - Contains scripts for automated project setup, building and creating of the final exstracted library
 * **build/cmake** - Contains the cmake files for the project
-* **build/jenkins** - Contains the scripts and working directories for the automated builds 
+* **build/jenkins** - Contains the scripts and working directories for the automated builds
 * **export** - Target folder for the automated export of the GA lib
 * **source** - Contains the complete source code for the project including the dependencies
 * **tests** - Contains tests for testing the functionality in the GA SDK, to run tests run **tests/run_tests_osx.py** (mac only)
@@ -64,7 +64,7 @@ Preperation before usage of the SDK
 
 * Include the following directories in your C++ project's include paths:
   * **source/gameanalytics**
-  
+
 * In your C++ project, link to the following libraries:
   * All libraries in **source/dependencies/boost/1.60.0/libs/[target]**
   * All libraries in **source/dependencies/cppnetlib/0.11.2/libs/[target]**
@@ -88,9 +88,9 @@ Example:
 ``` c++
  gameanalytics::GameAnalytics::setEnabledInfoLog(true);
  gameanalytics::GameAnalytics::setEnabledVerboseLog(true);
-    
+
  gameanalytics::GameAnalytics::configureBuild("0.10");
-    
+
  {
      std::vector<std::string> list;
      list.push_back("gems");
@@ -144,6 +144,8 @@ Example:
 
 Changelog
 ---------
+**1.0.1**
+* fix for empty user id in events
 
 **1.0.0**
 * Initial version with Windows and Mac OS X support
