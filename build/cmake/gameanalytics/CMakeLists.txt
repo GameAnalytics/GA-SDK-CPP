@@ -16,12 +16,12 @@ set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
 
 message(STATUS "********************** platform is ${PLATFORM}")
 
-if("${PLATFORM}" STREQUAL "win32-static")
+if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "win64-static")
+elseif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
@@ -48,7 +48,7 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
-endif("${PLATFORM}" STREQUAL "win32-static")
+endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 
@@ -100,7 +100,7 @@ if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
     )
 endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
 
-if("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
+if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win32-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -119,9 +119,9 @@ if("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
     )
-endif("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
+endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win32-shared")
 
-if("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
+if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win64-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -140,7 +140,7 @@ if("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
     )
-endif("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
+endif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win64-shared")
 
 target_include_directories(
     GameAnalytics
