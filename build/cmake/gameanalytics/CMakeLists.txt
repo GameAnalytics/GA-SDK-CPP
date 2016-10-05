@@ -102,7 +102,7 @@ endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared"
 
 if("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include32"
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
     target_link_libraries(GameAnalytics 
@@ -123,7 +123,7 @@ endif("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-sha
 
 if("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include32"
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
     target_link_libraries(GameAnalytics 
