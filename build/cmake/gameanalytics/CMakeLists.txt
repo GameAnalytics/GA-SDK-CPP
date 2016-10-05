@@ -116,8 +116,8 @@ if("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win32/cppnetlib-client-connections.lib
         ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_chrono-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/libeay32MT.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/ssleay32MT.lib
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
     )
 endif("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
 
@@ -137,8 +137,8 @@ if("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win64/cppnetlib-client-connections.lib
         ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_chrono-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/libeay32MT.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/ssleay32MT.lib
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
     )
 endif("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
 
