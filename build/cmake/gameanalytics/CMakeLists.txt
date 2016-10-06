@@ -70,7 +70,7 @@ add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
 include_directories(
     "${DEPENDENCIES_DIR}/boost/boost_1_60_0"
-	"${DEPENDENCIES_DIR}/cppnetlib/0.11.2/include"
+	"${DEPENDENCIES_DIR}/cppnetlib/0.11.2/source"
     "${DEPENDENCIES_DIR}/jsoncpp"
     "${DEPENDENCIES_DIR}/sqlite"
     "${DEPENDENCIES_DIR}/crypto"
