@@ -5,7 +5,6 @@
 
 #include "GADevice.h"
 #include <boost/filesystem/operations.hpp>
-#include <boost/predef.h> 
 
 namespace gameanalytics
 {

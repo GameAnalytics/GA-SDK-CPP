@@ -182,10 +182,10 @@ available_targets = {
         'osx-shared': all_targets['osx-shared'],
     },
     'Windows': {
-        'win32-vc140-static': all_targets['win32-vc140-static'],
-        'win32-vc120-static': all_targets['win32-vc120-static'],
+        #'win32-vc140-static': all_targets['win32-vc140-static'],
+        #'win32-vc120-static': all_targets['win32-vc120-static'],
         #'win32-shared': all_targets['win32-shared'],
-        'win64-vc140-static': all_targets['win64-vc140-static'],
+        #'win64-vc140-static': all_targets['win64-vc140-static'],
         'win64-vc120-static': all_targets['win64-vc120-static'],
         #'win64-shared': all_targets['win64-shared'],
     }

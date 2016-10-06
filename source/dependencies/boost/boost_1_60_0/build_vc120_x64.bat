@@ -1,1 +1,1 @@
-b2 toolset=msvc-12.0 architecture=x86 address-model=64 --with-atomic --with-chrono --with-date_time --with-filesystem --with-log --with-regex --with-system --with-thread stage --stagedir=stage/win64
+b2 toolset=msvc-12.0 architecture=x86 address-model=64 --with-atomic --with-chrono --with-date_time --with-filesystem --with-log --with-regex --with-system --with-thread define=BOOST_USE_WINAPI_VERSION=0x601 stage --stagedir=stage/win64
