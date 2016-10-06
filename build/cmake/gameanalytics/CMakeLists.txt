@@ -51,6 +51,7 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
+add_definitions("-DUSE_OPENSSL")
 
 # traverse all the subdirectories of the matched directory
 FILE(GLOB_RECURSE CPP_SOURCES
@@ -65,6 +66,8 @@ FILE(GLOB_RECURSE CPP_SOURCES
     "${DEPENDENCIES_DIR}/crypto/*.c"
     "${DEPENDENCIES_DIR}/crypto/*.cpp"
 	"${DEPENDENCIES_DIR}/plog/*.h"
+    "${DEPENDENCIES_DIR}/curl/lib/*.c"
+    "${DEPENDENCIES_DIR}/curl/include/*.h"
 )
 
 add_definitions("-DCRYPTOPP_DISABLE_ASM")
@@ -75,6 +78,7 @@ include_directories(
 	"${DEPENDENCIES_DIR}/plog"
     "${DEPENDENCIES_DIR}/sqlite"
     "${DEPENDENCIES_DIR}/crypto"
+    "${DEPENDENCIES_DIR}/curl/include"
 )
 
 create_source_groups( CPP_SOURCES )
@@ -89,12 +93,9 @@ if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
     target_link_libraries(GameAnalytics 
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_thread-mt.a
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_log-mt.a
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_log_setup-mt.a
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_regex-mt.a
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-uri.a
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-client-connections.a
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_chrono-mt.a
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
@@ -110,12 +111,9 @@ if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_atomic-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_thread-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_log-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_log_setup-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_regex-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win32/cppnetlib-uri.lib
         ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win32/cppnetlib-client-connections.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_chrono-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc140-mt-1_60.lib
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib

@@ -8,6 +8,7 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include "GAValidator.h"
+#include <cstring>
 
 namespace gameanalytics
 {
@@ -31,6 +32,13 @@ namespace gameanalytics
 
             // use gzip compression on JSON body
             useGzip = true;
+            
+            curl_global_init(CURL_GLOBAL_ALL);
+        }
+        
+        GAHTTPApi::~GAHTTPApi()
+        {
+            curl_global_cleanup();
         }
 
         EGAHTTPApiResponse GAHTTPApi::requestInitReturningDict(Json::Value& dict)
@@ -53,20 +61,33 @@ namespace gameanalytics
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
-            client::request request = createRequest(url, payloadData, useGzip);
-            client client;
-            client::response response = client.post(request, payloadData);
+            CURL* curl = createRequest(url, payloadData, useGzip);
+            CURLcode res;
             
-            std::ostringstream os;
-
-            try
+            char errbuf[CURL_ERROR_SIZE];
+            curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+            
+            res = curl_easy_perform(curl);
+            
+            std::string body;
+            
+            if(res != CURLE_OK)
             {
-                os << body(response);
+                std::string error(errbuf);
+                
+                if(error.length() > 0)
+                {
+                    body = error;
+                }
+                else
+                {
+                    logging::GALogger::d("Init request. failed. Might be no connection. Description: failed to parse response body");
+                    return NoResponse;
+                }
             }
-            catch (std::exception& ex)
+            else
             {
-                logging::GALogger::d("Init request. failed. Might be no connection. Description: failed to parse response body");
-                return NoResponse;
+                
             }
             
             std::string body = os.str();
@@ -273,25 +294,66 @@ namespace gameanalytics
             return{};
         }
 
-        client::request GAHTTPApi::createRequest(const std::string& url, const std::string& payloadData, bool gzip)
+        CURL* GAHTTPApi::createRequest(const std::string& url, const std::string& payloadData, bool gzip)
         {
-            client::request req(url);
-            req << header("User-Agent", "GameAnalytics C++ SDK");
-
-            if (gzip)
+            CURL* curl = curl_easy_init();
+            
+            curl_slist *headers = NULL;
+            
+            if(curl)
             {
-                req << header("Content-Encoding", "gzip");
+                curl_easy_setopt(curl, CURLOPT_URL, url);
+                
+                if (gzip)
+                {
+                    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING , "gzip");
+                }
             }
 
             // create authorization hash
             std::string key = state::GAState::getGameSecret();
 
-            req << header("Authorization", utilities::GAUtilities::hmacWithKey(key, payloadData).c_str());
+            headers = curl_slist_append(headers, std::string("Authorization: " + utilities::GAUtilities::hmacWithKey(key, payloadData)).c_str());
 
             // always JSON
-            req << header("Content-Type", "application/json");
+            headers = curl_slist_append(headers, "Content-Type: application/json");
+            
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payloadData.c_str());
 
-            return req;
+            return curl;
+        }
+        
+        size_t GAHTTPApi::curlCallback(void *contents, size_t size, size_t nmemb, void *userp)
+        {
+            size_t realsize = size * nmemb;                             /* calculate buffer size */
+            CurlFetchStruct *p = (CurlFetchStruct *) userp;   /* cast pointer to fetch struct */
+
+            /* expand buffer */
+            p->payload = (char *) new char[p->size + realsize + 1];
+
+            /* check buffer */
+            if (p->payload == NULL) 
+            {
+                /* this isn't good */
+                logging::GALogger::d("ERROR: Failed to expand buffer in curlCallback");
+                /* free buffer */
+                delete[] p->payload;
+                /* return */
+                return -1;
+            }
+
+            /* copy contents to buffer */
+            std::memcpy(&(p->payload[p->size]), contents, realsize);
+
+            /* set new buffer size */
+            p->size += realsize;
+
+            /* ensure null termination */
+            p->payload[p->size] = 0;
+
+            /* return size */
+            return realsize;
         }
 
         EGAHTTPApiResponse GAHTTPApi::processRequestResponse(client::response& response, const std::string& body, const std::string& requestId)

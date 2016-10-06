@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include "GALogger.h"
-#include <boost/thread.hpp>
+#include <thread>
 #include <boost/date_time.hpp>
 
 namespace gameanalytics

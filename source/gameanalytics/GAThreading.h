@@ -9,6 +9,7 @@
 #include <functional>
 #include <vector>
 #include <chrono>
+#include <memory>
 
 namespace gameanalytics
 {
