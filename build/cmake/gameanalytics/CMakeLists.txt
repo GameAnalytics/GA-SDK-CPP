@@ -51,7 +51,7 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
-add_definitions("-DUSE_OPENSSL")
+add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
 # traverse all the subdirectories of the matched directory
 FILE(GLOB_RECURSE CPP_SOURCES

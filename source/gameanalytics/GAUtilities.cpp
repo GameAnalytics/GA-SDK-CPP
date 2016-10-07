@@ -14,7 +14,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/asio.hpp>
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -91,6 +90,17 @@ namespace gameanalytics
                 dest.u8[k] = source.u8[sizeof(T) - k - 1];
 
             return dest.u;
+        }
+
+        uint32 htonl(uint32 v)
+        {
+            uint32 result = 0;
+            result |= (v & 0xFF000000) >> 24;
+            result |= (v & 0x00FF0000) >> 8;
+            result |= (v & 0x0000FF00) << 8;
+            result |= (v & 0x000000FF) << 24;
+
+            return result;
         }
 
         // TODO(nikolaj): explain function
