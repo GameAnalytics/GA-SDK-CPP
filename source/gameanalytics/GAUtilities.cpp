@@ -10,8 +10,7 @@
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <algorithm>
-#include <boost/regex.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <regex>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -234,10 +233,10 @@ namespace gameanalytics
         {
             try
             {
-                boost::regex expression(pattern);
-                return boost::regex_match(string, expression);
+                std::regex expression(pattern);
+                return std::regex_match(string, expression);
             }
-            catch (const boost::regex_error& e)
+            catch (const std::regex_error& e)
             {
                 logging::GALogger::e("failed to parse regular expression '" + pattern + "', code: " + std::to_string(e.code()) + ", what: " + e.what());
                 logging::GALogger::e("Please note, that the gnustl might not have regex support yet: https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html");

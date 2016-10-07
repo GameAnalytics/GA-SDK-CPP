@@ -6,7 +6,7 @@
 #pragma once
 
 #define BOOST_NETWORK_ENABLE_HTTPS
-#include <curl/curl.h>
+#include "curl_easy.h"
 #include <vector>
 #include <string>
 #include "Foundation/GASingleton.h"
@@ -57,9 +57,8 @@ namespace gameanalytics
 
          private:
             const std::string createPayloadData(const std::string& payload, bool gzip);
-            size_t curlCallback(void *contents, size_t size, size_t nmemb, void *userp);
-            CURL* createRequest(const std::string& url, const std::string& payloadData, bool gzip);
-            EGAHTTPApiResponse processRequestResponse(client::response& response, const std::string& body, const std::string& requestId);
+            void createRequest(curl::curl_easy& curl, const std::string& url, const std::string& payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
 
             std::string protocol;
             std::string hostName;

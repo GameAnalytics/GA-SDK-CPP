@@ -2,6 +2,7 @@
 #include <iostream>
 #include "GADevice.h"
 #include <plog/Log.h>
+#include <plog/Appenders/ConsoleAppender.h>
 #include <boost/filesystem.hpp>
 
 namespace gameanalytics
@@ -17,18 +18,8 @@ namespace gameanalytics
 		#if defined(_DEBUG)
 			// log debug is in dev mode
 			debugEnabled = true;
-
-			boost::log::core::get()->set_filter
-		    (
-		        boost::log::trivial::severity >= boost::log::trivial::debug
-		    );
 		#else
 			debugEnabled = false;
-
-			boost::log::core::get()->set_filter
-		    (
-		        boost::log::trivial::severity >= boost::log::trivial::info
-		    );
 		#endif
 		}
 
@@ -49,8 +40,8 @@ namespace gameanalytics
 			
 			GALogger *ga = GALogger::sharedInstance();
 			
-			static log::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string(), 1 * 1024 * 1024, 10);
-			static log::ConsoleAppender<plog::TxtFormatter> consoleAppender;
+			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
+			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
 			
 			if(ga->debugEnabled)
 			{

@@ -72,7 +72,7 @@ namespace gameanalytics
         bool GAValidator::validateResourceEvent(
             EGAResourceFlowType flowType,
             const std::string& currency,
-            long amount,
+            double amount,
             const std::string& itemType,
             const std::string& itemId
             )
@@ -588,7 +588,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateClientTs(long clientTs)
+        bool GAValidator::validateClientTs(Json::Int64 clientTs)
         {
             // server regex: ^([0-9]{10,11})$
             if (clientTs < 1000000000 || clientTs > 9999999999)
