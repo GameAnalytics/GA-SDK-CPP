@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import subprocess
+import shutil
 
 
 BUILD_ROOT = os.path.abspath(os.path.join(__file__, '..'))
@@ -13,6 +14,8 @@ def make_test_build_dir():
     except OSError:
         pass
 
+def remove_test_build_dir():
+    shutil.rmtree(BUILD_DIR)
 
 def change_to_build_dir():
     os.chdir(BUILD_DIR)
@@ -29,6 +32,7 @@ def compile_and_run_tests():
 
 
 def main():
+    remove_test_build_dir()
     make_test_build_dir()
     change_to_build_dir()
     run_cmake_tests()

@@ -92,6 +92,8 @@ namespace gameanalytics
             return dest.u;
         }
 
+// Already defined on Mac OS X
+#if defined(_WIN32)
         uint32 htonl(uint32 v)
         {
             uint32 result = 0;
@@ -102,6 +104,7 @@ namespace gameanalytics
 
             return result;
         }
+#endif
 
         // TODO(nikolaj): explain function
         uint32 to_little_endian(uint32 v)
@@ -121,9 +124,9 @@ namespace gameanalytics
         "0123456789+/";
 
         int GAUtilities::base64_needed_encoded_length(int length_of_data) {
-            
+
             int nb_base64_chars = (length_of_data + 2) / 3 * 4;
-            
+
             return nb_base64_chars +               /* base64 char incl padding */
             (nb_base64_chars - 1) / 76 +    /* newlines */
             1;                              /* NUL termination of string */
@@ -138,7 +141,7 @@ namespace gameanalytics
             int j = 0;
             unsigned char char_array_3[3] = {0};
             unsigned char char_array_4[4] = {0};
-            
+
             while (src_len--) {
                 char_array_3[i++] = *(src++);
                 if (i == 3) {
@@ -156,12 +159,12 @@ namespace gameanalytics
                     i = 0;
                 }
             }
-            
+
             if (i) {
                 for (j = i; j < 3; j++) {
                     char_array_3[j] = '\0';
                 }
-                
+
                 char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
                 char_array_4[1] =
                 ((char_array_3[0] & 0x03) << 4) +
@@ -170,11 +173,11 @@ namespace gameanalytics
                 ((char_array_3[1] & 0x0f) << 2) +
                 ((char_array_3[2] & 0xc0) >> 6);
                 char_array_4[3] = char_array_3[2] & 0x3f;
-                
+
                 for (j = 0; (j < i + 1); j++) {
                     *buf++ = nb_base64_chars[char_array_4[j]];
                 }
-                
+
                 while ((i++ < 3)) {
                     *buf++ = '=';
                 }
@@ -338,4 +341,3 @@ namespace gameanalytics
         }
     }
 }
-

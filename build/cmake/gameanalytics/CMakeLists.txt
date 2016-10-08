@@ -86,23 +86,32 @@ create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
-if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+if("${PLATFORM}" STREQUAL "osx-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+    )
+endif("${PLATFORM}" STREQUAL "osx-static")
+
+if("${PLATFORM}" STREQUAL "osx-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
 
-    target_link_libraries(GameAnalytics 
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
+        ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     )
-endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+endif("${PLATFORM}" STREQUAL "osx-shared")
 
 if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
-    target_link_libraries(GameAnalytics 
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
 		${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
@@ -114,7 +123,7 @@ if("${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win32-
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
-    target_link_libraries(GameAnalytics 
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
 		${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
@@ -126,7 +135,7 @@ if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
-    target_link_libraries(GameAnalytics 
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
 		${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
@@ -138,7 +147,7 @@ if("${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win64-
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
-    target_link_libraries(GameAnalytics 
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
 		${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
@@ -163,7 +172,3 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # using Visual Studio C++
 endif()
-
-
-
-

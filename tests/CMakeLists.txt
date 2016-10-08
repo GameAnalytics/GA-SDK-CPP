@@ -17,18 +17,12 @@ add_executable(
     #"${CMAKE_CURRENT_SOURCE_DIR}/../base/samples/extra/usleep.cpp"
 )
 
-target_link_libraries(${PROJECT_NAME} 
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_thread-mt.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_filesystem-mt.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_log-mt.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_log_setup-mt.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_regex-mt.a
-    ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-uri.a
-    ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-client-connections.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_chrono-mt.a
-    ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_system-mt.a
+target_link_libraries(${PROJECT_NAME}
+    ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
+    ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
 	${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
+    ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
 )
 
 # enable c++11 via -std=c++11 when compiler is clang or gcc
@@ -46,13 +40,13 @@ endif()
 
 # include external dependency
 target_include_directories(
-	${PROJECT_NAME} 
-	PRIVATE 
+	${PROJECT_NAME}
+	PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
 	"${DEPENDENCIES_DIR}/jsoncpp/"
-	"${DEPENDENCIES_DIR}/boost/1.60.0/include/"
-	"${DEPENDENCIES_DIR}/cppnetlib/0.11.2/include/"
+	"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
     "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
+    "${DEPENDENCIES_DIR}/curlcpp/include"
 )
 
 # include gmock and GameAnalytics library
