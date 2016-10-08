@@ -14,9 +14,6 @@
 // test helpers
 #include "helpers/GATestHelpers.h"
 
-#include <map>
-#include <boost/regex.hpp>
-
 TEST(GAUtilities, testHmacWithKey)
 {
     ASSERT_STREQ(gameanalytics::utilities::GAUtilities::hmacWithKey("test1", "test2").c_str(), "E+sBF4BA9mLvVlfwHx53G2poUPwEUZ1f37oVrgHhOFQ=");
@@ -43,7 +40,7 @@ TEST(GAUtilities, testGenerateUUID)
     ASSERT_EQ(gameanalytics::utilities::GAUtilities::generateUUID().size(), 36);
 }
 
-TEST(GAUtilities, testJsonToString) 
+TEST(GAUtilities, testJsonToString)
 {
     Json::Value jsonObject;
     jsonObject["user_id"] = "test";

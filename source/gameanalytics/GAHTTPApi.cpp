@@ -8,7 +8,6 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include "GAValidator.h"
-#include "curl_header.h"
 #include "curl_exception.h"
 #include "curl_ios.h"
 #include <ostream>
@@ -34,14 +33,11 @@ namespace gameanalytics
             eventsUrlPath = "events";
 
             // use gzip compression on JSON body
+#if defined(_DEBUG)
             useGzip = true;
-            
-            curl_global_init(CURL_GLOBAL_ALL);
-        }
-        
-        GAHTTPApi::~GAHTTPApi()
-        {
-            curl_global_cleanup();
+#else
+            useGzip = true;
+#endif
         }
 
         EGAHTTPApiResponse GAHTTPApi::requestInitReturningDict(Json::Value& dict)
@@ -67,12 +63,8 @@ namespace gameanalytics
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
-            createRequest(curl, url, payloadData, useGzip);
-            
-            std::ostringstream header_os;
-            curl::curl_ios<std::ostringstream> header_writer(header_os);
-            curl.add<CURLOPT_HEADERFUNCTION>(header_writer.get_function());
-            curl.add<CURLOPT_HEADERDATA>(header_writer.get_stream());
+            curl::curl_header header;
+            std::string authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
             {
@@ -82,27 +74,6 @@ namespace gameanalytics
             {
                 error.print_traceback();
             }
-
-            long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
-
-            /*if(res != CURLE_OK)
-            {
-                std::string error(errbuf);
-                
-                if(error.length() > 0)
-                {
-                    body = error;
-                }
-                else
-                {
-                    logging::GALogger::d("Init request. failed. Might be no connection. Description: failed to parse response body");
-                    return NoResponse;
-                }
-            }
-            else
-            {
-                
-            }*/
             
             std::string body = os.str();
             // process the response
@@ -114,7 +85,7 @@ namespace gameanalytics
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
             {                
-                logging::GALogger::d("Failed Init Call. URL: " + url + ", Headers: " + header_os.str() + ", JSONString: " + JSONstring);
+                logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 dict = Json::Value();
                 return requestResponseEnum;
             }
@@ -177,12 +148,8 @@ namespace gameanalytics
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
-            createRequest(curl, url, payloadData, useGzip);
-
-            std::ostringstream header_os;
-            curl::curl_ios<std::ostringstream> header_writer(header_os);
-            curl.add<CURLOPT_HEADERFUNCTION>(header_writer.get_function());
-            curl.add<CURLOPT_HEADERDATA>(header_writer.get_stream());
+            curl::curl_header header;
+            std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
             {
@@ -201,7 +168,7 @@ namespace gameanalytics
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
             {
-                logging::GALogger::d("Failed Events Call. URL: " + url + ", Headers: " + header_os.str() + ", JSONString: " + JSONstring);
+                logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 dict = {};
                 return requestResponseEnum;
             }
@@ -291,26 +258,29 @@ namespace gameanalytics
             return{};
         }
 
-        void GAHTTPApi::createRequest(curl::curl_easy& curl, const std::string& url, const std::string& payloadData, bool gzip)
+        const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip)
         {
             curl.add<CURLOPT_URL>(url.c_str());
 
             if (gzip)
             {
-                curl.add<CURLOPT_ENCODING>("gzip");
+                header.add(std::string("Content-Encoding: gzip"));
             }
 
             // create authorization hash
             std::string key = state::GAState::getGameSecret();
-            curl::curl_header header;
 
-            header.add(std::string("Authorization: " + utilities::GAUtilities::hmacWithKey(key, payloadData)));
+            std::string authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
+            header.add(std::string("Authorization: " + authorization));
 
             // always JSON
             header.add("Content-Type: application/json");
             
             curl.add<CURLOPT_HTTPHEADER>(header.get());
             curl.add<CURLOPT_POSTFIELDS>(payloadData.c_str());
+            curl.add<CURLOPT_SSL_VERIFYPEER>(false);
+            
+            return authorization;
         }
 
         EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId)
@@ -320,7 +290,7 @@ namespace gameanalytics
             // if no result - often no connection
             if (body.empty())
             {
-                logging::GALogger::d(requestId + " request. failed. Might be no connection. Description: Status code: " + std::to_string(statusCode));
+                logging::GALogger::d(requestId + " request. failed. Might be no connection. Status code: " + std::to_string(statusCode));
                 return NoResponse;
             }
 

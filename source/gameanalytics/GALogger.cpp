@@ -52,7 +52,7 @@ namespace gameanalytics
 				plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
 			}
 
-			GALogger::w("Log file added under: " + path);
+			GALogger::i("Log file added under: " + path);
 		}
 
 		// i: information logging

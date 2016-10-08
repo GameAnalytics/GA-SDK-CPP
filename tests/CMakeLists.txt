@@ -10,11 +10,14 @@ add_subdirectory (gmock ${CMAKE_BINARY_DIR}/bin/gmock)
 add_subdirectory (../build/cmake/gameanalytics/ ${CMAKE_BINARY_DIR}/bin/gameanalytics)
 
 # building an executable file from the test source files
-file(GLOB_RECURSE TEST_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE TEST_SOURCES RELATIVE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
+
 add_executable(
     ${PROJECT_NAME}
     ${TEST_SOURCES}
-    #"${CMAKE_CURRENT_SOURCE_DIR}/../base/samples/extra/usleep.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME}
