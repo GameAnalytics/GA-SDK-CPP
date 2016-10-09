@@ -34,7 +34,7 @@ namespace gameanalytics
 
             // use gzip compression on JSON body
 #if defined(_DEBUG)
-            useGzip = true;
+            useGzip = false;
 #else
             useGzip = true;
 #endif
@@ -236,7 +236,7 @@ namespace gameanalytics
             
             if (gzip)
             {
-                payloadData = utilities::GAUtilities::gzipEnflate(payload);
+                payloadData = utilities::GAUtilities::gzipCompress(payload);
                 logging::GALogger::d("Gzip stats. Size: " + std::to_string(payload.size()) + ", Compressed: " + std::to_string(payloadData.size()));
             }
             else
@@ -279,6 +279,7 @@ namespace gameanalytics
             curl.add<CURLOPT_HTTPHEADER>(header.get());
             curl.add<CURLOPT_POSTFIELDS>(payloadData.c_str());
             curl.add<CURLOPT_SSL_VERIFYPEER>(false);
+            curl.add<CURLOPT_POSTFIELDSIZE>(payloadData.size());
             
             return authorization;
         }

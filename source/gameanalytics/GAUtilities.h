@@ -22,7 +22,7 @@ namespace gameanalytics
             static std::string arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr);
             static Json::Value jsonFromString(const std::string& string);
             static bool stringMatch(const std::string& string, const std::string& pattern);
-            static std::string gzipEnflate(const std::string& data);
+            static std::string gzipCompress(const std::string& data);
 
             // added for C++ port
             static std::string uppercaseString(std::string s);

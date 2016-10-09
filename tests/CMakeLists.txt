@@ -23,6 +23,8 @@ add_executable(
 target_link_libraries(${PROJECT_NAME}
     ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
     ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
+    ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_iostreams-mt.a
+    ${DEPENDENCIES_DIR}/zlib/lib/osx/libz.a
 	${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
     ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a

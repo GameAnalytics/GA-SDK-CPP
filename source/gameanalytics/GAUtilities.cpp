@@ -4,8 +4,6 @@
 //
 
 #include <hmac_sha2.h>
-#include <string>
-#include <vector>
 #include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
@@ -266,8 +264,7 @@ namespace gameanalytics
             }
         }
 
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::gzipEnflate(const std::string& data)
+        std::string GAUtilities::gzipCompress(const std::string& data)
         {
             return compress_string_gzip(data);
         }
