@@ -328,12 +328,12 @@ void sha256(const unsigned char *message, unsigned int len, unsigned char *diges
 {
     sha256_ctx ctx;
 
-    sha256_init(&ctx);
+    sha256_init2(&ctx);
     sha256_update(&ctx, message, len);
     sha256_final(&ctx, digest);
 }
 
-void sha256_init(sha256_ctx *ctx)
+void sha256_init2(sha256_ctx *ctx)
 {
 #ifndef UNROLL_LOOPS
     int i;
