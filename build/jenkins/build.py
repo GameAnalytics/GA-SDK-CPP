@@ -173,7 +173,7 @@ all_targets = {
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
-    'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 14 Win64'),
+    'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
 }
@@ -184,13 +184,13 @@ available_targets = {
         'osx-shared': all_targets['osx-shared'],
     },
     'Windows': {
-        #'win32-vc140-static': all_targets['win32-vc140-static'],
-        #'win32-vc120-static': all_targets['win32-vc120-static'],
+        'win32-vc140-static': all_targets['win32-vc140-static'],
+        'win32-vc120-static': all_targets['win32-vc120-static'],
         #'win32-vc140-shared': all_targets['win32-vc140-shared'],
         #'win32-vc120-shared': all_targets['win32-vc120-shared'],
-        #'win64-vc140-static': all_targets['win64-vc140-static'],
-        #'win64-vc120-static': all_targets['win64-vc120-static'],
-        'win64-vc140-shared': all_targets['win64-vc140-shared'],
+        'win64-vc140-static': all_targets['win64-vc140-static'],
+        'win64-vc120-static': all_targets['win64-vc120-static'],
+        #'win64-vc140-shared': all_targets['win64-vc140-shared'],
         #'win64-vc120-shared': all_targets['win64-vc120-shared'],
     }
 }[platform.system()]
