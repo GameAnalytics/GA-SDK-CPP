@@ -31,11 +31,13 @@ elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "wi
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
     SET (LIB_TYPE SHARED)
+    add_definitions("-DGA_SHARED_LIB")
 elseif("${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
     SET (LIB_TYPE SHARED)
+    add_definitions("-DGA_SHARED_LIB")
 elseif("${PLATFORM}" STREQUAL "osx-static")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
@@ -136,7 +138,7 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-
+    
     target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
@@ -156,8 +158,6 @@ if("${PLATFORM}" STREQUAL "win64-vc140-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-    
-    #set(CMAKE_SHARED_LINKER_FLAGS "-lws2_32 ${CMAKE_SHARED_LINKER_FLAGS}")
 
     target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
@@ -178,7 +178,7 @@ if("${PLATFORM}" STREQUAL "win64-vc120-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-
+    
     target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
