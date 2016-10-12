@@ -662,7 +662,7 @@ namespace gameanalytics
             }
 
             // set offset in state (memory) from current config (config could be from cache etc.)
-            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<double>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
+            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
 
             // if SDK is disabled in config
             if (!GAState::isEnabled()) 

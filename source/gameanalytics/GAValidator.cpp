@@ -72,7 +72,7 @@ namespace gameanalytics
         bool GAValidator::validateResourceEvent(
             EGAResourceFlowType flowType,
             const std::string& currency,
-            long amount,
+            double amount,
             const std::string& itemType,
             const std::string& itemId
             )
@@ -381,7 +381,7 @@ namespace gameanalytics
         // validate wrapper version, build, engine version, store
         bool GAValidator::validateSdkWrapperVersion(const std::string& wrapperVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unity|unreal|corona|marmalade|cocos2d|xamarin) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -399,7 +399,7 @@ namespace gameanalytics
 
         bool GAValidator::validateEngineVersion(const std::string& engineVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unity|unreal|corona|marmalade|cocos2d|xamarin) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -588,7 +588,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateClientTs(long clientTs)
+        bool GAValidator::validateClientTs(Json::Int64 clientTs)
         {
             // server regex: ^([0-9]{10,11})$
             if (clientTs < 1000000000 || clientTs > 9999999999)

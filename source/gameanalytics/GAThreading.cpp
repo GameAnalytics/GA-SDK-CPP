@@ -8,8 +8,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include "GALogger.h"
-#include <boost/thread.hpp>
-#include <boost/date_time.hpp>
+#include <thread>
 
 namespace gameanalytics
 {
@@ -37,7 +36,7 @@ namespace gameanalytics
             GAThreadHelpers::scoped_lock lock(state->mutex);
 
             GAThreading::BlockIdentifier blockIdentifier = GAThreading::BlockIdentifier::make();
-            state->blocks.push_back({ callback, blockIdentifier, boost::chrono::steady_clock::now() + boost::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
+            state->blocks.push_back({ callback, blockIdentifier, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
             return blockIdentifier;
         }
@@ -64,7 +63,7 @@ namespace gameanalytics
         {
             createStateIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), boost::chrono::steady_clock::now() + boost::chrono::seconds(delayInSeconds)} );
+            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now() + std::chrono::seconds(delayInSeconds)} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -72,7 +71,7 @@ namespace gameanalytics
         {
             GAThreadHelpers::scoped_lock lock(state->mutex);
 
-            if((!state->blocks.empty() && state->blocks.front().deadline <= boost::chrono::steady_clock::now()))
+            if((!state->blocks.empty() && state->blocks.front().deadline <= std::chrono::steady_clock::now()))
             {
                 timedBlock = state->blocks.front();
                 std::pop_heap(state->blocks.begin(), state->blocks.end());
@@ -88,8 +87,7 @@ namespace gameanalytics
             while(!state)
             {
                 // wait for the assignment to be complete
-                boost::posix_time::seconds workTime(1);
-                boost::this_thread::sleep(workTime);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
             while (std::shared_ptr<State> state = GAThreading::state)
@@ -99,7 +97,7 @@ namespace gameanalytics
                 while (getNextBlock(timedBlock))
                 {
                     assert(timedBlock.block);
-                    assert(timedBlock.deadline <= boost::chrono::steady_clock::now());
+                    assert(timedBlock.deadline <= std::chrono::steady_clock::now());
                     if (!timedBlock.ignore)
                     {
                         timedBlock.block();
@@ -108,8 +106,7 @@ namespace gameanalytics
                     timedBlock.block = {};
                 }
 
-                boost::posix_time::seconds workTime(1);
-                boost::this_thread::sleep(workTime);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
             return nullptr;

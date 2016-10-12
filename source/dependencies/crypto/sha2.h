@@ -79,7 +79,7 @@ void sha224_final(sha224_ctx *ctx, unsigned char *digest);
 void sha224(const unsigned char *message, unsigned int len,
             unsigned char *digest);
 
-void sha256_init(sha256_ctx * ctx);
+void sha256_init2(sha256_ctx * ctx);
 void sha256_update(sha256_ctx *ctx, const unsigned char *message,
                    unsigned int len);
 void sha256_final(sha256_ctx *ctx, unsigned char *digest);

@@ -8,6 +8,8 @@
 #include <Foundation/GAThreadHelpers.h>
 #include <functional>
 #include <vector>
+#include <chrono>
+#include <memory>
 
 namespace gameanalytics
 {
@@ -58,7 +60,7 @@ namespace gameanalytics
             //timers
             struct TimedBlock
             {
-                typedef boost::chrono::steady_clock::time_point time_point;
+                typedef std::chrono::steady_clock::time_point time_point;
 
                 TimedBlock() {}
 

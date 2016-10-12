@@ -1,12 +1,9 @@
 #include "GALogger.h"
 #include <iostream>
 #include "GADevice.h"
+#include <plog/Log.h>
+#include <plog/Appenders/ConsoleAppender.h>
 #include <boost/filesystem.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/trivial.hpp>
 
 namespace gameanalytics
 {
@@ -21,18 +18,8 @@ namespace gameanalytics
 		#if defined(_DEBUG)
 			// log debug is in dev mode
 			debugEnabled = true;
-
-			boost::log::core::get()->set_filter
-		    (
-		        boost::log::trivial::severity >= boost::log::trivial::debug
-		    );
 		#else
 			debugEnabled = false;
-
-			boost::log::core::get()->set_filter
-		    (
-		        boost::log::trivial::severity >= boost::log::trivial::info
-		    );
 		#endif
 		}
 
@@ -49,18 +36,23 @@ namespace gameanalytics
 		void GALogger::addFileLog(const std::string& path)
 		{
 			boost::filesystem::path p(path);
-            p /= "ga_log_%3N.txt";
+            p /= "ga_log.txt";
+			
+			GALogger *ga = GALogger::sharedInstance();
+			
+			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
+			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
+			
+			if(ga->debugEnabled)
+			{
+				plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
+			}
+			else
+			{
+				plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
+			}
 
-			boost::log::add_file_log(
-				boost::log::keywords::file_name = p.string(),
-				boost::log::keywords::rotation_size = 1 * 1024 * 1024,
-				boost::log::keywords::max_size = 10 * 1024 * 1024,
-				boost::log::keywords::format = "[%TimeStamp%]: %Message%",
-				boost::log::keywords::auto_flush = true);
-
-			boost::log::add_common_attributes(); 
-
-			GALogger::w("Log file added under: " + path);
+			GALogger::i("Log file added under: " + path);
 		}
 
 		// i: information logging
@@ -151,20 +143,16 @@ namespace gameanalytics
 			switch(type)
 			{
 				case Error:
-					std::clog << message << std::endl;
-					BOOST_LOG_TRIVIAL(error) << message;
+					LOG_ERROR << message;
 					break;
 				case Warning:
-					std::clog << message << std::endl;
-					BOOST_LOG_TRIVIAL(warning) << message;
+					LOG_WARNING << message;
 					break;
 				case Debug:
-					std::clog << message << std::endl;
-					BOOST_LOG_TRIVIAL(debug) << message;
+					LOG_DEBUG << message;
 					break;
 				case Info:
-					std::clog << message << std::endl;
-					BOOST_LOG_TRIVIAL(info) << message;
+					LOG_INFO << message;
 					break;
 			}
 		}

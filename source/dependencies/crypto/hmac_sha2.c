@@ -123,7 +123,7 @@ void hmac_sha224(const unsigned char *key, unsigned int key_size,
 
 /* HMAC-SHA-256 functions */
 
-void hmac_sha256_init(hmac_sha256_ctx *ctx, const unsigned char *key,
+void hmac_sha256_init2(hmac_sha256_ctx *ctx, const unsigned char *key,
                       unsigned int key_size)
 {
     unsigned int fill;
@@ -156,10 +156,10 @@ void hmac_sha256_init(hmac_sha256_ctx *ctx, const unsigned char *key,
         ctx->block_opad[i] = key_used[i] ^ 0x5c;
     }
 
-    sha256_init(&ctx->ctx_inside);
+    sha256_init2(&ctx->ctx_inside);
     sha256_update(&ctx->ctx_inside, ctx->block_ipad, SHA256_BLOCK_SIZE);
 
-    sha256_init(&ctx->ctx_outside);
+    sha256_init2(&ctx->ctx_outside);
     sha256_update(&ctx->ctx_outside, ctx->block_opad,
                   SHA256_BLOCK_SIZE);
 
@@ -202,7 +202,7 @@ void hmac_sha256(const unsigned char *key, unsigned int key_size,
 {
     hmac_sha256_ctx ctx;
 
-    hmac_sha256_init(&ctx, key, key_size);
+    hmac_sha256_init2(&ctx, key, key_size);
     hmac_sha256_update(&ctx, message, message_len);
     hmac_sha256_final(&ctx, mac, mac_size);
 }

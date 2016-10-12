@@ -16,26 +16,28 @@ set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
 
 message(STATUS "********************** platform is ${PLATFORM}")
 
-if("${PLATFORM}" STREQUAL "win32-static")
+if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "win64-static")
+elseif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "win32-shared")
+elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc120-shared")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
     SET (LIB_TYPE SHARED)
-elseif("${PLATFORM}" STREQUAL "win64-shared")
+    add_definitions("-DGA_SHARED_LIB")
+elseif("${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
     SET (LIB_TYPE SHARED)
+    add_definitions("-DGA_SHARED_LIB")
 elseif("${PLATFORM}" STREQUAL "osx-static")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
@@ -48,9 +50,10 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
-endif("${PLATFORM}" STREQUAL "win32-static")
+endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
+add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
 # traverse all the subdirectories of the matched directory
 FILE(GLOB_RECURSE CPP_SOURCES
@@ -64,83 +67,126 @@ FILE(GLOB_RECURSE CPP_SOURCES
     "${DEPENDENCIES_DIR}/sqlite/*.h"
     "${DEPENDENCIES_DIR}/crypto/*.c"
     "${DEPENDENCIES_DIR}/crypto/*.cpp"
+	"${DEPENDENCIES_DIR}/plog/*.h"
+	"${DEPENDENCIES_DIR}/curlcpp/include/*.h"
+	"${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
 )
 
 add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
 include_directories(
-    "${DEPENDENCIES_DIR}/boost/1.60.0/include"
-	"${DEPENDENCIES_DIR}/cppnetlib/0.11.2/include"
     "${DEPENDENCIES_DIR}/jsoncpp"
+	"${DEPENDENCIES_DIR}/plog"
     "${DEPENDENCIES_DIR}/sqlite"
     "${DEPENDENCIES_DIR}/crypto"
+    "${DEPENDENCIES_DIR}/curl/include"
+	"${DEPENDENCIES_DIR}/curlcpp/include"
+	"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
 )
 
 create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
-if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+if("${PLATFORM}" STREQUAL "osx-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+    )
+endif("${PLATFORM}" STREQUAL "osx-static")
+
+if("${PLATFORM}" STREQUAL "osx-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
 
-    target_link_libraries(GameAnalytics 
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_thread-mt.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_filesystem-mt.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_log-mt.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_log_setup-mt.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_regex-mt.a
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-uri.a
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/osx/libcppnetlib-client-connections.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_chrono-mt.a
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/osx/libboost_system-mt.a
+    target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
+        ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     )
-endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+endif("${PLATFORM}" STREQUAL "osx-shared")
 
-if("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
+if("${PLATFORM}" STREQUAL "win32-vc140-static")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include32"
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
+endif("${PLATFORM}" STREQUAL "win32-vc140-static")
 
-    target_link_libraries(GameAnalytics 
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_atomic-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_thread-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_filesystem-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_log-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_log_setup-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_regex-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win32/cppnetlib-uri.lib
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win32/cppnetlib-client-connections.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_chrono-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win32/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/libeay32MT.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/ssleay32MT.lib
-    )
-endif("${PLATFORM}" STREQUAL "win32-static" OR "${PLATFORM}" STREQUAL "win32-shared")
-
-if("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
+if("${PLATFORM}" STREQUAL "win32-vc140-shared")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include32"
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
 
-    target_link_libraries(GameAnalytics 
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_atomic-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_thread-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_filesystem-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_log-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_log_setup-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_regex-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win64/cppnetlib-uri.lib
-        ${DEPENDENCIES_DIR}/cppnetlib/0.11.2/libs/win64/cppnetlib-client-connections.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_chrono-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/1.60.0/libs/win64/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/libeay32MT.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/ssleay32MT.lib
+    target_link_libraries(GameAnalytics
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc140-mt-1_60.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc140-mt-1_60.lib
+		${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
-endif("${PLATFORM}" STREQUAL "win64-static" OR "${PLATFORM}" STREQUAL "win64-shared")
+endif("${PLATFORM}" STREQUAL "win32-vc140-shared")
+
+if("${PLATFORM}" STREQUAL "win32-vc120-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+endif("${PLATFORM}" STREQUAL "win32-vc120-static")
+
+if("${PLATFORM}" STREQUAL "win32-vc120-shared")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+    
+    target_link_libraries(GameAnalytics
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc120-mt-1_60.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc120-mt-1_60.lib
+		${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
+    )
+endif("${PLATFORM}" STREQUAL "win32-vc120-shared")
+
+if("${PLATFORM}" STREQUAL "win64-vc140-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+endif("${PLATFORM}" STREQUAL "win64-vc140-static")
+
+if("${PLATFORM}" STREQUAL "win64-vc140-shared")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+
+    target_link_libraries(GameAnalytics
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc140-mt-1_60.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc140-mt-1_60.lib
+		${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
+    )
+endif("${PLATFORM}" STREQUAL "win64-vc140-shared")
+
+if("${PLATFORM}" STREQUAL "win64-vc120-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+endif("${PLATFORM}" STREQUAL "win64-vc120-static")
+
+if("${PLATFORM}" STREQUAL "win64-vc120-shared")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+    )
+    
+    target_link_libraries(GameAnalytics
+		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc120-mt-1_60.lib
+        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc120-mt-1_60.lib
+		${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
+    )
+endif("${PLATFORM}" STREQUAL "win64-vc120-shared")
 
 target_include_directories(
     GameAnalytics
@@ -160,7 +206,3 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # using Visual Studio C++
 endif()
-
-
-
-

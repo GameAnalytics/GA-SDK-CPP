@@ -4,18 +4,14 @@
 //
 
 #include <hmac_sha2.h>
-#include <string>
-#include <vector>
 #include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <algorithm>
-#include <boost/regex.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <regex>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/asio.hpp>
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -50,13 +46,15 @@ namespace gameanalytics
             std::string outstring;
 
             // retrieve the compressed bytes blockwise
-            do {
+            do
+            {
                 zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
                 zs.avail_out = sizeof(outbuffer);
 
                 ret = deflate(&zs, Z_FINISH);
 
-                if (outstring.size() < zs.total_out) {
+                if (outstring.size() < zs.total_out)
+                {
                     // append the block to the output string
                     outstring.append(outbuffer,
                         zs.total_out - outstring.size());
@@ -94,11 +92,21 @@ namespace gameanalytics
             return dest.u;
         }
 
-        // TODO(nikolaj): explain function
+        uint32 htonl2(uint32 v)
+        {
+            uint32 result = 0;
+            result |= (v & 0xFF000000) >> 24;
+            result |= (v & 0x00FF0000) >> 8;
+            result |= (v & 0x0000FF00) << 8;
+            result |= (v & 0x000000FF) << 24;
+
+            return result;
+        }
+
         uint32 to_little_endian(uint32 v)
         {
             // convert to big endian
-            v = htonl(v);
+            v = htonl2(v);
 
             // and to little endian, because gzip wants it so.
             v = swap_endian(v);
@@ -111,10 +119,10 @@ namespace gameanalytics
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
 
-        int GAUtilities::base64_needed_encoded_length(int length_of_data) {
-            
+        int GAUtilities::base64_needed_encoded_length(int length_of_data)
+        {
             int nb_base64_chars = (length_of_data + 2) / 3 * 4;
-            
+
             return nb_base64_chars +               /* base64 char incl padding */
             (nb_base64_chars - 1) / 76 +    /* newlines */
             1;                              /* NUL termination of string */
@@ -123,16 +131,19 @@ namespace gameanalytics
         /**
          * buf_ is allocated by malloc(3).The size is grater than nb_base64_needed_encoded_length(src_len).
          */
-        void GAUtilities::base64_encode(const unsigned char * src, int src_len, unsigned char *buf_) {
+        void GAUtilities::base64_encode(const unsigned char * src, int src_len, unsigned char *buf_)
+        {
             unsigned char *buf = buf_;
             int i = 0;
             int j = 0;
             unsigned char char_array_3[3] = {0};
             unsigned char char_array_4[4] = {0};
-            
-            while (src_len--) {
+
+            while (src_len--)
+            {
                 char_array_3[i++] = *(src++);
-                if (i == 3) {
+                if (i == 3)
+                {
                     char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
                     char_array_4[1] =
                     ((char_array_3[0] & 0x03) << 4) +
@@ -147,12 +158,14 @@ namespace gameanalytics
                     i = 0;
                 }
             }
-            
-            if (i) {
-                for (j = i; j < 3; j++) {
+
+            if (i)
+            {
+                for (j = i; j < 3; j++)
+                {
                     char_array_3[j] = '\0';
                 }
-                
+
                 char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
                 char_array_4[1] =
                 ((char_array_3[0] & 0x03) << 4) +
@@ -161,12 +174,14 @@ namespace gameanalytics
                 ((char_array_3[1] & 0x0f) << 2) +
                 ((char_array_3[2] & 0xc0) >> 6);
                 char_array_4[3] = char_array_3[2] & 0x3f;
-                
-                for (j = 0; (j < i + 1); j++) {
+
+                for (j = 0; (j < i + 1); j++)
+                {
                     *buf++ = nb_base64_chars[char_array_4[j]];
                 }
-                
-                while ((i++ < 3)) {
+
+                while ((i++ < 3))
+                {
                     *buf++ = '=';
                 }
             }
@@ -234,10 +249,10 @@ namespace gameanalytics
         {
             try
             {
-                boost::regex expression(pattern);
-                return boost::regex_match(string, expression);
+                std::regex expression(pattern);
+                return std::regex_match(string, expression);
             }
-            catch (const boost::regex_error& e)
+            catch (const std::regex_error& e)
             {
                 logging::GALogger::e("failed to parse regular expression '" + pattern + "', code: " + std::to_string(e.code()) + ", what: " + e.what());
                 logging::GALogger::e("Please note, that the gnustl might not have regex support yet: https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html");
@@ -249,11 +264,9 @@ namespace gameanalytics
             }
         }
 
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::gzipEnflate(const std::string& data)
+        std::string GAUtilities::gzipCompress(const std::string& data)
         {
             return compress_string_gzip(data);
-            // TODO : review
         }
 
         // TODO(nikolaj): explain function
@@ -329,4 +342,3 @@ namespace gameanalytics
         }
     }
 }
-

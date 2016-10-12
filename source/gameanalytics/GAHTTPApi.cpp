@@ -8,6 +8,9 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include "GAValidator.h"
+#include "curl_exception.h"
+#include "curl_ios.h"
+#include <ostream>
 
 namespace gameanalytics
 {
@@ -30,7 +33,11 @@ namespace gameanalytics
             eventsUrlPath = "events";
 
             // use gzip compression on JSON body
+#if defined(_DEBUG)
+            useGzip = false;
+#else
             useGzip = true;
+#endif
         }
 
         EGAHTTPApiResponse GAHTTPApi::requestInitReturningDict(Json::Value& dict)
@@ -53,20 +60,19 @@ namespace gameanalytics
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
-            client::request request = createRequest(url, payloadData, useGzip);
-            client client;
-            client::response response = client.post(request, payloadData);
-            
             std::ostringstream os;
+            curl::curl_ios<std::ostringstream> writer(os);
+            curl::curl_easy curl(writer);
+            curl::curl_header header;
+            std::string authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
             {
-                os << body(response);
+                curl.perform();
             }
-            catch (std::exception& ex)
+            catch (curl::curl_easy_exception error)
             {
-                logging::GALogger::d("Init request. failed. Might be no connection. Description: failed to parse response body");
-                return NoResponse;
+                error.print_traceback();
             }
             
             std::string body = os.str();
@@ -74,22 +80,12 @@ namespace gameanalytics
             logging::GALogger::d("init request content : " + body);
 
             Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
-            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response, body, "Init");
+            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Init");
 
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
-            {
-                std::string authorization;
-                for (auto header : response.headers()) 
-                {
-                    if(header.first.compare("Authorization") == 0)
-                    {
-                        authorization = header.second;
-                        break;
-                    }
-                }
-                
-                logging::GALogger::d("Failed Init Call. URL: " + url + ", Authorization: " + authorization + ", JSONString: " + JSONstring);
+            {                
+                logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 dict = Json::Value();
                 return requestResponseEnum;
             }
@@ -149,41 +145,30 @@ namespace gameanalytics
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
-            client::request request = createRequest(url, payloadData, useGzip);
-            client client;
-            client::response response = client.post(request, payloadData);
             std::ostringstream os;
-            
+            curl::curl_ios<std::ostringstream> writer(os);
+            curl::curl_easy curl(writer);
+            curl::curl_header header;
+            std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
+
             try
             {
-                os << body(response);
+                curl.perform();
             }
-            catch (std::exception& ex)
+            catch (curl::curl_easy_exception error)
             {
-                logging::GALogger::d("Events request. failed. Might be no connection. Description: failed to parse response body");
-                return NoResponse;
+                error.print_traceback();
             }
             
             std::string body = os.str();
             logging::GALogger::d("body: " + body);
 
-            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response, body, "Events");
+            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Events");
 
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
             {
-                std::string authorization;
-                for (auto header : response.headers()) 
-                {
-                    
-                    if(header.first.compare("Authorization") == 0)
-                    {
-                        authorization = header.second;
-                        break;
-                    }
-                }
-                
-                logging::GALogger::d("Failed Events Call. URL: " + url + ", Authorization: " + authorization + ", JSONString: " + JSONstring);
+                logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 dict = {};
                 return requestResponseEnum;
             }
@@ -251,7 +236,7 @@ namespace gameanalytics
             
             if (gzip)
             {
-                payloadData = utilities::GAUtilities::gzipEnflate(payload);
+                payloadData = utilities::GAUtilities::gzipCompress(payload);
                 logging::GALogger::d("Gzip stats. Size: " + std::to_string(payload.size()) + ", Compressed: " + std::to_string(payloadData.size()));
             }
             else
@@ -273,56 +258,63 @@ namespace gameanalytics
             return{};
         }
 
-        client::request GAHTTPApi::createRequest(const std::string& url, const std::string& payloadData, bool gzip)
+        const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip)
         {
-            client::request req(url);
-            req << header("User-Agent", "GameAnalytics C++ SDK");
+            curl.add<CURLOPT_URL>(url.c_str());
 
             if (gzip)
             {
-                req << header("Content-Encoding", "gzip");
+                header.add(std::string("Content-Encoding: gzip"));
             }
 
             // create authorization hash
             std::string key = state::GAState::getGameSecret();
 
-            req << header("Authorization", utilities::GAUtilities::hmacWithKey(key, payloadData).c_str());
+            std::string authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
+            header.add(std::string("Authorization: " + authorization));
 
             // always JSON
-            req << header("Content-Type", "application/json");
-
-            return req;
+            header.add("Content-Type: application/json");
+            
+            curl.add<CURLOPT_HTTPHEADER>(header.get());
+            curl.add<CURLOPT_POSTFIELDS>(payloadData.c_str());
+            curl.add<CURLOPT_SSL_VERIFYPEER>(false);
+            curl.add<CURLOPT_POSTFIELDSIZE>(payloadData.size());
+            
+            return authorization;
         }
 
-        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(client::response& response, const std::string& body, const std::string& requestId)
+        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId)
         {
+            long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
+
             // if no result - often no connection
             if (body.empty())
             {
-                logging::GALogger::d(requestId + " request. failed. Might be no connection. Description: " + response.status_message() + ", Status code: " + std::to_string(response.status()));
+                logging::GALogger::d(requestId + " request. failed. Might be no connection. Status code: " + std::to_string(statusCode));
                 return NoResponse;
             }
 
             // ok
-            if (response.status() == 200)
+            if (statusCode == 200)
             {
                 return Ok;
             }
 
             // 401 can return 0 status
-            if (response.status() == 0 || response.status() == 401)
+            if (statusCode == 0 || statusCode == 401)
             {
                 logging::GALogger::d(requestId + " request. 401 - Unauthorized.");
                 return Unauthorized;
             }
 
-            if (response.status() == 400)
+            if (statusCode == 400)
             {
                 logging::GALogger::d(requestId + " request. 400 - Bad Request.");
                 return BadRequest;
             }
 
-            if (response.status() == 500)
+            if (statusCode == 500)
             {
                 logging::GALogger::d(requestId + " request. 500 - Internal Server Error.");
                 return InternalServerError;

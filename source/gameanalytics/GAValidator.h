@@ -32,7 +32,7 @@ namespace gameanalytics
             static bool validateResourceEvent(
                 EGAResourceFlowType flowType,
                 const std::string& currency,
-                long amount,
+                double amount,
                 const std::string& itemType,
                 const std::string& itemId
                 );
@@ -104,7 +104,7 @@ namespace gameanalytics
             static bool validateFacebookId(const std::string& facebookId);
             static bool validateGender(EGAGender gender);
             static bool validateBirthyear(long birthYear);
-            static bool validateClientTs(long clientTs);
+            static bool validateClientTs(Json::Int64 clientTs);
 
             static bool validateUserId(const std::string& uId);
         };

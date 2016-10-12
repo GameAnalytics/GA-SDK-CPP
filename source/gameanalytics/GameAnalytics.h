@@ -5,6 +5,11 @@
 
 #pragma once
 
+#if GA_SHARED_LIB
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "gdi32.lib")
+#endif
+
 #include <string>
 #include <vector>
 

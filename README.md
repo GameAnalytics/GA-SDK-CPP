@@ -18,6 +18,17 @@ Dependencies
 * **Mac:** XCode
 * **Windows:** Visual Studio
 
+Changelog
+---------
+**1.1.0**
+* switched to use curl as network library
+
+**1.0.1**
+* fix for empty user id in events
+
+**1.0.0**
+* Initial version with Windows and Mac OS X support
+
 How to build
 ------------
 
@@ -141,11 +152,3 @@ Example:
  gameanalytics::GameAnalytics::addResourceEvent(gameanalytics::Source, "gems", 10, "lives", "extra_life");
  gameanalytics::GameAnalytics::addProgressionEvent(gameanalytics::Start, "progression01", "progression02");
 ```
-
-Changelog
----------
-**1.0.1**
-* fix for empty user id in events
-
-**1.0.0**
-* Initial version with Windows and Mac OS X support

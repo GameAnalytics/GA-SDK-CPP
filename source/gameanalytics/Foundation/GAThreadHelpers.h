@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
-
+#include <mutex>
+#include <thread>
 
 namespace
 {
@@ -14,7 +14,7 @@ namespace
     {
         typedef void *(*start_routine) (void *);
 
-        typedef boost::mutex mutex;
+        typedef std::mutex mutex;
 
         void mutex_init(mutex& mtx)
         {
@@ -31,7 +31,7 @@ namespace
             mtx.unlock();
         }
 
-        typedef boost::thread thread;
+        typedef std::thread thread;
 
         void thread_create(thread& t, start_routine f, void* arg)
         {
