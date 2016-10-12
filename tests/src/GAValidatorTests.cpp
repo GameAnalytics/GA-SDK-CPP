@@ -291,17 +291,17 @@ TEST(GAValidator, testValidateSdkWrapperVersion)
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("123"));
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("test 1.2.x"));
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unkfalsewn 1.5.6"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity 1.2.3.4"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("Unity 1.2"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1.2.3.4"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("Unreal 1.2"));
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("corona1.2.3"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity x.2.3"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity 1.x.3"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity 1.2.x"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal x.2.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1.x.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1.2.x"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("marmalade 1.2.3"));
 
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity 1.2.3"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("marmalade 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1.2.3"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("corona 1.2.3"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unity 1233.101.0"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1233.101.0"));
 }
 
 // build
@@ -325,15 +325,15 @@ TEST(GAValidator, testValidateEngineVersion)
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("uni 1.2.3"));
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("unity 123456.2.3"));
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("unity1.2.3"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("unity 1.2.3.4"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("Unity 1.2.3"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("UNITY 1.2.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1.2.3.4"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("Unreal 1.2.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("UNREAL 1.2.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("marmalade 1.2.3"));
+    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateEngineVersion("xamarin 1.2.3"));
 
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unity 1.2.3"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unity 1.2"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unity 1"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("marmalade 1.2.3"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("xamarin 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1.2"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("cocos2d 1.2.3"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1.2.3"));
 }
