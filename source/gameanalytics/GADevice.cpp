@@ -17,7 +17,7 @@ namespace gameanalytics
         std::string GADevice::_writablepath = GADevice::getPersistentPath();
         std::string GADevice::_sdkGameEngineVersion;
         std::string GADevice::_gameEngineVersion;
-        std::string GADevice::_connectionType = "offline";
+        std::string GADevice::_connectionType = "";
         const std::string GADevice::_sdkWrapperVersion = "cpp 1.1.0";
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)

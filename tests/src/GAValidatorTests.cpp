@@ -300,7 +300,9 @@ TEST(GAValidator, testValidateSdkWrapperVersion)
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("marmalade 1.2.3"));
 
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1.2.3"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("corona 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("corona 1.2"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("lumberyard 1"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("cocos2d 1.2.3"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("unreal 1233.101.0"));
 }
 
@@ -336,6 +338,8 @@ TEST(GAValidator, testValidateEngineVersion)
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("cocos2d 1.2.3"));
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateEngineVersion("unreal 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("corona 1.2.3"));
+    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateSdkWrapperVersion("lumberyard 1.2.3"));
 }
 
 // event params
