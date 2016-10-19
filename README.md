@@ -20,6 +20,9 @@ Dependencies
 
 Changelog
 ---------
+**1.1.1**
+* fix to empty user id
+
 **1.1.0**
 * switched to use curl as network library
 

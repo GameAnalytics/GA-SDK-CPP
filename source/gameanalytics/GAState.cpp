@@ -523,11 +523,15 @@ namespace gameanalytics
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 			
-			instance->_defaultUserId = state_dict.get("default_user_id", "").asString();
-			if(instance->_defaultUserId.empty())
+			std::string defaultId = state_dict.get("default_user_id", "").asString();
+			if(defaultId.empty())
 			{
-				instance->_defaultUserId = utilities::GAUtilities::generateUUID();
+				instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
 			}
+            else
+            {
+                instance->setDefaultUserId(defaultId);
+            }
 
             instance->_sessionNum = utilities::GAUtilities::parseString<double>(state_dict.get("session_num", "0.0").asString());
 
