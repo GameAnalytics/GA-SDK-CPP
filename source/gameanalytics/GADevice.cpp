@@ -4,7 +4,12 @@
 //
 
 #include "GADevice.h"
+#if USE_UWP
+#include <Windows.h>
+#include <sstream>
+#else
 #include <boost/filesystem.hpp>
+#endif
 
 namespace gameanalytics
 {
@@ -102,21 +107,73 @@ namespace gameanalytics
 
         const std::string GADevice::getOSVersionString()
         {
+#if USE_UWP
+            auto deviceFamilyVersion = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamilyVersion;
+            std::istringstream stringStream(deviceFamilyVersion->Data);
+            unsigned long long version;
+
+            stringStream >> version;
+            unsigned long long major = (version & 0xFFFF000000000000L) >> 48;
+            unsigned long long minor = (version & 0x0000FFFF00000000L) >> 32;
+            unsigned long long build = (version & 0x00000000FFFF0000L) >> 16;
+            std::ostringstream stream;
+            stream << getBuildPlatform() << " " << major << "." << minor << "." << build;
+            return stream.str();
+#else
             return GADevice::getBuildPlatform() + " 0.0.0";
+#endif
         }
 
         const std::string GADevice::deviceManufacturer()
         {
+#if USE_UWP
+            auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
+            return std::string(info->SystemManufacturer->Data);
+#else
             return "unknown";
+#endif
         }
 
         const std::string GADevice::deviceModel()
         {
+#if USE_UWP
+            auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
+            return std::string(info->SystemProductName->Data);
+#else
             return "unknown";
+#endif
         }
 
         const std::string GADevice::runtimePlatformToString()
         {
+#if USE_UWP
+            auto deviceFamily = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamily;
+
+            if (deviceFamily == "Windows.Mobile")
+            {
+                return "uwp_mobile";
+            }
+            else if (deviceFamily == "Windows.Desktop")
+            {
+                return "uwp_desktop";
+            }
+            else if (deviceFamily == "Windows.Universal")
+            {
+                return "uwp_iot";
+            }
+            else if (deviceFamily == "Windows.Xbox")
+            {
+                return "uwp_console";
+            }
+            else if (deviceFamily == "Windows.Team")
+            {
+                return "uwp_surfacehub";
+            }
+            else
+            {
+                return std::string(deviceFamily->Data);
+            }
+#else
 #if defined(__MACH__) || defined(__APPLE__)
             return "mac_osx";
 #elif defined(_WIN32)
@@ -126,11 +183,16 @@ namespace gameanalytics
 #else
             return "unknown";
 #endif
+#endif
         }
 
         const std::string GADevice::getPersistentPath()
         {
+#if USE_UWP
+            return Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data;
+#else
             return boost::filesystem::detail::temp_directory_path().string();
+#endif
         }
     }
 }

@@ -164,6 +164,25 @@ class TargetWin(TargetCMake):
             os.path.join(self.build_dir(), 'Release'),
             release_dir
         )
+        
+class TargetWin10(TargetWin):
+    def create_project_file(self):
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DCMAKE_SYSTEM_NAME=WindowsStore',
+                '-DCMAKE_SYSTEM_VERSION=10.0',
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
 
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
@@ -174,6 +193,9 @@ all_targets = {
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
     'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
+    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 14'),
+	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 14 Win64'),
+	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
 }
@@ -192,6 +214,9 @@ available_targets = {
         'win64-vc120-static': all_targets['win64-vc120-static'],
         #'win64-vc140-shared': all_targets['win64-vc140-shared'],
         #'win64-vc120-shared': all_targets['win64-vc120-shared'],
+        'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
+		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
+		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
     }
 }[platform.system()]
 

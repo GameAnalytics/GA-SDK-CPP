@@ -48,6 +48,9 @@ namespace gameanalytics
             bool infoLogVerboseEnabled;
             bool debugEnabled;
             static const std::string tag;
+#if USE_UWP
+            Windows::Foundation::Diagnostics::LoggingChannel^ channel;
+#endif
         };
     }
 }

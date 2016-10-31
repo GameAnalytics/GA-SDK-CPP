@@ -1,9 +1,13 @@
 #include "GALogger.h"
 #include <iostream>
 #include "GADevice.h"
+#if USE_UWP
+
+#else
 #include <plog/Log.h>
 #include <plog/Appenders/ConsoleAppender.h>
 #include <boost/filesystem.hpp>
+#endif
 
 namespace gameanalytics
 {
@@ -35,10 +39,12 @@ namespace gameanalytics
 
 		void GALogger::addFileLog(const std::string& path)
 		{
+            GALogger *ga = GALogger::sharedInstance();
+#if USE_UWP
+            ga->channel = ref new Windows::Foundation::Diagnostics::LoggingChannel("ga-channel");
+#else
 			boost::filesystem::path p(path);
             p /= "ga_log.txt";
-			
-			GALogger *ga = GALogger::sharedInstance();
 			
 			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
 			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
@@ -51,6 +57,7 @@ namespace gameanalytics
 			{
 				plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
 			}
+#endif
 
 			GALogger::i("Log file added under: " + path);
 		}
