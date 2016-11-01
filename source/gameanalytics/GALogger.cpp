@@ -13,6 +13,7 @@
 #define GALOGGER_PREFIX                     L"GALogger_"
 #define DEFAULT_SESSION_NAME                GALOGGER_PREFIX L"Session"
 #define DEFAULT_CHANNEL_NAME                GALOGGER_PREFIX L"Channel"
+#define OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME GALOGGER_PREFIX L"LogFiles"
 #define LOGGING_ENABLED_SETTING_KEY_NAME    GALOGGER_PREFIX L"LoggingEnabled"
 #define LOGFILEGEN_BEFORE_SUSPEND_SETTING_KEY_NAME GALOGGER_PREFIX L"LogFileGeneratedBeforeSuspend"
 #endif
@@ -21,7 +22,7 @@ namespace gameanalytics
 {
 	namespace logging
 	{
-		const std::string GALogger::tag = "GameAnalytics";
+		const STRING_TYPE GALogger::tag = TEXT("GameAnalytics");
 
 		GALogger::GALogger()
 		{
@@ -36,6 +37,7 @@ namespace gameanalytics
 
 #if USE_UWP
             isPreparingForSuspend = false;
+            logFileGeneratedCount = 0;
 
             // Create the logging channel.
             // When an app logs messages to a channel, the messges will go 
@@ -67,10 +69,11 @@ namespace gameanalytics
 			GALogger::sharedInstance()->infoLogVerboseEnabled = enabled;
 		}
 
-		void GALogger::addFileLog(const std::string& path)
+#if !USE_UWP
+		void GALogger::addFileLog(const STRING_TYPE& path)
 		{
             
-#if !USE_UWP
+
             GALogger *ga = GALogger::sharedInstance();
 			boost::filesystem::path p(path);
             p /= "ga_log.txt";
@@ -86,10 +89,10 @@ namespace gameanalytics
 			{
 				plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
 			}
-#endif
 
 			GALogger::i("Log file added under: " + path);
 		}
+#endif
 
 		// i: information logging
 		//
@@ -97,7 +100,7 @@ namespace gameanalytics
 		// - non-errors
 		// - initializing, adding event, sending events etc.
 		// - generally small text
-		void GALogger::i(const std::string& format)
+		void GALogger::i(const STRING_TYPE& format)
 		{
 #if USE_UWP
             GALogger ^ga = GALogger::sharedInstance();
@@ -109,7 +112,7 @@ namespace gameanalytics
 				return;
 			}
 
-			std::string message = "Info/" + ga->tag + ": " + format;
+            STRING_TYPE message = TEXT("Info/") + ga->tag + TEXT(": ") + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
@@ -120,14 +123,15 @@ namespace gameanalytics
 		// - validation errors
 		// - trying to initialize with wrong keys
 		// - other non-critical
-		void GALogger::w(const std::string& format)
+		void GALogger::w(const STRING_TYPE& format)
 		{
 #if USE_UWP
             GALogger ^ga = GALogger::sharedInstance();
 #else
             GALogger *ga = GALogger::sharedInstance();
 #endif
-			std::string message = "Warning/" + ga->tag + ": " + format;
+
+            STRING_TYPE message = TEXT("Warning/") + ga->tag + TEXT(": ") + format;
 			ga->sendNotificationMessage(message, Warning);
 		}
 
@@ -139,14 +143,15 @@ namespace gameanalytics
 		// - JSON decoding/encoding errors
 		// - unexpected exceptions
 		// - errors that never should happen
-		void GALogger::e(const std::string& format)
+		void GALogger::e(const STRING_TYPE& format)
 		{
 #if USE_UWP
             GALogger ^ga = GALogger::sharedInstance();
 #else
             GALogger *ga = GALogger::sharedInstance();
 #endif
-			std::string message = "Error/" + ga->tag + ": " + format;
+
+            STRING_TYPE message = TEXT("Error/") + ga->tag + TEXT(": ") + format;
 			ga->sendNotificationMessage(message, Error);
 		}
 
@@ -156,7 +161,7 @@ namespace gameanalytics
 		// used for:
 		// - development only
 		// - use large debug text like HTTP payload etc.
-		void GALogger::d(const std::string& format)
+		void GALogger::d(const STRING_TYPE& format)
 		{
 #if USE_UWP
             GALogger ^ga = GALogger::sharedInstance();
@@ -168,7 +173,7 @@ namespace gameanalytics
 				return;
 			}
 
-			std::string message = "Debug/" + ga->tag + ": " + format;
+            STRING_TYPE message = TEXT("Debug/") + ga->tag + TEXT(": ") + format;
 			ga->sendNotificationMessage(message, Debug);
 		}
 
@@ -177,7 +182,7 @@ namespace gameanalytics
 		//
 		// used for:
 		// - Large logs
-		void GALogger::ii(const std::string& format)
+		void GALogger::ii(const STRING_TYPE& format)
 		{
 #if USE_UWP
             GALogger ^ga = GALogger::sharedInstance();
@@ -189,25 +194,44 @@ namespace gameanalytics
 				return;
 			}
 
-			std::string message = "Verbose/" + ga->tag + ": " + format;
+            STRING_TYPE message = TEXT("Verbose/") + ga->tag + TEXT(": ") + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
-		void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
+		void GALogger::sendNotificationMessage(const STRING_TYPE& message, EGALoggerMessageType type)
 		{
 			switch(type)
 			{
 				case Error:
+#if USE_UWP
+                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Error);
+#else
 					LOG_ERROR << message;
+#endif
 					break;
+
 				case Warning:
+#if USE_UWP
+                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Warning);
+#else
 					LOG_WARNING << message;
+#endif
 					break;
+
 				case Debug:
+#if USE_UWP
+                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+#else
 					LOG_DEBUG << message;
+#endif
 					break;
+
 				case Info:
+#if USE_UWP
+                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+#else
 					LOG_INFO << message;
+#endif
 					break;
 			}
 		}
@@ -287,14 +311,14 @@ namespace gameanalytics
 
         void GALogger::OnLogFileGenerated(Windows::Foundation::Diagnostics::IFileLoggingSession^ sender, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs^ args)
         {
-            InterlockedIncrement(&_logFileGeneratedCount);
+            InterlockedIncrement(&logFileGeneratedCount);
 
             // ContinuationData allows information to be
             // shared across the below async operations.
             struct ContinuationData
             {
-                StorageFolder^ ourSampleAppLogFolder;
-                StorageFile^ generatedLogFile;
+                Windows::Storage::StorageFolder^ ourLogFolder;
+                Windows::Storage::StorageFile^ generatedLogFile;
                 Platform::String^ logFileName;
             };
             auto data = std::make_shared<ContinuationData>();
@@ -303,12 +327,12 @@ namespace gameanalytics
             // An app defines where/how it wants to store log files. 
             // This sample uses OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME under
             // the app's local folder. 
-            create_task(ApplicationData::Current->LocalFolder->CreateFolderAsync(OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME, CreationCollisionOption::OpenIfExists))
-                .then([this, data](StorageFolder^ ourSampleAppLogFolder)
+            concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFolderAsync(OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME, Windows::Storage::CreationCollisionOption::OpenIfExists))
+                .then([this, data](Windows::Storage::StorageFolder^ ourSampleAppLogFolder)
                 {
                     // After creating/opening our sample app's log folder, 
                     // save it for use in a continuation further below. 
-                    data->ourSampleAppLogFolder = ourSampleAppLogFolder;
+                    data->ourLogFolder = ourSampleAppLogFolder;
                     // Create a new log file name, and save it for use 
                     // in a continuation further below. 
                     data->logFileName = "Log-" + ref new Platform::String(GetTimeStamp().c_str()) + ".etl";
@@ -320,14 +344,54 @@ namespace gameanalytics
                     // Update the UI to show the new log file.
                     if (isPreparingForSuspend == false)
                     {
-                        StatusChanged(this, ref new LoggingScenarioEventArgs(LoggingScenarioEventType::LogFileGenerated, std::wstring((data->ourSampleAppLogFolder->Path + "\\" + data->logFileName)->Data())));
+                        StatusChanged(this, ref new GALoggerEventArgs(GALoggerEventType::LogFileGenerated, std::wstring((data->ourLogFolder->Path + "\\" + data->logFileName)->Data())));
                     }
                 });
         }
 
         concurrency::task<Windows::Storage::StorageFile^> GALogger::CloseSessionSaveFinalLogFile()
         {
+            // ContinuationData allows information to be
+            // shared across the below async operations.
+            struct ContinuationData
+            {
+                Windows::Storage::StorageFolder^ ourLogFolder;
+                Platform::String^ logFileName;
+            };
+            auto data = std::make_shared<ContinuationData>();
 
+            // Tell the session to save its final log file.
+            return concurrency::create_task(session->CloseAndSaveToFileAsync())
+                .then([this, data](Windows::Storage::StorageFile^ finalFileBeforeSuspend)
+                {
+                    if (finalFileBeforeSuspend != nullptr)
+                    {
+                        // A final log file was created. 
+                        // Move it to the sample-defined log folder. 
+                        // First, get create/open our sample-defined log folder.
+                        return concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFolderAsync(OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME, Windows::Storage::CreationCollisionOption::OpenIfExists))
+                            .then([this, finalFileBeforeSuspend, data](Windows::Storage::StorageFolder^ ourSampleAppLogFolder)
+                            {
+                                // Next, move the log file to the sample-defined log folder. 
+                                data->ourLogFolder = ourSampleAppLogFolder;
+                                data->logFileName = "Log-" + ref new Platform::String(GetTimeStamp().c_str()) + ".etl";
+                                return finalFileBeforeSuspend->MoveAsync(ourSampleAppLogFolder, data->logFileName, Windows::Storage::NameCollisionOption::FailIfExists);
+                            })
+                            .then([this, data](concurrency::task<void> previousTask)
+                            {
+                                // Return a StorageFile representing the log file. 
+                                return Windows::Storage::StorageFile::GetFileFromPathAsync(data->ourLogFolder->Path + "\\" + data->logFileName);
+                            });
+                    }
+
+                    // Async operation need to return consistent types.
+                    // If the session did not produce any log file, 
+                    // return a task which produces a null StorageFile.
+                    return concurrency::task<Windows::Storage::StorageFile^>([]() -> Windows::Storage::StorageFile^
+                    {
+                        return nullptr;
+                    });
+                });
         }
 
         void GALogger::ResumeLoggingIfApplicable()
@@ -356,7 +420,7 @@ namespace gameanalytics
                 Platform::String^ pathOfLogFileGeneratedBeforeSuspend = GetAppLocalSettingsValueAsString(LOGFILEGEN_BEFORE_SUSPEND_SETTING_KEY_NAME);
                 if (pathOfLogFileGeneratedBeforeSuspend != nullptr)
                 {
-                    StatusChanged(this, ref new LoggingScenarioEventArgs(LoggingScenarioEventType::LogFileGeneratedAtSuspend, pathOfLogFileGeneratedBeforeSuspend->Data()));
+                    StatusChanged(this, ref new GALoggerEventArgs(GALoggerEventType::LogFileGeneratedAtSuspend, pathOfLogFileGeneratedBeforeSuspend->Data()));
                     SetAppLocalSettingsValue(LOGFILEGEN_BEFORE_SUSPEND_SETTING_KEY_NAME, nullptr);
                 }
             }
@@ -371,18 +435,15 @@ namespace gameanalytics
             // sample is the common scenario of an app logging events
             // which it wants to place in its own log file, so it creates
             // a session and channel as a pair. The channel is created 
-            // during construction of this LoggingScenario class so 
+            // during construction of this GALogger class so 
             // it already exsits by the time this function is called. 
             if (session == nullptr)
             {
                 session = ref new Windows::Foundation::Diagnostics::FileLoggingSession(DEFAULT_SESSION_NAME);
-                session->LogFileGenerated += ref new Windows::Foundation::TypedEventHandler<IFileLoggingSession ^, LogFileGeneratedEventArgs ^>(this, &FileLoggingSessionScenario::OnLogFileGenerated);
+                session->LogFileGenerated += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::IFileLoggingSession ^, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs ^>(this, &GALogger::OnLogFileGenerated);
             }
 
-            // This sample adds the channel at level "warning" to 
-            // demonstrated how messages logged at more verbose levels
-            // are ignored by the session. 
-            session->AddLoggingChannel(_channel, LoggingLevel::Warning);
+            session->AddLoggingChannel(channel, Windows::Foundation::Diagnostics::LoggingLevel::Verbose);
         }
 #endif
 	}

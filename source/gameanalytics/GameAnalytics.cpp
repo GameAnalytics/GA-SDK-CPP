@@ -18,7 +18,7 @@ namespace gameanalytics
 {   
     // ----------------------- CONFIGURE ---------------------- //
 
-    void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<STRING_TYPE>& customDimensions)
     {
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
@@ -31,7 +31,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<STRING_TYPE>& customDimensions)
     {
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
@@ -44,7 +44,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<STRING_TYPE>& customDimensions)
     {
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
@@ -57,7 +57,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+    void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<STRING_TYPE>& resourceCurrencies)
     {
         threading::GAThreading::performTaskOnGAThread([resourceCurrencies]()
         {
@@ -70,7 +70,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+    void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<STRING_TYPE>& resourceItemTypes)
     {
         threading::GAThreading::performTaskOnGAThread([resourceItemTypes]()
         {
@@ -83,7 +83,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureBuild(const std::string& build)
+    void GameAnalytics::configureBuild(const STRING_TYPE& build)
     {
         threading::GAThreading::performTaskOnGAThread([build]()
         {
@@ -101,7 +101,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureWritablePath(const std::string& writablePath)
+    void GameAnalytics::configureWritablePath(const STRING_TYPE& writablePath)
     {
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
@@ -116,7 +116,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceModel(const std::string& deviceModel)
+    void GameAnalytics::configureDeviceModel(const STRING_TYPE& deviceModel)
     {
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
@@ -134,7 +134,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureDeviceManufacturer(const std::string& deviceManufacturer)
+    void GameAnalytics::configureDeviceManufacturer(const STRING_TYPE& deviceManufacturer)
     {
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
@@ -152,7 +152,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
+    void GameAnalytics::configureSdkGameEngineVersion(const STRING_TYPE& sdkGameEngineVersion)
     {
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
@@ -169,7 +169,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureGameEngineVersion(const std::string& gameEngineVersion)
+    void GameAnalytics::configureGameEngineVersion(const STRING_TYPE& gameEngineVersion)
     {
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
@@ -186,7 +186,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureUserId(const std::string& uId)
+    void GameAnalytics::configureUserId(const STRING_TYPE& uId)
     {
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
@@ -207,7 +207,7 @@ namespace gameanalytics
 
     // ----------------------- INITIALIZE ---------------------- //
 
-    void GameAnalytics::initialize(const std::string& gameKey, const std::string& gameSecret)
+    void GameAnalytics::initialize(const STRING_TYPE& gameKey, const STRING_TYPE& gameSecret)
     {
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
@@ -237,11 +237,11 @@ namespace gameanalytics
 
 
     void GameAnalytics::addBusinessEvent(
-        const std::string& currency,
+        const STRING_TYPE& currency,
         int amount,
-        const std::string& itemType,
-        const std::string& itemId,
-        const std::string& cartType)
+        const STRING_TYPE& itemType,
+        const STRING_TYPE& itemId,
+        const STRING_TYPE& cartType)
     {
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType]()
         {
@@ -255,7 +255,7 @@ namespace gameanalytics
     }
 
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const STRING_TYPE& currency, float amount, const STRING_TYPE&itemType, const STRING_TYPE& itemId)
     {
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId]()
         {
@@ -268,7 +268,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const STRING_TYPE& progression01, const STRING_TYPE& progression02, const STRING_TYPE& progression03)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03]()
         {
@@ -279,11 +279,11 @@ namespace gameanalytics
 
             // Send to events
             // TODO(nikolaj): check if passing 0 / null as the last argument is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false);
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const STRING_TYPE& progression01, const STRING_TYPE& progression02, const STRING_TYPE& progression03, int score)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score]()
         {
@@ -294,17 +294,23 @@ namespace gameanalytics
 
             // Send to events
             // TODO(nikolaj): check if this cast from int to double is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score);  
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true);  
         });
     }
 
-    void GameAnalytics::addDesignEvent(const std::string& eventId)
+    void GameAnalytics::addDesignEvent(const STRING_TYPE& eventId)
     {
-         // TODO(nikolaj): check if passing 0.0 instead of nil is ok here
-        addDesignEvent(eventId, 0.0);
+        threading::GAThreading::performTaskOnGAThread([eventId]()
+        {
+            if (!isSdkReady(true, true, "Could not add design event"))
+            {
+                return;
+            }
+            events::GAEvents::addDesignEvent(eventId, 0, false);
+        });
     }
 
-    void GameAnalytics::addDesignEvent(const std::string& eventId, double value)
+    void GameAnalytics::addDesignEvent(const STRING_TYPE& eventId, double value)
     {
         threading::GAThreading::performTaskOnGAThread([eventId, value]()
         {
@@ -312,11 +318,11 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value);
+            events::GAEvents::addDesignEvent(eventId, value, true);
         });
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::string& message)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const STRING_TYPE& message)
     {
         threading::GAThreading::performTaskOnGAThread([severity, message]()
         {
@@ -372,7 +378,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension01(const std::string& dimension)
+    void GameAnalytics::setCustomDimension01(const STRING_TYPE& dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -390,7 +396,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension02(const std::string& dimension)
+    void GameAnalytics::setCustomDimension02(const STRING_TYPE& dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -408,7 +414,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension03(const std::string& dimension)
+    void GameAnalytics::setCustomDimension03(const STRING_TYPE& dimension)
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -426,7 +432,7 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setFacebookId(const std::string& facebookId)
+    void GameAnalytics::setFacebookId(const STRING_TYPE& facebookId)
     {
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
@@ -542,7 +548,7 @@ namespace gameanalytics
         return isSdkReady(needsInitialized, warn, "");
     }
 
-    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, std::string message)
+    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, STRING_TYPE message)
     {
         if (!message.empty())
         {

@@ -17,11 +17,11 @@ namespace gameanalytics
     namespace validators
     {
         bool GAValidator::validateBusinessEvent(
-            const std::string& currency,
+            const STRING_TYPE& currency,
             long amount,
-            const std::string& cartType,
-            const std::string& itemType,
-            const std::string& itemId)
+            const STRING_TYPE& cartType,
+            const STRING_TYPE& itemType,
+            const STRING_TYPE& itemId)
         {
             // validate currency
             if (!GAValidator::validateCurrency(currency))
@@ -71,10 +71,10 @@ namespace gameanalytics
 
         bool GAValidator::validateResourceEvent(
             EGAResourceFlowType flowType,
-            const std::string& currency,
+            const STRING_TYPE& currency,
             double amount,
-            const std::string& itemType,
-            const std::string& itemId
+            const STRING_TYPE& itemType,
+            const STRING_TYPE& itemId
             )
         {
             if (events::GAEvents::resourceFlowTypeString(flowType).empty())
@@ -132,9 +132,9 @@ namespace gameanalytics
 
         bool GAValidator::validateProgressionEvent(
             EGAProgressionStatus progressionStatus,
-            const std::string& progression01,
-            const std::string& progression02,
-            const std::string& progression03
+            const STRING_TYPE& progression01,
+            const STRING_TYPE& progression02,
+            const STRING_TYPE& progression03
             )
         {
             if (events::GAEvents::progressionStatusString(progressionStatus).empty())
@@ -203,7 +203,7 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateDesignEvent(const std::string& eventId, double value)
+        bool GAValidator::validateDesignEvent(const STRING_TYPE& eventId, double value)
         {
             if (!GAValidator::validateEventIdLength(eventId))
             {
@@ -220,7 +220,7 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const std::string& message)
+        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const STRING_TYPE& message)
         {
             if (events::GAEvents::errorSeverityString(severity).empty())
             {
@@ -235,7 +235,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateSdkErrorEvent(const std::string& gameKey, const std::string& gameSecret, http::EGASdkErrorType type)
+        bool GAValidator::validateSdkErrorEvent(const STRING_TYPE& gameKey, const STRING_TYPE& gameSecret, http::EGASdkErrorType type)
         {
             if(!validateKeys(gameKey, gameSecret))
             {
@@ -252,7 +252,7 @@ namespace gameanalytics
 
 
         // event params
-        bool GAValidator::validateKeys(const std::string& gameKey, const std::string& gameSecret)
+        bool GAValidator::validateKeys(const STRING_TYPE& gameKey, const STRING_TYPE& gameSecret)
         {
             if (utilities::GAUtilities::stringMatch(gameKey, "^[A-z0-9]{32}$"))
             {
@@ -264,7 +264,7 @@ namespace gameanalytics
             return false;
         }
 
-        bool GAValidator::validateCurrency(const std::string& currency)
+        bool GAValidator::validateCurrency(const STRING_TYPE& currency)
         {
             if (currency.empty())
             {
@@ -277,7 +277,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventPartLength(const std::string& eventPart, bool allowNull)
+        bool GAValidator::validateEventPartLength(const STRING_TYPE& eventPart, bool allowNull)
         {
             if (allowNull == true && eventPart.empty())
             {
@@ -296,7 +296,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventPartCharacters(const std::string& eventPart)
+        bool GAValidator::validateEventPartCharacters(const STRING_TYPE& eventPart)
         {
             if (!utilities::GAUtilities::stringMatch(eventPart, "^[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}$"))
             {
@@ -305,7 +305,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventIdLength(const std::string& eventId)
+        bool GAValidator::validateEventIdLength(const STRING_TYPE& eventId)
         {
             if (eventId.empty())
             {
@@ -319,7 +319,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventIdCharacters(const std::string& eventId)
+        bool GAValidator::validateEventIdCharacters(const STRING_TYPE& eventId)
         {
             if (eventId.empty())
             {
@@ -333,7 +333,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateShortString(const std::string& shortString, bool canBeEmpty = false)
+        bool GAValidator::validateShortString(const STRING_TYPE& shortString, bool canBeEmpty = false)
         {
             // String is allowed to be empty or nil
             if (canBeEmpty && shortString.empty())
@@ -348,7 +348,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateString(const std::string& string, bool canBeEmpty = false)
+        bool GAValidator::validateString(const STRING_TYPE& string, bool canBeEmpty = false)
         {
             // String is allowed to be empty or nil
             if (canBeEmpty && string.empty())
@@ -363,7 +363,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateLongString(const std::string& longString, bool canBeEmpty = false)
+        bool GAValidator::validateLongString(const STRING_TYPE& longString, bool canBeEmpty = false)
         {
             // String is allowed to be empty
             if (canBeEmpty && longString.empty())
@@ -379,7 +379,7 @@ namespace gameanalytics
         }
 
         // validate wrapper version, build, engine version, store
-        bool GAValidator::validateSdkWrapperVersion(const std::string& wrapperVersion)
+        bool GAValidator::validateSdkWrapperVersion(const STRING_TYPE& wrapperVersion)
         {
             if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -388,7 +388,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateBuild(const std::string& build)
+        bool GAValidator::validateBuild(const STRING_TYPE& build)
         {
             if (!GAValidator::validateShortString(build))
             {
@@ -397,7 +397,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEngineVersion(const std::string& engineVersion)
+        bool GAValidator::validateEngineVersion(const STRING_TYPE& engineVersion)
         {
             if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -406,24 +406,24 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateStore(const std::string& store)
+        bool GAValidator::validateStore(const STRING_TYPE& store)
         {
             return utilities::GAUtilities::stringMatch(store, "^(apple|google_play)$");
         }
 
-        bool GAValidator::validateConnectionType(const std::string& connectionType)
+        bool GAValidator::validateConnectionType(const STRING_TYPE& connectionType)
         {
             return utilities::GAUtilities::stringMatch(connectionType, "^(wwan|wifi|lan|offline)$");
         }
 
         // dimensions
-        bool GAValidator::validateCustomDimensions(const std::vector<std::string>& customDimensions)
+        bool GAValidator::validateCustomDimensions(const std::vector<STRING_TYPE>& customDimensions)
         {
             return GAValidator::validateArrayOfStrings(customDimensions, 20, 32, false, "custom dimensions");
 
         }
 
-        bool GAValidator::validateResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+        bool GAValidator::validateResourceCurrencies(const std::vector<STRING_TYPE>& resourceCurrencies)
         {
             if (!GAValidator::validateArrayOfStrings(resourceCurrencies, 20, 64, false, "resource currencies"))
             {
@@ -431,7 +431,7 @@ namespace gameanalytics
             }
 
             // validate each string for regex
-            for (std::string resourceCurrency : resourceCurrencies)
+            for (STRING_TYPE resourceCurrency : resourceCurrencies)
             {
                 if (!utilities::GAUtilities::stringMatch(resourceCurrency, "^[A-Za-z]+$"))
                 {
@@ -442,7 +442,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+        bool GAValidator::validateResourceItemTypes(const std::vector<STRING_TYPE>& resourceItemTypes)
         {
             if (!GAValidator::validateArrayOfStrings(resourceItemTypes, 20, 32, false, "resource item types"))
             {
@@ -450,7 +450,7 @@ namespace gameanalytics
             }
 
             // validate each resourceItemType for eventpart validation
-            for (std::string resourceItemType : resourceItemTypes)
+            for (STRING_TYPE resourceItemType : resourceItemTypes)
             {
                 if (!GAValidator::validateEventPartCharacters(resourceItemType))
                 {
@@ -462,7 +462,7 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateDimension01(const std::string& dimension01)
+        bool GAValidator::validateDimension01(const STRING_TYPE& dimension01)
         {
             // allow nil
             if (dimension01.empty())
@@ -476,7 +476,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension02(const std::string& dimension02)
+        bool GAValidator::validateDimension02(const STRING_TYPE& dimension02)
         {
             // allow nil
             if (dimension02.empty())
@@ -490,7 +490,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension03(const std::string& dimension03)
+        bool GAValidator::validateDimension03(const STRING_TYPE& dimension03)
         {
             // allow nil
             if (dimension03.empty())
@@ -505,14 +505,14 @@ namespace gameanalytics
         }
 
         bool GAValidator::validateArrayOfStrings(
-            const std::vector<std::string>& arrayOfStrings,
+            const std::vector<STRING_TYPE>& arrayOfStrings,
             unsigned long maxCount,
             unsigned long maxStringLength,
             bool allowNoValues,
-            const std::string& logTag
+            const STRING_TYPE& logTag
             )
         {
-            std::string arrayTag = logTag;
+            STRING_TYPE arrayTag = logTag;
 
             // use arrayTag to annotate warning log
             if (arrayTag.empty())
@@ -535,7 +535,7 @@ namespace gameanalytics
             }
 
             // validate each string
-            for (std::string arrayString : arrayOfStrings)
+            for (STRING_TYPE arrayString : arrayOfStrings)
             {
                 auto stringLength = arrayString.length();
                 // check if empty (not allowed)
@@ -555,7 +555,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateFacebookId(const std::string& facebookId)
+        bool GAValidator::validateFacebookId(const STRING_TYPE& facebookId)
         {
             if (!GAValidator::validateString(facebookId))
             {
@@ -598,7 +598,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateUserId(const std::string& uId)
+        bool GAValidator::validateUserId(const STRING_TYPE& uId)
         {
             if (uId.empty())
             {

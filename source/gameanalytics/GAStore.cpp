@@ -22,28 +22,28 @@ namespace gameanalytics
         {
         }
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql)
+        Json::Value GAStore::executeQuerySync(const STRING_TYPE& sql)
         {
             return executeQuerySync(sql, {});
         }
 
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
+        Json::Value GAStore::executeQuerySync(const STRING_TYPE& sql, const std::vector<STRING_TYPE>& parameters)
         {
             return executeQuerySync(sql, parameters, false);
         }
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
+        Json::Value GAStore::executeQuerySync(const STRING_TYPE& sql, const std::vector<STRING_TYPE>& parameters, bool useTransaction)
         {
             // We must be running on GAThread
             if (!threading::GAThreading::isGAThread()) 
             {
-                logging::GALogger::w("Trying to execute query on non-GAThread");
+                logging::GALogger::w(TEXT("Trying to execute query on non-GAThread"));
                 return{};
             }
 
             // Force transaction if it is an update, insert or delete.
-            if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)")) 
+            if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), TEXT("^(UPDATE|INSERT|DELETE)"))) 
             {
                 useTransaction = true;
             }
@@ -58,7 +58,7 @@ namespace gameanalytics
             {
                 if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK) 
                 {
-                    logging::GALogger::e(std::string("SQLITE3 BEGIN ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
+                    logging::GALogger::e(STRING_TYPE(TEXT("SQLITE3 BEGIN ERROR: ")) + sqlite3_errmsg(sqlDatabasePtr));
                     return{};
                 }
             }
@@ -116,7 +116,7 @@ namespace gameanalytics
             else
             {
                 // TODO(nikolaj): Should we do a db validation to see if the db is corrupt here?
-                logging::GALogger::e(std::string("SQLITE3 PREPARE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
+                logging::GALogger::e(STRING_TYPE("SQLITE3 PREPARE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                 results.clear();
             }
 
@@ -128,20 +128,20 @@ namespace gameanalytics
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "COMMIT", 0, 0, 0) != SQLITE_OK)
                     {
-                        logging::GALogger::e(std::string("SQLITE3 COMMIT ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
+                        logging::GALogger::e(STRING_TYPE("SQLITE3 COMMIT ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                         results.clear();
                     }
                 }
             }
             else
             {
-                logging::GALogger::d(std::string("SQLITE3 FINALIZE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
+                logging::GALogger::d(STRING_TYPE("SQLITE3 FINALIZE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                 results.clear();
                 if (useTransaction)
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "ROLLBACK", 0, 0, 0) != SQLITE_OK)
                     {
-                        logging::GALogger::e(std::string("SQLITE3 ROLLBACK ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
+                        logging::GALogger::e(STRING_TYPE("SQLITE3 ROLLBACK ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                     }
                 }
             }
@@ -167,7 +167,7 @@ namespace gameanalytics
             }
 
             // Open database
-            if (sqlite3_open(sharedInstance()->dbPath.c_str(), &sharedInstance()->sqlDatabase) != SQLITE_OK) 
+            if (SQLITE(sqlite3_open)(sharedInstance()->dbPath.c_str(), &sharedInstance()->sqlDatabase) != SQLITE_OK) 
             {
                 sharedInstance()->dbReady = false;
                 logging::GALogger::w("Could not open database: " + sharedInstance()->dbPath);
@@ -277,17 +277,17 @@ namespace gameanalytics
             return true;
         }
 
-        void GAStore::setState(const std::string& key, const std::string& value)
+        void GAStore::setState(const STRING_TYPE& key, const STRING_TYPE& value)
         {
             if (value.empty())
             {
-                std::vector<std::string> parameterArray;
+                std::vector<STRING_TYPE> parameterArray;
                 parameterArray.push_back(key);
                 executeQuerySync("DELETE FROM ga_state WHERE key = ?;", parameterArray);
             }
             else
             {
-                std::vector<std::string> parameterArray;
+                std::vector<STRING_TYPE> parameterArray;
                 parameterArray.push_back(key);
                 parameterArray.push_back(value);
                 executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameterArray, true);
@@ -320,7 +320,7 @@ namespace gameanalytics
 
                 if(resultSessionArray.size() > 0)
                 {
-                    std::string sessionDeleteString = "";
+                    STRING_TYPE sessionDeleteString = "";
 
                     int i = 0;
                     for (auto result : resultSessionArray)
@@ -333,7 +333,7 @@ namespace gameanalytics
                         ++i;
                     }
 
-                    std::string deleteOldSessionsSql = "DELETE FROM ga_events WHERE session_id IN (\"" + sessionDeleteString + "\");";
+                    STRING_TYPE deleteOldSessionsSql = "DELETE FROM ga_events WHERE session_id IN (\"" + sessionDeleteString + "\");";
                     logging::GALogger::w("Database too large when initializing. Deleting the oldest 3 sessions.");
                     executeQuerySync(deleteOldSessionsSql);
                     executeQuerySync("VACUUM");

@@ -16,13 +16,13 @@ namespace gameanalytics
 {
     namespace events
     {
-        const std::string GAEvents::CategorySessionStart = "user";
-        const std::string GAEvents::CategorySessionEnd = "session_end";
-        const std::string GAEvents::CategoryDesign = "design";
-        const std::string GAEvents::CategoryBusiness = "business";
-        const std::string GAEvents::CategoryProgression = "progression";
-        const std::string GAEvents::CategoryResource = "resource";
-        const std::string GAEvents::CategoryError = "error";
+        const STRING_TYPE GAEvents::CategorySessionStart = TEXT("user");
+        const STRING_TYPE GAEvents::CategorySessionEnd = TEXT("session_end");
+        const STRING_TYPE GAEvents::CategoryDesign = TEXT("design");
+        const STRING_TYPE GAEvents::CategoryBusiness = TEXT("business");
+        const STRING_TYPE GAEvents::CategoryProgression = TEXT("progression");
+        const STRING_TYPE GAEvents::CategoryResource = TEXT("resource");
+        const STRING_TYPE GAEvents::CategoryError = TEXT("error");
         const double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
         const int GAEvents::MaxEventCount = 500;
 
@@ -50,7 +50,7 @@ namespace gameanalytics
         // USER EVENTS
         void GAEvents::addSessionStartEvent()
         {
-            std::string categorySessionStart = GAEvents::CategorySessionStart;
+            STRING_TYPE categorySessionStart = GAEvents::CategorySessionStart;
 
             // Event specific data
             Json::Value eventDict;
@@ -58,7 +58,7 @@ namespace gameanalytics
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
-            std::vector<std::string> parameters;
+            std::vector<STRING_TYPE> parameters;
             parameters.push_back("session_num");
             parameters.push_back(std::to_string(state::GAState::getSessionNum()));
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameters);
@@ -70,7 +70,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
 
             // Log
-            logging::GALogger::i("Add SESSION START event");
+            logging::GALogger::i(TEXT("Add SESSION START event"));
 
             // Send event right away
             GAEvents::processEvents(categorySessionStart, false);
@@ -110,7 +110,7 @@ namespace gameanalytics
         }
 
         // BUSINESS EVENT
-        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType)
+        void GAEvents::addBusinessEvent(const STRING_TYPE& currency, int amount, const STRING_TYPE& itemType, const STRING_TYPE& itemId, const STRING_TYPE& cartType)
         {
             // Validate event params
             if (!validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId))
@@ -149,7 +149,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const STRING_TYPE& currency, double amount, const STRING_TYPE& itemType, const STRING_TYPE& itemId)
         {
             // Validate event params
             if (!validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId))
@@ -168,7 +168,7 @@ namespace gameanalytics
             Json::Value eventDict;
 
             // insert event specific values
-            std::string flowTypeString = resourceFlowTypeString(flowType);
+            STRING_TYPE flowTypeString = resourceFlowTypeString(flowType);
             eventDict["event_id"] = flowTypeString + ":" + currency + ":" + itemType + ":" + itemId;
             eventDict["category"] = GAEvents::CategoryResource;
             eventDict["amount"] = amount;
@@ -183,9 +183,9 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const STRING_TYPE& progression01, const STRING_TYPE& progression02, const STRING_TYPE& progression03, double score, bool sendScore)
         {
-            std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
+            STRING_TYPE progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
 
             // Validate event params
             if (!validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03))
@@ -198,7 +198,7 @@ namespace gameanalytics
             Json::Value eventDict;
 
             // Progression identifier
-            std::string progressionIdentifier;
+            STRING_TYPE progressionIdentifier;
 
             if (progression02.empty())
             {
@@ -221,7 +221,7 @@ namespace gameanalytics
             double attempt_num = 0;
 
             // Add score if specified and status is not start
-            if (score > 0 && progressionStatus != EGAProgressionStatus::Start)
+            if (sendScore && progressionStatus != EGAProgressionStatus::Start)
             {
                 eventDict["score"] = score;
             }
@@ -257,7 +257,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value)
+        void GAEvents::addDesignEvent(const STRING_TYPE& eventId, double value, bool sendValue)
         {
             // Validate
             if (!validators::GAValidator::validateDesignEvent(eventId, value))
@@ -273,7 +273,7 @@ namespace gameanalytics
             eventData["category"] = GAEvents::CategoryDesign;
             eventData["event_id"] = eventId;
 
-            if (value > 0)
+            if (sendValue)
             {
                 eventData["value"] = value;
             }
@@ -285,9 +285,9 @@ namespace gameanalytics
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const STRING_TYPE& message)
         {
-            std::string severityString = errorSeverityString(severity);
+            STRING_TYPE severityString = errorSeverityString(severity);
 
             // Validate
             if (!validators::GAValidator::validateErrorEvent(severity, message))
@@ -324,15 +324,15 @@ namespace gameanalytics
             }
         }
 
-        void GAEvents::processEvents(const std::string& category, bool performCleanup)
+        void GAEvents::processEvents(const STRING_TYPE& category, bool performCleanup)
         {
             // Request identifier
-            std::string requestIdentifier = utilities::GAUtilities::generateUUID();
+            STRING_TYPE requestIdentifier = utilities::GAUtilities::generateUUID();
 
-            std::string selectSql;
-            std::string updateSql;
-            std::string deleteSql = "DELETE FROM ga_events WHERE status = '" + requestIdentifier + "'";
-            std::string putbackSql = "UPDATE ga_events SET status = 'new' WHERE status = '" + requestIdentifier + "';";
+            STRING_TYPE selectSql;
+            STRING_TYPE updateSql;
+            STRING_TYPE deleteSql = "DELETE FROM ga_events WHERE status = '" + requestIdentifier + "'";
+            STRING_TYPE putbackSql = "UPDATE ga_events SET status = 'new' WHERE status = '" + requestIdentifier + "';";
 
             // Cleanup
             if (performCleanup)
@@ -342,7 +342,7 @@ namespace gameanalytics
             }
 
             // Prepare SQL
-            std::string andCategory = "";
+            STRING_TYPE andCategory = "";
             if (!category.empty())
             {
                 andCategory = " AND category='" + category + "' ";
@@ -453,9 +453,9 @@ namespace gameanalytics
         void GAEvents::fixMissingSessionEndEvents()
         {
             // Get all sessions that are not current
-            std::vector<std::string> parameters = { state::GAState::getSessionId() };
+            std::vector<STRING_TYPE> parameters = { state::GAState::getSessionId() };
 
-            std::string sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
+            STRING_TYPE sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
             auto sessions = store::GAStore::executeQuerySync(sql, parameters);
 
             if (sessions.empty())
@@ -522,15 +522,15 @@ namespace gameanalytics
             }
 
             // Create json string representation
-            std::string json = utilities::GAUtilities::jsonToString(ev);
+            STRING_TYPE json = utilities::GAUtilities::jsonToString(ev);
 
             // output if VERBOSE LOG enabled
 
             logging::GALogger::ii("Event added to queue: " + json);
 
             // Add to store
-            std::vector<std::string> parameters = { "new", ev["category"].asString(), ev["session_id"].asString(), ev["client_ts"].asString(), json };
-            std::string sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
+            std::vector<STRING_TYPE> parameters = { "new", ev["category"].asString(), ev["session_id"].asString(), ev["client_ts"].asString(), json };
+            STRING_TYPE sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
 
             store::GAStore::executeQuerySync(sql, parameters);
 
@@ -570,7 +570,7 @@ namespace gameanalytics
             }
         }
 
-        const std::string GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus)
+        const STRING_TYPE GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus)
         {
             switch (progressionStatus) {
             case Start:
@@ -585,7 +585,7 @@ namespace gameanalytics
             return{};
         }
 
-        const std::string GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity)
+        const STRING_TYPE GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity)
         {
             switch (errorSeverity) {
             case Info:
@@ -604,7 +604,7 @@ namespace gameanalytics
             return{};
         }
 
-        const std::string GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType)
+        const STRING_TYPE GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType)
         {
             switch (flowType) {
             case Source:
