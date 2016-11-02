@@ -23,30 +23,30 @@ namespace gameanalytics
             static void ensureEventQueueIsRunning();
             static void addSessionStartEvent();
             static void addSessionEndEvent(Json::Int64 timeAdjustement = 0);
-            static void addBusinessEvent(const STRING_TYPE& currency, int amount, const STRING_TYPE& itemType, const STRING_TYPE& itemId, const STRING_TYPE& cartType);
-            static void addResourceEvent(EGAResourceFlowType flowType, const STRING_TYPE& currency, double amount, const STRING_TYPE& itemType, const STRING_TYPE& itemId);
-            static void addProgressionEvent(EGAProgressionStatus progressionStatus, const STRING_TYPE& progression01, const STRING_TYPE& progression02, const STRING_TYPE& progression03, double score, bool sendScore);
-            static void addDesignEvent(const STRING_TYPE& eventId, double value, bool sendValue);
-            static void addErrorEvent(EGAErrorSeverity severity, const STRING_TYPE& message);
-            static const STRING_TYPE progressionStatusString(EGAProgressionStatus progressionStatus);
-            static const STRING_TYPE errorSeverityString(EGAErrorSeverity errorSeverity);
-            static const STRING_TYPE resourceFlowTypeString(EGAResourceFlowType flowType);
+            static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType);
+            static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId);
+            static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore);
+            static void addDesignEvent(const std::string& eventId, double value, bool sendValue);
+            static void addErrorEvent(EGAErrorSeverity severity, const std::string& message);
+            static const std::string progressionStatusString(EGAProgressionStatus progressionStatus);
+            static const std::string errorSeverityString(EGAErrorSeverity errorSeverity);
+            static const std::string resourceFlowTypeString(EGAResourceFlowType flowType);
 
          private:
             static void processEventQueue();
-            static void processEvents(const STRING_TYPE& category, bool performCleanUp);
+            static void processEvents(const std::string& category, bool performCleanUp);
             static void cleanupEvents();
             static void fixMissingSessionEndEvents();
             static void addEventToStore(const Json::Value& eventData);
             static void addDimensionsToEvent(Json::Value& eventData);
 
-            static const STRING_TYPE CategorySessionStart;
-            static const STRING_TYPE CategorySessionEnd;
-            static const STRING_TYPE CategoryDesign;
-            static const STRING_TYPE CategoryBusiness;
-            static const STRING_TYPE CategoryProgression;
-            static const STRING_TYPE CategoryResource;
-            static const STRING_TYPE CategoryError;
+            static const std::string CategorySessionStart;
+            static const std::string CategorySessionEnd;
+            static const std::string CategoryDesign;
+            static const std::string CategoryBusiness;
+            static const std::string CategoryProgression;
+            static const std::string CategoryResource;
+            static const std::string CategoryError;
             static const double ProcessEventsIntervalInSeconds;
             static const int MaxEventCount;
 

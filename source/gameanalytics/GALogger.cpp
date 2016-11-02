@@ -2,7 +2,7 @@
 #include <iostream>
 #include "GADevice.h"
 #if USE_UWP
-
+#include "GAUtilities.h"
 #else
 #include <plog/Log.h>
 #include <plog/Appenders/ConsoleAppender.h>
@@ -22,7 +22,7 @@ namespace gameanalytics
 {
 	namespace logging
 	{
-		const STRING_TYPE GALogger::tag = TEXT("GameAnalytics");
+		const std::string GALogger::tag = "GameAnalytics";
 
 		GALogger::GALogger()
 		{
@@ -36,26 +36,7 @@ namespace gameanalytics
 		#endif
 
 #if USE_UWP
-            isPreparingForSuspend = false;
-            logFileGeneratedCount = 0;
-
-            // Create the logging channel.
-            // When an app logs messages to a channel, the messges will go 
-            // to any sessions which are consuming messages from the channel.
-#pragma warning(push)
-#pragma warning(disable : 4973)
-            channel = ref new Windows::Foundation::Diagnostics::LoggingChannel(DEFAULT_CHANNEL_NAME);
-#pragma warning(pop)
-
-            channel->LoggingEnabled += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::ILoggingChannel ^, Platform::Object ^>(this, &GALogger::OnChannelLoggingEnabled);
-
-            Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &GALogger::OnAppSuspending);
-            Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &GALogger::OnAppResuming);
-
-            // If the app is being launched (not resumed), the 
-            // following call will activate logging if it had been 
-            // active at the time of the last suspend. 
-            ResumeLoggingIfApplicable();
+            GALoggerUWP::Instance->Touch();
 #endif
 		}
 
@@ -70,7 +51,7 @@ namespace gameanalytics
 		}
 
 #if !USE_UWP
-		void GALogger::addFileLog(const STRING_TYPE& path)
+		void GALogger::addFileLog(const std::string& path)
 		{
             
 
@@ -100,19 +81,16 @@ namespace gameanalytics
 		// - non-errors
 		// - initializing, adding event, sending events etc.
 		// - generally small text
-		void GALogger::i(const STRING_TYPE& format)
+		void GALogger::i(const std::string& format)
 		{
-#if USE_UWP
-            GALogger ^ga = GALogger::sharedInstance();
-#else
 			GALogger *ga = GALogger::sharedInstance();
-#endif
+
 			if (!ga->infoLogEnabled) {
 				// No logging of info unless in client debug mode
 				return;
 			}
 
-            STRING_TYPE message = TEXT("Info/") + ga->tag + TEXT(": ") + format;
+            std::string message = "Info/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
@@ -123,15 +101,11 @@ namespace gameanalytics
 		// - validation errors
 		// - trying to initialize with wrong keys
 		// - other non-critical
-		void GALogger::w(const STRING_TYPE& format)
+		void GALogger::w(const std::string& format)
 		{
-#if USE_UWP
-            GALogger ^ga = GALogger::sharedInstance();
-#else
             GALogger *ga = GALogger::sharedInstance();
-#endif
 
-            STRING_TYPE message = TEXT("Warning/") + ga->tag + TEXT(": ") + format;
+            std::string message = "Warning/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Warning);
 		}
 
@@ -143,15 +117,11 @@ namespace gameanalytics
 		// - JSON decoding/encoding errors
 		// - unexpected exceptions
 		// - errors that never should happen
-		void GALogger::e(const STRING_TYPE& format)
+		void GALogger::e(const std::string& format)
 		{
-#if USE_UWP
-            GALogger ^ga = GALogger::sharedInstance();
-#else
             GALogger *ga = GALogger::sharedInstance();
-#endif
 
-            STRING_TYPE message = TEXT("Error/") + ga->tag + TEXT(": ") + format;
+            std::string message = "Error/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Error);
 		}
 
@@ -161,19 +131,16 @@ namespace gameanalytics
 		// used for:
 		// - development only
 		// - use large debug text like HTTP payload etc.
-		void GALogger::d(const STRING_TYPE& format)
+		void GALogger::d(const std::string& format)
 		{
-#if USE_UWP
-            GALogger ^ga = GALogger::sharedInstance();
-#else
             GALogger *ga = GALogger::sharedInstance();
-#endif
+
 			if (!ga->debugEnabled) {
 				// No logging of debug unless in full debug logging mode
 				return;
 			}
 
-            STRING_TYPE message = TEXT("Debug/") + ga->tag + TEXT(": ") + format;
+            std::string message = "Debug/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Debug);
 		}
 
@@ -182,29 +149,26 @@ namespace gameanalytics
 		//
 		// used for:
 		// - Large logs
-		void GALogger::ii(const STRING_TYPE& format)
+		void GALogger::ii(const std::string& format)
 		{
-#if USE_UWP
-            GALogger ^ga = GALogger::sharedInstance();
-#else
             GALogger *ga = GALogger::sharedInstance();
-#endif
+
 			if (!ga->infoLogVerboseEnabled) {
 				// No logging of info unless in client debug mode
 				return;
 			}
 
-            STRING_TYPE message = TEXT("Verbose/") + ga->tag + TEXT(": ") + format;
+            std::string message = "Verbose/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
-		void GALogger::sendNotificationMessage(const STRING_TYPE& message, EGALoggerMessageType type)
+		void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
 		{
 			switch(type)
 			{
 				case Error:
 #if USE_UWP
-                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Error);
+                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Error);
 #else
 					LOG_ERROR << message;
 #endif
@@ -212,7 +176,7 @@ namespace gameanalytics
 
 				case Warning:
 #if USE_UWP
-                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Warning);
+                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Warning);
 #else
 					LOG_WARNING << message;
 #endif
@@ -220,7 +184,7 @@ namespace gameanalytics
 
 				case Debug:
 #if USE_UWP
-                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
 #else
 					LOG_DEBUG << message;
 #endif
@@ -228,15 +192,51 @@ namespace gameanalytics
 
 				case Info:
 #if USE_UWP
-                    this->channel->LogMessage(ref new Platform::String(message.c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
 #else
 					LOG_INFO << message;
 #endif
 					break;
 			}
 		}
+
 #if USE_UWP
-        void GALogger::OnChannelLoggingEnabled(Windows::Foundation::Diagnostics::ILoggingChannel ^sender, Platform::Object ^args)
+        GALoggerUWP^ GALoggerUWP::_instance;
+
+        GALoggerUWP::GALoggerUWP()
+        {
+            isPreparingForSuspend = false;
+            logFileGeneratedCount = 0;
+
+            // Create the logging channel.
+            // When an app logs messages to a channel, the messges will go 
+            // to any sessions which are consuming messages from the channel.
+#pragma warning(push)
+#pragma warning(disable : 4973)
+            channel = ref new Windows::Foundation::Diagnostics::LoggingChannel(DEFAULT_CHANNEL_NAME);
+#pragma warning(pop)
+
+            channel->LoggingEnabled += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::ILoggingChannel ^, Platform::Object ^>(this, &GALoggerUWP::OnChannelLoggingEnabled);
+
+            Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &GALoggerUWP::OnAppSuspending);
+            Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &GALoggerUWP::OnAppResuming);
+
+            // If the app is being launched (not resumed), the 
+            // following call will activate logging if it had been 
+            // active at the time of the last suspend. 
+            ResumeLoggingIfApplicable();
+        }
+
+        GALoggerUWP::~GALoggerUWP()
+        {
+        }
+
+        void GALoggerUWP::Touch()
+        {
+            // Don't do anything just touch the class to create it
+        }
+
+        void GALoggerUWP::OnChannelLoggingEnabled(Windows::Foundation::Diagnostics::ILoggingChannel ^sender, Platform::Object ^args)
         {
             // This method is called when the channel is informing us of channel-related state changes.
             // Save new channel state. These values can be used for advanced logging scenarios where, 
@@ -246,7 +246,7 @@ namespace gameanalytics
             channelLoggingLevel = sender->Level;
         }
 
-        void GALogger::OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e)
+        void GALoggerUWP::OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e)
         {
             (void)sender;    // Unused parameter
 
@@ -262,7 +262,7 @@ namespace gameanalytics
             });
         }
 
-        void GALogger::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)
+        void GALoggerUWP::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)
         {
             // If logging was active at the last suspend,
             // ResumeLoggingIfApplicable will re-activate 
@@ -270,7 +270,7 @@ namespace gameanalytics
             ResumeLoggingIfApplicable();
         }
 
-        concurrency::task<void> GALogger::PrepareToSuspendAsync()
+        concurrency::task<void> GALoggerUWP::PrepareToSuspendAsync()
         {
             if (session != nullptr)
             {
@@ -309,7 +309,7 @@ namespace gameanalytics
             }
         }
 
-        void GALogger::OnLogFileGenerated(Windows::Foundation::Diagnostics::IFileLoggingSession^ sender, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs^ args)
+        void GALoggerUWP::OnLogFileGenerated(Windows::Foundation::Diagnostics::IFileLoggingSession^ sender, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs^ args)
         {
             InterlockedIncrement(&logFileGeneratedCount);
 
@@ -349,7 +349,7 @@ namespace gameanalytics
                 });
         }
 
-        concurrency::task<Windows::Storage::StorageFile^> GALogger::CloseSessionSaveFinalLogFile()
+        concurrency::task<Windows::Storage::StorageFile^> GALoggerUWP::CloseSessionSaveFinalLogFile()
         {
             // ContinuationData allows information to be
             // shared across the below async operations.
@@ -394,7 +394,7 @@ namespace gameanalytics
                 });
         }
 
-        void GALogger::ResumeLoggingIfApplicable()
+        void GALoggerUWP::ResumeLoggingIfApplicable()
         {
             bool loggingEnabled;
             if (IsAppLocalSettingsValue(LOGGING_ENABLED_SETTING_KEY_NAME))
@@ -426,7 +426,7 @@ namespace gameanalytics
             }
         }
 
-        void GALogger::StartLogging()
+        void GALoggerUWP::StartLogging()
         {
             // If no session exists, create one.
             // NOTE: There are use cases where an application
@@ -440,7 +440,7 @@ namespace gameanalytics
             if (session == nullptr)
             {
                 session = ref new Windows::Foundation::Diagnostics::FileLoggingSession(DEFAULT_SESSION_NAME);
-                session->LogFileGenerated += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::IFileLoggingSession ^, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs ^>(this, &GALogger::OnLogFileGenerated);
+                session->LogFileGenerated += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::IFileLoggingSession ^, Windows::Foundation::Diagnostics::LogFileGeneratedEventArgs ^>(this, &GALoggerUWP::OnLogFileGenerated);
             }
 
             session->AddLoggingChannel(channel, Windows::Foundation::Diagnostics::LoggingLevel::Verbose);

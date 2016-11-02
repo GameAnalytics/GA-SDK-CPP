@@ -42,16 +42,16 @@ namespace gameanalytics
 
         EGAHTTPApiResponse GAHTTPApi::requestInitReturningDict(Json::Value& dict)
         {
-            STRING_TYPE gameKey = state::GAState::getGameKey();
+            std::string gameKey = state::GAState::getGameKey();
 
             // Generate URL
-            STRING_TYPE url = baseUrl + "/" + gameKey + "/" + initializeUrlPath;
+            std::string url = baseUrl + "/" + gameKey + "/" + initializeUrlPath;
             logging::GALogger::d("Sending 'init' URL: " + url);
 
             Json::Value initAnnotations = state::GAState::getInitAnnotations();
 
             // make JSON string from data
-            STRING_TYPE JSONstring = utilities::GAUtilities::jsonToString(initAnnotations);
+            std::string JSONstring = utilities::GAUtilities::jsonToString(initAnnotations);
 
             if (JSONstring.empty()) 
             {
@@ -59,12 +59,12 @@ namespace gameanalytics
                 return JsonEncodeFailed;
             }
 
-            STRING_TYPE payloadData = createPayloadData(JSONstring, useGzip);
+            std::string payloadData = createPayloadData(JSONstring, useGzip);
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
             curl::curl_header header;
-            STRING_TYPE authorization = createRequest(curl, header, url, payloadData, useGzip);
+            std::string authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
             {
@@ -75,7 +75,7 @@ namespace gameanalytics
                 error.print_traceback();
             }
             
-            STRING_TYPE body = os.str();
+            std::string body = os.str();
             // process the response
             logging::GALogger::d("init request content : " + body);
 
@@ -144,12 +144,12 @@ namespace gameanalytics
                 return JsonEncodeFailed;
             }
 
-            STRING_TYPE payloadData = createPayloadData(JSONstring, useGzip);
+            std::string payloadData = createPayloadData(JSONstring, useGzip);
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
             curl::curl_header header;
-            STRING_TYPE  authorization = createRequest(curl, header, url, payloadData, useGzip);
+            std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
             {
@@ -160,7 +160,7 @@ namespace gameanalytics
                 error.print_traceback();
             }
             
-            STRING_TYPE body = os.str();
+            std::string body = os.str();
             logging::GALogger::d("body: " + body);
 
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Events");
@@ -195,8 +195,8 @@ namespace gameanalytics
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
         {
-            STRING_TYPE gameKey = state::GAState::getGameKey();
-            STRING_TYPE secretKey = state::GAState::getGameSecret();
+            std::string gameKey = state::GAState::getGameKey();
+            std::string secretKey = state::GAState::getGameSecret();
 
             // Validate
             if (!validators::GAValidator::validateSdkErrorEvent(gameKey, secretKey, type))
@@ -205,17 +205,17 @@ namespace gameanalytics
             }
 
             // Generate URL
-            STRING_TYPE url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
+            std::string url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
             logging::GALogger::d("Sending 'events' URL: " + url);
 
             Json::Value json = state::GAState::getSdkErrorEventAnnotations();
 
-            STRING_TYPE typeString = sdkErrorTypeToString(type);
+            std::string typeString = sdkErrorTypeToString(type);
             json["type"] = typeString;
 
             std::vector<Json::Value> eventArray;
             eventArray.push_back(json);
-            STRING_TYPE payloadJSONString = utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
+            std::string payloadJSONString = utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
 
             if(payloadJSONString.empty())
             {
@@ -230,9 +230,9 @@ namespace gameanalytics
             sdkErrorTask.Execute(url);*/
         }
 
-        const STRING_TYPE GAHTTPApi::createPayloadData(const STRING_TYPE& payload, bool gzip)
+        const std::string GAHTTPApi::createPayloadData(const std::string& payload, bool gzip)
         {
-            STRING_TYPE payloadData;
+            std::string payloadData;
             
             if (gzip)
             {
@@ -247,7 +247,7 @@ namespace gameanalytics
             return payloadData;
         }
 
-        const STRING_TYPE GAHTTPApi::sdkErrorTypeToString(EGASdkErrorType value)
+        const std::string GAHTTPApi::sdkErrorTypeToString(EGASdkErrorType value)
         {
             switch (value) {
             case Rejected:
@@ -258,20 +258,20 @@ namespace gameanalytics
             return{};
         }
 
-        const STRING_TYPE GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const STRING_TYPE& url, const STRING_TYPE& payloadData, bool gzip)
+        const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip)
         {
             curl.add<CURLOPT_URL>(url.c_str());
 
             if (gzip)
             {
-                header.add(STRING_TYPE("Content-Encoding: gzip"));
+                header.add(std::string("Content-Encoding: gzip"));
             }
 
             // create authorization hash
-            STRING_TYPE key = state::GAState::getGameSecret();
+            std::string key = state::GAState::getGameSecret();
 
-            STRING_TYPE authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
-            header.add(STRING_TYPE("Authorization: " + authorization));
+            std::string authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
+            header.add(std::string("Authorization: " + authorization));
 
             // always JSON
             header.add("Content-Type: application/json");
@@ -284,7 +284,7 @@ namespace gameanalytics
             return authorization;
         }
 
-        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const STRING_TYPE& body, const STRING_TYPE& requestId)
+        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId)
         {
             long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
 

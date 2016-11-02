@@ -10,7 +10,6 @@
 #include <vector>
 #include <json/json.h>
 #include "Foundation/GASingleton.h"
-#include "defines.h"
 
 namespace gameanalytics
 {
@@ -25,13 +24,13 @@ namespace gameanalytics
 
             static bool ensureDatabase(bool dropDatabase);
 
-            static void setState(const STRING_TYPE& key, const STRING_TYPE& value);
+            static void setState(const std::string& key, const std::string& value);
 
-            static Json::Value executeQuerySync(const STRING_TYPE& sql);
+            static Json::Value executeQuerySync(const std::string& sql);
 
-            static Json::Value executeQuerySync(const STRING_TYPE& sql, const std::vector<STRING_TYPE>& parameters);
+            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
 
-            static Json::Value executeQuerySync(const STRING_TYPE& sql, const std::vector<STRING_TYPE>& parameters, bool useTransaction);
+            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
 
             static long long getDbSizeBytes();
 
@@ -44,7 +43,7 @@ namespace gameanalytics
 
             // set when calling "ensureDatabase"
             // using a "writablePath" that needs to be set into the C++ component before
-            STRING_TYPE dbPath;
+            std::string dbPath;
 
             // local pointer to database
             sqlite3* sqlDatabase = nullptr;

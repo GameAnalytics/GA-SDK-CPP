@@ -5,14 +5,12 @@
 
 #pragma once
 
-#define BOOST_NETWORK_ENABLE_HTTPS
 #include "curl_easy.h"
 #include "curl_header.h"
 #include <vector>
 #include <string>
 #include "Foundation/GASingleton.h"
 #include <json/json.h>
-#include "defines.h"
 
 namespace gameanalytics
 {
@@ -54,19 +52,19 @@ namespace gameanalytics
             EGAHTTPApiResponse requestInitReturningDict(Json::Value& dict);
             EGAHTTPApiResponse sendEventsInArray(const std::vector<Json::Value>& eventArray, Json::Value& dict);
             void sendSdkErrorEvent(EGASdkErrorType type);
-            static const STRING_TYPE sdkErrorTypeToString(EGASdkErrorType value);
+            static const std::string sdkErrorTypeToString(EGASdkErrorType value);
 
          private:
-            const STRING_TYPE createPayloadData(const STRING_TYPE& payload, bool gzip);
-            const STRING_TYPE createRequest(curl::curl_easy& curl, curl::curl_header& header, const STRING_TYPE& url, const STRING_TYPE& payloadData, bool gzip);
-            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const STRING_TYPE& body, const STRING_TYPE& requestId);
+            const std::string createPayloadData(const std::string& payload, bool gzip);
+            const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
 
-            STRING_TYPE protocol;
-            STRING_TYPE hostName;
-            STRING_TYPE version;
-            STRING_TYPE baseUrl;
-            STRING_TYPE initializeUrlPath;
-            STRING_TYPE eventsUrlPath;
+            std::string protocol;
+            std::string hostName;
+            std::string version;
+            std::string baseUrl;
+            std::string initializeUrlPath;
+            std::string eventsUrlPath;
             bool useGzip;
         };
     }

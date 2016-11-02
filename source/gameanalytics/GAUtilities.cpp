@@ -9,9 +9,11 @@
 #include "GALogger.h"
 #include <algorithm>
 #include <regex>
+#if !USE_UWP
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#endif
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -23,7 +25,7 @@ namespace gameanalytics
     {
         // Compress a STL string using zlib with given compression level and return the binary data.
         // Note: the zlib header is supressed
-        static STRING_TYPE deflate_string(const STRING_TYPE& str,
+        static std::string deflate_string(const std::string& str,
             int compressionlevel = Z_BEST_COMPRESSION)
         {
             // z_stream is zlib's control structure
@@ -43,7 +45,7 @@ namespace gameanalytics
             zs.avail_in = str.size();
             int ret;
             static char outbuffer[32768];
-            STRING_TYPE outstring;
+            std::string outstring;
 
             // retrieve the compressed bytes blockwise
             do
@@ -190,12 +192,12 @@ namespace gameanalytics
 
 
         // gzip compresses a string
-        static STRING_TYPE compress_string_gzip(const STRING_TYPE& str,
+        static std::string compress_string_gzip(const std::string& str,
             int compressionlevel = Z_BEST_COMPRESSION)
         {
             // https://tools.ietf.org/html/rfc1952
-            STRING_TYPEstream ss;
-            STRING_TYPE deflated = deflate_string(str, compressionlevel);
+            std::stringstream ss;
+            std::string deflated = deflate_string(str, compressionlevel);
 
             static const char gzip_header[10] =
             { '\037', '\213', Z_DEFLATED, 0,
@@ -216,14 +218,32 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::generateUUID()
+        std::string GAUtilities::generateUUID()
         {
+#if USE_UWP
+            GUID result;
+            HRESULT hr = CoCreateGuid(&result);
+
+            if (SUCCEEDED(hr))
+            {
+                // Generate new GUID.
+                Platform::Guid guid(result);
+                auto guidString = std::wstring(guid.ToString()->Data());
+
+                // Remove curly brackets.
+                auto sessionId = guidString.substr(1, guidString.length() - 2);
+                return ws2s(sessionId);
+            }
+
+            throw Platform::Exception::CreateException(hr);
+#else
             boost::uuids::uuid uuid = boost::uuids::random_generator()();
-            return boost::lexical_cast<STRING_TYPE>(uuid);
+            return boost::lexical_cast<std::string>(uuid);
+#endif
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::hmacWithKey(const STRING_TYPE& key, const STRING_TYPE& data)
+        std::string GAUtilities::hmacWithKey(const std::string& key, const std::string& data)
         {
             unsigned char mac[SHA256_DIGEST_SIZE];
             hmac_sha256(
@@ -245,7 +265,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        bool GAUtilities::stringMatch(const STRING_TYPE& string, const STRING_TYPE& pattern)
+        bool GAUtilities::stringMatch(const std::string& string, const std::string& pattern)
         {
             try
             {
@@ -264,21 +284,21 @@ namespace gameanalytics
             }
         }
 
-        STRING_TYPE GAUtilities::gzipCompress(const STRING_TYPE& data)
+        std::string GAUtilities::gzipCompress(const std::string& data)
         {
             return compress_string_gzip(data);
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::jsonToString(const Json::Value& obj)
+        std::string GAUtilities::jsonToString(const Json::Value& obj)
         {
             Json::FastWriter writer;
-            STRING_TYPE output = writer.write(obj);
+            std::string output = writer.write(obj);
             return output;
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr)
+        std::string GAUtilities::arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr)
         {
             Json::Value json_array(Json::arrayValue);
             for (const auto& x : arr)
@@ -289,7 +309,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        Json::Value GAUtilities::jsonFromString(const STRING_TYPE& string)
+        Json::Value GAUtilities::jsonFromString(const std::string& string)
         {
             Json::Reader reader;
             Json::Value parsingResult;
@@ -302,13 +322,13 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        bool GAUtilities::stringVectorContainsString(std::vector<STRING_TYPE> vector, STRING_TYPE search)
+        bool GAUtilities::stringVectorContainsString(std::vector<std::string> vector, std::string search)
         {
             if (vector.size() == 0) {
                 return false;
             }
 
-            std::vector<STRING_TYPE>::iterator it = std::find(vector.begin(), vector.end(), search);
+            std::vector<std::string>::iterator it = std::find(vector.begin(), vector.end(), search);
             return it != vector.end();
         }
 
@@ -319,7 +339,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::uppercaseString(STRING_TYPE s)
+        std::string GAUtilities::uppercaseString(std::string s)
         {
             std::transform(s.begin(), s.end(), s.begin(), toupper);
             return s;
@@ -327,17 +347,17 @@ namespace gameanalytics
 
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::lowercaseString(STRING_TYPE s)
+        std::string GAUtilities::lowercaseString(std::string s)
         {
             std::transform(s.begin(), s.end(), s.begin(), tolower);
             return s;
         }
 
         // TODO(nikolaj): explain function
-        STRING_TYPE GAUtilities::joinStringArray(const std::vector<STRING_TYPE>& v, const STRING_TYPE& delimiter)
+        std::string GAUtilities::joinStringArray(const std::vector<std::string>& v, const std::string& delimiter)
         {
-            STRING_TYPEstream s;
-            copy(v.begin(), v.end(), std::ostream_iterator<STRING_TYPE>(s, delimiter.c_str()));
+            std::stringstream s;
+            copy(v.begin(), v.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
             return s.str();
         }
     }

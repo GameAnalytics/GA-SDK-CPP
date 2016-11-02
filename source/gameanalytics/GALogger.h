@@ -8,7 +8,6 @@
 #include <Foundation/GASingleton.h>
 #include <string>
 #include <ppltasks.h>
-#include "defines.h"
 
 namespace gameanalytics
 {
@@ -89,41 +88,41 @@ namespace gameanalytics
 
         delegate void StatusChangedHandler(Platform::Object^ sender, GALoggerEventArgs^ args);
 
-        ref class GALogger sealed
-#else
-        class GALogger : public GASingleton<GALogger>
-#endif
+        ref class GALoggerUWP sealed
         {
-#if USE_UWP
-         internal:
-#else
-         public:
-#endif
-            GALogger();
+        internal:
 
-            // set debug enabled (client)
-            static void setInfoLog(bool enabled);
-            static void setVerboseInfoLog(bool enabled);
-#if !USE_UWP
-            static void addFileLog(const STRING_TYPE& path);
-#endif
+            concurrency::task<void> PrepareToSuspendAsync();
+            void ResumeLoggingIfApplicable();
+            void StartLogging();
+            event StatusChangedHandler^ StatusChanged;
 
-            // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
-            static void  w(const STRING_TYPE& format);//const char* format, ...);
-            static void  e(const STRING_TYPE& format);//const char* format, ...);
-            static void  d(const STRING_TYPE& format);//const char* format, ...);
-            static void  i(const STRING_TYPE& format);//const char* format, ...);
-            static void ii(const STRING_TYPE& format);//const char* format, ...);
+            static property GALoggerUWP^ Instance
+            {
+                GALoggerUWP^ get()
+                {
+                    if (_instance == nullptr)
+                    {
+                        _instance = ref new GALoggerUWP();
+                    }
+                    return _instance;
+                }
+            }
 
-            void sendNotificationMessage(const STRING_TYPE& message, EGALoggerMessageType type);
+            property Windows::Foundation::Diagnostics::LoggingChannel^ Channel
+            {
+                Windows::Foundation::Diagnostics::LoggingChannel^ get()
+                {
+                    return channel;
+                }
+            }
 
-         private:
-            // Settings
-            bool infoLogEnabled;
-            bool infoLogVerboseEnabled;
-            bool debugEnabled;
-            static const STRING_TYPE tag;
-#if USE_UWP
+            void Touch();
+
+        private:
+            GALoggerUWP();
+            ~GALoggerUWP();
+
             void OnChannelLoggingEnabled(Windows::Foundation::Diagnostics::ILoggingChannel ^sender, Platform::Object ^args);
             void OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e);
             void OnAppResuming(Platform::Object ^sender, Platform::Object ^args);
@@ -136,17 +135,7 @@ namespace gameanalytics
             bool isChannelEnabled;
             Windows::Foundation::Diagnostics::LoggingLevel channelLoggingLevel;
             long logFileGeneratedCount;
-
-            static GALogger^ instance;
-
-            static GALogger^ sharedInstance()
-            {
-                if (instance == nullptr)
-                {
-                    instance = ref new GALogger();
-                }
-                return instance;
-            }
+            static GALoggerUWP^ _instance;
 
             static void SetAppLocalSettingsValue(Platform::String^ key, Platform::Object^ value)
             {
@@ -198,13 +187,36 @@ namespace gameanalytics
                     timeNow.wMilliseconds);
                 return result;
             }
+        };
 
-        internal:
-            concurrency::task<void> PrepareToSuspendAsync();
-            void ResumeLoggingIfApplicable();
-            void StartLogging();
-            event StatusChangedHandler^ StatusChanged;
 #endif
+        class GALogger : public GASingleton<GALogger>
+        {
+         public:
+            GALogger();
+
+            // set debug enabled (client)
+            static void setInfoLog(bool enabled);
+            static void setVerboseInfoLog(bool enabled);
+#if !USE_UWP
+            static void addFileLog(const std::string& path);
+#endif
+
+            // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
+            static void  w(const std::string& format);//const char* format, ...);
+            static void  e(const std::string& format);//const char* format, ...);
+            static void  d(const std::string& format);//const char* format, ...);
+            static void  i(const std::string& format);//const char* format, ...);
+            static void ii(const std::string& format);//const char* format, ...);
+
+            void sendNotificationMessage(const std::string& message, EGALoggerMessageType type);
+
+         private:
+            // Settings
+            bool infoLogEnabled;
+            bool infoLogVerboseEnabled;
+            bool debugEnabled;
+            static const std::string tag;
         };
     }
 }

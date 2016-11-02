@@ -17,19 +17,19 @@ namespace gameanalytics
 {
     namespace state
     {
-        const STRING_TYPE GAState::CategorySdkError = "sdk_error";
+        const std::string GAState::CategorySdkError = "sdk_error";
 
         GAState::GAState()
         {
         }
 
-        void GAState::setUserId(const STRING_TYPE& id)
+        void GAState::setUserId(const std::string& id)
         {
             sharedInstance()->_userId = id;
             cacheIdentifier();
         }
 
-        const STRING_TYPE GAState::getIdentifier()
+        const std::string GAState::getIdentifier()
         {
             return GAState::sharedInstance()->_identifier;
         }
@@ -54,27 +54,27 @@ namespace gameanalytics
             return GAState::sharedInstance()->_transactionNum;
         }
 
-        const STRING_TYPE GAState::getSessionId()
+        const std::string GAState::getSessionId()
         {
             return sharedInstance()->_sessionId;
         }
 
-        const STRING_TYPE GAState::getCurrentCustomDimension01()
+        const std::string GAState::getCurrentCustomDimension01()
         {
             return GAState::sharedInstance()->_currentCustomDimension01;
         }
 
-        const STRING_TYPE GAState::getCurrentCustomDimension02()
+        const std::string GAState::getCurrentCustomDimension02()
         {
             return GAState::sharedInstance()->_currentCustomDimension02;
         }
 
-        const STRING_TYPE GAState::getCurrentCustomDimension03()
+        const std::string GAState::getCurrentCustomDimension03()
         {
             return GAState::sharedInstance()->_currentCustomDimension03;
         }
 
-        void GAState::setAvailableCustomDimensions01(const std::vector<STRING_TYPE>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions01(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
@@ -89,7 +89,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableCustomDimensions02(const std::vector<STRING_TYPE>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions02(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
@@ -104,7 +104,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableCustomDimensions03(const std::vector<STRING_TYPE>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions03(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
@@ -119,7 +119,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableResourceCurrencies(const std::vector<STRING_TYPE>& availableResourceCurrencies)
+        void GAState::setAvailableResourceCurrencies(const std::vector<std::string>& availableResourceCurrencies)
         {
             // Validate
             if (!validators::GAValidator::validateResourceCurrencies(availableResourceCurrencies)) {
@@ -130,7 +130,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available resource currencies: (" + utilities::GAUtilities::joinStringArray(availableResourceCurrencies) + ")");
         }
 
-        void GAState::setAvailableResourceItemTypes(const std::vector<STRING_TYPE>& availableResourceItemTypes)
+        void GAState::setAvailableResourceItemTypes(const std::vector<std::string>& availableResourceItemTypes)
         {
             // Validate
             if (!validators::GAValidator::validateResourceItemTypes(availableResourceItemTypes)) {
@@ -141,14 +141,14 @@ namespace gameanalytics
             logging::GALogger::i("Set available resource item types: (" + utilities::GAUtilities::joinStringArray(availableResourceItemTypes) + ")");
         }
 
-        void GAState::setBuild(const STRING_TYPE& build)
+        void GAState::setBuild(const std::string& build)
         {
             sharedInstance()->_build = build;
 
             logging::GALogger::i("Set build: " + build);
         }
 
-        void GAState::setDefaultUserId(const STRING_TYPE& id)
+        void GAState::setDefaultUserId(const std::string& id)
         {
             sharedInstance()->_defaultUserId = id;
             cacheIdentifier();
@@ -186,28 +186,28 @@ namespace gameanalytics
             }
         }
 
-        void GAState::setCustomDimension01(const STRING_TYPE& dimension)
+        void GAState::setCustomDimension01(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension01 = dimension;
             store::GAStore::setState("dimension01", dimension);
             logging::GALogger::i("Set custom01 dimension value: " + dimension);
         }
 
-        void GAState::setCustomDimension02(const STRING_TYPE& dimension)
+        void GAState::setCustomDimension02(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension02 = dimension;
             store::GAStore::setState("dimension02", dimension);
             logging::GALogger::i("Set custom02 dimension value: " + dimension);
         }
 
-        void GAState::setCustomDimension03(const STRING_TYPE& dimension)
+        void GAState::setCustomDimension03(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension03 = dimension;
             store::GAStore::setState("dimension03", dimension);
             logging::GALogger::i("Set custom03 dimension value: " + dimension);
         }
 
-        void GAState::setFacebookId(const STRING_TYPE& facebookId)
+        void GAState::setFacebookId(const std::string& facebookId)
         {
             sharedInstance()->_facebookId = facebookId;
             store::GAStore::setState("facebook_id", facebookId);
@@ -246,19 +246,19 @@ namespace gameanalytics
             GAState::sharedInstance()->_transactionNum = transactionNumInt;
         }
 
-        void GAState::incrementProgressionTries(const STRING_TYPE& progression)
+        void GAState::incrementProgressionTries(const std::string& progression)
         {
             auto tries = static_cast<int>(getProgressionTries(progression) + 1);
             GAState::sharedInstance()->_progressionTries[progression] = tries;
 
             // Persist
-            std::vector<STRING_TYPE> parms;
+            std::vector<std::string> parms;
             parms.push_back(progression);
             parms.push_back(std::to_string(tries));
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms);
         }
 
-        int GAState::getProgressionTries(const STRING_TYPE& progression)
+        int GAState::getProgressionTries(const std::string& progression)
         {
             if (sharedInstance()->_progressionTries.find(progression) != sharedInstance()->_progressionTries.end())
             {
@@ -270,7 +270,7 @@ namespace gameanalytics
             }
         }
 
-        void GAState::clearProgressionTries(const STRING_TYPE& progression)
+        void GAState::clearProgressionTries(const std::string& progression)
         {
             auto progressionTries = GAState::sharedInstance()->_progressionTries;
             auto searchResult = progressionTries.find(progression);
@@ -280,48 +280,48 @@ namespace gameanalytics
             }
 
             // Delete
-            std::vector<STRING_TYPE> parms;
+            std::vector<std::string> parms;
             parms.push_back(progression);
             store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms);
         }
 
-        bool GAState::hasAvailableCustomDimensions01(const STRING_TYPE& dimension1)
+        bool GAState::hasAvailableCustomDimensions01(const std::string& dimension1)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions01, dimension1);
         }
 
-        bool GAState::hasAvailableCustomDimensions02(const STRING_TYPE& dimension2)
+        bool GAState::hasAvailableCustomDimensions02(const std::string& dimension2)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions02, dimension2);
         }
 
-        bool GAState::hasAvailableCustomDimensions03(const STRING_TYPE& dimension3)
+        bool GAState::hasAvailableCustomDimensions03(const std::string& dimension3)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions03, dimension3);
         }
 
-        bool GAState::hasAvailableResourceCurrency(const STRING_TYPE& currency)
+        bool GAState::hasAvailableResourceCurrency(const std::string& currency)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceCurrencies, currency);
         }
 
-        bool GAState::hasAvailableResourceItemType(const STRING_TYPE& itemType)
+        bool GAState::hasAvailableResourceItemType(const std::string& itemType)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceItemTypes, itemType);
         }
 
-        void GAState::setKeys(const STRING_TYPE& gameKey, const STRING_TYPE& gameSecret)
+        void GAState::setKeys(const std::string& gameKey, const std::string& gameSecret)
         {
             GAState::sharedInstance()->_gameKey = gameKey;
             GAState::sharedInstance()->_gameSecret = gameSecret;
         }
 
-        const STRING_TYPE GAState::getGameKey()
+        const std::string GAState::getGameKey()
         {
             return sharedInstance()->_gameKey;
         }
 
-        const STRING_TYPE GAState::getGameSecret()
+        const std::string GAState::getGameSecret()
         {
             return sharedInstance()->_gameSecret;
         }
@@ -404,7 +404,7 @@ namespace gameanalytics
             annotations["session_num"] = getSessionNum();
 
             // type of connection the user is currently on (add if valid)
-            STRING_TYPE connection_type = device::GADevice::getConnectionType();
+            std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type)) 
             {
                 annotations["connection_type"] = connection_type;
@@ -467,7 +467,7 @@ namespace gameanalytics
             annotations["platform"] = device::GADevice::getBuildPlatform();
 
             // type of connection the user is currently on (add if valid)
-            STRING_TYPE connection_type = device::GADevice::getConnectionType();
+            std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
                 annotations["connection_type"] = connection_type;
@@ -523,7 +523,7 @@ namespace gameanalytics
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 			
-			STRING_TYPE defaultId = state_dict.get("default_user_id", "").asString();
+			std::string defaultId = state_dict.get("default_user_id", "").asString();
 			if(defaultId.empty())
 			{
 				instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
@@ -570,7 +570,7 @@ namespace gameanalytics
             }
 
             // get cached init call values
-            STRING_TYPE sdkConfigCachedString = state_dict.get("sdk_config_cached", "").asString();
+            std::string sdkConfigCachedString = state_dict.get("sdk_config_cached", "").asString();
             if (!sdkConfigCachedString.empty()) {
                 // decode JSON
                 Json::Value sdkConfigCached = utilities::GAUtilities::jsonFromString(sdkConfigCachedString);
@@ -683,8 +683,8 @@ namespace gameanalytics
             }
 
             // generate the new session
-            STRING_TYPE newSessionId = utilities::GAUtilities::generateUUID();
-            STRING_TYPE newSessionIdLowercase = utilities::GAUtilities::lowercaseString(newSessionId);
+            std::string newSessionId = utilities::GAUtilities::generateUUID();
+            std::string newSessionIdLowercase = utilities::GAUtilities::lowercaseString(newSessionId);
 
             // Set session id
             GAState::sharedInstance()->_sessionId = newSessionIdLowercase;
@@ -738,17 +738,17 @@ namespace gameanalytics
             }
         }
 
-        const STRING_TYPE GAState::getBuild()
+        const std::string GAState::getBuild()
         {
             return GAState::sharedInstance()->_build;
         }
 
-        const STRING_TYPE GAState::getFacebookId()
+        const std::string GAState::getFacebookId()
         {
             return sharedInstance()->_facebookId;
         }
 
-        const STRING_TYPE GAState::getGender()
+        const std::string GAState::getGender()
         {
             return sharedInstance()->_gender;
         }
@@ -815,12 +815,12 @@ namespace gameanalytics
             GAEvents::ensureEventQueueIsRunning();
         }
 
-        STRING_TYPE GAState::getUserId()
+        std::string GAState::getUserId()
         {
             return sharedInstance()->userId;
         }
 
-        STRING_TYPE GAState::getProgression()
+        std::string GAState::getProgression()
         {
             return sharedInstance()->progression;
         }*/

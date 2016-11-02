@@ -8,7 +8,10 @@
 #include <vector>
 #include <string>
 #include <json/json.h>
-#include "defines.h"
+#if USE_UWP
+#include <locale>
+#include <codecvt>
+#endif
 
 namespace gameanalytics
 {
@@ -17,26 +20,38 @@ namespace gameanalytics
         class GAUtilities
         {
          public:
-            static STRING_TYPE generateUUID();
-            static STRING_TYPE hmacWithKey(const STRING_TYPE& key, const STRING_TYPE& data);
-            static STRING_TYPE jsonToString(const Json::Value& obj);
-            static STRING_TYPE arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr);
-            static Json::Value jsonFromString(const STRING_TYPE& string);
-            static bool stringMatch(const STRING_TYPE& string, const STRING_TYPE& pattern);
-            static STRING_TYPE gzipCompress(const STRING_TYPE& data);
+            static std::string generateUUID();
+            static std::string hmacWithKey(const std::string& key, const std::string& data);
+            static std::string jsonToString(const Json::Value& obj);
+            static std::string arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr);
+            static Json::Value jsonFromString(const std::string& string);
+            static bool stringMatch(const std::string& string, const std::string& pattern);
+            static std::string gzipCompress(const std::string& data);
 
             // added for C++ port
-            static STRING_TYPE uppercaseString(STRING_TYPE s);
-            static STRING_TYPE lowercaseString(STRING_TYPE s);
-            static bool stringVectorContainsString(std::vector<STRING_TYPE> vector, STRING_TYPE search);
+            static std::string uppercaseString(std::string s);
+            static std::string lowercaseString(std::string s);
+            static bool stringVectorContainsString(std::vector<std::string> vector, std::string search);
             static Json::Int64 timeIntervalSince1970();
-            static STRING_TYPE joinStringArray(const std::vector<STRING_TYPE>& v, const STRING_TYPE& delimiter = TEXT(", "));
+            static std::string joinStringArray(const std::vector<std::string>& v, const std::string& delimiter = ", ");
             static int base64_needed_encoded_length(int length_of_data);
             static void base64_encode(const unsigned char * src, int src_len, unsigned char *buf_);
 
+#if USE_UWP
+            inline static std::string ws2s(const std::wstring wstr)
+            {
+                return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+            }
+
+            inline static std::wstring s2ws(const std::string str)
+            {
+                return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+            }
+#endif
+
             // tries to convert s into T
             template <typename T>
-            static T parseString(const STRING_TYPE& s)
+            static T parseString(const std::string& s)
             {
                 std::istringstream i(s);
                 T parsed_value;
