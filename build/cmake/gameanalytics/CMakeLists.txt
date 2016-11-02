@@ -48,22 +48,39 @@ endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "u
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
-# traverse all the subdirectories of the matched directory
-FILE(GLOB_RECURSE CPP_SOURCES
-    # Add GameAnalytics Sources
-    "${GA_SOURCE_DIR}/*.cpp"
-    "${GA_SOURCE_DIR}/*.h"
+if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+    add_definitions("-DSQLITE_OS_WINRT")
+    
+    FILE(GLOB_RECURSE CPP_SOURCES
+        # Add GameAnalytics Sources
+        "${GA_SOURCE_DIR}/*.cpp"
+        "${GA_SOURCE_DIR}/*.h"
 
-    # Add dependencies
-    "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
-    "${DEPENDENCIES_DIR}/sqlite/*.c"
-    "${DEPENDENCIES_DIR}/sqlite/*.h"
-    "${DEPENDENCIES_DIR}/crypto/*.c"
-    "${DEPENDENCIES_DIR}/crypto/*.cpp"
-	"${DEPENDENCIES_DIR}/plog/*.h"
-	"${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-	"${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
-)
+        # Add dependencies
+        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/sqlite/*.c"
+        "${DEPENDENCIES_DIR}/sqlite/*.h"
+        "${DEPENDENCIES_DIR}/crypto/*.c"
+        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+    )
+else()
+    # traverse all the subdirectories of the matched directory
+    FILE(GLOB_RECURSE CPP_SOURCES
+        # Add GameAnalytics Sources
+        "${GA_SOURCE_DIR}/*.cpp"
+        "${GA_SOURCE_DIR}/*.h"
+
+        # Add dependencies
+        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/sqlite/*.c"
+        "${DEPENDENCIES_DIR}/sqlite/*.h"
+        "${DEPENDENCIES_DIR}/crypto/*.c"
+        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+        "${DEPENDENCIES_DIR}/plog/*.h"
+        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
+        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
+    )
+endif()
 
 add_definitions("-DCRYPTOPP_DISABLE_ASM")
 

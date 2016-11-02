@@ -411,8 +411,9 @@ namespace gameanalytics
             }
 
             // send events
-            Json::Value dataDict;
-            http::EGAHTTPApiResponse responseEnum = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray, dataDict);
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray).get();
+            Json::Value dataDict = pair.second;
+            http::EGAHTTPApiResponse responseEnum = pair.first;
 
             if (responseEnum == http::Ok) 
             {

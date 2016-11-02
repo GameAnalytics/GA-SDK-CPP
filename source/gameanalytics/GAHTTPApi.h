@@ -9,6 +9,7 @@
 #include <string>
 #include "Foundation/GASingleton.h"
 #include <json/json.h>
+#include <utility>
 #if USE_UWP
 #include <ppltasks.h>
 #else
@@ -53,8 +54,13 @@ namespace gameanalytics
         public:
             GAHTTPApi();
 
-            EGAHTTPApiResponse requestInitReturningDict(Json::Value& dict);
-            EGAHTTPApiResponse sendEventsInArray(const std::vector<Json::Value>& eventArray, Json::Value& dict);
+#if USE_UWP
+            concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> requestInitReturningDict();
+            concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> sendEventsInArray(const std::vector<Json::Value>& eventArray);
+#else
+            std::pair<EGAHTTPApiResponse, Json::Value> requestInitReturningDict();
+            std::pair<EGAHTTPApiResponse, Json::Value> sendEventsInArray(const std::vector<Json::Value>& eventArray);
+#endif
             void sendSdkErrorEvent(EGASdkErrorType type);
 
             static const std::string GAHTTPApi::sdkErrorTypeToString(EGASdkErrorType value)
@@ -73,6 +79,7 @@ namespace gameanalytics
 
 #if USE_UWP
             const std::string createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::string& payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
 #else
             const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
@@ -85,6 +92,11 @@ namespace gameanalytics
             std::string initializeUrlPath;
             std::string eventsUrlPath;
             bool useGzip;
+            static const int MaxCount;
+            static std::map<EGASdkErrorType, int> countMap;
+#if USE_UWP
+            Windows::Web::Http::HttpClient^ httpClient;
+#endif
         };
     }
 }

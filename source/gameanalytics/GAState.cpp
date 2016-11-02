@@ -12,6 +12,7 @@
 #include "GAThreading.h"
 #include "GALogger.h"
 #include "GADevice.h"
+#include <utility>
 
 namespace gameanalytics
 {
@@ -599,8 +600,9 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
-            Json::Value initResponseDict;
-            http::EGAHTTPApiResponse initResponse = httpApi->requestInitReturningDict(initResponseDict);
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict().get();
+            Json::Value initResponseDict = pair.second;
+            http::EGAHTTPApiResponse initResponse = pair.first;
 
             // init is ok
             if (initResponse == http::Ok && !initResponseDict.isNull()) {
