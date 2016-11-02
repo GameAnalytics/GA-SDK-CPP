@@ -3,6 +3,7 @@
 // Copyright 2015 GameAnalytics. All rights reserved.
 //
 
+#if !USE_UWP
 #include "GAHTTPApi.h"
 #include "GAState.h"
 #include "GALogger.h"
@@ -247,17 +248,6 @@ namespace gameanalytics
             return payloadData;
         }
 
-        const std::string GAHTTPApi::sdkErrorTypeToString(EGASdkErrorType value)
-        {
-            switch (value) {
-            case Rejected:
-                return "rejected";
-            default:
-                break;
-            }
-            return{};
-        }
-
         const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip)
         {
             curl.add<CURLOPT_URL>(url.c_str());
@@ -323,4 +313,5 @@ namespace gameanalytics
         }
     }
 }
+#endif
 

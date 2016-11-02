@@ -3,13 +3,13 @@
 // Copyright 2015 GameAnalytics. All rights reserved.
 //
 
-#include <hmac_sha2.h>
-#include <climits>
+//#include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <algorithm>
 #include <regex>
 #if !USE_UWP
+#include <hmac_sha2.h>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -116,6 +116,7 @@ namespace gameanalytics
             return v;
         }
 
+#if !USE_UWP
         static char nb_base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
@@ -189,7 +190,7 @@ namespace gameanalytics
             }
             *buf++ = '\0';
         }
-
+#endif
 
         // gzip compresses a string
         static std::string compress_string_gzip(const std::string& str,
@@ -245,6 +246,22 @@ namespace gameanalytics
         // TODO(nikolaj): explain function
         std::string GAUtilities::hmacWithKey(const std::string& key, const std::string& data)
         {
+#if USE_UWP
+            using namespace Platform;
+            using namespace Windows::Security::Cryptography::Core;
+            using namespace Windows::Security::Cryptography;
+
+            auto keyString = ref new String(utilities::GAUtilities::s2ws(key).c_str());
+            auto alg = MacAlgorithmProvider::OpenAlgorithm(MacAlgorithmNames::HmacSha256);
+            auto dataString = ref new String(utilities::GAUtilities::s2ws(data).c_str());
+            auto dataBuffer = CryptographicBuffer::ConvertStringToBinary(dataString, BinaryStringEncoding::Utf8);
+            auto secretKeyBuffer = CryptographicBuffer::ConvertStringToBinary(keyString, BinaryStringEncoding::Utf8);
+            auto hmacKey = alg->CreateKey(secretKeyBuffer);
+
+            auto hashedJsonBuffer = CryptographicEngine::Sign(hmacKey, dataBuffer);
+            auto hashedJsonBase64 = CryptographicBuffer::EncodeToBase64String(hashedJsonBuffer);
+            return utilities::GAUtilities::ws2s(hashedJsonBase64->Data());
+#else
             unsigned char mac[SHA256_DIGEST_SIZE];
             hmac_sha256(
                 (unsigned char*)key.data(),
@@ -262,6 +279,7 @@ namespace gameanalytics
                 (char*)ret.data(),
                 (char*)ret.data()+ret.size()
             };
+#endif
         }
 
         // TODO(nikolaj): explain function
