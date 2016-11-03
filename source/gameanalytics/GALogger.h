@@ -117,7 +117,14 @@ namespace gameanalytics
                 }
             }
 
-            void Touch();
+            static void SetAppLocalSettingsValue(Platform::String^ key, Platform::Object^ value)
+            {
+                if (Windows::Storage::ApplicationData::Current->LocalSettings->Values->HasKey(key))
+                {
+                    Windows::Storage::ApplicationData::Current->LocalSettings->Values->Remove(key);
+                }
+                Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert(key, value);
+            }
 
         private:
             GALoggerUWP();
@@ -136,15 +143,6 @@ namespace gameanalytics
             Windows::Foundation::Diagnostics::LoggingLevel channelLoggingLevel;
             long logFileGeneratedCount;
             static GALoggerUWP^ _instance;
-
-            static void SetAppLocalSettingsValue(Platform::String^ key, Platform::Object^ value)
-            {
-                if (Windows::Storage::ApplicationData::Current->LocalSettings->Values->HasKey(key))
-                {
-                    Windows::Storage::ApplicationData::Current->LocalSettings->Values->Remove(key);
-                }
-                Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert(key, value);
-            }
 
             static bool IsAppLocalSettingsValue(Platform::String^ key)
             {

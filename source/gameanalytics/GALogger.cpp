@@ -36,7 +36,8 @@ namespace gameanalytics
 		#endif
 
 #if USE_UWP
-            GALoggerUWP::Instance->Touch();
+            GALoggerUWP::Instance->StartLogging();
+            GALoggerUWP::Instance->SetAppLocalSettingsValue(LOGGING_ENABLED_SETTING_KEY_NAME, true);
 #endif
 		}
 
@@ -53,8 +54,6 @@ namespace gameanalytics
 #if !USE_UWP
 		void GALogger::addFileLog(const std::string& path)
 		{
-            
-
             GALogger *ga = GALogger::sharedInstance();
 			boost::filesystem::path p(path);
             p /= "ga_log.txt";
@@ -218,10 +217,7 @@ namespace gameanalytics
             // Create the logging channel.
             // When an app logs messages to a channel, the messges will go 
             // to any sessions which are consuming messages from the channel.
-#pragma warning(push)
-#pragma warning(disable : 4973)
-            channel = ref new Windows::Foundation::Diagnostics::LoggingChannel(DEFAULT_CHANNEL_NAME);
-#pragma warning(pop)
+            channel = ref new Windows::Foundation::Diagnostics::LoggingChannel(DEFAULT_CHANNEL_NAME, nullptr);
 
             channel->LoggingEnabled += ref new Windows::Foundation::TypedEventHandler<Windows::Foundation::Diagnostics::ILoggingChannel ^, Platform::Object ^>(this, &GALoggerUWP::OnChannelLoggingEnabled);
 
@@ -243,11 +239,6 @@ namespace gameanalytics
 
         GALoggerUWP::~GALoggerUWP()
         {
-        }
-
-        void GALoggerUWP::Touch()
-        {
-            // Don't do anything just touch the class to create it
         }
 
         void GALoggerUWP::OnChannelLoggingEnabled(Windows::Foundation::Diagnostics::ILoggingChannel ^sender, Platform::Object ^args)
