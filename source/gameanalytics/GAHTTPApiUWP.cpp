@@ -107,6 +107,8 @@ namespace gameanalytics
                     // all ok
                     return std::pair<EGAHTTPApiResponse, Json::Value>(Ok, validatedInitValues);
                 });
+
+                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
             });
         }
 
@@ -177,6 +179,8 @@ namespace gameanalytics
                     // all ok
                     return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
                 });
+
+                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
             });
         }
 

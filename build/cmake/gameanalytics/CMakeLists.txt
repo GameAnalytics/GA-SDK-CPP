@@ -60,9 +60,14 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+		"${DEPENDENCIES_DIR}/miniz/*.c"
     )
+	
+	include_directories(
+		"${DEPENDENCIES_DIR}/jsoncpp"
+		"${DEPENDENCIES_DIR}/sqlite"
+		"${DEPENDENCIES_DIR}/miniz"
+	)
 else()
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
@@ -77,22 +82,24 @@ else()
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
         "${DEPENDENCIES_DIR}/plog/*.h"
+		"${DEPENDENCIES_DIR}/miniz/*.c"
         "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
         "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
+	
+	add_definitions("-DCRYPTOPP_DISABLE_ASM")
+
+	include_directories(
+		"${DEPENDENCIES_DIR}/jsoncpp"
+		"${DEPENDENCIES_DIR}/plog"
+		"${DEPENDENCIES_DIR}/sqlite"
+		"${DEPENDENCIES_DIR}/crypto"
+		"${DEPENDENCIES_DIR}/miniz"
+		"${DEPENDENCIES_DIR}/curl/include"
+		"${DEPENDENCIES_DIR}/curlcpp/include"
+		"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
+	)
 endif()
-
-add_definitions("-DCRYPTOPP_DISABLE_ASM")
-
-include_directories(
-    "${DEPENDENCIES_DIR}/jsoncpp"
-	"${DEPENDENCIES_DIR}/plog"
-    "${DEPENDENCIES_DIR}/sqlite"
-    "${DEPENDENCIES_DIR}/crypto"
-    "${DEPENDENCIES_DIR}/curl/include"
-	"${DEPENDENCIES_DIR}/curlcpp/include"
-	"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
-)
 
 create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})

@@ -211,6 +211,10 @@ namespace gameanalytics
 
     void GameAnalytics::initialize(const std::string& gameKey, const std::string& gameSecret)
     {
+#if USE_UWP
+        Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(&GameAnalytics::OnAppSuspending);
+        Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(&GameAnalytics::OnAppResuming);
+#endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
             if (isSdkReady(true, false))
@@ -732,5 +736,42 @@ namespace gameanalytics
         }
         return true;
     }
+
+#if USE_UWP
+    void GameAnalytics::OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e)
+    {
+        (void)sender;    // Unused parameter
+
+        auto deferral = e->SuspendingOperation->GetDeferral();
+
+        if (!state::GAState::useManualSessionHandling())
+        {
+            onStop();
+        }
+        else
+        {
+            logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnStop() as using manual session handling");
+        }
+        deferral->Complete();
+    }
+
+    void GameAnalytics::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)
+    {
+        (void)sender;    // Unused parameter
+
+        threading::GAThreading::performTaskOnGAThread([]()
+        {
+            if (!state::GAState::useManualSessionHandling())
+            {
+                onResume();
+            }
+            else
+            {
+                logging::GALogger::i("OnResuming: Not calling GameAnalytics.OnResume() as using manual session handling");
+            }
+        });
+    }
+
+#endif
 
 } // namespace gameanalytics

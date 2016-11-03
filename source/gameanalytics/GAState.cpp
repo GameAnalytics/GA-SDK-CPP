@@ -501,6 +501,16 @@ namespace gameanalytics
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_userId;
             }
+#if USE_UWP
+            else if (!device::GADevice::getAdvertisingId().empty())
+            {
+                GAState::sharedInstance()->_identifier = device::GADevice::getAdvertisingId();
+            }
+            else if (!device::GADevice::getDeviceId().empty())
+            {
+                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+            }
+#endif
             else if (!GAState::sharedInstance()->_defaultUserId.empty())
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_defaultUserId;

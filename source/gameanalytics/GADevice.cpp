@@ -19,12 +19,16 @@ namespace gameanalytics
         const std::string GADevice::_buildPlatform = GADevice::runtimePlatformToString();
         const std::string GADevice::_osVersion = GADevice::getOSVersionString();
         std::string GADevice::_deviceModel = GADevice::deviceModel();
+#if USE_UWP
+        const std::string GADevice::_advertisingId = utilities::GAUtilities::ws2s(Windows::System::UserProfile::AdvertisingManager::AdvertisingId->Data());
+        const std::string GADevice::_deviceId = GADevice::deviceId();
+#endif
         std::string GADevice::_deviceManufacturer = GADevice::deviceManufacturer();
         std::string GADevice::_writablepath = GADevice::getPersistentPath();
         std::string GADevice::_sdkGameEngineVersion;
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.1.1";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.2.0";
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
         {
@@ -144,6 +148,33 @@ namespace gameanalytics
             return "unknown";
 #endif
         }
+
+#if USE_UWP
+        const std::string GADevice::getDeviceId()
+        {
+            return GADevice::_deviceId;
+        }
+
+        const std::string GADevice::getAdvertisingId()
+        {
+            return GADevice::_advertisingId;
+        }
+
+        const std::string GADevice::deviceId()
+        {
+            std::string result = "";
+
+            if (Windows::Foundation::Metadata::ApiInformation::IsTypePresent("Windows.System.Profile.HardwareIdentification"))
+            {
+                auto token = Windows::System::Profile::HardwareIdentification::GetPackageSpecificToken(nullptr);
+                auto hardwareId = token->Id;
+                auto hardwareIdString = Windows::Security::Cryptography::CryptographicBuffer::EncodeToHexString(hardwareId);
+                result = utilities::GAUtilities::ws2s(hardwareIdString->Data());
+            }
+
+            return result;
+        }
+#endif
 
         const std::string GADevice::runtimePlatformToString()
         {

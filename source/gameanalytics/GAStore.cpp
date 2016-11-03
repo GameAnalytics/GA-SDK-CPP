@@ -329,7 +329,7 @@ namespace gameanalytics
                 {
                     std::string sessionDeleteString = "";
 
-                    int i = 0;
+                    unsigned int i = 0;
                     for (auto result : resultSessionArray)
                     {
                         sessionDeleteString += result.asString();
