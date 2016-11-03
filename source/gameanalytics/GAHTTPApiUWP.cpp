@@ -228,21 +228,12 @@ namespace gameanalytics
 
             concurrency::create_task(httpClient->SendRequestAsync(message)).then([=](Windows::Web::Http::HttpResponseMessage^ response)
             {
-                EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response, "Init");
+                Windows::Web::Http::HttpStatusCode statusCode = response->StatusCode;
 
                 // if not 200 result
-                if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+                if (statusCode != Windows::Web::Http::HttpStatusCode::Ok)
                 {
-                    logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + payloadJSONString + ", Authorization: " + authorization);
-                    return;
-                }
-
-                // print reason if bad request
-                if (requestResponseEnum == BadRequest)
-                {
-                    Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(utilities::GAUtilities::ws2s(response->Content->ToString()->Data()));
-                    logging::GALogger::d("Failed Init Call. Bad request. Response: " + requestJsonDict.toStyledString());
-                    // return bad request result
+                    logging::GALogger::d("sdk error failed. response code not 200. status code: " + utilities::GAUtilities::ws2s(statusCode.ToString()->Data()));
                     return;
                 }
 
@@ -284,11 +275,6 @@ namespace gameanalytics
             message->RequestUri = ref new Windows::Foundation::Uri(urlString);
             message->Method = Windows::Web::Http::HttpMethod::Post;
 
-            if (gzip)
-            {
-                message->Headers->Append("Content-Encoding", "gzip");
-            }
-
             // create authorization hash
             std::string key = state::GAState::getGameSecret();
             auto authorization = ref new Platform::String(utilities::GAUtilities::s2ws(utilities::GAUtilities::hmacWithKey(key, payloadData)).c_str());
@@ -296,7 +282,12 @@ namespace gameanalytics
             message->Headers->TryAppendWithoutValidation(L"Authorization", authorization);
 
             message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8, ref new Platform::String(L"application/json"));
-            message->Headers->Append("Content-Length", payloadData.size().ToString());
+            //message->Content->Headers->ContentLength->Value = payloadData.size();
+
+            if (gzip)
+            {
+                message->Content->Headers->ContentEncoding->Append(ref new Windows::Web::Http::Headers::HttpContentCodingHeaderValue(ref new Platform::String(L"gzip")));
+            }
 
             return utilities::GAUtilities::ws2s(authorization->Data());
         }

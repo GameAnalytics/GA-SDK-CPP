@@ -12,6 +12,7 @@
 #include "curl_exception.h"
 #include "curl_ios.h"
 #include <ostream>
+#include <future>
 
 namespace gameanalytics
 {
@@ -41,7 +42,7 @@ namespace gameanalytics
 #endif
         }
 
-        EGAHTTPApiResponse GAHTTPApi::requestInitReturningDict(Json::Value& dict)
+        std::pair<EGAHTTPApiResponse, Json::Value> GAHTTPApi::requestInitReturningDict()
         {
             std::string gameKey = state::GAState::getGameKey();
 
@@ -56,8 +57,7 @@ namespace gameanalytics
 
             if (JSONstring.empty()) 
             {
-                dict.clear();
-                return JsonEncodeFailed;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
@@ -87,15 +87,13 @@ namespace gameanalytics
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
             {                
                 logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
-                dict = Json::Value();
-                return requestResponseEnum;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
             if (requestJsonDict.isNull()) 
             {
                 logging::GALogger::d("Failed Init Call. Json decoding failed");
-                dict = Json::Value();
-                return JsonDecodeFailed;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
             // print reason if bad request
@@ -103,8 +101,7 @@ namespace gameanalytics
             {
                 logging::GALogger::d("Failed Init Call. Bad request. Response: " + requestJsonDict.toStyledString());
                 // return bad request result
-                dict = Json::Value();
-                return requestResponseEnum;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
             // validate Init call values
@@ -112,17 +109,14 @@ namespace gameanalytics
 
             if (!validatedInitValues) 
             {
-                dict = Json::Value();
-                return BadResponse;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(BadResponse, Json::Value());
             }
 
             // all ok
-            dict = validatedInitValues;
-
-            return Ok;
+            return std::pair<EGAHTTPApiResponse, Json::Value>(Ok, validatedInitValues);
         }
 
-        EGAHTTPApiResponse GAHTTPApi::sendEventsInArray(const std::vector<Json::Value>& eventArray, Json::Value& dict)
+        std::pair<EGAHTTPApiResponse, Json::Value> GAHTTPApi::sendEventsInArray(const std::vector<Json::Value>& eventArray)
         {
             if (eventArray.empty()) 
             {
@@ -141,8 +135,7 @@ namespace gameanalytics
             if (JSONstring.empty()) 
             {
                 logging::GALogger::d("sendEventsInArray JSON encoding failed of eventArray");
-                dict = {};
-                return JsonEncodeFailed;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
@@ -170,8 +163,7 @@ namespace gameanalytics
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
             {
                 logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
-                dict = {};
-                return requestResponseEnum;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
             // decode JSON
@@ -179,8 +171,7 @@ namespace gameanalytics
 
             if (requestJsonDict.isNull()) 
             {
-                dict = {};
-                return JsonDecodeFailed;
+                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
             // print reason if bad request
@@ -190,8 +181,7 @@ namespace gameanalytics
             }
 
             // return response
-            dict = requestJsonDict;
-            return requestResponseEnum;
+            return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
         }
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
@@ -229,7 +219,59 @@ namespace gameanalytics
             /*byte[] payloadData = Encoding.UTF8.GetBytes(payloadJSONString);
             SdkErrorTask sdkErrorTask = new SdkErrorTask(type, payloadData, secretKey);
             sdkErrorTask.Execute(url);*/
+
+            if (payloadJSONString.empty())
+            {
+                logging::GALogger::w("sendSdkErrorEvent: JSON encoding failed.");
+                return;
+            }
+
+            logging::GALogger::d("sendSdkErrorEvent json: " + payloadJSONString);
+
+            if (countMap[type] >= MaxCount)
+            {
+                return;
+            }
+
+            bool useGzip = this->useGzip;
+
+            std::async(std::launch::async, [url, payloadJSONString, useGzip, type]() -> void
+            {
+                std::string payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString, useGzip);
+                std::ostringstream os;
+                curl::curl_ios<std::ostringstream> writer(os);
+                curl::curl_easy curl(writer);
+                curl::curl_header header;
+                std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, header, url, payloadData, useGzip);
+
+                try
+                {
+                    curl.perform();
+                }
+                catch (curl::curl_easy_exception error)
+                {
+                    error.print_traceback();
+                }
+
+                std::string body = os.str();
+                // process the response
+                logging::GALogger::d("init request content : " + body);
+
+                long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
+
+                // if not 200 result
+                if (statusCode != 200)
+                {
+                    logging::GALogger::d("sdk error failed. response code not 200. status code: " + std::to_string(statusCode));
+                    return;
+                }
+
+                countMap[type] = countMap[type] + 1;
+            });
         }
+
+        const int GAHTTPApi::MaxCount = 10;
+        std::map<EGASdkErrorType, int> GAHTTPApi::countMap = std::map<EGASdkErrorType, int>();
 
         const std::string GAHTTPApi::createPayloadData(const std::string& payload, bool gzip)
         {

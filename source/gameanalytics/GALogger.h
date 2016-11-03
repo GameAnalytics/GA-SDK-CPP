@@ -217,6 +217,9 @@ namespace gameanalytics
             bool infoLogVerboseEnabled;
             bool debugEnabled;
             static const std::string tag;
+#if USE_UWP
+            static void LogMessageToConsole(Platform::Object^ parameter);
+#endif
         };
     }
 }

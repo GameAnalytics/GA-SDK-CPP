@@ -610,7 +610,11 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
+#if USE_UWP
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict().get();
+#else
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
+#endif
             Json::Value initResponseDict = pair.second;
             http::EGAHTTPApiResponse initResponse = pair.first;
 

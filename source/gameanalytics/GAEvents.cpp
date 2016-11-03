@@ -411,7 +411,11 @@ namespace gameanalytics
             }
 
             // send events
+#if USE_UWP
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray).get();
+#else
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray);
+#endif
             Json::Value dataDict = pair.second;
             http::EGAHTTPApiResponse responseEnum = pair.first;
 

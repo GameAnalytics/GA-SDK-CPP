@@ -164,11 +164,15 @@ namespace gameanalytics
 
 		void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
 		{
+#if USE_UWP
+            auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
+#endif
 			switch(type)
 			{
 				case Error:
 #if USE_UWP
-                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Error);
+                    GALoggerUWP::Instance->Channel->LogMessage(m, Windows::Foundation::Diagnostics::LoggingLevel::Error);
+                    LogMessageToConsole(m);
 #else
 					LOG_ERROR << message;
 #endif
@@ -176,7 +180,8 @@ namespace gameanalytics
 
 				case Warning:
 #if USE_UWP
-                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Warning);
+                    GALoggerUWP::Instance->Channel->LogMessage(m, Windows::Foundation::Diagnostics::LoggingLevel::Warning);
+                    LogMessageToConsole(m);
 #else
 					LOG_WARNING << message;
 #endif
@@ -185,6 +190,7 @@ namespace gameanalytics
 				case Debug:
 #if USE_UWP
                     GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+                    LogMessageToConsole(m);
 #else
 					LOG_DEBUG << message;
 #endif
@@ -192,7 +198,8 @@ namespace gameanalytics
 
 				case Info:
 #if USE_UWP
-                    GALoggerUWP::Instance->Channel->LogMessage(ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str()), Windows::Foundation::Diagnostics::LoggingLevel::Information);
+                    GALoggerUWP::Instance->Channel->LogMessage(m, Windows::Foundation::Diagnostics::LoggingLevel::Information);
+                    LogMessageToConsole(m);
 #else
 					LOG_INFO << message;
 #endif
@@ -225,6 +232,13 @@ namespace gameanalytics
             // following call will activate logging if it had been 
             // active at the time of the last suspend. 
             ResumeLoggingIfApplicable();
+        }
+
+        void GALogger::LogMessageToConsole(Platform::Object^ parameter)
+        {
+            auto paraString = parameter->ToString();
+            auto formattedText = std::wstring(paraString->Data()).append(L"\r\n");
+            OutputDebugString(formattedText.c_str());
         }
 
         GALoggerUWP::~GALoggerUWP()
