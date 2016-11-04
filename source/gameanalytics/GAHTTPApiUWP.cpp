@@ -5,6 +5,8 @@
 #include "GAUtilities.h"
 #include "GAValidator.h"
 #include <map>
+#include <robuffer.h>
+#include <assert.h>
 
 namespace gameanalytics
 {
@@ -281,15 +283,62 @@ namespace gameanalytics
 
             message->Headers->TryAppendWithoutValidation(L"Authorization", authorization);
 
-            message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8, ref new Platform::String(L"application/json"));
-            //message->Content->Headers->ContentLength->Value = payloadData.size();
-
             if (gzip)
             {
+                Windows::Storage::Streams::InMemoryRandomAccessStream^ stream = createStream(payloadData).get();
+                message->Content = ref new Windows::Web::Http::HttpStreamContent(stream);
                 message->Content->Headers->ContentEncoding->Append(ref new Windows::Web::Http::Headers::HttpContentCodingHeaderValue(ref new Platform::String(L"gzip")));
+            }
+            else
+            {
+                message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8, ref new Platform::String(L"application/json"));
             }
 
             return utilities::GAUtilities::ws2s(authorization->Data());
+        }
+
+        concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> GAHTTPApi::createStream(std::string data)
+        {
+            using namespace Windows::Storage::Streams;
+            using namespace Microsoft::WRL;
+            using namespace Platform;
+            using namespace concurrency;
+
+            return create_task([=]()
+            {
+                unsigned int size = data.size();
+                Buffer^ buffer = ref new Buffer(size);
+                buffer->Length = size;
+
+                ComPtr<IBufferByteAccess> bufferByteAccess;
+                HRESULT hr = reinterpret_cast<IUnknown*>(buffer)->QueryInterface(IID_PPV_ARGS(&bufferByteAccess));
+                if (FAILED(hr))
+                {
+                    throw ref new Exception(hr);
+                }
+
+                byte* rawBuffer;
+                hr = bufferByteAccess->Buffer(&rawBuffer);
+                if (FAILED(hr))
+                {
+                    throw ref new Exception(hr);
+                }
+
+                for (unsigned int i = 0; i < size; ++i)
+                {
+                    rawBuffer[i] = data[i];
+                }
+
+                InMemoryRandomAccessStream^ stream = ref new InMemoryRandomAccessStream();
+                task<unsigned int> writeTask(stream->WriteAsync(buffer));
+                writeTask.wait();
+                assert(writeTask.get() == data.size());
+
+                // Rewind stream
+                stream->Seek(0);
+
+                return stream;
+            });
         }
 
         EGAHTTPApiResponse GAHTTPApi::processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId)

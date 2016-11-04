@@ -253,8 +253,12 @@ namespace gameanalytics
 
             auto keyString = ref new String(utilities::GAUtilities::s2ws(key).c_str());
             auto alg = MacAlgorithmProvider::OpenAlgorithm(MacAlgorithmNames::HmacSha256);
-            auto dataString = ref new String(utilities::GAUtilities::s2ws(data).c_str());
-            auto dataBuffer = CryptographicBuffer::ConvertStringToBinary(dataString, BinaryStringEncoding::Utf8);
+            Platform::Array<unsigned char>^ byteArray = ref new Platform::Array<unsigned char>(data.size());
+            for (unsigned int i = 0; i < data.size(); ++i)
+            {
+                byteArray[i] = data[i];
+            }
+            auto dataBuffer = CryptographicBuffer::CreateFromByteArray(byteArray);
             auto secretKeyBuffer = CryptographicBuffer::ConvertStringToBinary(keyString, BinaryStringEncoding::Utf8);
             auto hmacKey = alg->CreateKey(secretKeyBuffer);
 
