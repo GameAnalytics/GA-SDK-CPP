@@ -83,34 +83,32 @@ namespace gameanalytics
                     return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
                 }
 
-                concurrency::create_task(response->Content->ReadAsStringAsync()).then([=](Platform::String^ responseBodyAsText)
+                concurrency::task<Platform::String^> readTask(response->Content->ReadAsStringAsync());
+                Platform::String^ responseBodyAsText = readTask.get();
+
+                // Return response.
+                std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
+
+                logging::GALogger::d("init request content : " + body);
+
+                Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
+
+                if (requestJsonDict.isNull())
                 {
-                    // Return response.
-                    std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
+                    logging::GALogger::d("Failed Init Call. Json decoding failed");
+                    return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
+                }
 
-                    logging::GALogger::d("init request content : " + body);
+                // validate Init call values
+                Json::Value validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
 
-                    Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
+                if (!validatedInitValues)
+                {
+                    return std::pair<EGAHTTPApiResponse, Json::Value>(BadResponse, Json::Value());
+                }
 
-                    if (requestJsonDict.isNull())
-                    {
-                        logging::GALogger::d("Failed Init Call. Json decoding failed");
-                        return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
-                    }
-
-                    // validate Init call values
-                    Json::Value validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
-
-                    if (!validatedInitValues)
-                    {
-                        return std::pair<EGAHTTPApiResponse, Json::Value>(BadResponse, Json::Value());
-                    }
-
-                    // all ok
-                    return std::pair<EGAHTTPApiResponse, Json::Value>(Ok, validatedInitValues);
-                });
-
-                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                // all ok
+                return std::pair<EGAHTTPApiResponse, Json::Value>(Ok, validatedInitValues);
             });
         }
 
@@ -164,25 +162,23 @@ namespace gameanalytics
                     return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
                 }
 
-                concurrency::create_task(response->Content->ReadAsStringAsync()).then([requestResponseEnum](Platform::String^ responseBodyAsText)
+                concurrency::task<Platform::String^> readTask(response->Content->ReadAsStringAsync());
+                Platform::String^ responseBodyAsText = readTask.get();
+
+                // Return response.
+                std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
+
+                logging::GALogger::d("body: " + body);
+
+                Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
+
+                if (requestJsonDict.isNull())
                 {
-                    // Return response.
-                    std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
+                    return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
+                }
 
-                    logging::GALogger::d("body: " + body);
-
-                    Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
-
-                    if (requestJsonDict.isNull())
-                    {
-                        return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
-                    }
-
-                    // all ok
-                    return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
-                });
-
-                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                // all ok
+                return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
             });
         }
 
@@ -239,15 +235,15 @@ namespace gameanalytics
                     return;
                 }
 
-                concurrency::create_task(response->Content->ReadAsStringAsync()).then([type](Platform::String^ responseBodyAsText)
-                {
-                    // Return response.
-                    std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
+                concurrency::task<Platform::String^> readTask(response->Content->ReadAsStringAsync());
+                Platform::String^ responseBodyAsText = readTask.get();
 
-                    logging::GALogger::d("init request content : " + body);
+                // Return response.
+                std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
 
-                    countMap[type] = countMap[type] + 1;
-                });
+                logging::GALogger::d("init request content : " + body);
+
+                countMap[type] = countMap[type] + 1;
             });
         }
 
