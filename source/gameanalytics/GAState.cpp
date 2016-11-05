@@ -797,48 +797,5 @@ namespace gameanalytics
         {
             return sharedInstance()->_useManualSessionHandling;
         }
-
-
-        /*void GAState::suspendSessionAndStopQueue()
-        {
-            if (!GAState::isInitialized())  {
-                return;
-            }
-            GAThreading::ignoreTimer(GAState::sharedInstance()->suspendBlockId);
-            GALogger::i("Suspending session.");
-            if (GAState::isEnabled()) {
-                GAEvents::stopEventQueue();
-                GAState::sharedInstance()->suspendBlockId = GAThreading::scheduleTimerWithInterval(GA_SDK_SUSPEND_DURATION_UNTIL_SESSION_IS_DECLARED_ENDED, []() {
-                    if (GAState::isInitialized() && GAState::isEnabled() && GAState::sessionIsStarted()) {
-                        GAEvents::addSessionEndEvent(GA_SDK_SUSPEND_DURATION_UNTIL_SESSION_IS_DECLARED_ENDED);
-                        GAState::sharedInstance()->sessionStart = 0.0;
-                    }
-                });
-            }
-        }
-
-        void GAState::resumeSessionAndStartQueue()
-        {
-            if (!GAState::isInitialized()) {
-                return;
-            }
-            GAThreading::ignoreTimer(GAState::sharedInstance()->suspendBlockId);
-            GALogger::i("Resuming session.");
-            if (!GAState::sessionIsStarted())
-            {
-                GAState::startNewSession();
-            }
-            GAEvents::ensureEventQueueIsRunning();
-        }
-
-        std::string GAState::getUserId()
-        {
-            return sharedInstance()->userId;
-        }
-
-        std::string GAState::getProgression()
-        {
-            return sharedInstance()->progression;
-        }*/
     }
 }
