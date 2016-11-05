@@ -35,6 +35,20 @@ namespace gameanalytics
             useGzip = true;
 #endif
             httpClient = ref new Windows::Web::Http::HttpClient();
+            Windows::Networking::Connectivity::NetworkInformation::NetworkStatusChanged += ref new Windows::Networking::Connectivity::NetworkStatusChangedEventHandler(&GANetworkStatus::NetworkInformationOnNetworkStatusChanged);
+        }
+
+        bool GANetworkStatus::hasInternetAccess = false;
+
+        void GANetworkStatus::NetworkInformationOnNetworkStatusChanged(Platform::Object^ sender)
+        {
+            CheckInternetAccess();
+        }
+
+        void GANetworkStatus::CheckInternetAccess()
+        {
+            auto connectionProfile = Windows::Networking::Connectivity::NetworkInformation::GetInternetConnectionProfile();
+            hasInternetAccess = (connectionProfile != nullptr && connectionProfile->GetNetworkConnectivityLevel() == Windows::Networking::Connectivity::NetworkConnectivityLevel::InternetAccess);
         }
 
         concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> GAHTTPApi::requestInitReturningDict()
@@ -62,6 +76,14 @@ namespace gameanalytics
             auto message = ref new Windows::Web::Http::HttpRequestMessage();
 
             std::string authorization = createRequest(message, url, payloadData, useGzip);
+
+            if (!GANetworkStatus::hasInternetAccess)
+            {
+                return concurrency::create_task([]()
+                {
+                    return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                });
+            }
 
             return concurrency::create_task(httpClient->SendRequestAsync(message)).then([=](Windows::Web::Http::HttpResponseMessage^ response)
             {
@@ -141,6 +163,14 @@ namespace gameanalytics
             auto message = ref new Windows::Web::Http::HttpRequestMessage();
 
             std::string authorization = createRequest(message, url, payloadData, useGzip);
+
+            if (!GANetworkStatus::hasInternetAccess)
+            {
+                return concurrency::create_task([]()
+                {
+                    return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                });
+            }
 
             return concurrency::create_task(httpClient->SendRequestAsync(message)).then([=](Windows::Web::Http::HttpResponseMessage^ response)
             {
@@ -223,6 +253,11 @@ namespace gameanalytics
             auto message = ref new Windows::Web::Http::HttpRequestMessage();
 
             std::string authorization = createRequest(message, url, payloadData, useGzip);
+
+            if (!GANetworkStatus::hasInternetAccess)
+            {
+                return;
+            }
 
             concurrency::create_task(httpClient->SendRequestAsync(message)).then([=](Windows::Web::Http::HttpResponseMessage^ response)
             {

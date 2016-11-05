@@ -99,5 +99,15 @@ namespace gameanalytics
             Windows::Web::Http::HttpClient^ httpClient;
 #endif
         };
+
+#if USE_UWP
+        ref class GANetworkStatus sealed
+        {
+        internal:
+            static void NetworkInformationOnNetworkStatusChanged(Platform::Object^ sender);
+            static void CheckInternetAccess();
+            static bool hasInternetAccess;
+        };
+#endif
     }
 }
