@@ -7,6 +7,9 @@
 #include <map>
 #include <robuffer.h>
 #include <assert.h>
+#if USE_UWP
+#include "GADevice.h"
+#endif
 
 namespace gameanalytics
 {
@@ -36,6 +39,7 @@ namespace gameanalytics
 #endif
             httpClient = ref new Windows::Web::Http::HttpClient();
             Windows::Networking::Connectivity::NetworkInformation::NetworkStatusChanged += ref new Windows::Networking::Connectivity::NetworkStatusChangedEventHandler(&GANetworkStatus::NetworkInformationOnNetworkStatusChanged);
+            GANetworkStatus::CheckInternetAccess();
         }
 
         bool GANetworkStatus::hasInternetAccess = false;
@@ -49,6 +53,26 @@ namespace gameanalytics
         {
             auto connectionProfile = Windows::Networking::Connectivity::NetworkInformation::GetInternetConnectionProfile();
             hasInternetAccess = (connectionProfile != nullptr && connectionProfile->GetNetworkConnectivityLevel() == Windows::Networking::Connectivity::NetworkConnectivityLevel::InternetAccess);
+
+            if (hasInternetAccess)
+            {
+                if (connectionProfile->IsWlanConnectionProfile)
+                {
+                    device::GADevice::setConnectionType("wifi");
+                }
+                else if (connectionProfile->IsWwanConnectionProfile)
+                {
+                    device::GADevice::setConnectionType("wwan");
+                }
+                else
+                {
+                    device::GADevice::setConnectionType("lan");
+                }
+            }
+            else
+            {
+                device::GADevice::setConnectionType("offline");
+            }
         }
 
         concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> GAHTTPApi::requestInitReturningDict()

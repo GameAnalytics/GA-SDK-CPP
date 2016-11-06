@@ -76,7 +76,7 @@ namespace gameanalytics
             GAEvents::processEvents(categorySessionStart, false);
         }
 
-        void GAEvents::addSessionEndEvent(Json::Int64 timeAdjustement)
+        void GAEvents::addSessionEndEvent()
         {
             Json::Int64 session_start_ts = state::GAState::sharedInstance()->getSessionStart();
             Json::Int64 client_ts_adjusted = state::GAState::getClientTsAdjusted();

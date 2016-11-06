@@ -508,13 +508,10 @@ namespace gameanalytics
 
     void GameAnalytics::endSession()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        if (state::GAState::useManualSessionHandling())
         {
-            if(state::GAState::useManualSessionHandling())
-            {
-                state::GAState::endSessionAndStopQueue();
-            }
-        });
+            onStop();
+        }
     }
 
 
@@ -533,13 +530,13 @@ namespace gameanalytics
 
     void GameAnalytics::onStop()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        try
         {
-            if(!state::GAState::useManualSessionHandling())
-            {
-                state::GAState::endSessionAndStopQueue();
-            }
-        });
+            state::GAState::endSessionAndStopQueue();
+        }
+        catch (const std::exception&)
+        {
+        }
     }
 
 #if USE_UWP
