@@ -172,7 +172,13 @@ namespace gameanalytics
 			{
 				case Error:
 #if USE_UWP
-                    concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
                     LogMessageToConsole(m);
 #else
 					LOG_ERROR << message;
@@ -181,7 +187,13 @@ namespace gameanalytics
 
 				case Warning:
 #if USE_UWP
-                    concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
                     LogMessageToConsole(m);
 #else
 					LOG_WARNING << message;
@@ -190,7 +202,13 @@ namespace gameanalytics
 
 				case Debug:
 #if USE_UWP
-                    concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
                     LogMessageToConsole(m);
 #else
 					LOG_DEBUG << message;
@@ -199,7 +217,13 @@ namespace gameanalytics
 
 				case Info:
 #if USE_UWP
-                    concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
                     LogMessageToConsole(m);
 #else
 					LOG_INFO << message;
