@@ -7,7 +7,6 @@
 
 #include <Foundation/GASingleton.h>
 #include <string>
-#include <ppltasks.h>
 
 namespace gameanalytics
 {

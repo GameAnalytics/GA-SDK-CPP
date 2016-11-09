@@ -42,8 +42,8 @@ namespace gameanalytics
             Undefined = 0,
             Rejected = 1
         };
-        
-        struct CurlFetchStruct 
+
+        struct CurlFetchStruct
         {
             char *payload;
             size_t size;
@@ -63,7 +63,7 @@ namespace gameanalytics
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);
 
-            static const std::string GAHTTPApi::sdkErrorTypeToString(EGASdkErrorType value)
+            static const std::string sdkErrorTypeToString(EGASdkErrorType value)
             {
                 switch (value) {
                 case Rejected:

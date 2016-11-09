@@ -4,6 +4,7 @@
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>
+#include <ppltasks.h>
 #else
 #include <plog/Log.h>
 #include <plog/Appenders/ConsoleAppender.h>
@@ -57,10 +58,10 @@ namespace gameanalytics
             GALogger *ga = GALogger::sharedInstance();
 			boost::filesystem::path p(path);
             p /= "ga_log.txt";
-			
+
 			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
 			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
-			
+
 			if(ga->debugEnabled)
 			{
 				plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
