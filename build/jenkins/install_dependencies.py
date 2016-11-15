@@ -14,14 +14,24 @@ from sys import platform
 
 if platform == 'win32':  # win32 and/or win64
     CMAKE_URL = 'https://cmake.org/files/v3.5/cmake-3.5.2-win32-x86.zip'
+    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev2/tizen-web-cli_TizenSDK_2.4.0_Rev2_windows-32.exe'
 elif platform == 'darwin':  # OSX
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Darwin-universal.tar.gz'
+    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev2/tizen-web-cli_TizenSDK_2.4.0_Rev2_macos-64.bin'
 # elif platform in ('linux', 'linux2'):
 else:
     raise NotImplementedError('platform %s is currently not supported' % platform)
 
 cmake_package = os.path.join(config.BUILD_ROOT, CMAKE_URL.split('/')[-1])
+tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
 
+def call_process(process_arguments, silent=False):
+    print('Call process ' + str(process_arguments))
+
+    if silent is True:
+        subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
+    else:
+        subprocess.check_call(process_arguments)
 
 def download(url, destination, silent=False):
     def reporthook(count, block_size, total_size):
@@ -110,11 +120,31 @@ def install_cmake(silent=False):
 
         os.unlink(cmake_package)
 
+def install_tizen(silent=False):
+    if not os.path.exists(config.TIZEN_ROOT):
+        print "-------------- TIZEN ---------------"
+        if not os.path.exists(tizen_package):
+            print "--> DOWNLOADING TIZEN"
+            download(TIZEN_URL, tizen_package, silent=silent)
+
+        if platform == 'darwin':
+            st = os.stat(tizen_package)
+            os.chmod(tizen_package, st.st_mode | stat.S_IEXEC)
+
+        call_process(
+            [
+                tizen_package,
+                '--accept-license',
+                config.TIZEN_ROOT
+            ]
+        )
+        os.unlink(tizen_package)
 
 def install_dependencies(silent=False):
     if silent is True:
         print "SILENT DEPENDENCY INSTALL"
     install_cmake(silent=silent)
+    install_tizen(silent=silent)
 
 if __name__ == '__main__':
     os.chdir(config.BUILD_ROOT)
