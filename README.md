@@ -7,6 +7,7 @@ Supported platforms:
 
 * Mac OS X
 * Winddows 32-bit and 64-bit
+* UWP
 
 Dependencies
 ------------
@@ -20,6 +21,9 @@ Dependencies
 
 Changelog
 ---------
+**1.2.0**
+* added UWP support
+
 **1.1.1**
 * fix to empty user id
 
