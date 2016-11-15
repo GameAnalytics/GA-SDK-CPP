@@ -29,8 +29,7 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        //const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.2.0";
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.2.0";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.2.0";
 #else
         const std::string GADevice::_sdkWrapperVersion = "cpp 1.2.0";
 #endif
