@@ -8,7 +8,9 @@
 #include "GALogger.h"
 #include <algorithm>
 #include <regex>
-#if !USE_UWP
+#if USE_UWP
+#include <Objbase.h>
+#else
 #include <hmac_sha2.h>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
