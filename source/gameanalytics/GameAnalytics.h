@@ -101,28 +101,13 @@ namespace gameanalytics
         static void initialize(const std::string& gameKey, const std::string& gameSecret);
 
         // add events
-        static void addBusinessEvent(const std::string& currency,
-                                                 int amount,
-                                                 const std::string& itemType,
-                                                 const std::string& itemId,
-                                                 const std::string& cartType);
+        static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType);
 
-        static void addResourceEvent(EGAResourceFlowType flowType,
-                                                 const std::string& currency,
-                                                 float amount,
-                                                 const std::string&itemType,
-                                                 const std::string& itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus,
-                                                             const std::string& progression01,
-                                                             const std::string& progression02,
-                                                             const std::string& progression03);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus,
-                                                             const std::string& progression01,
-                                                             const std::string& progression02,
-                                                             const std::string& progression03,
-                                                             int score);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score);
 
         static void addDesignEvent(const std::string& eventId);
         static void addDesignEvent(const std::string& eventId, double value);
@@ -148,9 +133,40 @@ namespace gameanalytics
         static void onResume();
         static void onStop();
 
+#if USE_UWP
+        static void configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions);
+        static void configureAvailableCustomDimensions02(const std::vector<std::wstring>& customDimensions);
+        static void configureAvailableCustomDimensions03(const std::vector<std::wstring>& customDimensions);
+        static void configureAvailableResourceCurrencies(const std::vector<std::wstring>& resourceCurrencies);
+        static void configureAvailableResourceItemTypes(const std::vector<std::wstring>& resourceItemTypes);
+        static void configureBuild(const std::wstring& build);
+        static void configureWritablePath(const std::wstring& writablePath);
+        static void configureDeviceModel(const std::wstring& deviceModel);
+        static void configureDeviceManufacturer(const std::wstring& deviceManufacturer);
+        static void configureSdkGameEngineVersion(const std::wstring& sdkGameEngineVersion);
+        static void configureGameEngineVersion(const std::wstring& engineVersion);
+        static void configureUserId(const std::wstring& uId);
+        static void initialize(const std::wstring& gameKey, const std::wstring& gameSecret);
+        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score);
+        static void addDesignEvent(const std::wstring& eventId);
+        static void addDesignEvent(const std::wstring& eventId, double value);
+        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message);
+        static void setCustomDimension01(const std::wstring& dimension01);
+        static void setCustomDimension02(const std::wstring& dimension02);
+        static void setCustomDimension03(const std::wstring& dimension03);
+        static void setFacebookId(const std::wstring& facebookId);
+#endif
+
      private:
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
         static bool isSdkReady(bool needsInitialized, bool warn, std::string message);
+#if USE_UWP
+        static void OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e);
+        static void OnAppResuming(Platform::Object ^sender, Platform::Object ^args);
+#endif
     };
 } // namespace gameanalytics

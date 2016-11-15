@@ -112,7 +112,9 @@ namespace gameanalytics
             }
             device::GADevice::setWritablePath(writablePath);
 
+#if !USE_UWP
             logging::GALogger::addFileLog(writablePath);
+#endif
         });
     }
 
@@ -209,6 +211,10 @@ namespace gameanalytics
 
     void GameAnalytics::initialize(const std::string& gameKey, const std::string& gameSecret)
     {
+#if USE_UWP
+        Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(&GameAnalytics::OnAppSuspending);
+        Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(&GameAnalytics::OnAppResuming);
+#endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
             if (isSdkReady(true, false))
@@ -279,7 +285,7 @@ namespace gameanalytics
 
             // Send to events
             // TODO(nikolaj): check if passing 0 / null as the last argument is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false);
         });
     }
 
@@ -294,14 +300,20 @@ namespace gameanalytics
 
             // Send to events
             // TODO(nikolaj): check if this cast from int to double is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score);  
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true);  
         });
     }
 
     void GameAnalytics::addDesignEvent(const std::string& eventId)
     {
-         // TODO(nikolaj): check if passing 0.0 instead of nil is ok here
-        addDesignEvent(eventId, 0.0);
+        threading::GAThreading::performTaskOnGAThread([eventId]()
+        {
+            if (!isSdkReady(true, true, "Could not add design event"))
+            {
+                return;
+            }
+            events::GAEvents::addDesignEvent(eventId, 0, false);
+        });
     }
 
     void GameAnalytics::addDesignEvent(const std::string& eventId, double value)
@@ -312,7 +324,7 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value);
+            events::GAEvents::addDesignEvent(eventId, value, true);
         });
     }
 
@@ -496,13 +508,10 @@ namespace gameanalytics
 
     void GameAnalytics::endSession()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        if (state::GAState::useManualSessionHandling())
         {
-            if(state::GAState::useManualSessionHandling())
-            {
-                state::GAState::endSessionAndStopQueue();
-            }
-        });
+            onStop();
+        }
     }
 
 
@@ -521,14 +530,160 @@ namespace gameanalytics
 
     void GameAnalytics::onStop()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        try
         {
-            if(!state::GAState::useManualSessionHandling())
-            {
-                state::GAState::endSessionAndStopQueue();
-            }
-        });
+            state::GAState::endSessionAndStopQueue();
+        }
+        catch (const std::exception&)
+        {
+        }
     }
+
+#if USE_UWP
+    void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions)
+    {
+        std::vector<std::string> list;
+        for (const std::wstring& dimension : customDimensions)
+        {
+            list.push_back(utilities::GAUtilities::ws2s(dimension));
+        }
+        configureAvailableCustomDimensions01(list);
+    }
+
+    void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::wstring>& customDimensions)
+    {
+        std::vector<std::string> list;
+        for (const std::wstring& dimension : customDimensions)
+        {
+            list.push_back(utilities::GAUtilities::ws2s(dimension));
+        }
+        configureAvailableCustomDimensions02(list);
+    }
+
+    void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::wstring>& customDimensions)
+    {
+        std::vector<std::string> list;
+        for (const std::wstring& dimension : customDimensions)
+        {
+            list.push_back(utilities::GAUtilities::ws2s(dimension));
+        }
+        configureAvailableCustomDimensions03(list);
+    }
+
+    void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::wstring>& resourceCurrencies)
+    {
+        std::vector<std::string> list;
+        for (const std::wstring& currency : resourceCurrencies)
+        {
+            list.push_back(utilities::GAUtilities::ws2s(currency));
+        }
+        configureAvailableResourceCurrencies(list);
+    }
+
+    void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::wstring>& resourceItemTypes)
+    {
+        std::vector<std::string> list;
+        for (const std::wstring& itemType : resourceItemTypes)
+        {
+            list.push_back(utilities::GAUtilities::ws2s(itemType));
+        }
+        configureAvailableResourceItemTypes(list);
+    }
+
+    void GameAnalytics::configureBuild(const std::wstring& build)
+    {
+        configureBuild(utilities::GAUtilities::ws2s(build));
+    }
+
+    void GameAnalytics::configureWritablePath(const std::wstring& writablePath)
+    {
+        configureWritablePath(utilities::GAUtilities::ws2s(writablePath));
+    }
+
+    void GameAnalytics::configureDeviceModel(const std::wstring& deviceModel)
+    {
+        configureDeviceModel(utilities::GAUtilities::ws2s(deviceModel));
+    }
+
+    void GameAnalytics::configureDeviceManufacturer(const std::wstring& deviceManufacturer)
+    {
+        configureDeviceManufacturer(utilities::GAUtilities::ws2s(deviceManufacturer));
+    }
+
+    void GameAnalytics::configureSdkGameEngineVersion(const std::wstring& sdkGameEngineVersion)
+    {
+        configureSdkGameEngineVersion(utilities::GAUtilities::ws2s(sdkGameEngineVersion));
+    }
+
+    void GameAnalytics::configureGameEngineVersion(const std::wstring& engineVersion)
+    {
+        configureGameEngineVersion(utilities::GAUtilities::ws2s(engineVersion));
+    }
+
+    void GameAnalytics::configureUserId(const std::wstring& uId)
+    {
+        configureUserId(utilities::GAUtilities::ws2s(uId));
+    }
+
+    void GameAnalytics::initialize(const std::wstring& gameKey, const std::wstring& gameSecret)
+    {
+        initialize(utilities::GAUtilities::ws2s(gameKey), utilities::GAUtilities::ws2s(gameSecret));
+    }
+    void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType)
+    {
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType));
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
+    {
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId));
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03));
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score);
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId));
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value);
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
+    {
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message));
+    }
+
+    void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)
+    {
+        setCustomDimension01(utilities::GAUtilities::ws2s(dimension01));
+    }
+
+    void GameAnalytics::setCustomDimension02(const std::wstring& dimension02)
+    {
+        setCustomDimension02(utilities::GAUtilities::ws2s(dimension02));
+    }
+
+    void GameAnalytics::setCustomDimension03(const std::wstring& dimension03)
+    {
+        setCustomDimension03(utilities::GAUtilities::ws2s(dimension03));
+    }
+
+    void GameAnalytics::setFacebookId(const std::wstring& facebookId)
+    {
+        setFacebookId(utilities::GAUtilities::ws2s(facebookId));
+    }
+#endif
 
     // --------------PRIVATE HELPERS -------------- //
 
@@ -578,5 +733,42 @@ namespace gameanalytics
         }
         return true;
     }
+
+#if USE_UWP
+    void GameAnalytics::OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e)
+    {
+        (void)sender;    // Unused parameter
+
+        auto deferral = e->SuspendingOperation->GetDeferral();
+
+        if (!state::GAState::useManualSessionHandling())
+        {
+            onStop();
+        }
+        else
+        {
+            logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnStop() as using manual session handling");
+        }
+        deferral->Complete();
+    }
+
+    void GameAnalytics::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)
+    {
+        (void)sender;    // Unused parameter
+
+        threading::GAThreading::performTaskOnGAThread([]()
+        {
+            if (!state::GAState::useManualSessionHandling())
+            {
+                onResume();
+            }
+            else
+            {
+                logging::GALogger::i("OnResuming: Not calling GameAnalytics.OnResume() as using manual session handling");
+            }
+        });
+    }
+
+#endif
 
 } // namespace gameanalytics

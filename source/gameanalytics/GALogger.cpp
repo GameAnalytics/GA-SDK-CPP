@@ -1,9 +1,24 @@
 #include "GALogger.h"
 #include <iostream>
 #include "GADevice.h"
+#if USE_UWP
+#include "GAUtilities.h"
+#include <collection.h>
+#include <ppltasks.h>
+#else
 #include <plog/Log.h>
 #include <plog/Appenders/ConsoleAppender.h>
 #include <boost/filesystem.hpp>
+#endif
+
+#if USE_UWP
+#define GALOGGER_PREFIX                     L"GALogger_"
+#define DEFAULT_SESSION_NAME                GALOGGER_PREFIX L"Session"
+#define DEFAULT_CHANNEL_NAME                GALOGGER_PREFIX L"Channel"
+#define OUR_SAMPLE_APP_LOG_FILE_FOLDER_NAME GALOGGER_PREFIX L"LogFiles"
+#define LOGGING_ENABLED_SETTING_KEY_NAME    GALOGGER_PREFIX L"LoggingEnabled"
+#define LOGFILEGEN_BEFORE_SUSPEND_SETTING_KEY_NAME GALOGGER_PREFIX L"LogFileGeneratedBeforeSuspend"
+#endif
 
 namespace gameanalytics
 {
@@ -15,12 +30,16 @@ namespace gameanalytics
 		{
 			infoLogEnabled = false;
 
-		#if defined(_DEBUG)
+#if defined(_DEBUG)
 			// log debug is in dev mode
 			debugEnabled = true;
-		#else
+#else
 			debugEnabled = false;
-		#endif
+#endif
+
+#if USE_UWP
+            file = concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFileAsync("ga_log.txt", Windows::Storage::CreationCollisionOption::ReplaceExisting)).get();
+#endif
 		}
 
 		void GALogger::setInfoLog(bool enabled)
@@ -33,16 +52,16 @@ namespace gameanalytics
 			GALogger::sharedInstance()->infoLogVerboseEnabled = enabled;
 		}
 
+#if !USE_UWP
 		void GALogger::addFileLog(const std::string& path)
 		{
+            GALogger *ga = GALogger::sharedInstance();
 			boost::filesystem::path p(path);
             p /= "ga_log.txt";
-			
-			GALogger *ga = GALogger::sharedInstance();
-			
+
 			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
 			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
-			
+
 			if(ga->debugEnabled)
 			{
 				plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
@@ -54,6 +73,7 @@ namespace gameanalytics
 
 			GALogger::i("Log file added under: " + path);
 		}
+#endif
 
 		// i: information logging
 		//
@@ -64,12 +84,13 @@ namespace gameanalytics
 		void GALogger::i(const std::string& format)
 		{
 			GALogger *ga = GALogger::sharedInstance();
+
 			if (!ga->infoLogEnabled) {
 				// No logging of info unless in client debug mode
 				return;
 			}
 
-			std::string message = "Info/" + ga->tag + ": " + format;
+            std::string message = "Info/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
@@ -82,8 +103,9 @@ namespace gameanalytics
 		// - other non-critical
 		void GALogger::w(const std::string& format)
 		{
-			GALogger *ga = GALogger::sharedInstance();
-			std::string message = "Warning/" + ga->tag + ": " + format;
+            GALogger *ga = GALogger::sharedInstance();
+
+            std::string message = "Warning/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Warning);
 		}
 
@@ -97,8 +119,9 @@ namespace gameanalytics
 		// - errors that never should happen
 		void GALogger::e(const std::string& format)
 		{
-			GALogger *ga = GALogger::sharedInstance();
-			std::string message = "Error/" + ga->tag + ": " + format;
+            GALogger *ga = GALogger::sharedInstance();
+
+            std::string message = "Error/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Error);
 		}
 
@@ -110,13 +133,14 @@ namespace gameanalytics
 		// - use large debug text like HTTP payload etc.
 		void GALogger::d(const std::string& format)
 		{
-			GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::sharedInstance();
+
 			if (!ga->debugEnabled) {
 				// No logging of debug unless in full debug logging mode
 				return;
 			}
 
-			std::string message = "Debug/" + ga->tag + ": " + format;
+            std::string message = "Debug/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Debug);
 		}
 
@@ -127,34 +151,95 @@ namespace gameanalytics
 		// - Large logs
 		void GALogger::ii(const std::string& format)
 		{
+            GALogger *ga = GALogger::sharedInstance();
 
-			GALogger *ga = GALogger::sharedInstance();
 			if (!ga->infoLogVerboseEnabled) {
 				// No logging of info unless in client debug mode
 				return;
 			}
 
-			std::string message = "Verbose/" + ga->tag + ": " + format;
+            std::string message = "Verbose/" + ga->tag + ": " + format;
 			ga->sendNotificationMessage(message, Info);
 		}
 
 		void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
 		{
+#if USE_UWP
+            auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
+            Platform::Collections::Vector<Platform::String^>^ lines = ref new Platform::Collections::Vector<Platform::String^>();
+            lines->Append(m);
+#endif
 			switch(type)
 			{
 				case Error:
+#if USE_UWP
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
+                    LogMessageToConsole(m);
+#else
 					LOG_ERROR << message;
+#endif
 					break;
+
 				case Warning:
+#if USE_UWP
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
+                    LogMessageToConsole(m);
+#else
 					LOG_WARNING << message;
+#endif
 					break;
+
 				case Debug:
+#if USE_UWP
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
+                    LogMessageToConsole(m);
+#else
 					LOG_DEBUG << message;
+#endif
 					break;
+
 				case Info:
+#if USE_UWP
+                    try
+                    {
+                        concurrency::create_task(Windows::Storage::FileIO::AppendLinesAsync(file, lines)).wait();
+                    }
+                    catch (const std::exception&)
+                    {
+                    }
+                    LogMessageToConsole(m);
+#else
 					LOG_INFO << message;
+#endif
 					break;
 			}
 		}
+
+#if USE_UWP
+        void GALogger::LogMessageToConsole(Platform::Object^ parameter)
+        {
+            auto paraString = parameter->ToString();
+            auto formattedText = std::wstring(paraString->Data()).append(L"\r\n");
+            OutputDebugString(formattedText.c_str());
+        }
+#endif
 	}
 }

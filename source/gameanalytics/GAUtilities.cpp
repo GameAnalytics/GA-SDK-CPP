@@ -3,15 +3,17 @@
 // Copyright 2015 GameAnalytics. All rights reserved.
 //
 
-#include <hmac_sha2.h>
-#include <climits>
+//#include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <algorithm>
 #include <regex>
+#if !USE_UWP
+#include <hmac_sha2.h>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#endif
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -114,6 +116,7 @@ namespace gameanalytics
             return v;
         }
 
+#if !USE_UWP
         static char nb_base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
@@ -187,7 +190,7 @@ namespace gameanalytics
             }
             *buf++ = '\0';
         }
-
+#endif
 
         // gzip compresses a string
         static std::string compress_string_gzip(const std::string& str,
@@ -218,13 +221,51 @@ namespace gameanalytics
         // TODO(nikolaj): explain function
         std::string GAUtilities::generateUUID()
         {
+#if USE_UWP
+            GUID result;
+            HRESULT hr = CoCreateGuid(&result);
+
+            if (SUCCEEDED(hr))
+            {
+                // Generate new GUID.
+                Platform::Guid guid(result);
+                auto guidString = std::wstring(guid.ToString()->Data());
+
+                // Remove curly brackets.
+                auto sessionId = guidString.substr(1, guidString.length() - 2);
+                return ws2s(sessionId);
+            }
+
+            throw Platform::Exception::CreateException(hr);
+#else
             boost::uuids::uuid uuid = boost::uuids::random_generator()();
             return boost::lexical_cast<std::string>(uuid);
+#endif
         }
 
         // TODO(nikolaj): explain function
         std::string GAUtilities::hmacWithKey(const std::string& key, const std::string& data)
         {
+#if USE_UWP
+            using namespace Platform;
+            using namespace Windows::Security::Cryptography::Core;
+            using namespace Windows::Security::Cryptography;
+
+            auto keyString = ref new String(utilities::GAUtilities::s2ws(key).c_str());
+            auto alg = MacAlgorithmProvider::OpenAlgorithm(MacAlgorithmNames::HmacSha256);
+            Platform::Array<unsigned char>^ byteArray = ref new Platform::Array<unsigned char>(data.size());
+            for (unsigned int i = 0; i < data.size(); ++i)
+            {
+                byteArray[i] = data[i];
+            }
+            auto dataBuffer = CryptographicBuffer::CreateFromByteArray(byteArray);
+            auto secretKeyBuffer = CryptographicBuffer::ConvertStringToBinary(keyString, BinaryStringEncoding::Utf8);
+            auto hmacKey = alg->CreateKey(secretKeyBuffer);
+
+            auto hashedJsonBuffer = CryptographicEngine::Sign(hmacKey, dataBuffer);
+            auto hashedJsonBase64 = CryptographicBuffer::EncodeToBase64String(hashedJsonBuffer);
+            return utilities::GAUtilities::ws2s(hashedJsonBase64->Data());
+#else
             unsigned char mac[SHA256_DIGEST_SIZE];
             hmac_sha256(
                 (unsigned char*)key.data(),
@@ -242,6 +283,7 @@ namespace gameanalytics
                 (char*)ret.data(),
                 (char*)ret.data()+ret.size()
             };
+#endif
         }
 
         // TODO(nikolaj): explain function

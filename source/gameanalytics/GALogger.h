@@ -20,9 +20,6 @@ namespace gameanalytics
             Debug = 3
         };
 
-        // notification id-string for communicating
-        //extern NSString *k_GA_LoggerMessageNotification;
-
         class GALogger : public GASingleton<GALogger>
         {
          public:
@@ -31,7 +28,9 @@ namespace gameanalytics
             // set debug enabled (client)
             static void setInfoLog(bool enabled);
             static void setVerboseInfoLog(bool enabled);
+#if !USE_UWP
             static void addFileLog(const std::string& path);
+#endif
 
             // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
             static void  w(const std::string& format);//const char* format, ...);
@@ -48,6 +47,10 @@ namespace gameanalytics
             bool infoLogVerboseEnabled;
             bool debugEnabled;
             static const std::string tag;
+#if USE_UWP
+            static void LogMessageToConsole(Platform::Object^ parameter);
+            Windows::Storage::StorageFile^ file;
+#endif
         };
     }
 }

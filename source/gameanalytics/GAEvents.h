@@ -22,11 +22,11 @@ namespace gameanalytics
             static void stopEventQueue();
             static void ensureEventQueueIsRunning();
             static void addSessionStartEvent();
-            static void addSessionEndEvent(Json::Int64 timeAdjustement = 0);
+            static void addSessionEndEvent();
             static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType);
             static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId);
-            static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score);
-            static void addDesignEvent(const std::string& eventId, double value);
+            static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore);
+            static void addDesignEvent(const std::string& eventId, double value, bool sendValue);
             static void addErrorEvent(EGAErrorSeverity severity, const std::string& message);
             static const std::string progressionStatusString(EGAProgressionStatus progressionStatus);
             static const std::string errorSeverityString(EGAErrorSeverity errorSeverity);

@@ -28,6 +28,10 @@ namespace gameanalytics
         	static const std::string getDeviceManufacturer();
             static void setWritablePath(const std::string& writablePath);
         	static const std::string getWritablePath();
+#if USE_UWP
+            static const std::string getDeviceId();
+            static const std::string getAdvertisingId();
+#endif
             static void UpdateConnectionType();	
 
         private:
@@ -36,6 +40,12 @@ namespace gameanalytics
             static const std::string deviceModel();
             static const std::string runtimePlatformToString();
             static const std::string getPersistentPath();
+#if USE_UWP
+            static const std::string deviceId();
+
+            static const std::string _advertisingId;
+            static const std::string _deviceId;
+#endif
 
             static const std::string _buildPlatform;
             static const std::string _osVersion;

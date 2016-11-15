@@ -76,7 +76,7 @@ namespace gameanalytics
             GAEvents::processEvents(categorySessionStart, false);
         }
 
-        void GAEvents::addSessionEndEvent(Json::Int64 timeAdjustement)
+        void GAEvents::addSessionEndEvent()
         {
             Json::Int64 session_start_ts = state::GAState::sharedInstance()->getSessionStart();
             Json::Int64 client_ts_adjusted = state::GAState::getClientTsAdjusted();
@@ -183,7 +183,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore)
         {
             std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
 
@@ -221,7 +221,7 @@ namespace gameanalytics
             double attempt_num = 0;
 
             // Add score if specified and status is not start
-            if (score > 0 && progressionStatus != EGAProgressionStatus::Start)
+            if (sendScore && progressionStatus != EGAProgressionStatus::Start)
             {
                 eventDict["score"] = score;
             }
@@ -257,7 +257,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value)
+        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue)
         {
             // Validate
             if (!validators::GAValidator::validateDesignEvent(eventId, value))
@@ -273,7 +273,7 @@ namespace gameanalytics
             eventData["category"] = GAEvents::CategoryDesign;
             eventData["event_id"] = eventId;
 
-            if (value > 0)
+            if (sendValue)
             {
                 eventData["value"] = value;
             }
@@ -411,8 +411,13 @@ namespace gameanalytics
             }
 
             // send events
-            Json::Value dataDict;
-            http::EGAHTTPApiResponse responseEnum = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray, dataDict);
+#if USE_UWP
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray).get();
+#else
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray);
+#endif
+            Json::Value dataDict = pair.second;
+            http::EGAHTTPApiResponse responseEnum = pair.first;
 
             if (responseEnum == http::Ok) 
             {

@@ -11,7 +11,6 @@
 #include <json/json.h>
 #include "Foundation/GASingleton.h"
 
-
 namespace gameanalytics
 {
     namespace store

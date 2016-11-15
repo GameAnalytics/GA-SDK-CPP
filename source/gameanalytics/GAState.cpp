@@ -12,6 +12,7 @@
 #include "GAThreading.h"
 #include "GALogger.h"
 #include "GADevice.h"
+#include <utility>
 
 namespace gameanalytics
 {
@@ -500,6 +501,16 @@ namespace gameanalytics
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_userId;
             }
+#if USE_UWP
+            else if (!device::GADevice::getAdvertisingId().empty())
+            {
+                GAState::sharedInstance()->_identifier = device::GADevice::getAdvertisingId();
+            }
+            else if (!device::GADevice::getDeviceId().empty())
+            {
+                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+            }
+#endif
             else if (!GAState::sharedInstance()->_defaultUserId.empty())
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_defaultUserId;
@@ -599,8 +610,13 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
-            Json::Value initResponseDict;
-            http::EGAHTTPApiResponse initResponse = httpApi->requestInitReturningDict(initResponseDict);
+#if USE_UWP
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict().get();
+#else
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
+#endif
+            Json::Value initResponseDict = pair.second;
+            http::EGAHTTPApiResponse initResponse = pair.first;
 
             // init is ok
             if (initResponse == http::Ok && !initResponseDict.isNull()) {
@@ -781,48 +797,5 @@ namespace gameanalytics
         {
             return sharedInstance()->_useManualSessionHandling;
         }
-
-
-        /*void GAState::suspendSessionAndStopQueue()
-        {
-            if (!GAState::isInitialized())  {
-                return;
-            }
-            GAThreading::ignoreTimer(GAState::sharedInstance()->suspendBlockId);
-            GALogger::i("Suspending session.");
-            if (GAState::isEnabled()) {
-                GAEvents::stopEventQueue();
-                GAState::sharedInstance()->suspendBlockId = GAThreading::scheduleTimerWithInterval(GA_SDK_SUSPEND_DURATION_UNTIL_SESSION_IS_DECLARED_ENDED, []() {
-                    if (GAState::isInitialized() && GAState::isEnabled() && GAState::sessionIsStarted()) {
-                        GAEvents::addSessionEndEvent(GA_SDK_SUSPEND_DURATION_UNTIL_SESSION_IS_DECLARED_ENDED);
-                        GAState::sharedInstance()->sessionStart = 0.0;
-                    }
-                });
-            }
-        }
-
-        void GAState::resumeSessionAndStartQueue()
-        {
-            if (!GAState::isInitialized()) {
-                return;
-            }
-            GAThreading::ignoreTimer(GAState::sharedInstance()->suspendBlockId);
-            GALogger::i("Resuming session.");
-            if (!GAState::sessionIsStarted())
-            {
-                GAState::startNewSession();
-            }
-            GAEvents::ensureEventQueueIsRunning();
-        }
-
-        std::string GAState::getUserId()
-        {
-            return sharedInstance()->userId;
-        }
-
-        std::string GAState::getProgression()
-        {
-            return sharedInstance()->progression;
-        }*/
     }
 }

@@ -1,0 +1,1 @@
+b2 toolset=msvc-14.0 architecture=x86 address-model=64 --with-filesystem --with-system define=BOOST_USE_WINAPI_VERSION=0x601 stage --stagedir=stage/win64

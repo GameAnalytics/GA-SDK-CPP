@@ -9,7 +9,9 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include <fstream>
+#if !USE_UWP
 #include <boost/filesystem.hpp>
+#endif
 
 namespace gameanalytics
 {
@@ -160,10 +162,15 @@ namespace gameanalytics
             // lazy creation of db path
             if(sharedInstance()->dbPath.empty())
             {
+#if USE_UWP
+                std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
+                sharedInstance()->dbPath = p;
+#else
                 boost::filesystem::path p(device::GADevice::getWritablePath());
                 p /= "ga.sqlite3";
                 // initialize db path
                 sharedInstance()->dbPath = p.string();
+#endif
             }
 
             // Open database
@@ -322,7 +329,7 @@ namespace gameanalytics
                 {
                     std::string sessionDeleteString = "";
 
-                    int i = 0;
+                    unsigned int i = 0;
                     for (auto result : resultSessionArray)
                     {
                         sessionDeleteString += result.asString();
