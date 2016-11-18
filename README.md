@@ -21,6 +21,9 @@ Dependencies
 
 Changelog
 ---------
+**1.2.1**
+* possible to set custom dimensions and demographics before initialise
+
 **1.2.0**
 * added UWP support
 
