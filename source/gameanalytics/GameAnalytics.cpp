@@ -503,7 +503,10 @@ namespace gameanalytics
     {
         try
         {
-            state::GAState::endSessionAndStopQueue();
+            threading::GAThreading::performTaskOnGAThread([]()
+            {
+                state::GAState::endSessionAndStopQueue();
+            });
         }
         catch (const std::exception&)
         {

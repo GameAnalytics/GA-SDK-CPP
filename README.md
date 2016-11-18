@@ -21,6 +21,12 @@ Dependencies
 
 Changelog
 ---------
+**1.2.2**
+* fixed issue with onstop method
+
+**1.2.1**
+* possible to set custom dimensions and demographics before initialise
+
 **1.2.0**
 * added UWP support
 
