@@ -212,8 +212,8 @@ namespace gameanalytics
     void GameAnalytics::initialize(const std::string& gameKey, const std::string& gameSecret)
     {
 #if USE_UWP
-        Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(&GameAnalytics::OnAppSuspending);
-        Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(&GameAnalytics::OnAppResuming);
+        Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
+        Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);
 #endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {

@@ -225,7 +225,7 @@ namespace gameanalytics
         const std::string GADevice::getPersistentPath()
         {
 #if USE_UWP
-            return utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data());
+            return utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
 #else
             return boost::filesystem::detail::temp_directory_path().string();
 #endif
