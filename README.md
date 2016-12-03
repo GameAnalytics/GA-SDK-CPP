@@ -18,7 +18,6 @@ Dependencies
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
 * **Windows:** Visual Studio
-* **UWP:** Extenstion SDK: Windows Desktop Extensions for the UWP
 
 Changelog
 ---------
