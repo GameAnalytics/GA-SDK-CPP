@@ -18,9 +18,14 @@ Dependencies
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
 * **Windows:** Visual Studio
+* **UWP:** Extenstion SDK: Windows Desktop Extensions for the UWP
 
 Changelog
 ---------
+**1.2.3**
+* fixed build script for UWP
+* changed persistent path for UWP
+
 **1.2.2**
 * fixed issue with onstop method
 
