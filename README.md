@@ -22,6 +22,10 @@ Dependencies
 
 Changelog
 ---------
+**1.2.3**
+* fixed build script for UWP
+* changed persistent path for UWP
+
 **1.2.2**
 * fixed issue with onstop method
 
