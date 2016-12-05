@@ -5,9 +5,13 @@ xcode_scheme:
     - GameAnalyticsTests
 
 notifications:
+    slack:
+        rooms:
+            - gameanalytics:hDYD7nkOTe3tkrvb68WEpyqw#sdk
+        on_success: change
+        on_failure: change
     email:
-        - nikolaj@gameanalytics.com
-        - mts@gameanalytics.com
+        - sdk@gameanalytics.com
 
 before_install:
     - brew update
@@ -25,4 +29,3 @@ branches:
   only:
     - develop
     - master
-
