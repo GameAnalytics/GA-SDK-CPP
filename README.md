@@ -21,6 +21,9 @@ Dependencies
 
 Changelog
 ---------
+**1.2.4**
+* removed unused files
+
 **1.2.3**
 * fixed build script for UWP
 * changed persistent path for UWP
