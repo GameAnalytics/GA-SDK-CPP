@@ -78,7 +78,7 @@ namespace gameanalytics
         void GAState::setAvailableCustomDimensions01(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
-            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
+            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
             {
                 return;
             }
@@ -93,7 +93,7 @@ namespace gameanalytics
         void GAState::setAvailableCustomDimensions02(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
-            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
+            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
             {
                 return;
             }
@@ -108,7 +108,7 @@ namespace gameanalytics
         void GAState::setAvailableCustomDimensions03(const std::vector<std::string>& availableCustomDimensions)
         {
             // Validate
-            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions)) 
+            if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
             {
                 return;
             }
@@ -157,11 +157,11 @@ namespace gameanalytics
 
         Json::Value GAState::getSdkConfig()
         {
-            if (GAState::sharedInstance()->_sdkConfig.isObject()) 
+            if (GAState::sharedInstance()->_sdkConfig.isObject())
             {
                 return GAState::sharedInstance()->_sdkConfig;
-            } 
-            else if (GAState::sharedInstance()->_sdkConfigCached.isObject()) 
+            }
+            else if (GAState::sharedInstance()->_sdkConfigCached.isObject())
             {
                 return GAState::sharedInstance()->_sdkConfigCached;
             }
@@ -176,12 +176,12 @@ namespace gameanalytics
             if (currentSdkConfig.isObject() && currentSdkConfig.get("enabled", false).isBool() && currentSdkConfig.get("enabled", false).asBool() == false)
             {
                 return false;
-            } 
-            else if (!GAState::sharedInstance()->_initAuthorized) 
+            }
+            else if (!GAState::sharedInstance()->_initAuthorized)
             {
                 return false;
-            } 
-            else 
+            }
+            else
             {
                 return true;
             }
@@ -190,28 +190,40 @@ namespace gameanalytics
         void GAState::setCustomDimension01(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension01 = dimension;
-            store::GAStore::setState("dimension01", dimension);
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("dimension01", dimension);
+            }
             logging::GALogger::i("Set custom01 dimension value: " + dimension);
         }
 
         void GAState::setCustomDimension02(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension02 = dimension;
-            store::GAStore::setState("dimension02", dimension);
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("dimension02", dimension);
+            }
             logging::GALogger::i("Set custom02 dimension value: " + dimension);
         }
 
         void GAState::setCustomDimension03(const std::string& dimension)
         {
             sharedInstance()->_currentCustomDimension03 = dimension;
-            store::GAStore::setState("dimension03", dimension);
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("dimension03", dimension);
+            }
             logging::GALogger::i("Set custom03 dimension value: " + dimension);
         }
 
         void GAState::setFacebookId(const std::string& facebookId)
         {
             sharedInstance()->_facebookId = facebookId;
-            store::GAStore::setState("facebook_id", facebookId);
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("facebook_id", facebookId);
+            }
             logging::GALogger::i("Set facebook id: " + facebookId);
         }
 
@@ -223,15 +235,21 @@ namespace gameanalytics
             case Female:
                 sharedInstance()->_gender = "female";
             }
-            
-            store::GAStore::setState("gender", sharedInstance()->_gender);
+
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("gender", sharedInstance()->_gender);
+            }
             logging::GALogger::i("Set gender: " + sharedInstance()->_gender);
         }
 
         void GAState::setBirthYear(int birthYear)
         {
             sharedInstance()->_birthYear = birthYear;
-            store::GAStore::setState("birth_year", std::to_string(birthYear));
+            if (store::GAStore::sharedInstance()->getTableReady())
+            {
+                store::GAStore::setState("birth_year", std::to_string(birthYear));
+            }
             logging::GALogger::i("Set birth year: " + std::to_string(birthYear));
         }
 
@@ -330,7 +348,7 @@ namespace gameanalytics
         void GAState::internalInitialize()
         {
             // Make sure database is ready
-            if (!store::GAStore::sharedInstance()->getTableReady()) 
+            if (!store::GAStore::sharedInstance()->getTableReady())
             {
                 return;
             }
@@ -342,7 +360,7 @@ namespace gameanalytics
 
             startNewSession();
 
-            if (isEnabled()) 
+            if (isEnabled())
             {
                 events::GAEvents::ensureEventQueueIsRunning();
             }
@@ -364,11 +382,11 @@ namespace gameanalytics
 
         void GAState::endSessionAndStopQueue()
         {
-            if(GAState::isInitialized()) 
+            if(GAState::isInitialized())
             {
                 logging::GALogger::i("Ending session.");
                 events::GAEvents::stopEventQueue();
-                if (GAState::isEnabled() && GAState::sessionIsStarted()) 
+                if (GAState::isEnabled() && GAState::sessionIsStarted())
                 {
                     events::GAEvents::addSessionEndEvent();
                     GAState::sharedInstance()->_sessionStart = 0;
@@ -406,12 +424,12 @@ namespace gameanalytics
 
             // type of connection the user is currently on (add if valid)
             std::string connection_type = device::GADevice::getConnectionType();
-            if (validators::GAValidator::validateConnectionType(connection_type)) 
+            if (validators::GAValidator::validateConnectionType(connection_type))
             {
                 annotations["connection_type"] = connection_type;
             }
 
-            if (!device::GADevice::getGameEngineVersion().empty()) 
+            if (!device::GADevice::getGameEngineVersion().empty())
             {
                 annotations["engine_version"] = device::GADevice::getGameEngineVersion();
             }
@@ -419,7 +437,7 @@ namespace gameanalytics
             // ---- CONDITIONAL ---- //
 
             // App build version (use if not nil)
-            if (!getBuild().empty()) 
+            if (!getBuild().empty())
             {
                 annotations["build"] = getBuild();
             }
@@ -427,17 +445,17 @@ namespace gameanalytics
             // ---- OPTIONAL cross-session ---- //
 
             // facebook id (optional)
-            if (!getFacebookId().empty()) 
+            if (!getFacebookId().empty())
             {
                 annotations["facebook_id"] = getFacebookId();
             }
             // gender (optional)
-            if (!getGender().empty()) 
+            if (!getGender().empty())
             {
                 annotations["gender"] = getGender();
             }
             // birth_year (optional)
-            if (getBirthYear() != 0) 
+            if (getBirthYear() != 0)
             {
                 annotations["birth_year"] = getBirthYear();
             }
@@ -533,7 +551,7 @@ namespace gameanalytics
 
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
-			
+
 			std::string defaultId = state_dict.get("default_user_id", "").asString();
 			if(defaultId.empty())
 			{
@@ -549,35 +567,77 @@ namespace gameanalytics
             instance->_transactionNum = utilities::GAUtilities::parseString<double>(state_dict.get("transaction_num", "0.0").asString());
 
             // restore cross session user values
-            instance->_facebookId = state_dict.get("facebook_id", "").asString();
-            if (!instance->_facebookId.empty()) {
-                logging::GALogger::d("facebookid found in DB: " + instance->_facebookId);
+            if (!instance->_facebookId.empty())
+            {
+                store::GAStore::setState("facebook_id", instance->_facebookId);
+            }
+            else
+            {
+                instance->_facebookId = state_dict.get("facebook_id", "").asString();
+                if (!instance->_facebookId.empty()) {
+                    logging::GALogger::d("facebookid found in DB: " + instance->_facebookId);
+                }
             }
 
-            instance->_gender = state_dict.get("gender", "").asString();
-            if (!instance->_gender.empty()) {
-                logging::GALogger::d("gender found in DB: " + instance->_gender);
+            if (!instance->_gender.empty())
+            {
+                store::GAStore::setState("gender", instance->_gender);
+            }
+            else
+            {
+                instance->_gender = state_dict.get("gender", "").asString();
+                if (!instance->_gender.empty()) {
+                    logging::GALogger::d("gender found in DB: " + instance->_gender);
+                }
             }
 
-            instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.get("birthYear", "0").asString());
-            if (instance->_birthYear == 0) {
-                logging::GALogger::d("birthYear found in DB: " + std::to_string(instance->_birthYear));
+            if (instance->_birthYear != 0)
+            {
+                store::GAStore::setState("birth_year", std::to_string(instance->_birthYear));
+            }
+            else
+            {
+                instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.get("birth_year", "0").asString());
+                if (instance->_birthYear != 0) {
+                    logging::GALogger::d("birthYear found in DB: " + std::to_string(instance->_birthYear));
+                }
             }
 
             // restore dimension settings
-            instance->_currentCustomDimension01 = state_dict.get("dimension01", "").asString();
-            if (!instance->_currentCustomDimension01.empty()) {
-                logging::GALogger::d("Dimension01 found in cache: " + instance->_currentCustomDimension01);
+            if (!instance->_currentCustomDimension01.empty())
+            {
+                store::GAStore::setState("dimension01", instance->_currentCustomDimension01);
+            }
+            else
+            {
+                instance->_currentCustomDimension01 = state_dict.get("dimension01", "").asString();
+                if (!instance->_currentCustomDimension01.empty()) {
+                    logging::GALogger::d("Dimension01 found in cache: " + instance->_currentCustomDimension01);
+                }
             }
 
-            instance->_currentCustomDimension02 = state_dict.get("dimension02", "").asString();
-            if (!instance->_currentCustomDimension02.empty()) {
-                logging::GALogger::d("Dimension02 found cache: " + instance->_currentCustomDimension02);
+            if (!instance->_currentCustomDimension02.empty())
+            {
+                store::GAStore::setState("dimension02", instance->_currentCustomDimension02);
+            }
+            else
+            {
+                instance->_currentCustomDimension02 = state_dict.get("dimension02", "").asString();
+                if (!instance->_currentCustomDimension02.empty()) {
+                    logging::GALogger::d("Dimension02 found cache: " + instance->_currentCustomDimension02);
+                }
             }
 
-            instance->_currentCustomDimension03 = state_dict.get("dimension03", "").asString();
-            if (!instance->_currentCustomDimension03.empty()) {
-                logging::GALogger::d("Dimension03 found in cache: " + instance->_currentCustomDimension03);
+            if (!instance->_currentCustomDimension03.empty())
+            {
+                store::GAStore::setState("dimension03", instance->_currentCustomDimension03);
+            }
+            else
+            {
+                instance->_currentCustomDimension03 = state_dict.get("dimension03", "").asString();
+                if (!instance->_currentCustomDimension03.empty()) {
+                    logging::GALogger::d("Dimension03 found in cache: " + instance->_currentCustomDimension03);
+                }
             }
 
             // get cached init call values
@@ -637,7 +697,7 @@ namespace gameanalytics
                 GAState::sharedInstance()->_sdkConfig = initResponseDict;
 
                 GAState::sharedInstance()->_initAuthorized = true;
-            } 
+            }
             else if (initResponse == http::Unauthorized) {
                 logging::GALogger::w("Initialize SDK failed - Unauthorized");
                 GAState::sharedInstance()->_initAuthorized = false;
@@ -659,7 +719,7 @@ namespace gameanalytics
                 }
 
                 // init call failed (perhaps offline)
-                if (GAState::sharedInstance()->_sdkConfig.isNull()) 
+                if (GAState::sharedInstance()->_sdkConfig.isNull())
                 {
                     if (!GAState::sharedInstance()->_sdkConfigCached.isNull())
                     {
@@ -673,8 +733,8 @@ namespace gameanalytics
                         // set default init values
                         GAState::sharedInstance()->_sdkConfig = GAState::sharedInstance()->_sdkConfigDefault;
                     }
-                } 
-                else 
+                }
+                else
                 {
                     logging::GALogger::i("Init call (session start) failed - using cached init values.");
                 }
@@ -685,15 +745,15 @@ namespace gameanalytics
             GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
 
             // if SDK is disabled in config
-            if (!GAState::isEnabled()) 
+            if (!GAState::isEnabled())
             {
                 logging::GALogger::w("Could not start session: SDK is disabled.");
                 // stop event queue
                 // + make sure it's able to restart if another session detects it's enabled again
                 events::GAEvents::stopEventQueue();
                 return;
-            } 
-            else 
+            }
+            else
             {
                 events::GAEvents::ensureEventQueueIsRunning();
             }
@@ -715,19 +775,19 @@ namespace gameanalytics
         void GAState::validateAndFixCurrentDimensions()
         {
             // validate that there are no current dimension01 not in list
-            if (!validators::GAValidator::validateDimension01(sharedInstance()->_currentCustomDimension01)) 
+            if (!validators::GAValidator::validateDimension01(sharedInstance()->_currentCustomDimension01))
             {
                 logging::GALogger::d("Invalid dimension01 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension01);
                 setCustomDimension01("");
             }
             // validate that there are no current dimension02 not in list
-            if (!validators::GAValidator::validateDimension02(sharedInstance()->_currentCustomDimension02)) 
+            if (!validators::GAValidator::validateDimension02(sharedInstance()->_currentCustomDimension02))
             {
                 logging::GALogger::d("Invalid dimension02 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension02);
                 setCustomDimension02("");
             }
             // validate that there are no current dimension03 not in list
-            if (!validators::GAValidator::validateDimension03(sharedInstance()->_currentCustomDimension03)) 
+            if (!validators::GAValidator::validateDimension03(sharedInstance()->_currentCustomDimension03))
             {
                 logging::GALogger::d("Invalid dimension03 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension03);
                 setCustomDimension03("");
@@ -747,8 +807,8 @@ namespace gameanalytics
             if (validators::GAValidator::validateClientTs(clientTsAdjustedInteger))
             {
                 return clientTsAdjustedInteger;
-            } 
-            else 
+            }
+            else
             {
                 return clientTs;
             }

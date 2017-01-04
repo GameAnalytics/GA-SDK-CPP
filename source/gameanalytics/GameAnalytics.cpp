@@ -15,7 +15,7 @@
 #include "GAStore.h"
 
 namespace gameanalytics
-{   
+{
     // ----------------------- CONFIGURE ---------------------- //
 
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions)
@@ -212,8 +212,8 @@ namespace gameanalytics
     void GameAnalytics::initialize(const std::string& gameKey, const std::string& gameSecret)
     {
 #if USE_UWP
-        Windows::UI::Xaml::Application::Current->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(&GameAnalytics::OnAppSuspending);
-        Windows::UI::Xaml::Application::Current->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object ^>(&GameAnalytics::OnAppResuming);
+        Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
+        Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);
 #endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
@@ -300,7 +300,7 @@ namespace gameanalytics
 
             // Send to events
             // TODO(nikolaj): check if this cast from int to double is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true);  
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true);
         });
     }
 
@@ -388,11 +388,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
-
             if (!validators::GAValidator::validateDimension01(dimension))
             {
                 logging::GALogger::w("Could not set custom01 dimension value to '" + dimension + "'. Value not found in available custom01 dimension values");
@@ -406,11 +401,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
-
             if (!validators::GAValidator::validateDimension02(dimension))
             {
                 logging::GALogger::w("Could not set custom02 dimension value to '" + dimension + "'. Value not found in available custom01 dimension values");
@@ -424,11 +414,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
-
             if (!validators::GAValidator::validateDimension03(dimension))
             {
                 logging::GALogger::w("Could not set custom03 dimension value to '" + dimension + "'. Value not found in available custom01 dimension values");
@@ -442,11 +427,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
-
             if (validators::GAValidator::validateFacebookId(facebookId))
             {
                 state::GAState::setFacebookId(facebookId);
@@ -458,11 +438,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([gender]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
-
             if (validators::GAValidator::validateGender(gender))
             {
                 state::GAState::setGender(gender);
@@ -474,10 +449,6 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([birthYear]()
         {
-            if (!isSdkReady(false))
-            {
-                return;
-            }
             if (validators::GAValidator::validateBirthyear(birthYear))
             {
                 state::GAState::setBirthYear(birthYear);
@@ -487,7 +458,7 @@ namespace gameanalytics
 
     void GameAnalytics::startSession()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        threading::GAThreading::performTaskOnGAThread([]()
         {
             if(state::GAState::useManualSessionHandling())
             {
@@ -519,7 +490,7 @@ namespace gameanalytics
 
     void GameAnalytics::onResume()
     {
-        threading::GAThreading::performTaskOnGAThread([]() 
+        threading::GAThreading::performTaskOnGAThread([]()
         {
             if(!state::GAState::useManualSessionHandling())
             {
@@ -532,7 +503,10 @@ namespace gameanalytics
     {
         try
         {
-            state::GAState::endSessionAndStopQueue();
+            threading::GAThreading::performTaskOnGAThread([]()
+            {
+                state::GAState::endSessionAndStopQueue();
+            });
         }
         catch (const std::exception&)
         {

@@ -50,7 +50,7 @@ add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
 if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
     add_definitions("-DSQLITE_OS_WINRT")
-    
+
     FILE(GLOB_RECURSE CPP_SOURCES
         # Add GameAnalytics Sources
         "${GA_SOURCE_DIR}/*.cpp"
@@ -62,7 +62,7 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/sqlite/*.h"
 		"${DEPENDENCIES_DIR}/miniz/*.c"
     )
-	
+
 	include_directories(
 		"${DEPENDENCIES_DIR}/jsoncpp"
 		"${DEPENDENCIES_DIR}/sqlite"
@@ -86,7 +86,7 @@ else()
         "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
         "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
-	
+
 	add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
 	include_directories(
@@ -155,7 +155,7 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-    
+
     target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
@@ -169,7 +169,11 @@ if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x8
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-endif("${PLATFORM}" STREQUAL "win64-vc140-static")
+endif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+
+if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+    set_target_properties(GameAnalytics PROPERTIES VS_DESKTOP_EXTENSIONS_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
+endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
 if("${PLATFORM}" STREQUAL "win64-vc140-shared")
     include_directories(
@@ -195,7 +199,7 @@ if("${PLATFORM}" STREQUAL "win64-vc120-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-    
+
     target_link_libraries(GameAnalytics
 		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
