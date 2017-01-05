@@ -9,15 +9,22 @@ import tarfile
 import shutil
 import stat
 import subprocess
+import time
 
 from sys import platform
 
+def is_os_64bit():
+    return 'PROGRAMFILES(X86)' in os.environ
+
 if platform == 'win32':  # win32 and/or win64
     CMAKE_URL = 'https://cmake.org/files/v3.5/cmake-3.5.2-win32-x86.zip'
-    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev2/tizen-web-cli_TizenSDK_2.4.0_Rev2_windows-32.exe'
+    if is_os_64bit():
+        TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-64.exe'
+    else:
+        TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-32.exe'
 elif platform == 'darwin':  # OSX
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Darwin-universal.tar.gz'
-    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev2/tizen-web-cli_TizenSDK_2.4.0_Rev2_macos-64.bin'
+    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
 # elif platform in ('linux', 'linux2'):
 else:
     raise NotImplementedError('platform %s is currently not supported' % platform)
@@ -25,13 +32,13 @@ else:
 cmake_package = os.path.join(config.BUILD_ROOT, CMAKE_URL.split('/')[-1])
 tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
 
-def call_process(process_arguments, silent=False):
+def call_process(process_arguments, silent=False, shell=False):
     print('Call process ' + str(process_arguments))
 
     if silent is True:
-        subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
+        subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'), shell=shell)
     else:
-        subprocess.check_call(process_arguments)
+        subprocess.check_call(process_arguments, shell=shell)
 
 def download(url, destination, silent=False):
     def reporthook(count, block_size, total_size):
@@ -136,9 +143,38 @@ def install_tizen(silent=False):
                 tizen_package,
                 '--accept-license',
                 config.TIZEN_ROOT
-            ]
+            ],
+            shell=True
         )
+
         os.unlink(tizen_package)
+
+        if platform == 'darwin':
+            update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli")
+        else:
+            update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli.exe")
+
+        while not os.path.exists(update_manager):
+            time.sleep(1)
+
+        call_process(
+            [
+                update_manager,
+                'install',
+                '--accept-license',
+                'MOBILE-2.4-NativeAppDevelopment-CLI'
+            ],
+            shell=True
+        )
+
+        time.sleep(15)
+
+        temp_dir = os.path.join(config.TIZEN_ROOT, "temp")
+
+        while os.path.exists(temp_dir):
+            time.sleep(1)
+
+        print "Finished"
 
 def install_dependencies(silent=False):
     if silent is True:

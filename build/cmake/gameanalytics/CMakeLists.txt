@@ -13,6 +13,7 @@ message(STATUS ${CMAKE_MODULE_PATH})
 
 set(GA_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../source/gameanalytics")
 set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
+set(TIZEN_DIR "${PROJECT_SOURCE_DIR}/../../jenkins/dependencies/tizen")
 
 message(STATUS "********************** platform is ${PLATFORM}")
 
@@ -45,6 +46,16 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
     add_definitions("-DUSE_UWP -ZW")
 endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
+if("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tizen-x86-static")
+    add_definitions("-DUSE_TIZEN")
+
+    include_directories(
+        "${TIZEN_DIR}/platforms/tizen-2.4/mobile/rootstraps/mobile-2.4-device.core/usr/include/appfw"
+        "${TIZEN_DIR}/platforms/tizen-2.4/mobile/rootstraps/mobile-2.4-device.core/usr/include/system"
+        "${TIZEN_DIR}/platforms/tizen-2.4/mobile/rootstraps/mobile-2.4-device.core/usr/include"
+    )
+endif("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tizen-x86-static")
+
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
@@ -60,14 +71,43 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
-		"${DEPENDENCIES_DIR}/miniz/*.c"
+        "${DEPENDENCIES_DIR}/miniz/*.c"
     )
 
-	include_directories(
-		"${DEPENDENCIES_DIR}/jsoncpp"
-		"${DEPENDENCIES_DIR}/sqlite"
-		"${DEPENDENCIES_DIR}/miniz"
-	)
+    include_directories(
+        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/miniz"
+    )
+elseif("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tizen-x86-static")
+    FILE(GLOB_RECURSE CPP_SOURCES
+        # Add GameAnalytics Sources
+        "${GA_SOURCE_DIR}/*.cpp"
+        "${GA_SOURCE_DIR}/*.h"
+
+        # Add dependencies
+        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/sqlite/*.c"
+        "${DEPENDENCIES_DIR}/sqlite/*.h"
+        "${DEPENDENCIES_DIR}/crypto/*.c"
+        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+        "${DEPENDENCIES_DIR}/plog/*.h"
+        "${DEPENDENCIES_DIR}/miniz/*.c"
+        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
+        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
+    )
+
+    add_definitions("-DCRYPTOPP_DISABLE_ASM")
+
+    include_directories(
+        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/plog"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/crypto"
+        "${DEPENDENCIES_DIR}/miniz"
+        "${DEPENDENCIES_DIR}/curlcpp/include"
+        "${DEPENDENCIES_DIR}/boost/boost_1_60_0"
+    )
 else()
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
@@ -82,23 +122,23 @@ else()
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
         "${DEPENDENCIES_DIR}/plog/*.h"
-		"${DEPENDENCIES_DIR}/miniz/*.c"
+        "${DEPENDENCIES_DIR}/miniz/*.c"
         "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
         "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
-	add_definitions("-DCRYPTOPP_DISABLE_ASM")
+    add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
-	include_directories(
-		"${DEPENDENCIES_DIR}/jsoncpp"
-		"${DEPENDENCIES_DIR}/plog"
-		"${DEPENDENCIES_DIR}/sqlite"
-		"${DEPENDENCIES_DIR}/crypto"
-		"${DEPENDENCIES_DIR}/miniz"
-		"${DEPENDENCIES_DIR}/curl/include"
-		"${DEPENDENCIES_DIR}/curlcpp/include"
-		"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
-	)
+    include_directories(
+        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/plog"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/crypto"
+        "${DEPENDENCIES_DIR}/miniz"
+        "${DEPENDENCIES_DIR}/curl/include"
+        "${DEPENDENCIES_DIR}/curlcpp/include"
+        "${DEPENDENCIES_DIR}/boost/boost_1_60_0"
+    )
 endif()
 
 create_source_groups( CPP_SOURCES )
@@ -117,7 +157,7 @@ if("${PLATFORM}" STREQUAL "osx-shared")
     )
 
     target_link_libraries(GameAnalytics
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
@@ -125,11 +165,11 @@ if("${PLATFORM}" STREQUAL "osx-shared")
     )
 endif("${PLATFORM}" STREQUAL "osx-shared")
 
-if("${PLATFORM}" STREQUAL "win32-vc140-static")
+if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tizen-x86-static")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-endif("${PLATFORM}" STREQUAL "win32-vc140-static")
+endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tizen-x86-static")
 
 if("${PLATFORM}" STREQUAL "win32-vc140-shared")
     include_directories(
@@ -137,19 +177,13 @@ if("${PLATFORM}" STREQUAL "win32-vc140-shared")
     )
 
     target_link_libraries(GameAnalytics
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
+        ${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win32-vc140-shared")
-
-if("${PLATFORM}" STREQUAL "win32-vc120-static")
-    include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
-    )
-endif("${PLATFORM}" STREQUAL "win32-vc120-static")
 
 if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     include_directories(
@@ -157,11 +191,11 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     )
 
     target_link_libraries(GameAnalytics
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc120-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc120-mt-1_60.lib
-		${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
+        ${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win32-vc120-shared")
 
@@ -181,11 +215,11 @@ if("${PLATFORM}" STREQUAL "win64-vc140-shared")
     )
 
     target_link_libraries(GameAnalytics
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc140-mt-1_60.lib
-		${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
+        ${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win64-vc140-shared")
 
@@ -201,11 +235,11 @@ if("${PLATFORM}" STREQUAL "win64-vc120-shared")
     )
 
     target_link_libraries(GameAnalytics
-		${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc120-mt-1_60.lib
         ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc120-mt-1_60.lib
-		${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
+        ${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win64-vc120-shared")
 

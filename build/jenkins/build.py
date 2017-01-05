@@ -164,7 +164,7 @@ class TargetWin(TargetCMake):
             os.path.join(self.build_dir(), 'Release'),
             release_dir
         )
-        
+
 class TargetWin10(TargetWin):
     def create_project_file(self):
         call_process(
@@ -184,6 +184,69 @@ class TargetWin10(TargetWin):
             self.build_dir()
         )
 
+class TargetTizen(TargetCMake):
+    def create_project_file(self):
+        arm_toolchain_path = os.path.join(Config.TIZEN_ROOT, "tools", "arm-linux-gnueabi-gcc-4.9", "bin")
+        x86_toolchain_path = os.path.join(Config.TIZEN_ROOT, "tools", "i386-linux-gnueabi-gcc-4.9", "bin")
+        mingw_path = os.path.join(Config.TIZEN_ROOT, "tools", "mingw", "bin")
+
+        if platform == 'darwin':
+            os.environ['PATH'] = mingw_path + ":" + arm_toolchain_path + ":" + x86_toolchain_path + ":" + os.environ['PATH']
+        else:
+            os.environ['PATH'] = mingw_path + ";" + arm_toolchain_path + ";" + x86_toolchain_path + ";" + os.environ['PATH']
+
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DCMAKE_TOOLCHAIN_FILE=../../../cmake/Toolchain-Tizen-ARM.cmake',
+                '-DPLATFORM:STRING=' + self.name,
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+    def build(self, silent=False):
+        call_process(
+            [
+                'make'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        # call_process(
+        #     [
+        #         'make',
+        #         '-configuration',
+        #         'Debug'
+        #     ],
+        #     self.build_dir(),
+        #     silent=silent
+        # )
+        #
+        # debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
+        # release_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release'))
+        #
+        # # remove folders if there
+        # LibTools.remove_folder(debug_dir)
+        # LibTools.remove_folder(release_dir)
+        #
+        # shutil.move(
+        #     os.path.join(self.build_dir(), 'Debug'),
+        #     debug_dir
+        # )
+        #
+        # shutil.move(
+        #     os.path.join(self.build_dir(), 'Release'),
+        #     release_dir
+        # )
+
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
@@ -198,25 +261,31 @@ all_targets = {
 	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
+    'tizen-arm-static': TargetTizen('tizen-arm-static', 'MinGW Makefiles'),
+    'tizen-x86-static': TargetTizen('tizen-x86-static', 'MinGW Makefiles'),
 }
 
 available_targets = {
     'Darwin': {
         'osx-static': all_targets['osx-static'],
         'osx-shared': all_targets['osx-shared'],
+        'tizen-arm-static': all_targets['tizen-arm-static'],
+        'tizen-x86-static': all_targets['tizen-x86-static'],
     },
     'Windows': {
-        'win32-vc140-static': all_targets['win32-vc140-static'],
-        'win32-vc120-static': all_targets['win32-vc120-static'],
-        #'win32-vc140-shared': all_targets['win32-vc140-shared'],
-        #'win32-vc120-shared': all_targets['win32-vc120-shared'],
-        'win64-vc140-static': all_targets['win64-vc140-static'],
-        'win64-vc120-static': all_targets['win64-vc120-static'],
-        #'win64-vc140-shared': all_targets['win64-vc140-shared'],
-        #'win64-vc120-shared': all_targets['win64-vc120-shared'],
-        'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
-		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
-		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        # 'win32-vc140-static': all_targets['win32-vc140-static'],
+        # 'win32-vc120-static': all_targets['win32-vc120-static'],
+        # #'win32-vc140-shared': all_targets['win32-vc140-shared'],
+        # #'win32-vc120-shared': all_targets['win32-vc120-shared'],
+        # 'win64-vc140-static': all_targets['win64-vc140-static'],
+        # 'win64-vc120-static': all_targets['win64-vc120-static'],
+        # #'win64-vc140-shared': all_targets['win64-vc140-shared'],
+        # #'win64-vc120-shared': all_targets['win64-vc120-shared'],
+        # 'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
+		# 'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
+		# 'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        'tizen-arm-static': all_targets['tizen-arm-static'],
+        'tizen-x86-static': all_targets['tizen-x86-static'],
     }
 }[platform.system()]
 
