@@ -113,6 +113,7 @@ elseif("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tize
         "${DEPENDENCIES_DIR}/boost/boost_1_60_0"
     )
 else()
+    add_definitions("-DGUID_WINDOWS")
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
         # Add GameAnalytics Sources
@@ -143,7 +144,6 @@ else()
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
         "${DEPENDENCIES_DIR}/curlcpp/include"
-        "${DEPENDENCIES_DIR}/boost/boost_1_60_0"
     )
 endif()
 

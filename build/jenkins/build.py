@@ -15,7 +15,26 @@ import shutil
 if platform.system() == 'Windows':
     from _winreg import *
 
+if os.name == "nt":
+    __CSL = None
+    def symlink(source, link_name):
+        '''symlink(source, link_name)
+           Creates a symbolic link pointing to source named link_name'''
+        global __CSL
+        if __CSL is None:
+            import ctypes
+            csl = ctypes.windll.kernel32.CreateSymbolicLinkW
+            csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
+            csl.restype = ctypes.c_ubyte
+            __CSL = csl
+        flags = 0
+        if source is not None and os.path.isdir(source):
+            flags = 1
+        if __CSL(link_name, source, flags) == 0:
+            raise ctypes.WinError()
 
+    os.symlink = symlink
+    
 def call_process(process_arguments, process_workingdir, silent=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
     current_workingdir = os.getcwd()
@@ -187,7 +206,11 @@ class TargetWin10(TargetWin):
 class TargetTizen(TargetCMake):
     def create_project_file(self):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)
-        tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+        
+        if sys.platform == 'darwin':
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+        else:
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
 
         if LibTools.folder_exists(build_folder):
             shutil.rmtree(build_folder)
@@ -311,7 +334,7 @@ available_targets = {
         'tizen-x86-static': all_targets['tizen-x86-static'],
     },
     'Windows': {
-        # 'win32-vc140-static': all_targets['win32-vc140-static'],
+        'win32-vc140-static': all_targets['win32-vc140-static'],
         # 'win32-vc120-static': all_targets['win32-vc120-static'],
         # #'win32-vc140-shared': all_targets['win32-vc140-shared'],
         # #'win32-vc120-shared': all_targets['win32-vc120-shared'],

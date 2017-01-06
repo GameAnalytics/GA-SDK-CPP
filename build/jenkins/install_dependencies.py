@@ -194,6 +194,7 @@ def install_tizen(silent=False):
             os.unlink(tizen_package)
 
             update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli.exe")
+            tizen_ide = os.path.join(config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
 
             while not os.path.exists(update_manager):
                 time.sleep(1)
@@ -214,6 +215,15 @@ def install_tizen(silent=False):
 
             while os.path.exists(temp_dir):
                 time.sleep(1)
+                
+            call_process(
+                [
+                    tizen_ide,
+                    'cli-config',
+                    '-g',
+                    '"default.profiles.path=' + profile_file + '"'
+                ]
+            )
 
 def install_dependencies(silent=False):
     if silent is True:
