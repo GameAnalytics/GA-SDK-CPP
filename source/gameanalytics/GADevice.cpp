@@ -12,7 +12,7 @@
 #include <system_info.h>
 #include <app_common.h>
 #else
-#include <boost/filesystem.hpp>
+#include <cstdlib>
 #endif
 
 namespace gameanalytics
@@ -299,7 +299,11 @@ namespace gameanalytics
 #elif USE_TIZEN
             return app_get_data_path();
 #else
-            return boost::filesystem::detail::temp_directory_path().string();
+#ifdef _WIN32
+            return std::getenv("LOCALAPPDATA");
+#else
+            return std::getenv("TEMP");
+#endif
 #endif
         }
     }

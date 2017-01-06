@@ -220,6 +220,15 @@ namespace gameanalytics
             return ss.str();
         }
 
+        const char GAUtilities::getPathSeparatorChar()
+        {
+#ifdef _WIN32
+            return '\\';
+#else
+            return '/';
+#endif
+        }
+
         // TODO(nikolaj): explain function
         std::string GAUtilities::generateUUID()
         {

@@ -186,39 +186,77 @@ class TargetWin10(TargetWin):
 
 class TargetTizen(TargetCMake):
     def create_project_file(self):
-        arm_toolchain_path = os.path.join(Config.TIZEN_ROOT, "tools", "arm-linux-gnueabi-gcc-4.9", "bin")
-        x86_toolchain_path = os.path.join(Config.TIZEN_ROOT, "tools", "i386-linux-gnueabi-gcc-4.9", "bin")
-        mingw_path = os.path.join(Config.TIZEN_ROOT, "tools", "mingw", "bin")
+        build_folder = os.path.join(Config.BUILD_DIR, self.name)
+        tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
 
-        if platform == 'darwin':
-            os.environ['PATH'] = mingw_path + ":" + arm_toolchain_path + ":" + x86_toolchain_path + ":" + os.environ['PATH']
-        else:
-            os.environ['PATH'] = mingw_path + ";" + arm_toolchain_path + ";" + x86_toolchain_path + ";" + os.environ['PATH']
+        if LibTools.folder_exists(build_folder):
+            shutil.rmtree(build_folder)
 
         call_process(
             [
-                os.path.join(
-                    Config.CMAKE_ROOT,
-                    'bin',
-                    'cmake'
-                ),
-                '../../../cmake/gameanalytics/',
-                '-DCMAKE_TOOLCHAIN_FILE=../../../cmake/Toolchain-Tizen-ARM.cmake',
-                '-DPLATFORM:STRING=' + self.name,
-                '-G',
-                self.generator
+                tizen_ide,
+                'create',
+                'native-project',
+                '-p',
+                'mobile-2.4',
+                '-t',
+                'StaticLibrary',
+                '-n',
+                self.name,
+                '--',
+                Config.BUILD_DIR
             ],
-            self.build_dir()
+            Config.BUILD_DIR
         )
+
+        tizen_src_dir = os.path.join(build_folder, "src")
+        tizen_include_dir = os.path.join(build_folder, "inc")
+        src_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'source'))
+        dependencies_dir = os.path.join(src_dir, "dependencies")
+        project_def_tmp = os.path.abspath(os.path.join(__file__, '..', '..', 'tizen', 'project_def_tmp.prop'))
+        project_def = os.path.join(build_folder, 'project_def.prop')
+
+        shutil.rmtree(tizen_src_dir)
+        shutil.rmtree(tizen_include_dir)
+
+        os.symlink(src_dir, tizen_src_dir)
+        os.symlink(dependencies_dir, tizen_include_dir)
+
+        shutil.copy(project_def_tmp, project_def)
 
     def build(self, silent=False):
-        call_process(
-            [
-                'make'
-            ],
-            self.build_dir(),
-            silent=silent
-        )
+        build_folder = os.path.join(Config.BUILD_DIR, self.name)
+        tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+        #
+        # call_process(
+        #     [
+        #         tizen_ide,
+        #         'build-native',
+        #         '-a',
+        #         self.generator,
+        #         '-C',
+        #         'Release',
+        #         '--',
+        #         build_folder
+        #     ],
+        #     self.build_dir(),
+        #     silent=silent
+        # )
+        #
+        # call_process(
+        #     [
+        #         tizen_ide,
+        #         'build-native',
+        #         '-a',
+        #         self.generator,
+        #         '-C',
+        #         'Debug',
+        #         '--',
+        #         build_folder
+        #     ],
+        #     self.build_dir(),
+        #     silent=silent
+        # )
 
         # call_process(
         #     [
@@ -261,14 +299,14 @@ all_targets = {
 	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
-    'tizen-arm-static': TargetTizen('tizen-arm-static', 'MinGW Makefiles'),
-    'tizen-x86-static': TargetTizen('tizen-x86-static', 'MinGW Makefiles'),
+    'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
+    'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
 }
 
 available_targets = {
     'Darwin': {
-        'osx-static': all_targets['osx-static'],
-        'osx-shared': all_targets['osx-shared'],
+        # 'osx-static': all_targets['osx-static'],
+        # 'osx-shared': all_targets['osx-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
     },

@@ -31,6 +31,8 @@ else:
 
 cmake_package = os.path.join(config.BUILD_ROOT, CMAKE_URL.split('/')[-1])
 tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
+profile_tmp_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles_tmp.xml'))
+profile_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles.xml'))
 
 def call_process(process_arguments, silent=False, shell=False):
     print('Call process ' + str(process_arguments))
@@ -134,47 +136,84 @@ def install_tizen(silent=False):
             print "--> DOWNLOADING TIZEN"
             download(TIZEN_URL, tizen_package, silent=silent)
 
+        with open(profile_tmp_file) as infile, open(profile_file, 'w') as outfile:
+            for line in infile:
+                line = line.replace('<SDK_PATH>', config.TIZEN_ROOT)
+                outfile.write(line)
+
         if platform == 'darwin':
             st = os.stat(tizen_package)
             os.chmod(tizen_package, st.st_mode | stat.S_IEXEC)
 
-        call_process(
-            [
-                tizen_package,
-                '--accept-license',
-                config.TIZEN_ROOT
-            ],
-            shell=True
-        )
+            call_process(
+                [
+                    tizen_package,
+                    '--accept-license',
+                    config.TIZEN_ROOT
+                ]
+            )
 
-        os.unlink(tizen_package)
+            os.unlink(tizen_package)
 
-        if platform == 'darwin':
-            update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli")
+            update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli.bin")
+            tizen_ide = os.path.join(config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+
+            st = os.stat(update_manager)
+            os.chmod(update_manager, st.st_mode | stat.S_IEXEC)
+
+            st = os.stat(tizen_ide)
+            os.chmod(tizen_ide, st.st_mode | stat.S_IEXEC)
+
+            call_process(
+                [
+                    update_manager,
+                    'install',
+                    '--accept-license',
+                    'MOBILE-2.4-NativeAppDevelopment-CLI'
+                ]
+            )
+
+            call_process(
+                [
+                    tizen_ide,
+                    'cli-config',
+                    '-g',
+                    '"default.profiles.path=' + profile_file + '"'
+                ]
+            )
         else:
+            call_process(
+                [
+                    tizen_package,
+                    '--accept-license',
+                    config.TIZEN_ROOT
+                ],
+                shell=True
+            )
+
+            os.unlink(tizen_package)
+
             update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli.exe")
 
-        while not os.path.exists(update_manager):
-            time.sleep(1)
+            while not os.path.exists(update_manager):
+                time.sleep(1)
 
-        call_process(
-            [
-                update_manager,
-                'install',
-                '--accept-license',
-                'MOBILE-2.4-NativeAppDevelopment-CLI'
-            ],
-            shell=True
-        )
+            call_process(
+                [
+                    update_manager,
+                    'install',
+                    '--accept-license',
+                    'MOBILE-2.4-NativeAppDevelopment-CLI'
+                ],
+                shell=True
+            )
 
-        time.sleep(15)
+            time.sleep(15)
 
-        temp_dir = os.path.join(config.TIZEN_ROOT, "temp")
+            temp_dir = os.path.join(config.TIZEN_ROOT, "temp")
 
-        while os.path.exists(temp_dir):
-            time.sleep(1)
-
-        print "Finished"
+            while os.path.exists(temp_dir):
+                time.sleep(1)
 
 def install_dependencies(silent=False):
     if silent is True:

@@ -9,9 +9,6 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include <fstream>
-#if !USE_UWP
-#include <boost/filesystem.hpp>
-#endif
 
 namespace gameanalytics
 {
@@ -38,14 +35,14 @@ namespace gameanalytics
         Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
         {
             // We must be running on GAThread
-            if (!threading::GAThreading::isGAThread()) 
+            if (!threading::GAThreading::isGAThread())
             {
                 logging::GALogger::w("Trying to execute query on non-GAThread");
                 return{};
             }
 
             // Force transaction if it is an update, insert or delete.
-            if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)")) 
+            if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)"))
             {
                 useTransaction = true;
             }
@@ -56,9 +53,9 @@ namespace gameanalytics
             // Create mutable array for results
             Json::Value results(Json::arrayValue);
 
-            if (useTransaction) 
+            if (useTransaction)
             {
-                if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK) 
+                if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK)
                 {
                     logging::GALogger::e(std::string("SQLITE3 BEGIN ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                     return{};
@@ -69,13 +66,13 @@ namespace gameanalytics
             sqlite3_stmt *statement;
 
             // Prepare statement
-            if (sqlite3_prepare_v2(sqlDatabasePtr, sql.c_str(), -1, &statement, nullptr) == SQLITE_OK) 
+            if (sqlite3_prepare_v2(sqlDatabasePtr, sql.c_str(), -1, &statement, nullptr) == SQLITE_OK)
             {
                 // Bind parameters
-                if (!parameters.empty()) 
+                if (!parameters.empty())
                 {
                     unsigned parametersCount = parameters.size();
-                    for (unsigned index = 0; index < parametersCount; index++) 
+                    for (unsigned index = 0; index < parametersCount; index++)
                     {
                         sqlite3_bind_text(statement, static_cast<int>(index + 1), parameters[index].c_str(), -1, 0);
                     }
@@ -85,15 +82,15 @@ namespace gameanalytics
                 int columnCount = sqlite3_column_count(statement);
 
                 // Loop through results
-                while (sqlite3_step(statement) == SQLITE_ROW) 
+                while (sqlite3_step(statement) == SQLITE_ROW)
                 {
                     Json::Value row;
-                    for (int i = 0; i < columnCount; i++) 
+                    for (int i = 0; i < columnCount; i++)
                     {
                         const char *column = (const char *)sqlite3_column_name(statement, i);
                         const char *value = (const char *)sqlite3_column_text(statement, i);
 
-                        if (!column || !value) 
+                        if (!column || !value)
                         {
                             continue;
                         }
@@ -166,15 +163,13 @@ namespace gameanalytics
                 std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #else
-                boost::filesystem::path p(device::GADevice::getWritablePath());
-                p /= "ga.sqlite3";
-                // initialize db path
-                sharedInstance()->dbPath = p.string();
+                std::string p(device::GADevice::getWritablePath() + GAUtilities::getPathSeparatorChar() + "ga.sqlite3");
+                sharedInstance()->dbPath = p;
 #endif
             }
 
             // Open database
-            if (sqlite3_open(sharedInstance()->dbPath.c_str(), &sharedInstance()->sqlDatabase) != SQLITE_OK) 
+            if (sqlite3_open(sharedInstance()->dbPath.c_str(), &sharedInstance()->sqlDatabase) != SQLITE_OK)
             {
                 sharedInstance()->dbReady = false;
                 logging::GALogger::w("Could not open database: " + sharedInstance()->dbPath);
@@ -357,4 +352,4 @@ namespace gameanalytics
         }
 
     }
-} 
+}

@@ -68,6 +68,7 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${GA_SOURCE_DIR}/*.h"
 
         # Add dependencies
+        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
@@ -75,6 +76,7 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
     )
 
     include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
@@ -86,6 +88,7 @@ elseif("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tize
         "${GA_SOURCE_DIR}/*.h"
 
         # Add dependencies
+        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
@@ -100,6 +103,7 @@ elseif("${PLATFORM}" STREQUAL "tizen-arm-static" OR "${PLATFORM}" STREQUAL "tize
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
         "${DEPENDENCIES_DIR}/plog"
         "${DEPENDENCIES_DIR}/sqlite"
@@ -116,6 +120,7 @@ else()
         "${GA_SOURCE_DIR}/*.h"
 
         # Add dependencies
+        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
@@ -130,6 +135,7 @@ else()
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
         "${DEPENDENCIES_DIR}/plog"
         "${DEPENDENCIES_DIR}/sqlite"
@@ -255,7 +261,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     target_compile_features(GameAnalytics PRIVATE cxx_nonstatic_member_init)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_features(GameAnalytics PRIVATE cxx_nonstatic_member_init)
+    #target_compile_features(GameAnalytics PRIVATE cxx_nonstatic_member_init)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

@@ -5,10 +5,11 @@
 #include "GAUtilities.h"
 #include <collection.h>
 #include <ppltasks.h>
+#elif USE_TIZEN
+#include <dlog.h>
 #else
 #include <plog/Log.h>
 #include <plog/Appenders/ConsoleAppender.h>
-#include <boost/filesystem.hpp>
 #endif
 
 #if USE_UWP
@@ -22,157 +23,156 @@
 
 namespace gameanalytics
 {
-	namespace logging
-	{
-		const std::string GALogger::tag = "GameAnalytics";
+    namespace logging
+    {
+        const std::string GALogger::tag = "GameAnalytics";
 
-		GALogger::GALogger()
-		{
-			infoLogEnabled = false;
+        GALogger::GALogger()
+        {
+            infoLogEnabled = false;
 
 #if defined(_DEBUG)
-			// log debug is in dev mode
-			debugEnabled = true;
+            // log debug is in dev mode
+            debugEnabled = true;
 #else
-			debugEnabled = false;
+            debugEnabled = false;
 #endif
 
 #if USE_UWP
             Windows::Storage::StorageFolder^ gaFolder = concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFolderAsync("GameAnalytics", Windows::Storage::CreationCollisionOption::OpenIfExists)).get();
             file = concurrency::create_task(gaFolder->CreateFileAsync("ga_log.txt", Windows::Storage::CreationCollisionOption::ReplaceExisting)).get();
 #endif
-		}
+        }
 
-		void GALogger::setInfoLog(bool enabled)
-		{
-			GALogger::sharedInstance()->infoLogEnabled = enabled;
-		}
+        void GALogger::setInfoLog(bool enabled)
+        {
+            GALogger::sharedInstance()->infoLogEnabled = enabled;
+        }
 
-		void GALogger::setVerboseInfoLog(bool enabled)
-		{
-			GALogger::sharedInstance()->infoLogVerboseEnabled = enabled;
-		}
+        void GALogger::setVerboseInfoLog(bool enabled)
+        {
+            GALogger::sharedInstance()->infoLogVerboseEnabled = enabled;
+        }
 
-#if !USE_UWP
-		void GALogger::addFileLog(const std::string& path)
-		{
+#if !USE_UWP && !USE_TIZEN
+        void GALogger::addFileLog(const std::string& path)
+        {
             GALogger *ga = GALogger::sharedInstance();
-			boost::filesystem::path p(path);
-            p /= "ga_log.txt";
+            std::string p(path + GAUtilities::getPathSeparatorChar() + "ga_log.txt");
 
-			static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.string().c_str(), 1 * 1024 * 1024, 10);
-			static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
+            static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
+            static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
 
-			if(ga->debugEnabled)
-			{
-				plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
-			}
-			else
-			{
-				plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
-			}
+            if(ga->debugEnabled)
+            {
+                plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
+            }
+            else
+            {
+                plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
+            }
 
-			GALogger::i("Log file added under: " + path);
-		}
+            GALogger::i("Log file added under: " + path);
+        }
 #endif
 
-		// i: information logging
-		//
-		// used for:
-		// - non-errors
-		// - initializing, adding event, sending events etc.
-		// - generally small text
-		void GALogger::i(const std::string& format)
-		{
-			GALogger *ga = GALogger::sharedInstance();
+        // i: information logging
+        //
+        // used for:
+        // - non-errors
+        // - initializing, adding event, sending events etc.
+        // - generally small text
+        void GALogger::i(const std::string& format)
+        {
+            GALogger *ga = GALogger::sharedInstance();
 
-			if (!ga->infoLogEnabled) {
-				// No logging of info unless in client debug mode
-				return;
-			}
+            if (!ga->infoLogEnabled) {
+                // No logging of info unless in client debug mode
+                return;
+            }
 
             std::string message = "Info/" + ga->tag + ": " + format;
-			ga->sendNotificationMessage(message, Info);
-		}
+            ga->sendNotificationMessage(message, Info);
+        }
 
 
-		// w: warning logging (ALWAYS show)
-		//
-		// used for:
-		// - validation errors
-		// - trying to initialize with wrong keys
-		// - other non-critical
-		void GALogger::w(const std::string& format)
-		{
+        // w: warning logging (ALWAYS show)
+        //
+        // used for:
+        // - validation errors
+        // - trying to initialize with wrong keys
+        // - other non-critical
+        void GALogger::w(const std::string& format)
+        {
             GALogger *ga = GALogger::sharedInstance();
 
             std::string message = "Warning/" + ga->tag + ": " + format;
-			ga->sendNotificationMessage(message, Warning);
-		}
+            ga->sendNotificationMessage(message, Warning);
+        }
 
 
-		// e: error logging (ALWAYS show)
-		//
-		// used for:
-		// - breaking app behaviour
-		// - JSON decoding/encoding errors
-		// - unexpected exceptions
-		// - errors that never should happen
-		void GALogger::e(const std::string& format)
-		{
+        // e: error logging (ALWAYS show)
+        //
+        // used for:
+        // - breaking app behaviour
+        // - JSON decoding/encoding errors
+        // - unexpected exceptions
+        // - errors that never should happen
+        void GALogger::e(const std::string& format)
+        {
             GALogger *ga = GALogger::sharedInstance();
 
             std::string message = "Error/" + ga->tag + ": " + format;
-			ga->sendNotificationMessage(message, Error);
-		}
+            ga->sendNotificationMessage(message, Error);
+        }
 
 
-		// d: debug logging (show when developing)
-		//
-		// used for:
-		// - development only
-		// - use large debug text like HTTP payload etc.
-		void GALogger::d(const std::string& format)
-		{
+        // d: debug logging (show when developing)
+        //
+        // used for:
+        // - development only
+        // - use large debug text like HTTP payload etc.
+        void GALogger::d(const std::string& format)
+        {
             GALogger *ga = GALogger::sharedInstance();
 
-			if (!ga->debugEnabled) {
-				// No logging of debug unless in full debug logging mode
-				return;
-			}
+            if (!ga->debugEnabled) {
+                // No logging of debug unless in full debug logging mode
+                return;
+            }
 
             std::string message = "Debug/" + ga->tag + ": " + format;
-			ga->sendNotificationMessage(message, Debug);
-		}
+            ga->sendNotificationMessage(message, Debug);
+        }
 
 
-		// ii: Advanced information logging
-		//
-		// used for:
-		// - Large logs
-		void GALogger::ii(const std::string& format)
-		{
+        // ii: Advanced information logging
+        //
+        // used for:
+        // - Large logs
+        void GALogger::ii(const std::string& format)
+        {
             GALogger *ga = GALogger::sharedInstance();
 
-			if (!ga->infoLogVerboseEnabled) {
-				// No logging of info unless in client debug mode
-				return;
-			}
+            if (!ga->infoLogVerboseEnabled) {
+                // No logging of info unless in client debug mode
+                return;
+            }
 
             std::string message = "Verbose/" + ga->tag + ": " + format;
-			ga->sendNotificationMessage(message, Info);
-		}
+            ga->sendNotificationMessage(message, Info);
+        }
 
-		void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
-		{
+        void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
+        {
 #if USE_UWP
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
             Platform::Collections::Vector<Platform::String^>^ lines = ref new Platform::Collections::Vector<Platform::String^>();
             lines->Append(m);
 #endif
-			switch(type)
-			{
-				case Error:
+            switch(type)
+            {
+                case Error:
 #if USE_UWP
                     try
                     {
@@ -182,12 +182,14 @@ namespace gameanalytics
                     {
                     }
                     LogMessageToConsole(m);
+#elif USE_TIZEN
+                    dlog_print(DLOG_ERROR, GALogger::tag.c_str(), message.c_str());
 #else
-					LOG_ERROR << message;
+                    LOG_ERROR << message;
 #endif
-					break;
+                    break;
 
-				case Warning:
+                case Warning:
 #if USE_UWP
                     try
                     {
@@ -197,12 +199,14 @@ namespace gameanalytics
                     {
                     }
                     LogMessageToConsole(m);
+#elif USE_TIZEN
+                    dlog_print(DLOG_WARN, GALogger::tag.c_str(), message.c_str());
 #else
-					LOG_WARNING << message;
+                    LOG_WARNING << message;
 #endif
-					break;
+                    break;
 
-				case Debug:
+                case Debug:
 #if USE_UWP
                     try
                     {
@@ -212,12 +216,14 @@ namespace gameanalytics
                     {
                     }
                     LogMessageToConsole(m);
+#elif USE_TIZEN
+                    dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
 #else
-					LOG_DEBUG << message;
+                    LOG_DEBUG << message;
 #endif
-					break;
+                    break;
 
-				case Info:
+                case Info:
 #if USE_UWP
                     try
                     {
@@ -227,12 +233,14 @@ namespace gameanalytics
                     {
                     }
                     LogMessageToConsole(m);
+#elif USE_TIZEN
+                    dlog_print(DLOG_INFO, GALogger::tag.c_str(), message.c_str());
 #else
-					LOG_INFO << message;
+                    LOG_INFO << message;
 #endif
-					break;
-			}
-		}
+                    break;
+            }
+        }
 
 #if USE_UWP
         void GALogger::LogMessageToConsole(Platform::Object^ parameter)
@@ -242,5 +250,5 @@ namespace gameanalytics
             OutputDebugString(formattedText.c_str());
         }
 #endif
-	}
+    }
 }
