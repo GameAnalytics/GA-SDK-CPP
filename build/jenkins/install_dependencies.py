@@ -172,13 +172,22 @@ def install_tizen(silent=False):
                     'MOBILE-2.4-NativeAppDevelopment-CLI'
                 ]
             )
-
+            
             call_process(
                 [
                     tizen_ide,
                     'cli-config',
                     '-g',
                     '"default.profiles.path=' + profile_file + '"'
+                ]
+            )
+            
+            call_process(
+                [
+                    tizen_ide,
+                    'cli-config',
+                    '-g',
+                    'default.build.compiler=gcc'
                 ]
             )
         else:
@@ -222,6 +231,15 @@ def install_tizen(silent=False):
                     'cli-config',
                     '-g',
                     '"default.profiles.path=' + profile_file + '"'
+                ]
+            )
+            
+            call_process(
+                [
+                    tizen_ide,
+                    'cli-config',
+                    '-g',
+                    'default.build.compiler=gcc'
                 ]
             )
 

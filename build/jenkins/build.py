@@ -217,8 +217,10 @@ class TargetTizen(TargetCMake):
         
         if LibTools.folder_exists(build_folder):
             if sys.platform != 'darwin':
-                os.rmdir(tizen_include_dir)
-                os.rmdir(tizen_src_dir)
+                if LibTools.folder_exists(tizen_include_dir):
+                    os.rmdir(tizen_include_dir)
+                if LibTools.folder_exists(tizen_src_dir):
+                    os.rmdir(tizen_src_dir)
             shutil.rmtree(build_folder)
 
         call_process(
@@ -253,63 +255,60 @@ class TargetTizen(TargetCMake):
 
     def build(self, silent=False):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)
-        tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
-        #
-        # call_process(
-        #     [
-        #         tizen_ide,
-        #         'build-native',
-        #         '-a',
-        #         self.generator,
-        #         '-C',
-        #         'Release',
-        #         '--',
-        #         build_folder
-        #     ],
-        #     self.build_dir(),
-        #     silent=silent
-        # )
-        #
-        # call_process(
-        #     [
-        #         tizen_ide,
-        #         'build-native',
-        #         '-a',
-        #         self.generator,
-        #         '-C',
-        #         'Debug',
-        #         '--',
-        #         build_folder
-        #     ],
-        #     self.build_dir(),
-        #     silent=silent
-        # )
-
-        # call_process(
-        #     [
-        #         'make',
-        #         '-configuration',
-        #         'Debug'
-        #     ],
-        #     self.build_dir(),
-        #     silent=silent
-        # )
-        #
-        # debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
-        # release_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release'))
-        #
-        # # remove folders if there
+        if sys.platform == 'darwin':
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+        else:
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
+        
+        call_process(
+            [
+                tizen_ide,
+                'build-native',
+                '-a',
+                self.generator,
+                '-c',
+                'gcc',
+                '-C',
+                'Release',
+                '--',
+                build_folder
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+        
+        call_process(
+            [
+                tizen_ide,
+                'build-native',
+                '-a',
+                self.generator,
+                '-c',
+                'gcc',
+                '-C',
+                'Debug',
+                '--',
+                build_folder
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+        
+        debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
+        release_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release'))
+        
+        # remove folders if there
         # LibTools.remove_folder(debug_dir)
         # LibTools.remove_folder(release_dir)
-        #
+        
         # shutil.move(
-        #     os.path.join(self.build_dir(), 'Debug'),
-        #     debug_dir
+            # os.path.join(self.build_dir(), 'Debug'),
+            # debug_dir
         # )
-        #
+        
         # shutil.move(
-        #     os.path.join(self.build_dir(), 'Release'),
-        #     release_dir
+            # os.path.join(self.build_dir(), 'Release'),
+            # release_dir
         # )
 
 all_targets = {
@@ -338,7 +337,7 @@ available_targets = {
         'tizen-x86-static': all_targets['tizen-x86-static'],
     },
     'Windows': {
-        'win32-vc140-static': all_targets['win32-vc140-static'],
+        # 'win32-vc140-static': all_targets['win32-vc140-static'],
         # 'win32-vc120-static': all_targets['win32-vc120-static'],
         # #'win32-vc140-shared': all_targets['win32-vc140-shared'],
         # #'win32-vc120-shared': all_targets['win32-vc120-shared'],
