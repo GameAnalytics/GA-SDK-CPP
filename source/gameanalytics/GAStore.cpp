@@ -163,7 +163,7 @@ namespace gameanalytics
                 std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #else
-                std::string p(device::GADevice::getWritablePath() + GAUtilities::getPathSeparatorChar() + "ga.sqlite3");
+                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparatorChar() + "ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #endif
             }

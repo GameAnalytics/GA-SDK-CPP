@@ -165,8 +165,6 @@ if("${PLATFORM}" STREQUAL "osx-shared")
     target_link_libraries(GameAnalytics
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
         ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     )
 endif("${PLATFORM}" STREQUAL "osx-shared")
@@ -185,8 +183,6 @@ if("${PLATFORM}" STREQUAL "win32-vc140-shared")
     target_link_libraries(GameAnalytics
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win32-vc140-shared")
@@ -199,8 +195,6 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     target_link_libraries(GameAnalytics
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_filesystem-vc120-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win32/lib/libboost_system-vc120-mt-1_60.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win32-vc120-shared")
@@ -223,8 +217,6 @@ if("${PLATFORM}" STREQUAL "win64-vc140-shared")
     target_link_libraries(GameAnalytics
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc140-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc140-mt-1_60.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win64-vc140-shared")
@@ -243,8 +235,6 @@ if("${PLATFORM}" STREQUAL "win64-vc120-shared")
     target_link_libraries(GameAnalytics
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_filesystem-vc120-mt-1_60.lib
-        ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/win64/lib/libboost_system-vc120-mt-1_60.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
     )
 endif("${PLATFORM}" STREQUAL "win64-vc120-shared")

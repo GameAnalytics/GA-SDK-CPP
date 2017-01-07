@@ -217,7 +217,7 @@ class TargetTizen(TargetCMake):
         
         if LibTools.folder_exists(build_folder):
             if sys.platform != 'darwin':
-                #os.rmdir(tizen_include_dir)
+                os.rmdir(tizen_include_dir)
                 os.rmdir(tizen_src_dir)
             shutil.rmtree(build_folder)
 

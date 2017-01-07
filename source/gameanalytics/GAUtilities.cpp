@@ -12,9 +12,8 @@
 #include <Objbase.h>
 #else
 #include <hmac_sha2.h>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <guid.h>
+#include <sstream>
 #endif
 
 // From crypto
@@ -249,8 +248,11 @@ namespace gameanalytics
 
             throw Platform::Exception::CreateException(hr);
 #else
-            boost::uuids::uuid uuid = boost::uuids::random_generator()();
-            return boost::lexical_cast<std::string>(uuid);
+            GuidGenerator generator;
+            auto myGuid = generator.newGuid();
+            std::stringstream stream;
+            stream << myGuid;
+            return stream.str();
 #endif
         }
 
