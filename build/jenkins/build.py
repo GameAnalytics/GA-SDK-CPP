@@ -212,7 +212,13 @@ class TargetTizen(TargetCMake):
         else:
             tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
 
+        tizen_src_dir = os.path.join(build_folder, "src")
+        tizen_include_dir = os.path.join(build_folder, "inc")
+        
         if LibTools.folder_exists(build_folder):
+            if sys.platform != 'darwin':
+                #os.rmdir(tizen_include_dir)
+                os.rmdir(tizen_src_dir)
             shutil.rmtree(build_folder)
 
         call_process(
@@ -232,8 +238,6 @@ class TargetTizen(TargetCMake):
             Config.BUILD_DIR
         )
 
-        tizen_src_dir = os.path.join(build_folder, "src")
-        tizen_include_dir = os.path.join(build_folder, "inc")
         src_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'source'))
         dependencies_dir = os.path.join(src_dir, "dependencies")
         project_def_tmp = os.path.abspath(os.path.join(__file__, '..', '..', 'tizen', 'project_def_tmp.prop'))
