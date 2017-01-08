@@ -252,6 +252,18 @@ class TargetTizen(TargetCMake):
         os.symlink(dependencies_dir, tizen_include_dir)
 
         shutil.copy(project_def_tmp, project_def)
+        
+        flags_file = os.path.join(build_folder, 'Build', 'flags.mk')
+        
+        with open(flags_file, 'r') as file:
+            lines = file.readlines()
+            
+        for index, line in enumerate(lines):
+            if line.startswith('CPP_COMPILE_FLAGS'):
+                lines[index] = line.strip() + " -std=c++11\n"
+        
+        with open(flags_file, 'w') as file:
+            file.writelines(lines)
 
     def build(self, silent=False):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)

@@ -4,7 +4,7 @@ type = staticLib
 profile = mobile-2.4
 
 USER_SRCS = src/gameanalytics/*.cpp src/dependencies/crossguid/*.cpp src/dependencies/crypto/*.cpp src/dependencies/crypto/*.c src/dependencies/miniz/*.c src/dependencies/curlcpp/src/*.cpp
-USER_DEFS = USE_TIZEN
+USER_DEFS = USE_TIZEN GUID_LIBUUID
 USER_INC_DIRS = inc/crypto inc/miniz
 USER_CPP_INC_DIRS = inc/crossguid inc/jsoncpp inc/curlcpp/include inc/crypto src/gameanalytics
 USER_OBJS =
