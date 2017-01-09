@@ -4,15 +4,17 @@
 //
 
 #include "GADevice.h"
+#include "GAUtilities.h"
 #if USE_UWP
 #include <Windows.h>
 #include <sstream>
-#include "GAUtilities.h"
 #elif USE_TIZEN
 #include <system_info.h>
 #include <app_common.h>
 #else
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 namespace gameanalytics
@@ -300,9 +302,14 @@ namespace gameanalytics
             return app_get_data_path();
 #else
 #ifdef _WIN32
-            return std::getenv("LOCALAPPDATA");
+            std::string result = std::getenv("LOCALAPPDATA") + std::to_string(utilities::GAUtilities::getPathSeparatorChar()) + "GameAnalytics";
+            _mkdir(result.c_str());
+            return result;
 #else
-            return std::getenv("TEMP");
+            std::string result = std::getenv("TEMP") + std::to_string(utilities::GAUtilities::getPathSeparatorChar()) + "GameAnalytics";
+            mode_t nMode = 0733;
+            mkdir(result.c_str(),nMode);
+            return result;
 #endif
 #endif
         }

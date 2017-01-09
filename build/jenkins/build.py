@@ -34,7 +34,7 @@ if os.name == "nt":
             raise ctypes.WinError()
 
     os.symlink = symlink
-    
+
 def call_process(process_arguments, process_workingdir, silent=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
     current_workingdir = os.getcwd()
@@ -206,15 +206,15 @@ class TargetWin10(TargetWin):
 class TargetTizen(TargetCMake):
     def create_project_file(self):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)
-        
+
         if sys.platform == 'darwin':
-            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.sh")
         else:
             tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
 
         tizen_src_dir = os.path.join(build_folder, "src")
         tizen_include_dir = os.path.join(build_folder, "inc")
-        
+
         if LibTools.folder_exists(build_folder):
             if sys.platform != 'darwin':
                 if LibTools.folder_exists(tizen_include_dir):
@@ -252,26 +252,26 @@ class TargetTizen(TargetCMake):
         os.symlink(dependencies_dir, tizen_include_dir)
 
         shutil.copy(project_def_tmp, project_def)
-        
+
         flags_file = os.path.join(build_folder, 'Build', 'flags.mk')
-        
+
         with open(flags_file, 'r') as file:
             lines = file.readlines()
-            
+
         for index, line in enumerate(lines):
             if line.startswith('CPP_COMPILE_FLAGS'):
                 lines[index] = line.strip() + " -std=c++11\n"
-        
+
         with open(flags_file, 'w') as file:
             file.writelines(lines)
 
     def build(self, silent=False):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)
         if sys.platform == 'darwin':
-            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.sh")
         else:
             tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
-        
+
         call_process(
             [
                 tizen_ide,
@@ -279,7 +279,7 @@ class TargetTizen(TargetCMake):
                 '-a',
                 self.generator,
                 '-c',
-                'gcc',
+                'llvm',
                 '-C',
                 'Release',
                 '--',
@@ -288,7 +288,7 @@ class TargetTizen(TargetCMake):
             self.build_dir(),
             silent=silent
         )
-        
+
         call_process(
             [
                 tizen_ide,
@@ -296,7 +296,7 @@ class TargetTizen(TargetCMake):
                 '-a',
                 self.generator,
                 '-c',
-                'gcc',
+                'llvm',
                 '-C',
                 'Debug',
                 '--',
@@ -305,19 +305,19 @@ class TargetTizen(TargetCMake):
             self.build_dir(),
             silent=silent
         )
-        
+
         debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
         release_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release'))
-        
+
         # remove folders if there
         # LibTools.remove_folder(debug_dir)
         # LibTools.remove_folder(release_dir)
-        
+
         # shutil.move(
             # os.path.join(self.build_dir(), 'Debug'),
             # debug_dir
         # )
-        
+
         # shutil.move(
             # os.path.join(self.build_dir(), 'Release'),
             # release_dir
