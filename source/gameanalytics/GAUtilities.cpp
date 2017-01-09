@@ -8,6 +8,7 @@
 #include "GALogger.h"
 #include <algorithm>
 #include <regex>
+#include <limits.h>
 #if USE_UWP
 #include <Objbase.h>
 #else

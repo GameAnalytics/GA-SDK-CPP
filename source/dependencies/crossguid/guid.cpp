@@ -25,7 +25,9 @@ THE SOFTWARE.
 #include "guid.h"
 
 #ifdef GUID_LIBUUID
-#include <uuid/uuid.h>
+#include "kashmir/uuid.h"
+#include "kashmir/devrand.h"
+#include <sstream>
 #endif
 
 #ifdef GUID_CFUUID
@@ -166,13 +168,21 @@ bool Guid::operator!=(const Guid &other) const
 #ifdef GUID_LIBUUID
 Guid GuidGenerator::newGuid()
 {
-  uuid_t id;
-  uuid_generate(id);
-  return id;
+  using kashmir::uuid_t;
+  using kashmir::system::DevRand;
+
+  DevRand devrandom;
+  std::stringstream ss;
+
+  uuid_t uuid;
+  devrandom >> uuid;
+  ss << uuid;
+
+  return ss.str();
 }
 #endif
 
-// this is the mac and ios version 
+// this is the mac and ios version
 #ifdef GUID_CFUUID
 Guid GuidGenerator::newGuid()
 {
@@ -210,7 +220,7 @@ Guid GuidGenerator::newGuid()
   GUID newId;
   CoCreateGuid(&newId);
 
-  const unsigned char bytes[16] = 
+  const unsigned char bytes[16] =
   {
     (newId.Data1 >> 24) & 0xFF,
     (newId.Data1 >> 16) & 0xFF,
@@ -254,7 +264,7 @@ Guid GuidGenerator::newGuid()
   jlong mostSignificant = _env->CallLongMethod(javaUuid, _mostSignificantBitsMethod);
   jlong leastSignificant = _env->CallLongMethod(javaUuid, _leastSignificantBitsMethod);
 
-  unsigned char bytes[16] = 
+  unsigned char bytes[16] =
   {
     (mostSignificant >> 56) & 0xFF,
     (mostSignificant >> 48) & 0xFF,
