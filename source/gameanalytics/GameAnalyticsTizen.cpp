@@ -6,12 +6,12 @@
 
 void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 {
-    Json::Value json = utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    const std::vector<std::string>& list;
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+    std::vector<std::string> list;
 
-    for (auto entry : json)
+    for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(entry.asString());
+        list.push_back(json[index].asString());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(list);
@@ -19,12 +19,12 @@ void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 
 void configureAvailableCustomDimensions02(const char *customDimensionsJson)
 {
-    Json::Value json = utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    const std::vector<std::string>& list;
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+    std::vector<std::string> list;
 
-    for (auto entry : json)
+    for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(entry.asString());
+        list.push_back(json[index].asString());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(list);
@@ -32,12 +32,12 @@ void configureAvailableCustomDimensions02(const char *customDimensionsJson)
 
 void configureAvailableCustomDimensions03(const char *customDimensionsJson)
 {
-    Json::Value json = utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    const std::vector<std::string>& list;
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+    std::vector<std::string> list;
 
-    for (auto entry : json)
+    for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(entry.asString());
+        list.push_back(json[index].asString());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(list);
@@ -45,12 +45,12 @@ void configureAvailableCustomDimensions03(const char *customDimensionsJson)
 
 void configureAvailableResourceCurrencies(const char *resourceCurrenciesJson)
 {
-    Json::Value json = utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
-    const std::vector<std::string>& list;
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
+    std::vector<std::string> list;
 
-    for (auto entry : json)
+    for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(entry.asString());
+        list.push_back(json[index].asString());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(list);
@@ -58,12 +58,12 @@ void configureAvailableResourceCurrencies(const char *resourceCurrenciesJson)
 
 void configureAvailableResourceItemTypes(const char *resourceItemTypesJson)
 {
-    Json::Value json = utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
-    const std::vector<std::string>& list;
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
+    std::vector<std::string> list;
 
-    for (auto entry : json)
+    for (unsigned int index = 0; index < json.size(); ++index )
     {
-        list.push_back(entry.asString());
+        list.push_back(json[index].asString());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(list);
@@ -117,7 +117,7 @@ void initialize(const char *gameKey, const char *gameSecret)
 // add events
 void addBusinessEvent(const char *currency, int amount, const char *itemType, const char *itemId, const char *cartType)
 {
-    gameanalytics::GameAnalytics::initialize(currency, amount, itemType, itemId, cartType);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType);
 }
 
 void addResourceEvent(int flowType, const char *currency, float amount, const char *itemType, const char *itemId)

@@ -11,6 +11,7 @@ import re
 import config as Config
 import libs.tools as LibTools
 import shutil
+import fileinput
 
 if platform.system() == 'Windows':
     from _winreg import *
@@ -223,6 +224,12 @@ class TargetTizen(TargetCMake):
                     os.rmdir(tizen_src_dir)
             shutil.rmtree(build_folder)
 
+        libType = 'StaticLibrary'
+        lib_type = 'staticLib'
+        if 'shared' in self.name:
+            libType = 'SharedLibrary'
+            lib_type = 'sharedLib'
+
         call_process(
             [
                 tizen_ide,
@@ -231,7 +238,7 @@ class TargetTizen(TargetCMake):
                 '-p',
                 'mobile-2.4',
                 '-t',
-                'StaticLibrary',
+                libType,
                 '-n',
                 self.name,
                 '--',
@@ -253,6 +260,16 @@ class TargetTizen(TargetCMake):
 
         shutil.copy(project_def_tmp, project_def)
 
+        for line in fileinput.input(project_def, inplace=True):
+            if '<LIB_TYPE>' in line:
+                line = line.replace('<LIB_TYPE>', lib_type)
+            if '<ASYNC>' in line:
+                if self.generator == 'x86':
+                    line = line.replace('<ASYNC>', 'NO_ASYNC')
+                else:
+                    line = line.replace('<ASYNC>', '')
+            sys.stdout.write(line)
+
         flags_file = os.path.join(build_folder, 'Build', 'flags.mk')
 
         with open(flags_file, 'r') as file:
@@ -272,6 +289,8 @@ class TargetTizen(TargetCMake):
         else:
             tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
 
+        compiler = 'gcc'
+
         call_process(
             [
                 tizen_ide,
@@ -279,7 +298,7 @@ class TargetTizen(TargetCMake):
                 '-a',
                 self.generator,
                 '-c',
-                'gcc',
+                compiler,
                 '-C',
                 'Release',
                 '--',
@@ -296,7 +315,7 @@ class TargetTizen(TargetCMake):
                 '-a',
                 self.generator,
                 '-c',
-                'gcc',
+                compiler,
                 '-C',
                 'Debug',
                 '--',
@@ -306,22 +325,28 @@ class TargetTizen(TargetCMake):
             silent=silent
         )
 
-        debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
-        release_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release'))
+        libEnding = 'a'
+        if 'shared' in self.name:
+            libEnding = 'so'
 
-        # remove folders if there
-        # LibTools.remove_folder(debug_dir)
-        # LibTools.remove_folder(release_dir)
+        debug_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug', 'libGameAnalytics.' + libEnding))
+        release_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release', 'libGameAnalytics.' + libEnding))
 
-        # shutil.move(
-            # os.path.join(self.build_dir(), 'Debug'),
-            # debug_dir
-        # )
+        if not os.path.exists(os.path.dirname(debug_file)):
+            os.makedirs(os.path.dirname(debug_file))
 
-        # shutil.move(
-            # os.path.join(self.build_dir(), 'Release'),
-            # release_dir
-        # )
+        if not os.path.exists(os.path.dirname(release_file)):
+            os.makedirs(os.path.dirname(release_file))
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
+            debug_file
+        )
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
+            release_file
+        )
 
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
@@ -338,15 +363,19 @@ all_targets = {
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
+    'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
+    'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
 }
 
 available_targets = {
     'Darwin': {
-        # 'osx-static': all_targets['osx-static'],
-        # 'osx-shared': all_targets['osx-shared'],
+        'osx-static': all_targets['osx-static'],
+        'osx-shared': all_targets['osx-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
-        #'tizen-x86-static': all_targets['tizen-x86-static'],
+        'tizen-arm-shared': all_targets['tizen-arm-shared'],
+        'tizen-x86-static': all_targets['tizen-x86-static'],
+        'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Windows': {
         # 'win32-vc140-static': all_targets['win32-vc140-static'],

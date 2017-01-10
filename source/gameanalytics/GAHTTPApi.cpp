@@ -55,7 +55,7 @@ namespace gameanalytics
             // make JSON string from data
             std::string JSONstring = utilities::GAUtilities::jsonToString(initAnnotations);
 
-            if (JSONstring.empty()) 
+            if (JSONstring.empty())
             {
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
             }
@@ -75,7 +75,7 @@ namespace gameanalytics
             {
                 error.print_traceback();
             }
-            
+
             std::string body = os.str();
             // process the response
             logging::GALogger::d("init request content : " + body);
@@ -84,20 +84,20 @@ namespace gameanalytics
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Init");
 
             // if not 200 result
-            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
-            {                
+            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+            {
                 logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
-            if (requestJsonDict.isNull()) 
+            if (requestJsonDict.isNull())
             {
                 logging::GALogger::d("Failed Init Call. Json decoding failed");
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
             // print reason if bad request
-            if (requestResponseEnum == BadRequest) 
+            if (requestResponseEnum == BadRequest)
             {
                 logging::GALogger::d("Failed Init Call. Bad request. Response: " + requestJsonDict.toStyledString());
                 // return bad request result
@@ -107,7 +107,7 @@ namespace gameanalytics
             // validate Init call values
             Json::Value validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
 
-            if (!validatedInitValues) 
+            if (!validatedInitValues)
             {
                 return std::pair<EGAHTTPApiResponse, Json::Value>(BadResponse, Json::Value());
             }
@@ -118,7 +118,7 @@ namespace gameanalytics
 
         std::pair<EGAHTTPApiResponse, Json::Value> GAHTTPApi::sendEventsInArray(const std::vector<Json::Value>& eventArray)
         {
-            if (eventArray.empty()) 
+            if (eventArray.empty())
             {
                 logging::GALogger::d("sendEventsInArray called with missing eventArray");
             }
@@ -132,7 +132,7 @@ namespace gameanalytics
             // make JSON string from data
             auto JSONstring = utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
 
-            if (JSONstring.empty()) 
+            if (JSONstring.empty())
             {
                 logging::GALogger::d("sendEventsInArray JSON encoding failed of eventArray");
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
@@ -153,14 +153,14 @@ namespace gameanalytics
             {
                 error.print_traceback();
             }
-            
+
             std::string body = os.str();
             logging::GALogger::d("body: " + body);
 
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Events");
 
             // if not 200 result
-            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest) 
+            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
                 return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
@@ -169,13 +169,13 @@ namespace gameanalytics
             // decode JSON
             Json::Value requestJsonDict = utilities::GAUtilities::jsonFromString(body);
 
-            if (requestJsonDict.isNull()) 
+            if (requestJsonDict.isNull())
             {
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
             // print reason if bad request
-            if (requestResponseEnum == BadRequest) 
+            if (requestResponseEnum == BadRequest)
             {
                 logging::GALogger::d("Failed Events Call. Bad request. Response: " + requestJsonDict.toStyledString());
             }
@@ -233,8 +233,9 @@ namespace gameanalytics
                 return;
             }
 
+#if !NO_ASYNC
             bool useGzip = this->useGzip;
-
+            
             std::async(std::launch::async, [url, payloadJSONString, useGzip, type]() -> void
             {
                 std::string payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString, useGzip);
@@ -268,6 +269,7 @@ namespace gameanalytics
 
                 countMap[type] = countMap[type] + 1;
             });
+#endif
         }
 
         const int GAHTTPApi::MaxCount = 10;
@@ -276,7 +278,7 @@ namespace gameanalytics
         const std::string GAHTTPApi::createPayloadData(const std::string& payload, bool gzip)
         {
             std::string payloadData;
-            
+
             if (gzip)
             {
                 payloadData = utilities::GAUtilities::gzipCompress(payload);
@@ -286,7 +288,7 @@ namespace gameanalytics
             {
                 payloadData = payload;
             }
-            
+
             return payloadData;
         }
 
@@ -307,12 +309,12 @@ namespace gameanalytics
 
             // always JSON
             header.add("Content-Type: application/json");
-            
+
             curl.add<CURLOPT_HTTPHEADER>(header.get());
             curl.add<CURLOPT_POSTFIELDS>(payloadData.c_str());
             curl.add<CURLOPT_SSL_VERIFYPEER>(false);
             curl.add<CURLOPT_POSTFIELDSIZE>(payloadData.size());
-            
+
             return authorization;
         }
 
@@ -356,4 +358,3 @@ namespace gameanalytics
     }
 }
 #endif
-
