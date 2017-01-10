@@ -32,10 +32,10 @@ extern void addResourceEvent(int flowType, const char *currency, float amount, c
 
 extern void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03);
 
-extern void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score);
+extern void addProgressionEventWithScore(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score);
 
 extern void addDesignEvent(const char *eventId);
-extern void addDesignEvent(const char *eventId, double value);
+extern void addDesignEventWithValue(const char *eventId, double value);
 extern void addErrorEvent(int severity, const char *message);
 
 // set calls can be changed at any time (pre- and post-initialize)

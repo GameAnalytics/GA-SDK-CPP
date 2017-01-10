@@ -110,38 +110,113 @@ void configureUserId(const char *uId)
 
 // initialize - starting SDK (need configuration before starting)
 void initialize(const char *gameKey, const char *gameSecret)
+{
+    gameanalytics::GameAnalytics::initialize(gameKey, gameSecret);
+}
 
 // add events
-extern void addBusinessEvent(const char *currency, int amount, const char *itemType, const char *itemId, const char *cartType);
+void addBusinessEvent(const char *currency, int amount, const char *itemType, const char *itemId, const char *cartType)
+{
+    gameanalytics::GameAnalytics::initialize(currency, amount, itemType, itemId, cartType);
+}
 
-extern void addResourceEvent(int flowType, const char *currency, float amount, const char *itemType, const char *itemId);
+void addResourceEvent(int flowType, const char *currency, float amount, const char *itemType, const char *itemId)
+{
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowType, currency, amount, itemType, itemId);
+}
 
-extern void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03);
+void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03)
+{
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatus, progression01, progression02, progression03);
+}
 
-extern void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score);
+void addProgressionEventWithScore(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score)
+{
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatus, progression01, progression02, progression03, score);
+}
 
-extern void addDesignEvent(const char *eventId);
-extern void addDesignEvent(const char *eventId, double value);
-extern void addErrorEvent(int severity, const char *message);
+void addDesignEvent(const char *eventId)
+{
+    gameanalytics::GameAnalytics::addDesignEvent(eventId);
+}
+
+void addDesignEventWithValue(const char *eventId, double value)
+{
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value);
+}
+
+void addErrorEvent(int severity, const char *message)
+{
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severity, message);
+}
 
 // set calls can be changed at any time (pre- and post-initialize)
 // some calls only work after a configure is called (setCustomDimension)
-extern void setEnabledInfoLog(bool flag);
-extern void setEnabledVerboseLog(bool flag);
-extern void setEnabledManualSessionHandling(bool flag);
-extern void setCustomDimension01(const char *dimension01);
-extern void setCustomDimension02(const char *dimension02);
-extern void setCustomDimension03(const char *dimension03);
-extern void setFacebookId(const char *facebookId);
-extern void setGender(int gender);
-extern void setBirthYear(int birthYear);
+void setEnabledInfoLog(bool flag)
+{
+    gameanalytics::GameAnalytics::setEnabledInfoLog(flag);
+}
 
-extern void startSession();
-extern void endSession();
+void setEnabledVerboseLog(bool flag)
+{
+    gameanalytics::GameAnalytics::setEnabledVerboseLog(flag);
+}
+
+void setEnabledManualSessionHandling(bool flag)
+{
+    gameanalytics::GameAnalytics::setEnabledManualSessionHandling(flag);
+}
+
+void setCustomDimension01(const char *dimension01)
+{
+    gameanalytics::GameAnalytics::setCustomDimension01(dimension01);
+}
+
+void setCustomDimension02(const char *dimension02)
+{
+    gameanalytics::GameAnalytics::setCustomDimension02(dimension02);
+}
+
+void setCustomDimension03(const char *dimension03)
+{
+    gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
+}
+
+void setFacebookId(const char *facebookId)
+{
+    gameanalytics::GameAnalytics::setFacebookId(facebookId);
+}
+
+void setGender(int gender)
+{
+    gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)gender);
+}
+
+void setBirthYear(int birthYear)
+{
+    gameanalytics::GameAnalytics::setBirthYear(birthYear);
+}
+
+void startSession()
+{
+    gameanalytics::GameAnalytics::startSession();
+}
+
+void endSession()
+{
+    gameanalytics::GameAnalytics::endSession();
+}
 
 // game state changes
 // will affect how session is started / ended
-extern void onResume();
-extern void onStop();
+void onResume()
+{
+    gameanalytics::GameAnalytics::onResume();
+}
+
+void onStop()
+{
+    gameanalytics::GameAnalytics::onStop();
+}
 
 #endif
