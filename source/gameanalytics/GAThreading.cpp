@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include "GALogger.h"
 #include <thread>
+#include <exception>
 
 namespace gameanalytics
 {
@@ -17,12 +18,7 @@ namespace gameanalytics
         // static members
         std::shared_ptr<GAThreading::State> GAThreading::state;
 
-        bool GAThreading::isGAThread()
-        {
-            return true;
-        }
-
-        void GAThreading::createStateIfNeeded()
+        void GAThreading::initIfNeeded()
         {
             if (!state)
             {
@@ -30,38 +26,19 @@ namespace gameanalytics
             }
         }
 
-        GAThreading::BlockIdentifier GAThreading::scheduleTimer(double interval, const Block& callback)
+        void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
-            createStateIfNeeded();
+            initIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
 
             GAThreading::BlockIdentifier blockIdentifier = GAThreading::BlockIdentifier::make();
             state->blocks.push_back({ callback, blockIdentifier, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
-            return blockIdentifier;
-        }
-
-        void GAThreading::ignoreTimer(const GAThreading::BlockIdentifier& blockIdentifier)
-        {
-            createStateIfNeeded();
-            GAThreadHelpers::scoped_lock lock(state->mutex);
-            for (auto& block : state->blocks)
-            {
-                if (block.blockIdentifier == blockIdentifier)
-                {
-                    block.ignore = true;
-                }
-            }
         }
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
-            performTaskWithDelayOnGAThread(taskBlock, 0);
-        }
-
-        void GAThreading::performTaskWithDelayOnGAThread(const Block& taskBlock, long delayInSeconds)
-        {
-            createStateIfNeeded();
+            initIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
             state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now() + std::chrono::seconds(delayInSeconds)} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
@@ -84,33 +61,41 @@ namespace gameanalytics
 
         void* GAThreading::thread_routine(void*)
         {
+            logging::GALogger::d("thread_routine start");
             while(!state)
             {
                 // wait for the assignment to be complete
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
-            while (std::shared_ptr<State> state = GAThreading::state)
+            try
             {
-                TimedBlock timedBlock;
-
-                while (getNextBlock(timedBlock))
+                while (std::shared_ptr<State> state = GAThreading::state)
                 {
-                    assert(timedBlock.block);
-                    assert(timedBlock.deadline <= std::chrono::steady_clock::now());
-                    if (!timedBlock.ignore)
-                    {
-                        timedBlock.block();
-                    }
-                    // clear the block, so that the assert works
-                    timedBlock.block = {};
-                }
+                    TimedBlock timedBlock;
 
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+                    while (getNextBlock(timedBlock))
+                    {
+                        assert(timedBlock.block);
+                        assert(timedBlock.deadline <= std::chrono::steady_clock::now());
+                        if (!timedBlock.ignore)
+                        {
+                            timedBlock.block();
+                        }
+                        // clear the block, so that the assert works
+                        timedBlock.block = {};
+                    }
+
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+            catch(const std::exception& e)
+            {
+                logging::GALogger::e("Error on GA thread");
+                logging::GALogger::e(e.what());
             }
 
             return nullptr;
         }
     }
 }
-

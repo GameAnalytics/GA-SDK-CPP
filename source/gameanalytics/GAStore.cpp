@@ -34,13 +34,6 @@ namespace gameanalytics
 
         Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
         {
-            // We must be running on GAThread
-            if (!threading::GAThreading::isGAThread())
-            {
-                logging::GALogger::w("Trying to execute query on non-GAThread");
-                return{};
-            }
-
             // Force transaction if it is an update, insert or delete.
             if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)"))
             {

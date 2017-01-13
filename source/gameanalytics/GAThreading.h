@@ -5,11 +5,16 @@
 
 #pragma once
 
-#include <Foundation/GAThreadHelpers.h>
+
 #include <functional>
+#if USE_TIZEN
+#include <Ecore.h>
+#else
+#include <Foundation/GAThreadHelpers.h>
 #include <vector>
 #include <chrono>
 #include <memory>
+#endif
 
 namespace gameanalytics
 {
@@ -18,8 +23,10 @@ namespace gameanalytics
         class GAThreading
         {
          public:
+
             typedef std::function<void()> Block;
 
+#if !USE_TIZEN
             struct BlockIdentifier
             {
                 static BlockIdentifier make()
@@ -43,20 +50,31 @@ namespace gameanalytics
              private:
                 unsigned long id = 0;
             };
+#endif
 
             static void performTaskOnGAThread(const Block& taskBlock);
-            
-            static void performTaskWithDelayOnGAThread(const Block& taskBlock, long delayInSeconds);
-
-            static void performTaskOnMainThread(const Block& taskBlock);
-
-            static bool isGAThread();
 
             // timers
-            static BlockIdentifier scheduleTimer(double interval, const Block& callback);
-            static void ignoreTimer(const BlockIdentifier& blockIdentifier);
+            static void scheduleTimer(double interval, const Block& callback);
 
          private:
+
+#if USE_TIZEN
+            static bool initialized;
+
+            struct BlockHolder
+            {
+                BlockHolder() {}
+
+                BlockHolder(const Block& block) :block(block) {}
+
+                Block block;
+            };
+
+            static Eina_Bool _scheduled_function(void* data);
+            static void _perform_task_function(void* data, Ecore_Thread* thread);
+            static void _end_function(void* data, Ecore_Thread* thread);
+#else
             //timers
             struct TimedBlock
             {
@@ -96,8 +114,6 @@ namespace gameanalytics
 
             static std::shared_ptr<State> state;
 
-            static void createStateIfNeeded();
-
             //< The function that's running in the gaThread
             static void* thread_routine(void*);
             /*!
@@ -106,6 +122,9 @@ namespace gameanalytics
             return true, if a Block is retrieved, false if a TimedBlock is retrieved.
             */
             static bool getNextBlock(TimedBlock& timedBlock);
+#endif
+
+            static void initIfNeeded();
         };
     }
 }

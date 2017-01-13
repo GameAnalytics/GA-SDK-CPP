@@ -375,7 +375,7 @@ available_targets = {
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
-        'tizen-x86-shared': all_targets['tizen-x86-shared'],
+         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Windows': {
         # 'win32-vc140-static': all_targets['win32-vc140-static'],
@@ -389,7 +389,7 @@ available_targets = {
         # 'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
 		# 'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
 		# 'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
-        'tizen-arm-static': all_targets['tizen-arm-static'],
+        #'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
     }
 }[platform.system()]
