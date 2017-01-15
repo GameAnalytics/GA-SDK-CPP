@@ -197,12 +197,12 @@ void setBirthYear(int birthYear)
     gameanalytics::GameAnalytics::setBirthYear(birthYear);
 }
 
-void startSession()
+void gameAnalyticsStartSession()
 {
     gameanalytics::GameAnalytics::startSession();
 }
 
-void endSession()
+void gameAnalyticsEndSession()
 {
     gameanalytics::GameAnalytics::endSession();
 }

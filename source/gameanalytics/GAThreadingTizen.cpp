@@ -36,7 +36,19 @@ namespace gameanalytics
 
         Eina_Bool GAThreading::_scheduled_function(void* data)
         {
-            ecore_thread_run(_perform_task_function, _end_function, NULL, data);
+            BlockHolder* blockHolder = static_cast<BlockHolder*>(data);
+
+            try
+            {
+                blockHolder->block();
+            }
+            catch(const std::exception& e)
+            {
+                logging::GALogger::e("Error on GA thread");
+                logging::GALogger::e(e.what());
+            }
+
+            delete blockHolder;
             return ECORE_CALLBACK_DONE;
         }
 
@@ -59,7 +71,7 @@ namespace gameanalytics
 
         void GAThreading::_end_function(void* data, Ecore_Thread* thread)
         {
-            logging::GALogger::d("GAThreading::_perform_task_function has finished");
+            //logging::GALogger::d("GAThreading::_perform_task_function has finished");
         }
     }
 }

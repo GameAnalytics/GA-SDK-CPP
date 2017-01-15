@@ -11,6 +11,7 @@
 #elif USE_TIZEN
 #include <system_info.h>
 #include <app_common.h>
+#include <algorithm>
 #else
 #include <cstdlib>
 #include <sys/types.h>
@@ -142,7 +143,7 @@ namespace gameanalytics
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/feature/platform.version", &value);
-            if (ret != SYSTEM_INFO_ERROR_NONE)
+            if (ret == SYSTEM_INFO_ERROR_NONE)
             {
                 version = value;
             }
@@ -163,7 +164,7 @@ namespace gameanalytics
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/manufacturer", &value);
-            if (ret != SYSTEM_INFO_ERROR_NONE)
+            if (ret == SYSTEM_INFO_ERROR_NONE)
             {
                 result = value;
             }
@@ -184,7 +185,7 @@ namespace gameanalytics
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/model_name", &value);
-            if (ret != SYSTEM_INFO_ERROR_NONE)
+            if (ret == SYSTEM_INFO_ERROR_NONE)
             {
                 result = value;
             }
@@ -232,7 +233,7 @@ namespace gameanalytics
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/tizenid", &value);
-            if (ret != SYSTEM_INFO_ERROR_NONE)
+            if (ret == SYSTEM_INFO_ERROR_NONE)
             {
                 result = value;
             }
@@ -275,10 +276,12 @@ namespace gameanalytics
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/platform.name", &value);
-            if (ret != SYSTEM_INFO_ERROR_NONE)
+            if (ret == SYSTEM_INFO_ERROR_NONE)
             {
                 result = value;
             }
+
+            std::transform(result.begin(), result.end(), result.begin(), ::tolower);
 
             return result;
 #else

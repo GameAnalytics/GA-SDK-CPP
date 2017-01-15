@@ -13,6 +13,9 @@
 #include "curl_ios.h"
 #include <ostream>
 #include <future>
+#if USE_TIZEN
+#include <net_connection.h>
+#endif
 
 namespace gameanalytics
 {
@@ -65,6 +68,16 @@ namespace gameanalytics
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
             curl::curl_header header;
+#if USE_TIZEN
+            connection_h connection;
+            int conn_err;
+            conn_err = connection_create(&connection);
+            if (conn_err != CONNECTION_ERROR_NONE)
+            {
+                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+            }
+#endif
+
             std::string authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
@@ -74,6 +87,7 @@ namespace gameanalytics
             catch (curl::curl_easy_exception error)
             {
                 error.print_traceback();
+                logging::GALogger::d(error.what());
             }
 
             std::string body = os.str();
@@ -87,12 +101,18 @@ namespace gameanalytics
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
             if (requestJsonDict.isNull())
             {
                 logging::GALogger::d("Failed Init Call. Json decoding failed");
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
@@ -101,6 +121,9 @@ namespace gameanalytics
             {
                 logging::GALogger::d("Failed Init Call. Bad request. Response: " + requestJsonDict.toStyledString());
                 // return bad request result
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
@@ -109,8 +132,15 @@ namespace gameanalytics
 
             if (!validatedInitValues)
             {
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(BadResponse, Json::Value());
             }
+
+#if USE_TIZEN
+            connection_destroy(connection);
+#endif
 
             // all ok
             return std::pair<EGAHTTPApiResponse, Json::Value>(Ok, validatedInitValues);
@@ -143,6 +173,15 @@ namespace gameanalytics
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
             curl::curl_header header;
+#if USE_TIZEN
+            connection_h connection;
+            int conn_err;
+            conn_err = connection_create(&connection);
+            if (conn_err != CONNECTION_ERROR_NONE)
+            {
+                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+            }
+#endif
             std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
 
             try
@@ -152,6 +191,7 @@ namespace gameanalytics
             catch (curl::curl_easy_exception error)
             {
                 error.print_traceback();
+                logging::GALogger::d(error.what());
             }
 
             std::string body = os.str();
@@ -163,6 +203,9 @@ namespace gameanalytics
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
             }
 
@@ -171,6 +214,9 @@ namespace gameanalytics
 
             if (requestJsonDict.isNull())
             {
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
             }
 
@@ -179,6 +225,10 @@ namespace gameanalytics
             {
                 logging::GALogger::d("Failed Events Call. Bad request. Response: " + requestJsonDict.toStyledString());
             }
+
+#if USE_TIZEN
+            connection_destroy(connection);
+#endif
 
             // return response
             return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
@@ -235,7 +285,7 @@ namespace gameanalytics
 
 #if !NO_ASYNC
             bool useGzip = this->useGzip;
-            
+
             std::async(std::launch::async, [url, payloadJSONString, useGzip, type]() -> void
             {
                 std::string payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString, useGzip);
@@ -243,6 +293,15 @@ namespace gameanalytics
                 curl::curl_ios<std::ostringstream> writer(os);
                 curl::curl_easy curl(writer);
                 curl::curl_header header;
+#if USE_TIZEN
+                connection_h connection;
+                int conn_err;
+                conn_err = connection_create(&connection);
+                if (conn_err != CONNECTION_ERROR_NONE)
+                {
+                    return;
+                }
+#endif
                 std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, header, url, payloadData, useGzip);
 
                 try
@@ -252,6 +311,7 @@ namespace gameanalytics
                 catch (curl::curl_easy_exception error)
                 {
                     error.print_traceback();
+                    logging::GALogger::d(error.what());
                 }
 
                 std::string body = os.str();
@@ -264,8 +324,15 @@ namespace gameanalytics
                 if (statusCode != 200)
                 {
                     logging::GALogger::d("sdk error failed. response code not 200. status code: " + std::to_string(statusCode));
+#if USE_TIZEN
+                    connection_destroy(connection);
+#endif
                     return;
                 }
+
+#if USE_TIZEN
+                connection_destroy(connection);
+#endif
 
                 countMap[type] = countMap[type] + 1;
             });

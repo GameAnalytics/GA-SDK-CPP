@@ -50,8 +50,8 @@ extern void setFacebookId(const char *facebookId);
 extern void setGender(int gender);
 extern void setBirthYear(int birthYear);
 
-extern void startSession();
-extern void endSession();
+extern void gameAnalyticsStartSession();
+extern void gameAnalyticsEndSession();
 
 // game state changes
 // will affect how session is started / ended
