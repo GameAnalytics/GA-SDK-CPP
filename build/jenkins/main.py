@@ -74,7 +74,7 @@ def main(argv):
         build(specific_target=build_target_name, silent=silent)
     else:
         # build all
-        build(silent=silent)
+        build(silent=False)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

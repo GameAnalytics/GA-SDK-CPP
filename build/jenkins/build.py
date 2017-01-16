@@ -370,12 +370,12 @@ all_targets = {
 
 available_targets = {
     'Darwin': {
-        'osx-static': all_targets['osx-static'],
+        #'osx-static': all_targets['osx-static'],
         'osx-shared': all_targets['osx-shared'],
-        'tizen-arm-static': all_targets['tizen-arm-static'],
-        'tizen-arm-shared': all_targets['tizen-arm-shared'],
-        'tizen-x86-static': all_targets['tizen-x86-static'],
-        'tizen-x86-shared': all_targets['tizen-x86-shared'],
+        #'tizen-arm-static': all_targets['tizen-arm-static'],
+        #'tizen-arm-shared': all_targets['tizen-arm-shared'],
+        #'tizen-x86-static': all_targets['tizen-x86-static'],
+        #'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Windows': {
         'win32-vc140-static': all_targets['win32-vc140-static'],
