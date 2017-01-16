@@ -150,7 +150,8 @@ def install_tizen(silent=False):
                     tizen_package,
                     '--accept-license',
                     config.TIZEN_ROOT
-                ]
+                ],
+                silent=silent
             )
 
             os.unlink(tizen_package)
@@ -170,25 +171,28 @@ def install_tizen(silent=False):
                     'install',
                     '--accept-license',
                     'MOBILE-2.4-NativeAppDevelopment-CLI'
-                ]
+                ],
+                silent=silent
             )
-            
+
             call_process(
                 [
                     tizen_ide,
                     'cli-config',
                     '-g',
                     '"default.profiles.path=' + profile_file + '"'
-                ]
+                ],
+                silent=silent
             )
-            
+
             call_process(
                 [
                     tizen_ide,
                     'cli-config',
                     '-g',
                     'default.build.compiler=gcc'
-                ]
+                ],
+                silent=silent
             )
         else:
             call_process(
@@ -224,7 +228,7 @@ def install_tizen(silent=False):
 
             while os.path.exists(temp_dir):
                 time.sleep(1)
-                
+
             call_process(
                 [
                     tizen_ide,
@@ -233,7 +237,7 @@ def install_tizen(silent=False):
                     '"default.profiles.path=' + profile_file + '"'
                 ]
             )
-            
+
             call_process(
                 [
                     tizen_ide,
