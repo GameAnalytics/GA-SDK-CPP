@@ -12,6 +12,8 @@
 #include <system_info.h>
 #include <app_common.h>
 #include <algorithm>
+#elif _WIN32
+#include <direct.h>
 #else
 #include <cstdlib>
 #include <sys/types.h>

@@ -40,7 +40,7 @@ namespace gameanalytics
         {
             initIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now() + std::chrono::seconds(delayInSeconds)} );
+            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
