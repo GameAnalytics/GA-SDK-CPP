@@ -14,9 +14,7 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - rvm install ruby-1.9.3
-    - rvm use 1.9.3
-    - ruby --version
+    - rvm get head
     - brew update
     - brew install p7zip
     - travis_wait python build/jenkins/main.py -s
@@ -26,6 +24,9 @@ install:
 
 script:
     - (cd tests && cd build && xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug && ./Debug/GameAnalyticsTests)
+
+after_script:
+    - set +e
 
 # only test develop and master
 branches:
