@@ -14,7 +14,6 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - rvm get head
     - brew update
     - brew install p7zip
     - travis_wait python build/jenkins/main.py -s
@@ -23,10 +22,10 @@ install:
     - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -G Xcode ..)
 
 script:
-    - (cd tests && cd build && xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug && ./Debug/GameAnalyticsTests)
-
-after_script:
-    - set +e
+    - cd tests
+    - cd build
+    - xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug
+    - ./Debug/GameAnalyticsTests
 
 # only test develop and master
 branches:
