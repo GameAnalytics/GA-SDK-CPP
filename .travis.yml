@@ -14,7 +14,7 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - sudo rvm install 2.2.0
+    - rvmsudo install 2.2.0
     - rvm use 2.2.0
     - ruby --version
     - brew update
