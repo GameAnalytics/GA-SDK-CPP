@@ -1,4 +1,4 @@
-osx_image: xcode8.2
+osx_image: xcode8
 language: objective-c
 xcode_project: GameAnalyticsTests.xcodeproj
 xcode_scheme:
@@ -14,7 +14,8 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - rvm install 1.9.3
+    - sudo rvm install 1.9.3
+    - rvm use 1.9.3
     - brew update
     - brew install p7zip
     - travis_wait python build/jenkins/main.py -s
