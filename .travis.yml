@@ -14,8 +14,7 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - sudo rvm install ruby-head
-    - rvm use ruby-head
+    - rvm get stable
     - ruby --version
     - brew update
     - brew install p7zip
