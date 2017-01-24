@@ -16,6 +16,7 @@ notifications:
 before_install:
     - sudo rvm install 1.9.3
     - rvm use 1.9.3
+    - ruby --version
     - brew update
     - brew install p7zip
     - travis_wait python build/jenkins/main.py -s
