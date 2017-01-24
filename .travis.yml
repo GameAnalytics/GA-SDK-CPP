@@ -14,7 +14,8 @@ notifications:
         - sdk@gameanalytics.com
 
 before_install:
-    - rvm get stable
+    - sudo rvm install 2.2.0
+    - rvm use 2.2.0
     - ruby --version
     - brew update
     - brew install p7zip
