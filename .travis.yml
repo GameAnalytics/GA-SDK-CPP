@@ -1,4 +1,4 @@
-osx_image: xcode8.2
+osx_image: xcode6.4
 language: objective-c
 xcode_project: GameAnalyticsTests.xcodeproj
 xcode_scheme:
