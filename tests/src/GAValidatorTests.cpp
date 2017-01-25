@@ -17,6 +17,8 @@
 #include "helpers/GATestHelpers.h"
 #include "fixtures/GAValidatorTest.h"
 
+#include <iostream>
+
 // TEST(GAValidatorTest, testValidateCurrency)
 // {
 //     gameanalytics::logging::GALogger::setInfoLog(true);
@@ -473,7 +475,14 @@
 
 TEST(GAValidator, testValidateUserId)
 {
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateUserId("fhjkdfghdfjkgh"));
+    try
+    {
+        ASSERT_TRUE(gameanalytics::validators::GAValidator::validateUserId("fhjkdfghdfjkgh"));
 
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateUserId(""));
+        ASSERT_FALSE(gameanalytics::validators::GAValidator::validateUserId(""));
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Exception catched : " << e.what() << std::endl;
+    }
 }
