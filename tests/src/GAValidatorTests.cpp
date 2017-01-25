@@ -17,20 +17,20 @@
 #include "helpers/GATestHelpers.h"
 #include "fixtures/GAValidatorTest.h"
 
-TEST(GAValidatorTest, testValidateCurrency)
-{
-    gameanalytics::logging::GALogger::setInfoLog(true);
-
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateCurrency("USD"));
-    ASSERT_TRUE(gameanalytics::validators::GAValidator::validateCurrency("XXX"));
-
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("usd"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("US"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("KR"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("USDOLLARS"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("$"));
-    ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency(""));
-}
+// TEST(GAValidatorTest, testValidateCurrency)
+// {
+//     gameanalytics::logging::GALogger::setInfoLog(true);
+//
+//     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateCurrency("USD"));
+//     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateCurrency("XXX"));
+//
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("usd"));
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("US"));
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("KR"));
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("USDOLLARS"));
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency("$"));
+//     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateCurrency(""));
+// }
 
 TEST(GAValidator, testValidateResourceCurrencies)
 {
@@ -130,85 +130,85 @@ TEST(GAValidator, testValidateBusinessEvent)
     ASSERT_FALSE(isValid) << "Business event should not allow empty item id";
 }
 
-TEST(GAValidator, testValidateResourceSourceEvent)
-{
-    // Set available list
-    gameanalytics::state::GAState::setAvailableResourceCurrencies({"gems", "gold"});
-    gameanalytics::state::GAState::setAvailableResourceItemTypes({"guns", "powerups"});
+// TEST(GAValidator, testValidateResourceSourceEvent)
+// {
+//     // Set available list
+//     gameanalytics::state::GAState::setAvailableResourceCurrencies({"gems", "gold"});
+//     gameanalytics::state::GAState::setAvailableResourceItemTypes({"guns", "powerups"});
+//
+//     // Store result
+//     bool isValid;
+//
+//     // Valid resource source events
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 100, "guns", "item");
+//     ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
+//
+//     // Valid resource source events
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gold", 100, "powerups", "item");
+//     ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
+//
+//     // falset defined resource type should fail
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "iron", 100, "guns", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined resource types";
+//
+//     // falset defined item type should fail
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 100, "cows", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined item types";
+//
+//     // Should falset allow negative amount
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", -10, "guns", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow negative amount";
+//
+//     // Should falset allow false item id
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 10, "guns", "");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
+//
+//     // Should falset allow false item type
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 10, "", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
+// }
 
-    // Store result
-    bool isValid;
-
-    // Valid resource source events
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 100, "guns", "item");
-    ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
-
-    // Valid resource source events
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gold", 100, "powerups", "item");
-    ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
-
-    // falset defined resource type should fail
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "iron", 100, "guns", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined resource types";
-
-    // falset defined item type should fail
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 100, "cows", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined item types";
-
-    // Should falset allow negative amount
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", -10, "guns", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow negative amount";
-
-    // Should falset allow false item id
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 10, "guns", "");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
-
-    // Should falset allow false item type
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Source, "gems", 10, "", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
-}
-
-TEST(GAValidator, testValidateResourceSinkEvent)
-{
-    // Set available list
-    gameanalytics::state::GAState::setAvailableResourceCurrencies({"gems", "gold"});
-    gameanalytics::state::GAState::setAvailableResourceItemTypes({"guns", "powerups"});
-
-    // Store result
-    bool isValid;
-
-    // Valid resource source events
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 100, "guns", "item");
-    ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
-
-    // Valid resource source events
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gold", 100, "powerups", "item");
-    ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
-
-    // falset defined resource type should fail
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "iron", 100, "guns", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined resource types";
-
-    // falset defined item type should fail
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 100, "cows", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined item types";
-
-    // Should falset allow 0 amount
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 0, "guns", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow 0 amount";
-
-    // Should falset allow negative amount
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", -10, "guns", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow negative amount";
-
-    // Should falset allow false item id
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 10, "guns", "");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
-
-    // Should falset allow false item type
-    isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 10, "", "item");
-    ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
-}
+// TEST(GAValidator, testValidateResourceSinkEvent)
+// {
+//     // Set available list
+//     gameanalytics::state::GAState::setAvailableResourceCurrencies({"gems", "gold"});
+//     gameanalytics::state::GAState::setAvailableResourceItemTypes({"guns", "powerups"});
+//
+//     // Store result
+//     bool isValid;
+//
+//     // Valid resource source events
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 100, "guns", "item");
+//     ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
+//
+//     // Valid resource source events
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gold", 100, "powerups", "item");
+//     ASSERT_TRUE(isValid) << "Valid resource source event should succeed";
+//
+//     // falset defined resource type should fail
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "iron", 100, "guns", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined resource types";
+//
+//     // falset defined item type should fail
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 100, "cows", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow falsen defined item types";
+//
+//     // Should falset allow 0 amount
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 0, "guns", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow 0 amount";
+//
+//     // Should falset allow negative amount
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", -10, "guns", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow negative amount";
+//
+//     // Should falset allow false item id
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 10, "guns", "");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
+//
+//     // Should falset allow false item type
+//     isValid = gameanalytics::validators::GAValidator::validateResourceEvent(gameanalytics::Sink, "gems", 10, "", "item");
+//     ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
+// }
 
 TEST(GAValidator, testValidateDesignEvent)
 {
