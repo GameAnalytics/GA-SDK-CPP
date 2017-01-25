@@ -60,9 +60,9 @@ To start a build for all supported targets simply call
 
 **Mac: ./build.sh**
 
-**Windows: build.bat**
+**Windows: build.bat** (must be run as administrator when building for Tizen)
 
-Or you can run the actual build script directly found at **build/jenkins/main.py** or call **build/jenkins/main.py -h** to display the usage of the script.
+Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
 
 How to develop
 --------------
@@ -85,11 +85,12 @@ Folderstructure
 Lib Dependencies
 ----------------
 
-* **boost** (*as binary*) - C++ library used for threading, regex and logging.
-* **cpp-netlib** (*as binary*) - C++ library build upon latest C++ standard used for HTTP requests.
+* **crossguid** (*as source*) - Cross platform library to generate a Guid.
 * **cryptoC++** (*as source*) - collection of functions and classes for cryptography related tasks.
+* **curl** (*as binary*) - library used to make HTTP requests.
 * **jsonCpp** (*as source*) - lightweight C++ library for manipulating JSON values including serialization and deserialization.
-* **openssl** (*as binary*) - used by **cpp-netlib** to make HTTPS requests
+* **openssl** (*as binary*) - used by **curl** to make HTTPS requests.
+* **plog** (*as source*) - library used for logging.
 * **SQLite** (*as source*) - SQLite is a software library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine.
 
 *as source* means the dependency will be compiled with the project itself, *as binary* means the dependency is prebuild and will be linked to the project
@@ -101,8 +102,7 @@ Preperation before usage of the SDK
   * **source/gameanalytics**
 
 * In your C++ project, link to the following libraries:
-  * All libraries in **source/dependencies/boost/1.60.0/libs/[target]**
-  * All libraries in **source/dependencies/cppnetlib/0.11.2/libs/[target]**
+  * All libraries in **source/dependencies/curl/lib/[target]**
   * All libraries in **source/dependencies/openssl/1.0.2h/libs/[target]**
   * Produced library from build script found in **export/[target]-static/Release/**
 
