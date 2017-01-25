@@ -20,6 +20,9 @@ add_executable(
     ${TEST_SOURCES}
 )
 
+add_definitions("-DGUID_CFUUID")
+set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+
 target_link_libraries(${PROJECT_NAME}
 	${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
