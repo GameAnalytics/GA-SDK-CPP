@@ -230,7 +230,7 @@ namespace gameanalytics
 
             state::GAState::setKeys(gameKey, gameSecret);
 
-            if (!store::GAStore::ensureDatabase(false))
+            if (!store::GAStore::ensureDatabase(false, gameKey))
             {
                 logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
             }

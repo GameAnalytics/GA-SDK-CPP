@@ -9,6 +9,15 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include <fstream>
+#if USE_UWP
+#elif USE_TIZEN
+#elif _WIN32
+#include <direct.h>
+#else
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 namespace gameanalytics
 {
@@ -147,7 +156,7 @@ namespace gameanalytics
             return sqlDatabase;
         }
 
-        bool GAStore::ensureDatabase(bool dropDatabase)
+        bool GAStore::ensureDatabase(bool dropDatabase, const std::string& key)
         {
             // lazy creation of db path
             if(sharedInstance()->dbPath.empty())
@@ -155,8 +164,18 @@ namespace gameanalytics
 #if USE_UWP
                 std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
                 sharedInstance()->dbPath = p;
+#elif USE_TIZEN
+                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga.sqlite3");
+                sharedInstance()->dbPath = p;
 #else
-                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparatorChar() + "ga.sqlite3");
+                std::string d(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + key);
+#ifdef _WIN32
+                _mkdir(d.c_str());
+#else
+                mode_t nMode = 0733;
+                mkdir(d.c_str(),nMode);
+#endif
+                std::string p(d + utilities::GAUtilities::getPathSeparator() + "ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #endif
             }

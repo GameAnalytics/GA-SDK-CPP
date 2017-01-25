@@ -307,11 +307,11 @@ namespace gameanalytics
             return app_get_data_path();
 #else
 #ifdef _WIN32
-            std::string result = std::getenv("LOCALAPPDATA") + std::to_string(utilities::GAUtilities::getPathSeparatorChar()) + "GameAnalytics";
+            std::string result = std::getenv("LOCALAPPDATA") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
             _mkdir(result.c_str());
             return result;
 #else
-            std::string result = std::getenv("TEMP") + std::to_string(utilities::GAUtilities::getPathSeparatorChar()) + "GameAnalytics";
+            std::string result = std::getenv("HOME") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
             mode_t nMode = 0733;
             mkdir(result.c_str(),nMode);
             return result;

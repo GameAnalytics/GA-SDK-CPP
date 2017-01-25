@@ -59,7 +59,7 @@ namespace gameanalytics
         void GALogger::addFileLog(const std::string& path)
         {
             GALogger *ga = GALogger::sharedInstance();
-            std::string p(path + utilities::GAUtilities::getPathSeparatorChar() + "ga_log.txt");
+            std::string p(path + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
 
             static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
             static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;

@@ -220,12 +220,12 @@ namespace gameanalytics
             return ss.str();
         }
 
-        const char GAUtilities::getPathSeparatorChar()
+        std::string GAUtilities::getPathSeparator()
         {
 #ifdef _WIN32
-            return '\\';
+            return "\\";
 #else
-            return '/';
+            return "/";
 #endif
         }
 
