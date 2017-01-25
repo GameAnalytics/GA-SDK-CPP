@@ -25,20 +25,19 @@
 
 TEST(GATests, testInitialize)
 {
-    // gameanalytics::logging::GALogger::addFileLog(gameanalytics::device::GADevice::getWritablePath());
-    //
-    // gameanalytics::logging::GALogger::setInfoLog(true);
-    // gameanalytics::logging::GALogger::i("Info logging enabled");
-    //
-    // gameanalytics::logging::GALogger::setVerboseInfoLog(true);
-    // gameanalytics::logging::GALogger::i("Verbose logging enabled");
-    //
-    // gameanalytics::state::GAState::setKeys("bd624ee6f8e6efb32a054f8d7ba11618", "7f5c3f682cbd217841efba92e92ffb1b3b6612bc");
-    //
-    // ASSERT_TRUE(gameanalytics::store::GAStore::ensureDatabase(false));
-    //
-    // gameanalytics::state::GAState::internalInitialize();
-    ASSERT_TRUE(true);
+    gameanalytics::logging::GALogger::addFileLog(gameanalytics::device::GADevice::getWritablePath());
+
+    gameanalytics::logging::GALogger::setInfoLog(true);
+    gameanalytics::logging::GALogger::i("Info logging enabled");
+
+    gameanalytics::logging::GALogger::setVerboseInfoLog(true);
+    gameanalytics::logging::GALogger::i("Verbose logging enabled");
+
+    gameanalytics::state::GAState::setKeys("bd624ee6f8e6efb32a054f8d7ba11618", "7f5c3f682cbd217841efba92e92ffb1b3b6612bc");
+
+    ASSERT_TRUE(gameanalytics::store::GAStore::ensureDatabase(false));
+
+    gameanalytics::state::GAState::internalInitialize();
 }
 
 // TEST(GATests, testCompress)
