@@ -31,8 +31,10 @@ namespace gameanalytics
 #if USE_UWP
             static const std::string getDeviceId();
             static const std::string getAdvertisingId();
+#elif USE_TIZEN
+            static const std::string getDeviceId();
 #endif
-            static void UpdateConnectionType();	
+            static void UpdateConnectionType();
 
         private:
             static const std::string getOSVersionString();
@@ -44,6 +46,10 @@ namespace gameanalytics
             static const std::string deviceId();
 
             static const std::string _advertisingId;
+            static const std::string _deviceId;
+#elif USE_TIZEN
+            static const std::string deviceId();
+
             static const std::string _deviceId;
 #endif
 
@@ -58,4 +64,4 @@ namespace gameanalytics
             static const std::string _sdkWrapperVersion;
         };
     }
-} 
+}

@@ -112,7 +112,7 @@ namespace gameanalytics
             }
             device::GADevice::setWritablePath(writablePath);
 
-#if !USE_UWP
+#if !USE_UWP && !USE_TIZEN
             logging::GALogger::addFileLog(writablePath);
 #endif
         });
@@ -230,7 +230,7 @@ namespace gameanalytics
 
             state::GAState::setKeys(gameKey, gameSecret);
 
-            if (!store::GAStore::ensureDatabase(false))
+            if (!store::GAStore::ensureDatabase(false, gameKey))
             {
                 logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
             }

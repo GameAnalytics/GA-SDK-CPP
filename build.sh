@@ -1,3 +1,3 @@
 #/bin/sh -f
 
-python build/jenkins/main.py
+python build/jenkins/main.py $@

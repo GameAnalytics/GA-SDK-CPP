@@ -528,6 +528,11 @@ namespace gameanalytics
             {
                 GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
             }
+#elif USE_TIZEN
+            else if (!device::GADevice::getDeviceId().empty())
+            {
+                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+            }
 #endif
             else if (!GAState::sharedInstance()->_defaultUserId.empty())
             {

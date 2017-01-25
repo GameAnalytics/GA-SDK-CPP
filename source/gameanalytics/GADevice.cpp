@@ -4,12 +4,20 @@
 //
 
 #include "GADevice.h"
+#include "GAUtilities.h"
 #if USE_UWP
 #include <Windows.h>
 #include <sstream>
-#include "GAUtilities.h"
+#elif USE_TIZEN
+#include <system_info.h>
+#include <app_common.h>
+#include <algorithm>
+#elif _WIN32
+#include <direct.h>
 #else
-#include <boost/filesystem.hpp>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 namespace gameanalytics
@@ -22,6 +30,8 @@ namespace gameanalytics
 #if USE_UWP
         const std::string GADevice::_advertisingId = utilities::GAUtilities::ws2s(Windows::System::UserProfile::AdvertisingManager::AdvertisingId->Data());
         const std::string GADevice::_deviceId = GADevice::deviceId();
+#elif USE_TIZEN
+        const std::string GADevice::_deviceId = GADevice::deviceId();
 #endif
         std::string GADevice::_deviceManufacturer = GADevice::deviceManufacturer();
         std::string GADevice::_writablepath = GADevice::getPersistentPath();
@@ -29,9 +39,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.2.4";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.0";
+#elif USE_TIZEN
+        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.0";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.2.4";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.0";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
@@ -128,6 +140,17 @@ namespace gameanalytics
             std::ostringstream stream;
             stream << getBuildPlatform() << " " << major << "." << minor << "." << build;
             return stream.str();
+#elif USE_TIZEN
+            std::string version = "0.0.0";
+            char *value;
+            int ret;
+            ret = system_info_get_platform_string("http://tizen.org/feature/platform.version", &value);
+            if (ret == SYSTEM_INFO_ERROR_NONE)
+            {
+                version = value;
+            }
+
+            return GADevice::getBuildPlatform() + " " + version;
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
@@ -138,6 +161,17 @@ namespace gameanalytics
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             return utilities::GAUtilities::ws2s(info->SystemManufacturer->Data());
+#elif USE_TIZEN
+            std::string result = "unknown";
+            char *value;
+            int ret;
+            ret = system_info_get_platform_string("http://tizen.org/system/manufacturer", &value);
+            if (ret == SYSTEM_INFO_ERROR_NONE)
+            {
+                result = value;
+            }
+
+            return result;
 #else
             return "unknown";
 #endif
@@ -148,6 +182,17 @@ namespace gameanalytics
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             return utilities::GAUtilities::ws2s(info->SystemProductName->Data());
+#elif USE_TIZEN
+            std::string result = "unknown";
+            char *value;
+            int ret;
+            ret = system_info_get_platform_string("http://tizen.org/system/model_name", &value);
+            if (ret == SYSTEM_INFO_ERROR_NONE)
+            {
+                result = value;
+            }
+
+            return result;
 #else
             return "unknown";
 #endif
@@ -174,6 +219,25 @@ namespace gameanalytics
                 auto hardwareId = token->Id;
                 auto hardwareIdString = Windows::Security::Cryptography::CryptographicBuffer::EncodeToHexString(hardwareId);
                 result = utilities::GAUtilities::ws2s(hardwareIdString->Data());
+            }
+
+            return result;
+        }
+#elif USE_TIZEN
+        const std::string GADevice::getDeviceId()
+        {
+            return GADevice::_deviceId;
+        }
+
+        const std::string GADevice::deviceId()
+        {
+            std::string result = "";
+            char *value;
+            int ret;
+            ret = system_info_get_platform_string("http://tizen.org/system/tizenid", &value);
+            if (ret == SYSTEM_INFO_ERROR_NONE)
+            {
+                result = value;
             }
 
             return result;
@@ -209,6 +273,19 @@ namespace gameanalytics
             {
                 return utilities::GAUtilities::ws2s(deviceFamily->Data());
             }
+#elif USE_TIZEN
+            std::string result = "tizen";
+            char *value;
+            int ret;
+            ret = system_info_get_platform_string("http://tizen.org/system/platform.name", &value);
+            if (ret == SYSTEM_INFO_ERROR_NONE)
+            {
+                result = value;
+            }
+
+            std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+
+            return result;
 #else
 #if defined(__MACH__) || defined(__APPLE__)
             return "mac_osx";
@@ -226,8 +303,19 @@ namespace gameanalytics
         {
 #if USE_UWP
             return utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
+#elif USE_TIZEN
+            return app_get_data_path();
 #else
-            return boost::filesystem::detail::temp_directory_path().string();
+#ifdef _WIN32
+            std::string result = std::getenv("LOCALAPPDATA") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
+            _mkdir(result.c_str());
+            return result;
+#else
+            std::string result = std::getenv("HOME") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
+            mode_t nMode = 0733;
+            mkdir(result.c_str(),nMode);
+            return result;
+#endif
 #endif
         }
     }

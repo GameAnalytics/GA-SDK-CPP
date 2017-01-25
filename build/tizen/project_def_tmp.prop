@@ -1,0 +1,13 @@
+APPNAME = GameAnalytics
+
+type = <LIB_TYPE>
+profile = mobile-2.4
+
+USER_SRCS = src/gameanalytics/GADevice.cpp src/gameanalytics/GAEvents.cpp src/gameanalytics/GAHTTPApi.cpp src/gameanalytics/GALogger.cpp src/gameanalytics/GameAnalytics.cpp src/gameanalytics/GameAnalyticsTizen.cpp src/gameanalytics/GAState.cpp src/gameanalytics/GAStore.cpp src/gameanalytics/GAThreadingTizen.cpp src/gameanalytics/GAUtilities.cpp src/gameanalytics/GAValidator.cpp src/dependencies/crossguid/Guid.cpp src/dependencies/crypto/aes.cpp src/dependencies/crypto/md5.cpp src/dependencies/crypto/hmac_sha2.c src/dependencies/crypto/sha2.c src/dependencies/miniz/miniz.c src/dependencies/curlcpp/src/cookie_date.cpp src/dependencies/curlcpp/src/cookie_datetime.cpp src/dependencies/curlcpp/src/cookie_time.cpp src/dependencies/curlcpp/src/cookie.cpp src/dependencies/curlcpp/src/curl_cookie.cpp src/dependencies/curlcpp/src/curl_easy.cpp src/dependencies/curlcpp/src/curl_exception.cpp src/dependencies/curlcpp/src/curl_form.cpp src/dependencies/curlcpp/src/curl_header.cpp src/dependencies/curlcpp/src/curl_info.cpp src/dependencies/curlcpp/src/curl_multi.cpp src/dependencies/curlcpp/src/curl_share.cpp src/dependencies/jsoncpp/jsoncpp.cpp
+USER_DEFS = USE_TIZEN GUID_LIBUUID <ASYNC>
+USER_CPP_DEFS = USE_TIZEN GUID_LIBUUID <ASYNC>
+USER_INC_DIRS = inc/crypto inc/miniz inc/ooid
+USER_CPP_INC_DIRS = inc/crossguid inc/jsoncpp inc/curlcpp/include inc/crypto src/gameanalytics inc/miniz inc/ooid
+USER_OBJS =
+USER_LIBS =
+USER_EDCS =
