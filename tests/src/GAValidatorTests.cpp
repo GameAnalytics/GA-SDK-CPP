@@ -68,67 +68,67 @@ TEST(GAValidator, testValidateResourceItemTypes)
 
 // Events
 
-TEST(GAValidator, testValidateProgressionEvent)
-{
-    // Store result
-    bool isValid;
+// TEST(GAValidator, testValidateProgressionEvent)
+// {
+//     // Store result
+//     bool isValid;
+//
+//     // Valids
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "level_001", "phase_001");
+//     ASSERT_TRUE(isValid) << "Should allow progression 01-02-03";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "level_001", "");
+//     ASSERT_TRUE(isValid) << "Should allow progression 01-02";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "", "");
+//     ASSERT_TRUE(isValid) << "Should allow progression 01";
+//
+//     // Invalids (TODO)
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "", "");
+//     ASSERT_FALSE(isValid) << "Should falset allow false progressions";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "", "phase_001");
+//     ASSERT_FALSE(isValid) << "Should falset allow progression 01-03";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "level_001", "phase_001");
+//     ASSERT_FALSE(isValid) << "Should falset allow progression 02-03";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "level_001", "");
+//     ASSERT_FALSE(isValid) << "Should falset allow progression 02";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "", "phase_001");
+//     ASSERT_FALSE(isValid) << "Should falset allow progression 03";
+// }
 
-    // Valids
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "level_001", "phase_001");
-    ASSERT_TRUE(isValid) << "Should allow progression 01-02-03";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "level_001", "");
-    ASSERT_TRUE(isValid) << "Should allow progression 01-02";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "", "");
-    ASSERT_TRUE(isValid) << "Should allow progression 01";
-
-    // Invalids (TODO)
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "", "");
-    ASSERT_FALSE(isValid) << "Should falset allow false progressions";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "world_001", "", "phase_001");
-    ASSERT_FALSE(isValid) << "Should falset allow progression 01-03";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "level_001", "phase_001");
-    ASSERT_FALSE(isValid) << "Should falset allow progression 02-03";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "level_001", "");
-    ASSERT_FALSE(isValid) << "Should falset allow progression 02";
-
-    isValid = gameanalytics::validators::GAValidator::validateProgressionEvent(gameanalytics::Start, "", "", "phase_001");
-    ASSERT_FALSE(isValid) << "Should falset allow progression 03";
-}
-
-TEST(GAValidator, testValidateBusinessEvent)
-{
-    // Store result
-    bool isValid;
-
-    // Valid business events
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "cartType", "itemType", "itemId");
-    ASSERT_TRUE(isValid) << "Valid business event should succeed";
-
-    // Should allow false carttype (optional)
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "itemType", "itemId");
-    ASSERT_TRUE(isValid) << "Business event cartType should be optional";
-
-    // Should allow 0 amount
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 0, "", "itemType", "itemId");
-    ASSERT_TRUE(isValid) << "Business event should allow amount 0";
-
-    // Should allow negative amount
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", -99, "", "itemType", "itemId");
-    ASSERT_TRUE(isValid) << "Business event should allow amount less than 0";
-
-    // Should fail on empty item type
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "", "itemId");
-    ASSERT_FALSE(isValid) << "Business event should not allow empty item type";
-
-    // Should fail on empty item id
-    isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "itemType", "");
-    ASSERT_FALSE(isValid) << "Business event should not allow empty item id";
-}
+// TEST(GAValidator, testValidateBusinessEvent)
+// {
+//     // Store result
+//     bool isValid;
+//
+//     // Valid business events
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "cartType", "itemType", "itemId");
+//     ASSERT_TRUE(isValid) << "Valid business event should succeed";
+//
+//     // Should allow false carttype (optional)
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "itemType", "itemId");
+//     ASSERT_TRUE(isValid) << "Business event cartType should be optional";
+//
+//     // Should allow 0 amount
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 0, "", "itemType", "itemId");
+//     ASSERT_TRUE(isValid) << "Business event should allow amount 0";
+//
+//     // Should allow negative amount
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", -99, "", "itemType", "itemId");
+//     ASSERT_TRUE(isValid) << "Business event should allow amount less than 0";
+//
+//     // Should fail on empty item type
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "", "itemId");
+//     ASSERT_FALSE(isValid) << "Business event should not allow empty item type";
+//
+//     // Should fail on empty item id
+//     isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "itemType", "");
+//     ASSERT_FALSE(isValid) << "Business event should not allow empty item id";
+// }
 
 // TEST(GAValidator, testValidateResourceSourceEvent)
 // {
@@ -210,57 +210,57 @@ TEST(GAValidator, testValidateBusinessEvent)
 //     ASSERT_FALSE(isValid) << "Resource event should falset allow empty item id";
 // }
 
-TEST(GAValidator, testValidateDesignEvent)
-{
-    // Store result
-    bool isValid;
+// TEST(GAValidator, testValidateDesignEvent)
+// {
+//     // Store result
+//     bool isValid;
+//
+//     // Valid
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name", 100);
+//     ASSERT_TRUE(isValid) << "Design event should allow nil value";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name", 100);
+//     ASSERT_TRUE(isValid) << "Design event should allow nil value";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name", 100);
+//     ASSERT_TRUE(isValid) << "Design event should allow nil value";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name:name", 100);
+//     ASSERT_TRUE(isValid) << "Design event should allow nil value";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name", 0);
+//     ASSERT_TRUE(isValid) << "Design event should allow nil value";
+//
+//     // Invalid
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("", 100);
+//     ASSERT_FALSE(isValid) << "Design event should falset allow empty event string";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name:name:name", 100);
+//     ASSERT_FALSE(isValid) << "Design event should falset allow more than 5 values in event string";
+// }
 
-    // Valid
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name", 100);
-    ASSERT_TRUE(isValid) << "Design event should allow nil value";
+// TEST(GAValidator, testValidateErrorEvent)
+// {
+//     // Store result
+//     bool isValid;
+//
+//     // Valid
+//     isValid = gameanalytics::validators::GAValidator::validateErrorEvent(gameanalytics::Error, "This is a message");
+//     ASSERT_TRUE(isValid) << "Error event should validate";
+//
+//     isValid = gameanalytics::validators::GAValidator::validateErrorEvent(gameanalytics::Error, "");
+//     ASSERT_TRUE(isValid) << "Error event should allow empty message";
+// }
 
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name", 100);
-    ASSERT_TRUE(isValid) << "Design event should allow nil value";
-
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name", 100);
-    ASSERT_TRUE(isValid) << "Design event should allow nil value";
-
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name:name", 100);
-    ASSERT_TRUE(isValid) << "Design event should allow nil value";
-
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name", 0);
-    ASSERT_TRUE(isValid) << "Design event should allow nil value";
-
-    // Invalid
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("", 100);
-    ASSERT_FALSE(isValid) << "Design event should falset allow empty event string";
-
-    isValid = gameanalytics::validators::GAValidator::validateDesignEvent("name:name:name:name:name:name", 100);
-    ASSERT_FALSE(isValid) << "Design event should falset allow more than 5 values in event string";
-}
-
-TEST(GAValidator, testValidateErrorEvent)
-{
-    // Store result
-    bool isValid;
-
-    // Valid
-    isValid = gameanalytics::validators::GAValidator::validateErrorEvent(gameanalytics::Error, "This is a message");
-    ASSERT_TRUE(isValid) << "Error event should validate";
-
-    isValid = gameanalytics::validators::GAValidator::validateErrorEvent(gameanalytics::Error, "");
-    ASSERT_TRUE(isValid) << "Error event should allow empty message";
-}
-
-TEST(GAValidator, testValidateSdkErrorEvent)
-{
-    // Store result
-    bool isValid;
-
-    // Valid
-    isValid = gameanalytics::validators::GAValidator::validateSdkErrorEvent("c6cfc80ff69d1e7316bf1e0c8194eda6", "e0ae4809f70e2fa96916c7060f417ae53895f18d", gameanalytics::http::Rejected);
-    ASSERT_TRUE(isValid) << "Error event should validate";
-}
+// TEST(GAValidator, testValidateSdkErrorEvent)
+// {
+//     // Store result
+//     bool isValid;
+//
+//     // Valid
+//     isValid = gameanalytics::validators::GAValidator::validateSdkErrorEvent("c6cfc80ff69d1e7316bf1e0c8194eda6", "e0ae4809f70e2fa96916c7060f417ae53895f18d", gameanalytics::http::Rejected);
+//     ASSERT_TRUE(isValid) << "Error event should validate";
+// }
 
 // Dimensions
 
