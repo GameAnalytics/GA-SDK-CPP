@@ -20,12 +20,14 @@ add_executable(
     ${TEST_SOURCES}
 )
 
+add_definitions("-DGUID_CFUUID")
+set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+
 target_link_libraries(${PROJECT_NAME}
-    ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_filesystem-mt.a
-    ${DEPENDENCIES_DIR}/boost/boost_1_60_0/stage/osx/libboost_system-mt.a
 	${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
     ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
+    "-framework CoreFoundation"
 )
 
 # enable c++11 via -std=c++11 when compiler is clang or gcc
@@ -47,7 +49,6 @@ target_include_directories(
 	PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
 	"${DEPENDENCIES_DIR}/jsoncpp/"
-	"${DEPENDENCIES_DIR}/boost/boost_1_60_0"
     "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
     "${DEPENDENCIES_DIR}/curlcpp/include"
 )

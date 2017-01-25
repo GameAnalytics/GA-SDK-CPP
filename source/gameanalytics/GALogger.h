@@ -28,7 +28,7 @@ namespace gameanalytics
             // set debug enabled (client)
             static void setInfoLog(bool enabled);
             static void setVerboseInfoLog(bool enabled);
-#if !USE_UWP
+#if !USE_UWP && !USE_TIZEN
             static void addFileLog(const std::string& path);
 #endif
 

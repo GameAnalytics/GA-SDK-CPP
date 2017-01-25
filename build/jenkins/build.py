@@ -11,10 +11,30 @@ import re
 import config as Config
 import libs.tools as LibTools
 import shutil
+import fileinput
 
 if platform.system() == 'Windows':
     from _winreg import *
 
+if os.name == "nt":
+    __CSL = None
+    def symlink(source, link_name):
+        '''symlink(source, link_name)
+           Creates a symbolic link pointing to source named link_name'''
+        global __CSL
+        if __CSL is None:
+            import ctypes
+            csl = ctypes.windll.kernel32.CreateSymbolicLinkW
+            csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
+            csl.restype = ctypes.c_ubyte
+            __CSL = csl
+        flags = 0
+        if source is not None and os.path.isdir(source):
+            flags = 1
+        if __CSL(link_name, source, flags) == 0:
+            raise ctypes.WinError()
+
+    os.symlink = symlink
 
 def call_process(process_arguments, process_workingdir, silent=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
@@ -164,7 +184,7 @@ class TargetWin(TargetCMake):
             os.path.join(self.build_dir(), 'Release'),
             release_dir
         )
-        
+
 class TargetWin10(TargetWin):
     def create_project_file(self):
         call_process(
@@ -184,6 +204,150 @@ class TargetWin10(TargetWin):
             self.build_dir()
         )
 
+class TargetTizen(TargetCMake):
+    def create_project_file(self):
+        build_folder = os.path.join(Config.BUILD_DIR, self.name)
+
+        if sys.platform == 'darwin':
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.sh")
+        else:
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
+
+        tizen_src_dir = os.path.join(build_folder, "src")
+        tizen_include_dir = os.path.join(build_folder, "inc")
+
+        if LibTools.folder_exists(build_folder):
+            if sys.platform != 'darwin':
+                if LibTools.folder_exists(tizen_include_dir):
+                    os.rmdir(tizen_include_dir)
+                if LibTools.folder_exists(tizen_src_dir):
+                    os.rmdir(tizen_src_dir)
+            shutil.rmtree(build_folder)
+
+        libType = 'StaticLibrary'
+        lib_type = 'staticLib'
+        if 'shared' in self.name:
+            libType = 'SharedLibrary'
+            lib_type = 'sharedLib'
+
+        call_process(
+            [
+                tizen_ide,
+                'create',
+                'native-project',
+                '-p',
+                'mobile-2.4',
+                '-t',
+                libType,
+                '-n',
+                self.name,
+                '--',
+                Config.BUILD_DIR
+            ],
+            Config.BUILD_DIR
+        )
+
+        src_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'source'))
+        dependencies_dir = os.path.join(src_dir, "dependencies")
+        project_def_tmp = os.path.abspath(os.path.join(__file__, '..', '..', 'tizen', 'project_def_tmp.prop'))
+        project_def = os.path.join(build_folder, 'project_def.prop')
+
+        shutil.rmtree(tizen_src_dir)
+        shutil.rmtree(tizen_include_dir)
+
+        os.symlink(src_dir, tizen_src_dir)
+        os.symlink(dependencies_dir, tizen_include_dir)
+
+        shutil.copy(project_def_tmp, project_def)
+
+        for line in fileinput.input(project_def, inplace=True):
+            if '<LIB_TYPE>' in line:
+                line = line.replace('<LIB_TYPE>', lib_type)
+            if '<ASYNC>' in line:
+                if self.generator == 'x86':
+                    line = line.replace('<ASYNC>', 'NO_ASYNC')
+                else:
+                    line = line.replace('<ASYNC>', '')
+            sys.stdout.write(line)
+
+        flags_file = os.path.join(build_folder, 'Build', 'flags.mk')
+
+        with open(flags_file, 'r') as file:
+            lines = file.readlines()
+
+        for index, line in enumerate(lines):
+            if line.startswith('CPP_COMPILE_FLAGS'):
+                lines[index] = line.strip() + " -std=c++11\n"
+
+        with open(flags_file, 'w') as file:
+            file.writelines(lines)
+
+    def build(self, silent=False):
+        build_folder = os.path.join(Config.BUILD_DIR, self.name)
+        if sys.platform == 'darwin':
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.sh")
+        else:
+            tizen_ide = os.path.join(Config.TIZEN_ROOT, "tools", "ide", "bin", "tizen.bat")
+
+        compiler = 'gcc'
+
+        call_process(
+            [
+                tizen_ide,
+                'build-native',
+                '-a',
+                self.generator,
+                '-c',
+                compiler,
+                '-C',
+                'Release',
+                '--',
+                build_folder
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                tizen_ide,
+                'build-native',
+                '-a',
+                self.generator,
+                '-c',
+                compiler,
+                '-C',
+                'Debug',
+                '--',
+                build_folder
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        libEnding = 'a'
+        if 'shared' in self.name:
+            libEnding = 'so'
+
+        debug_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug', 'libGameAnalytics.' + libEnding))
+        release_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release', 'libGameAnalytics.' + libEnding))
+
+        if not os.path.exists(os.path.dirname(debug_file)):
+            os.makedirs(os.path.dirname(debug_file))
+
+        if not os.path.exists(os.path.dirname(release_file)):
+            os.makedirs(os.path.dirname(release_file))
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
+            debug_file
+        )
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
+            release_file
+        )
+
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
@@ -198,12 +362,20 @@ all_targets = {
 	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
+    'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
+    'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
+    'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
+    'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
 }
 
 available_targets = {
     'Darwin': {
         'osx-static': all_targets['osx-static'],
         'osx-shared': all_targets['osx-shared'],
+        'tizen-arm-static': all_targets['tizen-arm-static'],
+        'tizen-arm-shared': all_targets['tizen-arm-shared'],
+        'tizen-x86-static': all_targets['tizen-x86-static'],
+        'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Windows': {
         'win32-vc140-static': all_targets['win32-vc140-static'],
@@ -217,6 +389,10 @@ available_targets = {
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
 		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
 		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        'tizen-arm-static': all_targets['tizen-arm-static'],
+        'tizen-arm-shared': all_targets['tizen-arm-shared'],
+        'tizen-x86-static': all_targets['tizen-x86-static'],
+        'tizen-x86-shared': all_targets['tizen-x86-shared'],
     }
 }[platform.system()]
 

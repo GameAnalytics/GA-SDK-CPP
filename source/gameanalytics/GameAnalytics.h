@@ -12,8 +12,11 @@
 
 #include <string>
 #include <vector>
+#if USE_TIZEN
+#include "GameAnalyticsTizen.h"
+#endif
 
-namespace gameanalytics 
+namespace gameanalytics
 {
 
     /*!
@@ -103,7 +106,7 @@ namespace gameanalytics
         // add events
         static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType);
 
-        static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string& itemType, const std::string& itemId);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03);
 
@@ -148,7 +151,7 @@ namespace gameanalytics
         static void configureUserId(const std::wstring& uId);
         static void initialize(const std::wstring& gameKey, const std::wstring& gameSecret);
         static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType);
-        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score);
         static void addDesignEvent(const std::wstring& eventId);

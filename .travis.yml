@@ -1,4 +1,4 @@
-osx_image: xcode7
+osx_image: xcode8
 language: objective-c
 xcode_project: GameAnalyticsTests.xcodeproj
 xcode_scheme:
@@ -22,7 +22,10 @@ install:
     - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -G Xcode ..)
 
 script:
-    - (cd tests && cd build && xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug && ./Debug/GameAnalyticsTests)
+    - cd tests
+    - cd build
+    - xcodebuild -project GameAnalyticsTests.xcodeproj -target GameAnalyticsTests -configuration Debug
+    - ./Debug/GameAnalyticsTests
 
 # only test develop and master
 branches:

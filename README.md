@@ -8,6 +8,7 @@ Supported platforms:
 * Mac OS X
 * Winddows 32-bit and 64-bit
 * UWP
+* Tizen
 
 Dependencies
 ------------
@@ -21,6 +22,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.0**
+* added support for Tizen
+
 **1.2.4**
 * removed unused files
 

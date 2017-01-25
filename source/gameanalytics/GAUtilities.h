@@ -20,6 +20,7 @@ namespace gameanalytics
         class GAUtilities
         {
          public:
+            static std::string getPathSeparator();
             static std::string generateUUID();
             static std::string hmacWithKey(const std::string& key, const std::string& data);
             static std::string jsonToString(const Json::Value& obj);
@@ -63,5 +64,3 @@ namespace gameanalytics
         };
     }
 }
-
-

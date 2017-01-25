@@ -22,7 +22,7 @@ namespace gameanalytics
 
             sqlite3* getDatabase();
 
-            static bool ensureDatabase(bool dropDatabase);
+            static bool ensureDatabase(bool dropDatabase, const std::string& key = "");
 
             static void setState(const std::string& key, const std::string& value);
 
