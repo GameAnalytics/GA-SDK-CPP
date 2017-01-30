@@ -39,6 +39,10 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
+elseif("${PLATFORM}" STREQUAL "linux-x86-static")
+    set(LIB_EXTENSION "a")
+    set(CMAKE_CXX_FLAGS "-std=c++11")
+    SET (LIB_TYPE STATIC)
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
 if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
@@ -52,6 +56,10 @@ endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win
 if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
     add_definitions("-DGUID_CFUUID")
 endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+
+if("${PLATFORM}" STREQUAL "linux-x86-static")
+    add_definitions("-DGUID_LIBUUID")
+endif("${PLATFORM}" STREQUAL "linux-x86-static")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
@@ -121,6 +129,13 @@ if("${PLATFORM}" STREQUAL "osx-static")
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
 endif("${PLATFORM}" STREQUAL "osx-static")
+
+if("${PLATFORM}" STREQUAL "linux-x86-static")
+    include_directories(
+        "${DEPENDENCIES_DIR}/ooid"
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+    )
+endif("${PLATFORM}" STREQUAL "linux-x86-static")
 
 if("${PLATFORM}" STREQUAL "osx-shared")
     include_directories(

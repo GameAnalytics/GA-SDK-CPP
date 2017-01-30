@@ -25,7 +25,8 @@ if platform == 'win32':  # win32 and/or win64
 elif platform == 'darwin':  # OSX
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Darwin-universal.tar.gz'
     TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
-# elif platform in ('linux', 'linux2'):
+elif platform in ('linux', 'linux2'):
+    CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz'
 else:
     raise NotImplementedError('platform %s is currently not supported' % platform)
 
@@ -194,6 +195,8 @@ def install_tizen(silent=False):
                 ],
                 silent=silent
             )
+        elif platform in ('linux', 'linux2'):
+            # Don't install tizen on Linux
         else:
             call_process(
                 [
