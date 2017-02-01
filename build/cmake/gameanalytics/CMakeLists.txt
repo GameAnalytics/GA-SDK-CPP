@@ -41,7 +41,7 @@ elseif("${PLATFORM}" STREQUAL "osx-shared")
     SET (LIB_TYPE SHARED)
 elseif("${PLATFORM}" STREQUAL "linux-x86-static")
     set(LIB_EXTENSION "a")
-    set(CMAKE_CXX_FLAGS "-std=c++11")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
     SET (LIB_TYPE STATIC)
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
