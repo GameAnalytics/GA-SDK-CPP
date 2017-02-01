@@ -31,7 +31,8 @@ else:
     raise NotImplementedError('platform %s is currently not supported' % platform)
 
 cmake_package = os.path.join(config.BUILD_ROOT, CMAKE_URL.split('/')[-1])
-tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
+if not (platform in ('linux', 'linux2')):
+    tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
 profile_tmp_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles_tmp.xml'))
 profile_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles.xml'))
 
