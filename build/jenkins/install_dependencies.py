@@ -196,7 +196,7 @@ def install_tizen(silent=False):
                 silent=silent
             )
         elif platform in ('linux', 'linux2'):
-            # Don't install tizen on Linux
+            print "Don't install tizen on Linux"
         else:
             call_process(
                 [
