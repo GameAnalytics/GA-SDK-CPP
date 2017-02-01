@@ -399,7 +399,7 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-x86-static': TargetLinux('linux-x86-static', 'MinGW Makefiles'),
+    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles'),
 }
 
 available_targets = {
