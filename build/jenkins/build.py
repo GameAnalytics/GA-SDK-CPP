@@ -427,7 +427,7 @@ available_targets = {
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
-    }
+    },
     'Linux': {
         'linux-x86-static': all_targets['linux-x86-static'],
     }
