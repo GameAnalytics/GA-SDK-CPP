@@ -132,6 +132,9 @@ def install_cmake(silent=False):
         os.unlink(cmake_package)
 
 def install_tizen(silent=False):
+    if not (platform in ('linux', 'linux2')):
+        print "Don't install tizen on Linux"
+        return
     if not os.path.exists(config.TIZEN_ROOT):
         print "-------------- TIZEN ---------------"
         if not os.path.exists(tizen_package):
@@ -196,8 +199,6 @@ def install_tizen(silent=False):
                 ],
                 silent=silent
             )
-        elif platform in ('linux', 'linux2'):
-            print "Don't install tizen on Linux"
         else:
             call_process(
                 [
@@ -255,7 +256,8 @@ def install_dependencies(silent=False):
     if silent is True:
         print "SILENT DEPENDENCY INSTALL"
     install_cmake(silent=silent)
-    install_tizen(silent=silent)
+    if not (platform in ('linux', 'linux2')):
+        install_tizen(silent=silent)
 
 if __name__ == '__main__':
     os.chdir(config.BUILD_ROOT)
