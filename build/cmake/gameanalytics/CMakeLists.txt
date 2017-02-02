@@ -109,6 +109,7 @@ else()
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
+        "${GA_SOURCE_DIR}"
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
         "${DEPENDENCIES_DIR}/plog"
