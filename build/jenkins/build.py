@@ -357,6 +357,8 @@ class TargetLinux(TargetCMake):
             # self.build_dir(),
             # silent=silent
         # )
+        
+        print 'TODO: build linux'
 
         # libEnding = 'a'
         # if 'shared' in self.name:
