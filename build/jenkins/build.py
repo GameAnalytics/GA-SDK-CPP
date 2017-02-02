@@ -411,6 +411,8 @@ class TargetLinux(TargetCMake):
             silent=silent
         )
 
+# test
+
         libEnding = 'a'
         if 'shared' in self.name:
             libEnding = 'so'
