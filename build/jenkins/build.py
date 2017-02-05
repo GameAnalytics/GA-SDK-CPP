@@ -352,7 +352,7 @@ class TargetLinux(TargetCMake):
     def create_project_file(self):
         print 'Skip create_project_file for Linux'
 
-        
+
     def build(self, silent=False):
         call_process(
             [
@@ -416,21 +416,21 @@ class TargetLinux(TargetCMake):
         libEnding = 'a'
         if 'shared' in self.name:
             libEnding = 'so'
-        
+
         debug_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug', 'libGameAnalytics.' + libEnding))
         release_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release', 'libGameAnalytics.' + libEnding))
-        
+
         if not os.path.exists(os.path.dirname(debug_file)):
             os.makedirs(os.path.dirname(debug_file))
-        
+
         if not os.path.exists(os.path.dirname(release_file)):
             os.makedirs(os.path.dirname(release_file))
-        
+
         shutil.move(
             os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
             debug_file
         )
-        
+
         shutil.move(
             os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
             release_file
@@ -470,12 +470,12 @@ available_targets = {
     'Windows': {
         'win32-vc140-static': all_targets['win32-vc140-static'],
         'win32-vc120-static': all_targets['win32-vc120-static'],
-        #'win32-vc140-shared': all_targets['win32-vc140-shared'],
-        #'win32-vc120-shared': all_targets['win32-vc120-shared'],
+        'win32-vc140-shared': all_targets['win32-vc140-shared'],
+        'win32-vc120-shared': all_targets['win32-vc120-shared'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
         'win64-vc120-static': all_targets['win64-vc120-static'],
-        #'win64-vc140-shared': all_targets['win64-vc140-shared'],
-        #'win64-vc120-shared': all_targets['win64-vc120-shared'],
+        'win64-vc140-shared': all_targets['win64-vc140-shared'],
+        'win64-vc120-shared': all_targets['win64-vc120-shared'],
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
 		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
 		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
