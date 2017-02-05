@@ -162,6 +162,18 @@ if("${PLATFORM}" STREQUAL "osx-shared")
     )
 endif("${PLATFORM}" STREQUAL "osx-shared")
 
+if("${PLATFORM}" STREQUAL "linux-shared")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+    )
+
+    target_link_libraries(GameAnalytics
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux/libssl.a
+        ${DEPENDENCIES_DIR}/curl/lib/linux/libcurl.a
+    )
+endif("${PLATFORM}" STREQUAL "linux-shared")
+
 if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"

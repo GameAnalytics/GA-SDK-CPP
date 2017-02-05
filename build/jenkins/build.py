@@ -486,7 +486,7 @@ available_targets = {
     },
     'Linux': {
         'linux-static': all_targets['linux-static'],
-        #'linux-shared': all_targets['linux-shared'],
+        'linux-shared': all_targets['linux-shared'],
     }
 }[platform.system()]
 
