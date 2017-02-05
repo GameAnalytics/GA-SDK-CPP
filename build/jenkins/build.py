@@ -455,6 +455,7 @@ all_targets = {
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
     'linux-static': TargetLinux('linux-static', 'Unix Makefiles'),
+    'linux-shared': TargetLinux('linux-shared', 'Unix Makefiles'),
 }
 
 available_targets = {
@@ -485,6 +486,7 @@ available_targets = {
     },
     'Linux': {
         'linux-static': all_targets['linux-static'],
+        #'linux-shared': all_targets['linux-shared'],
     }
 }[platform.system()]
 
