@@ -22,6 +22,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.1**
+* logging initialisation updated for windows and mac (windows, mac)
+
 **1.3.0**
 * added support for Tizen
 

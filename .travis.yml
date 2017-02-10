@@ -30,5 +30,5 @@ script:
 # only test develop and master
 branches:
   only:
-    #- develop
+    - develop
     - master
