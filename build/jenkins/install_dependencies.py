@@ -132,7 +132,7 @@ def install_cmake(silent=False):
         os.unlink(cmake_package)
 
 def install_tizen(silent=False):
-    if not (platform in ('linux', 'linux2')):
+    if (platform in ('linux', 'linux2')):
         print "Don't install tizen on Linux"
         return
     if not os.path.exists(config.TIZEN_ROOT):

@@ -111,10 +111,6 @@ namespace gameanalytics
                 return;
             }
             device::GADevice::setWritablePath(writablePath);
-
-#if !USE_UWP && !USE_TIZEN
-            logging::GALogger::addFileLog(writablePath);
-#endif
         });
     }
 

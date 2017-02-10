@@ -28,9 +28,6 @@ namespace gameanalytics
             // set debug enabled (client)
             static void setInfoLog(bool enabled);
             static void setVerboseInfoLog(bool enabled);
-#if !USE_UWP && !USE_TIZEN
-            static void addFileLog(const std::string& path);
-#endif
 
             // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
             static void  w(const std::string& format);//const char* format, ...);
@@ -42,6 +39,9 @@ namespace gameanalytics
             void sendNotificationMessage(const std::string& message, EGALoggerMessageType type);
 
          private:
+#if !USE_UWP && !USE_TIZEN
+            static void initializeLog();
+#endif
             // Settings
             bool infoLogEnabled;
             bool infoLogVerboseEnabled;
@@ -50,6 +50,9 @@ namespace gameanalytics
 #if USE_UWP
             static void LogMessageToConsole(Platform::Object^ parameter);
             Windows::Storage::StorageFile^ file;
+#endif
+#if !USE_UWP && !USE_TIZEN
+            bool plogInitialized;
 #endif
         };
     }
