@@ -25,12 +25,14 @@ if platform == 'win32':  # win32 and/or win64
 elif platform == 'darwin':  # OSX
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Darwin-universal.tar.gz'
     TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
-# elif platform in ('linux', 'linux2'):
+elif platform in ('linux', 'linux2'):
+    CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz'
 else:
     raise NotImplementedError('platform %s is currently not supported' % platform)
 
 cmake_package = os.path.join(config.BUILD_ROOT, CMAKE_URL.split('/')[-1])
-tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
+if not (platform in ('linux', 'linux2')):
+    tizen_package = os.path.join(config.BUILD_ROOT, TIZEN_URL.split('/')[-1])
 profile_tmp_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles_tmp.xml'))
 profile_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles.xml'))
 
@@ -130,6 +132,9 @@ def install_cmake(silent=False):
         os.unlink(cmake_package)
 
 def install_tizen(silent=False):
+    if (platform in ('linux', 'linux2')):
+        print "Don't install tizen on Linux"
+        return
     if not os.path.exists(config.TIZEN_ROOT):
         print "-------------- TIZEN ---------------"
         if not os.path.exists(tizen_package):
@@ -251,7 +256,8 @@ def install_dependencies(silent=False):
     if silent is True:
         print "SILENT DEPENDENCY INSTALL"
     install_cmake(silent=silent)
-    install_tizen(silent=silent)
+    if not (platform in ('linux', 'linux2')):
+        install_tizen(silent=silent)
 
 if __name__ == '__main__':
     os.chdir(config.BUILD_ROOT)

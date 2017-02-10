@@ -348,6 +348,94 @@ class TargetTizen(TargetCMake):
             release_file
         )
 
+class TargetLinux(TargetCMake):
+    def create_project_file(self):
+        print 'Skip create_project_file for Linux'
+
+
+    def build(self, silent=False):
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DCMAKE_BUILD_TYPE=RELEASE',
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                'make'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DCMAKE_BUILD_TYPE=DEBUG',
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'make'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+# test
+
+        libEnding = 'a'
+        if 'shared' in self.name:
+            libEnding = 'so'
+
+        debug_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug', 'libGameAnalytics.' + libEnding))
+        release_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release', 'libGameAnalytics.' + libEnding))
+
+        if not os.path.exists(os.path.dirname(debug_file)):
+            os.makedirs(os.path.dirname(debug_file))
+
+        if not os.path.exists(os.path.dirname(release_file)):
+            os.makedirs(os.path.dirname(release_file))
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
+            debug_file
+        )
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
+            release_file
+        )
+
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
@@ -366,6 +454,8 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
+    'linux-static': TargetLinux('linux-static', 'Unix Makefiles'),
+    'linux-shared': TargetLinux('linux-shared', 'Unix Makefiles'),
 }
 
 available_targets = {
@@ -380,12 +470,12 @@ available_targets = {
     'Windows': {
         'win32-vc140-static': all_targets['win32-vc140-static'],
         'win32-vc120-static': all_targets['win32-vc120-static'],
-        #'win32-vc140-shared': all_targets['win32-vc140-shared'],
-        #'win32-vc120-shared': all_targets['win32-vc120-shared'],
+        'win32-vc140-shared': all_targets['win32-vc140-shared'],
+        'win32-vc120-shared': all_targets['win32-vc120-shared'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
         'win64-vc120-static': all_targets['win64-vc120-static'],
-        #'win64-vc140-shared': all_targets['win64-vc140-shared'],
-        #'win64-vc120-shared': all_targets['win64-vc120-shared'],
+        'win64-vc140-shared': all_targets['win64-vc140-shared'],
+        'win64-vc120-shared': all_targets['win64-vc120-shared'],
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
 		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
 		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
@@ -393,6 +483,10 @@ available_targets = {
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
+    },
+    'Linux': {
+        'linux-static': all_targets['linux-static'],
+        'linux-shared': all_targets['linux-shared'],
     }
 }[platform.system()]
 

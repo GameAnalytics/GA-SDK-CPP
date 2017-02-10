@@ -434,6 +434,22 @@ namespace gameanalytics
                 annotations["engine_version"] = device::GADevice::getGameEngineVersion();
             }
 
+#if USE_UWP
+            if (!device::GADevice::getAdvertisingId().empty())
+            {
+                annotations["uwp_aid"] = device::GADevice::getAdvertisingId();
+            }
+            else if (!device::GADevice::getDeviceId().empty())
+            {
+                annotations["uwp_id"] = device::GADevice::getDeviceId();
+            }
+#elif USE_TIZEN
+            if (!device::GADevice::getDeviceId().empty())
+            {
+                annotations["tizen_id"] = device::GADevice::getDeviceId();
+            }
+#endif
+
             // ---- CONDITIONAL ---- //
 
             // App build version (use if not nil)

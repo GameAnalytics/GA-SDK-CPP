@@ -9,7 +9,7 @@
 #include <string>
 #include <json/json.h>
 #include "GameAnalytics.h"
-#include "GAHttpApi.h"
+#include "GAHTTPApi.h"
 
 namespace gameanalytics
 {

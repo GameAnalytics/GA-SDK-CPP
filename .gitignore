@@ -10,3 +10,4 @@ build/obj
 export/
 tests/.idea
 tests/build
+/.project

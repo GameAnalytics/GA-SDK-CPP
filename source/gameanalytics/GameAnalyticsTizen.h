@@ -1,4 +1,3 @@
-#if USE_TIZEN
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,5 +59,4 @@ extern void onStop();
 
 #ifdef __cplusplus
 }
-#endif
 #endif

@@ -32,6 +32,7 @@ namespace gameanalytics
         {
             infoLogEnabled = false;
 
+
 #if defined(_DEBUG)
             // log debug is in dev mode
             debugEnabled = true;
@@ -42,6 +43,10 @@ namespace gameanalytics
 #if USE_UWP
             Windows::Storage::StorageFolder^ gaFolder = concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFolderAsync("GameAnalytics", Windows::Storage::CreationCollisionOption::OpenIfExists)).get();
             file = concurrency::create_task(gaFolder->CreateFileAsync("ga_log.txt", Windows::Storage::CreationCollisionOption::ReplaceExisting)).get();
+#endif
+
+#if !USE_UWP && !USE_TIZEN
+            plogInitialized = false;
 #endif
         }
 
@@ -56,10 +61,10 @@ namespace gameanalytics
         }
 
 #if !USE_UWP && !USE_TIZEN
-        void GALogger::addFileLog(const std::string& path)
+        void GALogger::initializeLog()
         {
             GALogger *ga = GALogger::sharedInstance();
-            std::string p(path + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+            std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
 
             static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
             static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
@@ -73,7 +78,7 @@ namespace gameanalytics
                 plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
             }
 
-            GALogger::i("Log file added under: " + path);
+            GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
         }
 #endif
 
@@ -170,6 +175,14 @@ namespace gameanalytics
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
             Platform::Collections::Vector<Platform::String^>^ lines = ref new Platform::Collections::Vector<Platform::String^>();
             lines->Append(m);
+#endif
+
+#if !USE_UWP && !USE_TIZEN
+            if(!plogInitialized)
+            {
+                plogInitialized = true;
+                initializeLog();
+            }
 #endif
             switch(type)
             {
