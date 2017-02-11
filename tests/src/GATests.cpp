@@ -25,8 +25,6 @@
 
  TEST(GATests, testInitialize)
  {
-     gameanalytics::logging::GALogger::addFileLog(gameanalytics::device::GADevice::getWritablePath());
-
      gameanalytics::logging::GALogger::setInfoLog(true);
      gameanalytics::logging::GALogger::i("Info logging enabled");
 
