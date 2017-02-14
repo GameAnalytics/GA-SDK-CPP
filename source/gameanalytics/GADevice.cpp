@@ -20,6 +20,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
+#if defined(__MACH__) || defined(__APPLE__)
+#include <CoreServices/CoreServices.h>
+#endif
 
 namespace gameanalytics
 {
@@ -160,6 +163,15 @@ namespace gameanalytics
             GetVersionEx(&info);
 
             return GADevice::getBuildPlatform() + " " + std::to_string(info.dwMajorVersion) + "." + std::to_string(info.dwMinorVersion) + "." + std::to_string(info.dwBuildNumber);
+#elif defined(__MACH__) || defined(__APPLE__)
+            SInt32 majorVersion,minorVersion,bugFixVersion;
+
+            Gestalt(gestaltSystemVersionMajor, &majorVersion);
+            Gestalt(gestaltSystemVersionMinor, &minorVersion);
+            Gestalt(gestaltSystemVersionBugFix, &bugFixVersion);
+
+            return GADevice::getBuildPlatform() + " " + std::to_string(majorVersion) + "." + std::to_string(minorVersion) + "." + std::to_string(bugFixVersion);
+#elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
