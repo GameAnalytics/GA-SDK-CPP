@@ -22,6 +22,8 @@
 #endif
 #if defined(__MACH__) || defined(__APPLE__)
 #include <CoreServices/CoreServices.h>
+#elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
+#include <sys/utsname.h>
 #endif
 
 namespace gameanalytics
@@ -160,7 +162,7 @@ namespace gameanalytics
             OSVERSIONINFOEX info;
             ZeroMemory(&info, sizeof(OSVERSIONINFOEX));
             info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-            GetVersionEx(&info);
+            GetVersionEx((LPOSVERSIONINFO)&info);
 
             return GADevice::getBuildPlatform() + " " + std::to_string(info.dwMajorVersion) + "." + std::to_string(info.dwMinorVersion) + "." + std::to_string(info.dwBuildNumber);
 #elif defined(__MACH__) || defined(__APPLE__)
@@ -172,6 +174,9 @@ namespace gameanalytics
 
             return GADevice::getBuildPlatform() + " " + std::to_string(majorVersion) + "." + std::to_string(minorVersion) + "." + std::to_string(bugFixVersion);
 #elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
+            struct utsname info;
+            uname(&info);
+            return GADevice::getBuildPlatform() + " " + std::string(info.release);
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
