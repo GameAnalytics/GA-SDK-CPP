@@ -24,6 +24,7 @@
 #include <CoreServices/CoreServices.h>
 #elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
 #include <sys/utsname.h>
+#include <cctype>
 #endif
 
 namespace gameanalytics
@@ -176,7 +177,18 @@ namespace gameanalytics
 #elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
             struct utsname info;
             uname(&info);
-            return GADevice::getBuildPlatform() + " " + std::string(info.release);
+            std::string v(info.release);
+
+            std::size_t i;
+            for(i = 0; i < v.size(); ++i)
+            {
+                if(!isdigit(v[i]) && v[i] != '.')
+                {
+                    v = v.substr(0, i);
+                    break;
+                }
+            }
+            return GADevice::getBuildPlatform() + " " + v;
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
