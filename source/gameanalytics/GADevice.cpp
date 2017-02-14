@@ -14,6 +14,7 @@
 #include <algorithm>
 #elif _WIN32
 #include <direct.h>
+#include <windows.h>
 #else
 #include <cstdlib>
 #include <sys/types.h>
@@ -152,7 +153,16 @@ namespace gameanalytics
 
             return GADevice::getBuildPlatform() + " " + version;
 #else
+#ifdef _WIN32
+            OSVERSIONINFOEX info;
+            ZeroMemory(&info, sizeof(OSVERSIONINFOEX));
+            info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+            GetVersionEx(&info);
+
+            return GADevice::getBuildPlatform() + " " + std::to_string(info.dwMajorVersion) + "." + std::to_string(info.dwMinorVersion) + "." + std::to_string(info.dwBuildNumber);
+#else
             return GADevice::getBuildPlatform() + " 0.0.0";
+#endif
 #endif
         }
 
