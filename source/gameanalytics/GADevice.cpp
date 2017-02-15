@@ -183,11 +183,14 @@ namespace gameanalytics
             return GADevice::getBuildPlatform() + " " + version;
 #else
 #ifdef _WIN32
+#if (_MSC_VER == 1900)
             if (IsWindows10OrGreater())
             {
                 return GADevice::getBuildPlatform() + " 10.0";
             }
-            else if (IsWindows8Point1OrGreater())
+            else
+#endif
+                if (IsWindows8Point1OrGreater())
             {
                 return GADevice::getBuildPlatform() + " 6.3";
             }
