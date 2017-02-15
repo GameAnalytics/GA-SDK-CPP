@@ -330,7 +330,7 @@ namespace gameanalytics
 #elif IS_MAC
             return "Apple";
 #elif IS_LINUX
-            return "unknown"
+            return "unknown";
 #else
             return "unknown";
 #endif
