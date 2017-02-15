@@ -43,7 +43,7 @@
 #include <sys/stat.h>
 #endif
 #if IS_MAC
-#include <CoreServices/CoreServices.h>
+#include "GADeviceOSX.h"
 #elif IS_LINUX
 #include <sys/utsname.h>
 #include <cctype>
@@ -211,13 +211,8 @@ namespace gameanalytics
                 return GADevice::getBuildPlatform() + " 0.0.0";
             }
 #elif IS_MAC
-            SInt32 majorVersion,minorVersion,bugFixVersion;
-
-            Gestalt(gestaltSystemVersionMajor, &majorVersion);
-            Gestalt(gestaltSystemVersionMinor, &minorVersion);
-            Gestalt(gestaltSystemVersionBugFix, &bugFixVersion);
-
-            return GADevice::getBuildPlatform() + " " + std::to_string(majorVersion) + "." + std::to_string(minorVersion) + "." + std::to_string(bugFixVersion);
+            return GADevice::getBuildPlatform() + " " + getOSXVersion();
+            
 #elif IS_LINUX
             struct utsname info;
             uname(&info);
@@ -267,7 +262,7 @@ namespace gameanalytics
             hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
 
             auto hasFailed = [&hResult]() {
-                if (FAILED(hResult)) 
+                if (FAILED(hResult))
                 {
                     return true;
                 }
@@ -433,6 +428,7 @@ namespace gameanalytics
 
             return std::string(pszConvertedAnsiString);
 #elif IS_MAC
+            return "unknown";
 #elif IS_LINUX
 #else
             return "unknown";
