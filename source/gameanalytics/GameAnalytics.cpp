@@ -111,6 +111,7 @@ namespace gameanalytics
                 return;
             }
             device::GADevice::setWritablePath(writablePath);
+            logging::GALogger::customInitializeLog();
         });
     }
 

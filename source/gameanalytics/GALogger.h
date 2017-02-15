@@ -38,6 +38,9 @@ namespace gameanalytics
 
             void sendNotificationMessage(const std::string& message, EGALoggerMessageType type);
 
+#if !USE_UWP && !USE_TIZEN
+            static void customInitializeLog();
+#endif
          private:
 #if !USE_UWP && !USE_TIZEN
             static void initializeLog();
