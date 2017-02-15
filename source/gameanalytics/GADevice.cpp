@@ -213,7 +213,7 @@ namespace gameanalytics
             }
 #elif IS_MAC
             return GADevice::getBuildPlatform() + " " + getOSXVersion();
-            
+
 #elif IS_LINUX
             struct utsname info;
             uname(&info);
@@ -330,6 +330,7 @@ namespace gameanalytics
 #elif IS_MAC
             return "Apple";
 #elif IS_LINUX
+            return "unknown"
 #else
             return "unknown";
 #endif
@@ -431,16 +432,17 @@ namespace gameanalytics
 #elif IS_MAC
             size_t len = 0;
             sysctlbyname("hw.model", NULL, &len, NULL, 0);
-            
+
             char* model = (char*)malloc(len + 1);
             memset(model, 0, len + 1);
-            
+
             sysctlbyname("hw.model", model, &len, NULL, 0);
             std::string result(model);
             free(model);
-            
+
             return result;
 #elif IS_LINUX
+            return "unknown";
 #else
             return "unknown";
 #endif
