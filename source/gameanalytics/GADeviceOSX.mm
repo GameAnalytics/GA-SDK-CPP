@@ -13,8 +13,8 @@ const char* getOSXVersion()
     if([[NSProcessInfo processInfo] respondsToSelector:@selector(operatingSystemVersion)])
     {
         MyOperatingSystemVersion version;
-        NSMethodSignature* methodSignsture = [[NSProcessInfo processInfo] methodSignatureForSelector:@selector(operatingSystemVersion)];
-        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:methodSignsture];
+        NSMethodSignature* methodSignature = [[NSProcessInfo processInfo] methodSignatureForSelector:@selector(operatingSystemVersion)];
+        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:methodSignature];
         inv.selector = @selector(operatingSystemVersion);
         [inv invokeWithTarget:[NSProcessInfo processInfo]];
         [inv getReturnValue:&version];
@@ -26,9 +26,12 @@ const char* getOSXVersion()
     {
         SInt32 majorVersion,minorVersion,bugFixVersion;
         
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         Gestalt(gestaltSystemVersionMajor, &majorVersion);
         Gestalt(gestaltSystemVersionMinor, &minorVersion);
         Gestalt(gestaltSystemVersionBugFix, &bugFixVersion);
+#pragma GCC diagnostic pop
         
         NSString* v = [NSString stringWithFormat:@"%d.%d.%d", majorVersion, minorVersion, bugFixVersion];
         return [v UTF8String];
