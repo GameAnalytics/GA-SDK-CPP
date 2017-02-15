@@ -98,6 +98,39 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
     )
+elseif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+    # traverse all the subdirectories of the matched directory
+    FILE(GLOB_RECURSE CPP_SOURCES
+        # Add GameAnalytics Sources
+        "${GA_SOURCE_DIR}/*.cpp"
+        "${GA_SOURCE_DIR}/*.mm"
+        "${GA_SOURCE_DIR}/*.h"
+
+        # Add dependencies
+        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/sqlite/*.c"
+        "${DEPENDENCIES_DIR}/sqlite/*.h"
+        "${DEPENDENCIES_DIR}/crypto/*.c"
+        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+        "${DEPENDENCIES_DIR}/plog/*.h"
+        "${DEPENDENCIES_DIR}/miniz/*.c"
+        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
+        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
+    )
+
+    add_definitions("-DCRYPTOPP_DISABLE_ASM")
+
+    include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
+        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/plog"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/crypto"
+        "${DEPENDENCIES_DIR}/miniz"
+        "${DEPENDENCIES_DIR}/curl/include"
+        "${DEPENDENCIES_DIR}/curlcpp/include"
+    )
 else()
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
@@ -159,6 +192,8 @@ if("${PLATFORM}" STREQUAL "osx-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
         "-framework CoreFoundation"
+        "-framework Foundation"
+        "-framework CoreServices"
     )
 endif("${PLATFORM}" STREQUAL "osx-shared")
 

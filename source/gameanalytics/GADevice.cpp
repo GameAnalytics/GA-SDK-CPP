@@ -3,6 +3,22 @@
 // Copyright 2015 GameAnalytics. All rights reserved.
 //
 
+#if defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
+#define IS_LINUX 1
+#else
+#define IS_LINUX 0
+#endif
+
+#if defined(__MACH__) || defined(__APPLE__)
+#define IS_MAC 1
+#else
+#define IS_MAC 0
+#endif
+
+#if _WIN32
+#define _WIN32_DCOM
+#endif
+
 #include "GADevice.h"
 #include "GAUtilities.h"
 #if USE_UWP
@@ -14,16 +30,31 @@
 #include <algorithm>
 #elif _WIN32
 #include <direct.h>
+#include <windows.h>
+#include <VersionHelpers.h>
+#include "GALogger.h"
+#include <atlstr.h>
+#include <comdef.h>
+#include <wbemidl.h>
+#pragma comment(lib, "wbemuuid.lib")
 #else
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
+#if IS_MAC
+#include "GADeviceOSX.h"
+#include <sys/sysctl.h>
+#elif IS_LINUX
+#include <sys/utsname.h>
+#include <cctype>
 #endif
 
 namespace gameanalytics
 {
     namespace device
     {
+        std::string GADevice::_writablepath = GADevice::getPersistentPath();
         const std::string GADevice::_buildPlatform = GADevice::runtimePlatformToString();
         const std::string GADevice::_osVersion = GADevice::getOSVersionString();
         std::string GADevice::_deviceModel = GADevice::deviceModel();
@@ -34,16 +65,15 @@ namespace gameanalytics
         const std::string GADevice::_deviceId = GADevice::deviceId();
 #endif
         std::string GADevice::_deviceManufacturer = GADevice::deviceManufacturer();
-        std::string GADevice::_writablepath = GADevice::getPersistentPath();
         std::string GADevice::_sdkGameEngineVersion;
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.1";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.2";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.1";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.2";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.1";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.2";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
@@ -152,7 +182,59 @@ namespace gameanalytics
 
             return GADevice::getBuildPlatform() + " " + version;
 #else
+#ifdef _WIN32
+#if (_MSC_VER == 1900)
+            if (IsWindows10OrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 10.0";
+            }
+            else
+#endif
+                if (IsWindows8Point1OrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 6.3";
+            }
+            else if (IsWindows8OrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 6.2";
+            }
+            else if (IsWindows7OrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 6.1";
+            }
+            else if (IsWindowsVistaOrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 6.0";
+            }
+            else if (IsWindowsXPOrGreater())
+            {
+                return GADevice::getBuildPlatform() + " 5.1";
+            }
+            else
+            {
+                return GADevice::getBuildPlatform() + " 0.0.0";
+            }
+#elif IS_MAC
+            return GADevice::getBuildPlatform() + " " + getOSXVersion();
+
+#elif IS_LINUX
+            struct utsname info;
+            uname(&info);
+            std::string v(info.release);
+
+            std::size_t i;
+            for(i = 0; i < v.size(); ++i)
+            {
+                if(!isdigit(v[i]) && v[i] != '.')
+                {
+                    v = v.substr(0, i);
+                    break;
+                }
+            }
+            return GADevice::getBuildPlatform() + " " + v;
+#else
             return GADevice::getBuildPlatform() + " 0.0.0";
+#endif
 #endif
         }
 
@@ -173,7 +255,88 @@ namespace gameanalytics
 
             return result;
 #else
+#ifdef _WIN32
+            IWbemLocator *locator = nullptr;
+            IWbemServices *services = nullptr;
+            auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
+            if (FAILED(hResult))
+            {
+                return "unknown";
+            }
+            hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
+
+            auto hasFailed = [&hResult]() {
+                if (FAILED(hResult))
+                {
+                    return true;
+                }
+                return false;
+            };
+
+            auto getValue = [&hResult, &hasFailed](IWbemClassObject *classObject, LPCWSTR property) {
+                CString propertyValueText = "unknown";
+                VARIANT propertyValue;
+                hResult = classObject->Get(property, 0, &propertyValue, 0, 0);
+                if (!hasFailed()) {
+                    if ((propertyValue.vt == VT_NULL) || (propertyValue.vt == VT_EMPTY)) {
+                    }
+                    else if (propertyValue.vt & VT_ARRAY) {
+                        propertyValueText = "unknown"; //Array types not supported
+                    }
+                    else {
+                        propertyValueText = propertyValue.bstrVal;
+                    }
+                }
+                VariantClear(&propertyValue);
+                return propertyValueText;
+            };
+
+            CString manufacturer = "unknown";
+            if (!hasFailed()) {
+                // Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
+                hResult = locator->ConnectServer(L"ROOT\\CIMV2", nullptr, nullptr, 0, NULL, 0, 0, &services);
+
+                if (!hasFailed()) {
+                    // Set the IWbemServices proxy so that impersonation of the user (client) occurs.
+                    hResult = CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL,
+                        RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+
+                    if (!hasFailed()) {
+                        IEnumWbemClassObject* classObjectEnumerator = nullptr;
+                        hResult = services->ExecQuery(L"WQL", L"SELECT * FROM Win32_ComputerSystem", WBEM_FLAG_FORWARD_ONLY |
+                            WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &classObjectEnumerator);
+                        if (!hasFailed()) {
+                            IWbemClassObject *classObject;
+                            ULONG uReturn = 0;
+                            hResult = classObjectEnumerator->Next(WBEM_INFINITE, 1, &classObject, &uReturn);
+                            if (uReturn != 0) {
+                                manufacturer = getValue(classObject, (LPCWSTR)L"Manufacturer");
+                            }
+                            classObject->Release();
+                        }
+                        classObjectEnumerator->Release();
+                    }
+                }
+            }
+
+            if (locator) {
+                locator->Release();
+            }
+            if (services) {
+                services->Release();
+            }
+            CoUninitialize();
+
+            CT2CA pszConvertedAnsiString(manufacturer);
+
+            return std::string(pszConvertedAnsiString);
+#elif IS_MAC
+            return "Apple";
+#elif IS_LINUX
             return "unknown";
+#else
+            return "unknown";
+#endif
 #endif
         }
 
@@ -194,7 +357,98 @@ namespace gameanalytics
 
             return result;
 #else
+#ifdef _WIN32
+            IWbemLocator *locator = nullptr;
+            IWbemServices *services = nullptr;
+            auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
+            if (FAILED(hResult))
+            {
+                return "unknown";
+            }
+            hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
+
+            auto hasFailed = [&hResult]() {
+                if (FAILED(hResult))
+                {
+                    return true;
+                }
+                return false;
+            };
+
+            auto getValue = [&hResult, &hasFailed](IWbemClassObject *classObject, LPCWSTR property) {
+                CString propertyValueText = "unknown";
+                VARIANT propertyValue;
+                hResult = classObject->Get(property, 0, &propertyValue, 0, 0);
+                if (!hasFailed()) {
+                    if ((propertyValue.vt == VT_NULL) || (propertyValue.vt == VT_EMPTY)) {
+                    }
+                    else if (propertyValue.vt & VT_ARRAY) {
+                        propertyValueText = "unknown"; //Array types not supported
+                    }
+                    else {
+                        propertyValueText = propertyValue.bstrVal;
+                    }
+                }
+                VariantClear(&propertyValue);
+                return propertyValueText;
+            };
+
+            CString model = "unknown";
+            if (!hasFailed()) {
+                // Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
+                hResult = locator->ConnectServer(L"ROOT\\CIMV2", nullptr, nullptr, 0, NULL, 0, 0, &services);
+
+                if (!hasFailed()) {
+                    // Set the IWbemServices proxy so that impersonation of the user (client) occurs.
+                    hResult = CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL,
+                        RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+
+                    if (!hasFailed()) {
+                        IEnumWbemClassObject* classObjectEnumerator = nullptr;
+                        hResult = services->ExecQuery(L"WQL", L"SELECT * FROM Win32_ComputerSystem", WBEM_FLAG_FORWARD_ONLY |
+                            WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &classObjectEnumerator);
+                        if (!hasFailed()) {
+                            IWbemClassObject *classObject;
+                            ULONG uReturn = 0;
+                            hResult = classObjectEnumerator->Next(WBEM_INFINITE, 1, &classObject, &uReturn);
+                            if (uReturn != 0) {
+                                model = getValue(classObject, (LPCWSTR)L"Model");
+                            }
+                            classObject->Release();
+                        }
+                        classObjectEnumerator->Release();
+                    }
+                }
+            }
+
+            if (locator) {
+                locator->Release();
+            }
+            if (services) {
+                services->Release();
+            }
+            CoUninitialize();
+
+            CT2CA pszConvertedAnsiString(model);
+
+            return std::string(pszConvertedAnsiString);
+#elif IS_MAC
+            size_t len = 0;
+            sysctlbyname("hw.model", NULL, &len, NULL, 0);
+
+            char* model = (char*)malloc(len + 1);
+            memset(model, 0, len + 1);
+
+            sysctlbyname("hw.model", model, &len, NULL, 0);
+            std::string result(model);
+            free(model);
+
+            return result;
+#elif IS_LINUX
             return "unknown";
+#else
+            return "unknown";
+#endif
 #endif
         }
 
@@ -287,11 +541,11 @@ namespace gameanalytics
 
             return result;
 #else
-#if defined(__MACH__) || defined(__APPLE__)
+#if IS_MAC
             return "mac_osx";
 #elif defined(_WIN32)
             return "windows";
-#elif defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
+#elif IS_LINUX
             return "linux";
 #else
             return "unknown";
