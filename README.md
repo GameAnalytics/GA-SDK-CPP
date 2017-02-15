@@ -7,6 +7,7 @@ Supported platforms:
 
 * Mac OS X
 * Winddows 32-bit and 64-bit
+* Linux
 * UWP
 * Tizen
 
@@ -22,7 +23,11 @@ Dependencies
 
 Changelog
 ---------
+**1.3.2**
+* added OS version, device model and device manufacturer to event (windows, mac)
+
 **1.3.1**
+* added support for Linux
 * logging initialisation updated for windows and mac (windows, mac)
 
 **1.3.0**
