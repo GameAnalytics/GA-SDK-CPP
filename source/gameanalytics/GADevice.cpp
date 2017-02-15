@@ -44,6 +44,7 @@
 #endif
 #if IS_MAC
 #include "GADeviceOSX.h"
+#include <sys/sysctl.h>
 #elif IS_LINUX
 #include <sys/utsname.h>
 #include <cctype>
@@ -428,7 +429,17 @@ namespace gameanalytics
 
             return std::string(pszConvertedAnsiString);
 #elif IS_MAC
-            return "unknown";
+            size_t len = 0;
+            sysctlbyname("hw.model", NULL, &len, NULL, 0);
+            
+            char* model = (char*)malloc(len + 1);
+            memset(model, 0, len + 1);
+            
+            sysctlbyname("hw.model", model, &len, NULL, 0);
+            std::string result(model);
+            free(model);
+            
+            return result;
 #elif IS_LINUX
 #else
             return "unknown";
