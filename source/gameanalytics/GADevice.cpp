@@ -332,6 +332,7 @@ namespace gameanalytics
 
             return std::string(pszConvertedAnsiString);
 #elif IS_MAC
+            return "Apple";
 #elif IS_LINUX
 #else
             return "unknown";
