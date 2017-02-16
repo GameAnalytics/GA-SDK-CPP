@@ -28,6 +28,8 @@ target_link_libraries(${PROJECT_NAME}
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
     ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     "-framework CoreFoundation"
+    "-framework Foundation"
+    "-framework CoreServices"
 )
 
 # enable c++11 via -std=c++11 when compiler is clang or gcc

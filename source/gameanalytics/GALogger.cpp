@@ -87,15 +87,14 @@ namespace gameanalytics
             std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
 
             static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
-            static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
 
             if (ga->debugEnabled)
             {
-                plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
+                plog::init(plog::debug, &fileAppender);
             }
             else
             {
-                plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
+                plog::init(plog::info, &fileAppender);
             }
 
             GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
