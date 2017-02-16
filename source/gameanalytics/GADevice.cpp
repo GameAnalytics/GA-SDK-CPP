@@ -32,8 +32,6 @@
 #include <direct.h>
 #include <windows.h>
 #include <VersionHelpers.h>
-#include "GALogger.h"
-#include <atlstr.h>
 #include <comdef.h>
 #include <wbemidl.h>
 #pragma comment(lib, "wbemuuid.lib")
@@ -69,11 +67,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.2";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.3.3";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.2";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 1.3.3";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.2";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.3.3";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
@@ -216,7 +214,6 @@ namespace gameanalytics
             }
 #elif IS_MAC
             return GADevice::getBuildPlatform() + " " + getOSXVersion();
-
 #elif IS_LINUX
             struct utsname info;
             uname(&info);
@@ -274,14 +271,14 @@ namespace gameanalytics
             };
 
             auto getValue = [&hResult, &hasFailed](IWbemClassObject *classObject, LPCWSTR property) {
-                CString propertyValueText = "unknown";
+                BSTR propertyValueText = L"unknown";
                 VARIANT propertyValue;
                 hResult = classObject->Get(property, 0, &propertyValue, 0, 0);
                 if (!hasFailed()) {
                     if ((propertyValue.vt == VT_NULL) || (propertyValue.vt == VT_EMPTY)) {
                     }
                     else if (propertyValue.vt & VT_ARRAY) {
-                        propertyValueText = "unknown"; //Array types not supported
+                        propertyValueText = L"unknown"; //Array types not supported
                     }
                     else {
                         propertyValueText = propertyValue.bstrVal;
@@ -291,7 +288,7 @@ namespace gameanalytics
                 return propertyValueText;
             };
 
-            CString manufacturer = "unknown";
+            BSTR manufacturer = L"unknown";
             if (!hasFailed()) {
                 // Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
                 hResult = locator->ConnectServer(L"ROOT\\CIMV2", nullptr, nullptr, 0, NULL, 0, 0, &services);
@@ -327,9 +324,7 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            CT2CA pszConvertedAnsiString(manufacturer);
-
-            return std::string(pszConvertedAnsiString);
+            return std::string(_com_util::ConvertBSTRToString(manufacturer));
 #elif IS_MAC
             return "Apple";
 #elif IS_LINUX
@@ -376,14 +371,14 @@ namespace gameanalytics
             };
 
             auto getValue = [&hResult, &hasFailed](IWbemClassObject *classObject, LPCWSTR property) {
-                CString propertyValueText = "unknown";
+                BSTR propertyValueText = L"unknown";
                 VARIANT propertyValue;
                 hResult = classObject->Get(property, 0, &propertyValue, 0, 0);
                 if (!hasFailed()) {
                     if ((propertyValue.vt == VT_NULL) || (propertyValue.vt == VT_EMPTY)) {
                     }
                     else if (propertyValue.vt & VT_ARRAY) {
-                        propertyValueText = "unknown"; //Array types not supported
+                        propertyValueText = L"unknown"; //Array types not supported
                     }
                     else {
                         propertyValueText = propertyValue.bstrVal;
@@ -393,7 +388,7 @@ namespace gameanalytics
                 return propertyValueText;
             };
 
-            CString model = "unknown";
+            BSTR model = L"unknown";
             if (!hasFailed()) {
                 // Connect to the root\cimv2 namespace with the current user and obtain pointer pSvc to make IWbemServices calls.
                 hResult = locator->ConnectServer(L"ROOT\\CIMV2", nullptr, nullptr, 0, NULL, 0, 0, &services);
@@ -429,9 +424,7 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            CT2CA pszConvertedAnsiString(model);
-
-            return std::string(pszConvertedAnsiString);
+            return std::string(_com_util::ConvertBSTRToString(model));
 #elif IS_MAC
             size_t len = 0;
             sysctlbyname("hw.model", NULL, &len, NULL, 0);

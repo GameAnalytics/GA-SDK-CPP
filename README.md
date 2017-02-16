@@ -23,6 +23,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.3**
+* bug fix to dupplicate logs send to console (windows, mac, linux)
+
 **1.3.2**
 * added OS version, device model and device manufacturer to event (windows, mac)
 
