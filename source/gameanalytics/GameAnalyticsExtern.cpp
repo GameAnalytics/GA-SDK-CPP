@@ -1,4 +1,4 @@
-#if USE_TIZEN
+#if USE_TIZEN || GA_SHARED_LIB
 
 #include "GameAnalytics.h"
 #include "GAUtilities.h"

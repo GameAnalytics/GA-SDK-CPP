@@ -12,8 +12,8 @@
 
 #include <string>
 #include <vector>
-#if USE_TIZEN
-#include "GameAnalyticsTizen.h"
+#if USE_TIZEN || GA_SHARED_LIB
+#include "GameAnalyticsExtern.h"
 #endif
 
 namespace gameanalytics
