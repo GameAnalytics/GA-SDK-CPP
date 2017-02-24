@@ -152,19 +152,20 @@ void addErrorEvent(int severity, const char *message)
 
 // set calls can be changed at any time (pre- and post-initialize)
 // some calls only work after a configure is called (setCustomDimension)
-void setEnabledInfoLog(bool flag)
+
+void setEnabledInfoLog(double flag)
 {
-    gameanalytics::GameAnalytics::setEnabledInfoLog(flag);
+    gameanalytics::GameAnalytics::setEnabledInfoLog(flag != 0.0);
 }
 
-void setEnabledVerboseLog(bool flag)
+void setEnabledVerboseLog(double flag)
 {
-    gameanalytics::GameAnalytics::setEnabledVerboseLog(flag);
+    gameanalytics::GameAnalytics::setEnabledVerboseLog(flag != 0.0);
 }
 
-void setEnabledManualSessionHandling(bool flag)
+void setEnabledManualSessionHandling(double flag)
 {
-    gameanalytics::GameAnalytics::setEnabledManualSessionHandling(flag);
+    gameanalytics::GameAnalytics::setEnabledManualSessionHandling(flag != 0.0);
 }
 
 void setCustomDimension01(const char *dimension01)
