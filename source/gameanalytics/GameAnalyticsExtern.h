@@ -2,10 +2,14 @@
 extern "C" {
 #endif
 
-#if GA_SHARED_LIB && defined(_WIN32)
+#if GA_SHARED_LIB
+#if defined(_WIN32)
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT __attribute__((visibility("default")))
+#endif
+#else
+#define EXPORT
 #endif
 
 EXPORT void configureAvailableCustomDimensions01(const char *customDimensionsJson);
