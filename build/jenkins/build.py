@@ -129,9 +129,19 @@ class TargetOSX(TargetCMake):
         if not LibTools.folder_exists(release_dir):
             os.makedirs(release_dir)
 
+        shutil.copy(
+            os.path.join(self.build_dir(), 'Debug', self.binary_name),
+            os.path.join(debug_dir, self.binary_name)
+        )
+
         shutil.move(
             os.path.join(self.build_dir(), 'Debug', self.binary_name),
             os.path.join(debug_dir, self.target_name)
+        )
+
+        shutil.copy(
+            os.path.join(self.build_dir(), 'Release', self.binary_name),
+            os.path.join(release_dir, self.binary_name)
         )
 
         shutil.move(
