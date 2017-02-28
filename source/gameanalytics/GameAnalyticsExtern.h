@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-#if GA_SHARED_LIB
+#if GA_SHARED_LIB && defined(_WIN32)
 #define EXPORT __declspec(dllexport)
 #else
 #define EXPORT
