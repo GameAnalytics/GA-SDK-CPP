@@ -30,12 +30,12 @@ elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "wi
 elseif("${PLATFORM}" STREQUAL "osx-static")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64") # for now, we only support 64bit
+    set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     set(EXTRA_LIBS z)
     SET (LIB_TYPE STATIC)
 elseif("${PLATFORM}" STREQUAL "osx-shared")
     set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64") # for now, we only support 64bit
+    set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
