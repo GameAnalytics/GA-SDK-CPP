@@ -56,6 +56,7 @@ elseif("${PLATFORM}" STREQUAL "linux-shared")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE SHARED)
+    add_definitions("-DGA_SHARED_LIB")
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
 if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
