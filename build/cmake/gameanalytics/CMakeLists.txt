@@ -21,7 +21,7 @@ if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
+elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
@@ -58,9 +58,9 @@ elseif("${PLATFORM}" STREQUAL "linux-shared")
     SET (LIB_TYPE SHARED)
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
 
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
     add_definitions("-DUSE_UWP -ZW")
-endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
 
 if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
     add_definitions("-DGUID_WINDOWS")
@@ -77,7 +77,7 @@ endif("${PLATFORM}" STREQUAL "linux-static" OR "${PLATFORM}" STREQUAL "linux-sha
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
     add_definitions("-DSQLITE_OS_WINRT")
 
     FILE(GLOB_RECURSE CPP_SOURCES
@@ -164,7 +164,7 @@ else()
         "${DEPENDENCIES_DIR}/curl/include"
         "${DEPENDENCIES_DIR}/curlcpp/include"
     )
-endif()
+endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
 
 create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
@@ -240,15 +240,15 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
     )
 endif("${PLATFORM}" STREQUAL "win32-vc120-shared")
 
-if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-endif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+endif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
 
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
     set_target_properties(GameAnalytics PROPERTIES VS_DESKTOP_EXTENSIONS_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
-endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
 
 if("${PLATFORM}" STREQUAL "win64-vc140-shared")
     include_directories(
