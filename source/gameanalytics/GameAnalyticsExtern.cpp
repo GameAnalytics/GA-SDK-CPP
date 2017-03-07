@@ -115,24 +115,27 @@ void initialize(const char *gameKey, const char *gameSecret)
 }
 
 // add events
-void addBusinessEvent(const char *currency, int amount, const char *itemType, const char *itemId, const char *cartType)
+void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType)
 {
-    gameanalytics::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType);
 }
 
-void addResourceEvent(int flowType, const char *currency, float amount, const char *itemType, const char *itemId)
+void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId)
 {
-    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowType, currency, amount, itemType, itemId);
+    int flowTypeInt = (int)flowType;
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId);
 }
 
-void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03)
+void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03)
 {
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatus, progression01, progression02, progression03);
+    int progressionStatusInt = (int)progressionStatus;
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03);
 }
 
-void addProgressionEventWithScore(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score)
+void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score)
 {
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatus, progression01, progression02, progression03, score);
+    int progressionStatusInt = (int)progressionStatus;
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score);
 }
 
 void addDesignEvent(const char *eventId)
@@ -145,9 +148,10 @@ void addDesignEventWithValue(const char *eventId, double value)
     gameanalytics::GameAnalytics::addDesignEvent(eventId, value);
 }
 
-void addErrorEvent(int severity, const char *message)
+void addErrorEvent(double severity, const char *message)
 {
-    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severity, message);
+    int severityInt = (int)severity;
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message);
 }
 
 // set calls can be changed at any time (pre- and post-initialize)
@@ -188,14 +192,15 @@ void setFacebookId(const char *facebookId)
     gameanalytics::GameAnalytics::setFacebookId(facebookId);
 }
 
-void setGender(int gender)
+void setGender(double gender)
 {
-    gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)gender);
+    int genderInt = (int)gender;
+    gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
 }
 
-void setBirthYear(int birthYear)
+void setBirthYear(double birthYear)
 {
-    gameanalytics::GameAnalytics::setBirthYear(birthYear);
+    gameanalytics::GameAnalytics::setBirthYear((int)birthYear);
 }
 
 void gameAnalyticsStartSession()

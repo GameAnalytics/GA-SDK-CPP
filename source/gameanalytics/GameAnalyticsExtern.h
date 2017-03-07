@@ -35,17 +35,17 @@ EXPORT void configureUserId(const char *uId);
 EXPORT void initialize(const char *gameKey, const char *gameSecret);
 
 // add events
-EXPORT void addBusinessEvent(const char *currency, int amount, const char *itemType, const char *itemId, const char *cartType);
+EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType);
 
-EXPORT void addResourceEvent(int flowType, const char *currency, float amount, const char *itemType, const char *itemId);
+EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId);
 
-EXPORT void addProgressionEvent(int progressionStatus, const char *progression01, const char *progression02, const char *progression03);
+EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03);
 
-EXPORT void addProgressionEventWithScore(int progressionStatus, const char *progression01, const char *progression02, const char *progression03, int score);
+EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score);
 
 EXPORT void addDesignEvent(const char *eventId);
 EXPORT void addDesignEventWithValue(const char *eventId, double value);
-EXPORT void addErrorEvent(int severity, const char *message);
+EXPORT void addErrorEvent(double severity, const char *message);
 
 // set calls can be changed at any time (pre- and post-initialize)
 // some calls only work after a configure is called (setCustomDimension)
@@ -56,8 +56,8 @@ EXPORT void setCustomDimension01(const char *dimension01);
 EXPORT void setCustomDimension02(const char *dimension02);
 EXPORT void setCustomDimension03(const char *dimension03);
 EXPORT void setFacebookId(const char *facebookId);
-EXPORT void setGender(int gender);
-EXPORT void setBirthYear(int birthYear);
+EXPORT void setGender(double gender);
+EXPORT void setBirthYear(double birthYear);
 
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
