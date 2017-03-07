@@ -1,5 +1,6 @@
 #/bin/sh -f
 
+export CFLAGS="-O -g -arch i386"
 ./configure --disable-shared --enable-static \
 --disable-dependency-tracking --enable-ipv6 --disable-ftp --disable-file \
 --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict \
