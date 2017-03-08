@@ -29,28 +29,28 @@ elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "wi
     add_definitions("-DGA_SHARED_LIB")
 elseif("${PLATFORM}" STREQUAL "osx-static")
     set(LIB_EXTENSION "a")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     set(EXTRA_LIBS z)
     SET (LIB_TYPE STATIC)
 elseif("${PLATFORM}" STREQUAL "osx-shared")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
     add_definitions("-DGA_SHARED_LIB")
-elseif("${PLATFORM}" STREQUAL "linux-static")
+elseif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static")
     set(LIB_EXTENSION "a")
-    set(CMAKE_CXX_FLAGS "-std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "linux-shared")
+elseif("${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
     set(LIB_EXTENSION "so")
-    set(CMAKE_CXX_FLAGS "-std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
@@ -71,9 +71,9 @@ if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
     add_definitions("-DGUID_CFUUID")
 endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
 
-if("${PLATFORM}" STREQUAL "linux-static" OR "${PLATFORM}" STREQUAL "linux-shared")
+if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
     add_definitions("-DGUID_LIBUUID")
-endif("${PLATFORM}" STREQUAL "linux-static" OR "${PLATFORM}" STREQUAL "linux-shared")
+endif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
@@ -177,12 +177,13 @@ if("${PLATFORM}" STREQUAL "osx-static")
     )
 endif("${PLATFORM}" STREQUAL "osx-static")
 
-if("${PLATFORM}" STREQUAL "linux-static" OR "${PLATFORM}" STREQUAL "linux-shared")
+if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/ooid"
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
-endif("${PLATFORM}" STREQUAL "linux-static" OR "${PLATFORM}" STREQUAL "linux-shared")
+    set_target_properties(GameAnalytics PROPERTIES COMPILE_FLAGS "${TARGET_ARCH}" LINK_FLAGS "${TARGET_ARCH}")
+endif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
 
 if("${PLATFORM}" STREQUAL "osx-shared")
     include_directories(
@@ -199,17 +200,29 @@ if("${PLATFORM}" STREQUAL "osx-shared")
     )
 endif("${PLATFORM}" STREQUAL "osx-shared")
 
-if("${PLATFORM}" STREQUAL "linux-shared")
+if("${PLATFORM}" STREQUAL "linux-x64-shared")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux/libcrypto.a
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux/libssl.a
-        ${DEPENDENCIES_DIR}/curl/lib/linux/libcurl.a
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x64/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x64/libssl.a
+        ${DEPENDENCIES_DIR}/curl/lib/linux_x64/libcurl.a
     )
-endif("${PLATFORM}" STREQUAL "linux-shared")
+endif("${PLATFORM}" STREQUAL "linux-x64-shared")
+
+if("${PLATFORM}" STREQUAL "linux-x86-shared")
+    include_directories(
+        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+    )
+
+    target_link_libraries(GameAnalytics
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x86/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x86/libssl.a
+        ${DEPENDENCIES_DIR}/curl/lib/linux_x86/libcurl.a
+    )
+endif("${PLATFORM}" STREQUAL "linux-x86-shared")
 
 if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
     include_directories(

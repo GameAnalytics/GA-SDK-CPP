@@ -359,11 +359,16 @@ class TargetTizen(TargetCMake):
         )
 
 class TargetLinux(TargetCMake):
+    def __init__(self, name, generator, architecture):
+        super(TargetLinux, self).__init__(name, generator)
+        self.architecture = architecture
+
     def create_project_file(self):
         print 'Skip create_project_file for Linux'
 
 
     def build(self, silent=False):
+	    # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -374,6 +379,7 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
+		        '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-G',
                 self.generator
             ],
@@ -407,10 +413,20 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
+		        '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-G',
                 self.generator
             ],
             self.build_dir()
+        )
+
+        call_process(
+            [
+                'make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
         )
 
         call_process(
@@ -420,8 +436,6 @@ class TargetLinux(TargetCMake):
             self.build_dir(),
             silent=silent
         )
-
-# test
 
         libEnding = 'a'
         if 'shared' in self.name:
@@ -445,7 +459,7 @@ class TargetLinux(TargetCMake):
             os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
             release_file
         )
-
+	    
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
@@ -467,8 +481,10 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-static': TargetLinux('linux-static', 'Unix Makefiles'),
-    'linux-shared': TargetLinux('linux-shared', 'Unix Makefiles'),
+    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles', '-m32'),
+    'linux-x86-shared': TargetLinux('linux-x86-shared', 'Unix Makefiles', '-m32'),
+    'linux-x64-static': TargetLinux('linux-x64-static', 'Unix Makefiles', '-m64'),
+    'linux-x64-shared': TargetLinux('linux-x64-shared', 'Unix Makefiles', '-m64'),
 }
 
 available_targets = {
@@ -501,8 +517,10 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
-        'linux-static': all_targets['linux-static'],
-        'linux-shared': all_targets['linux-shared'],
+        'linux-x86-static': all_targets['linux-x86-static'],
+        'linux-x86-shared': all_targets['linux-x86-shared'],
+        'linux-x64-static': all_targets['linux-x64-static'],
+        'linux-x64-shared': all_targets['linux-x64-shared'],
     }
 }[platform.system()]
 
