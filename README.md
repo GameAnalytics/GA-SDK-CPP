@@ -23,6 +23,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.4**
+* custom user id bug fix
+
 **1.3.3**
 * bug fix to dupplicate logs send to console (windows, mac, linux)
 
