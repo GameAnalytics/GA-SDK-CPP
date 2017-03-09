@@ -32,9 +32,11 @@
 #include <direct.h>
 #include <windows.h>
 #include <VersionHelpers.h>
+#if USE_WMI
 #include <comdef.h>
 #include <wbemidl.h>
 #pragma comment(lib, "wbemuuid.lib")
+#endif
 #else
 #include <cstdlib>
 #include <sys/types.h>
@@ -252,7 +254,7 @@ namespace gameanalytics
 
             return result;
 #else
-#ifdef _WIN32
+#if defined(_WIN32) && USE_WMI
             IWbemLocator *locator = nullptr;
             IWbemServices *services = nullptr;
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -352,7 +354,7 @@ namespace gameanalytics
 
             return result;
 #else
-#ifdef _WIN32
+#if defined(_WIN32) && USE_WMI
             IWbemLocator *locator = nullptr;
             IWbemServices *services = nullptr;
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
