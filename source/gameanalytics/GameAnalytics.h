@@ -5,15 +5,15 @@
 
 #pragma once
 
-#if GA_SHARED_LIB
+#if GA_SHARED_LIB && defined(_WIN32)
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "gdi32.lib")
 #endif
 
 #include <string>
 #include <vector>
-#if USE_TIZEN
-#include "GameAnalyticsTizen.h"
+#if USE_TIZEN || GA_SHARED_LIB
+#include "GameAnalyticsExtern.h"
 #endif
 
 namespace gameanalytics

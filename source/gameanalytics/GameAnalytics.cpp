@@ -191,12 +191,12 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
-            if (!isSdkReady(true, false))
+            if (isSdkReady(true, false))
             {
                 logging::GALogger::w("A custom user id must be set before SDK is initialized.");
                 return;
             }
-            if (validators::GAValidator::validateUserId(uId))
+            if (!validators::GAValidator::validateUserId(uId))
             {
                 logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: " + uId);
                 return;

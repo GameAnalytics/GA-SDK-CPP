@@ -129,9 +129,19 @@ class TargetOSX(TargetCMake):
         if not LibTools.folder_exists(release_dir):
             os.makedirs(release_dir)
 
+        shutil.copy(
+            os.path.join(self.build_dir(), 'Debug', self.binary_name),
+            os.path.join(debug_dir, self.binary_name)
+        )
+
         shutil.move(
             os.path.join(self.build_dir(), 'Debug', self.binary_name),
             os.path.join(debug_dir, self.target_name)
+        )
+
+        shutil.copy(
+            os.path.join(self.build_dir(), 'Release', self.binary_name),
+            os.path.join(release_dir, self.binary_name)
         )
 
         shutil.move(
@@ -349,11 +359,16 @@ class TargetTizen(TargetCMake):
         )
 
 class TargetLinux(TargetCMake):
+    def __init__(self, name, generator, architecture):
+        super(TargetLinux, self).__init__(name, generator)
+        self.architecture = architecture
+
     def create_project_file(self):
         print 'Skip create_project_file for Linux'
 
 
     def build(self, silent=False):
+	    # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -364,6 +379,7 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
+		        '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-G',
                 self.generator
             ],
@@ -397,10 +413,20 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
+		        '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-G',
                 self.generator
             ],
             self.build_dir()
+        )
+
+        call_process(
+            [
+                'make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
         )
 
         call_process(
@@ -410,8 +436,6 @@ class TargetLinux(TargetCMake):
             self.build_dir(),
             silent=silent
         )
-
-# test
 
         libEnding = 'a'
         if 'shared' in self.name:
@@ -440,6 +464,7 @@ all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
     'win32-vc140-shared': TargetWin('win32-vc140-shared', 'Visual Studio 14'),
+    'win32-vc140-shared-nowmi': TargetWin('win32-vc140-shared-nowmi', 'Visual Studio 14'),
     'win32-vc120-shared': TargetWin('win32-vc120-shared', 'Visual Studio 12'),
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
@@ -448,14 +473,19 @@ all_targets = {
     'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 14'),
 	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 14 Win64'),
 	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
+    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 14'),
+	'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 14 Win64'),
+	'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 14 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-static': TargetLinux('linux-static', 'Unix Makefiles'),
-    'linux-shared': TargetLinux('linux-shared', 'Unix Makefiles'),
+    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles', '-m32'),
+    'linux-x86-shared': TargetLinux('linux-x86-shared', 'Unix Makefiles', '-m32'),
+    'linux-x64-static': TargetLinux('linux-x64-static', 'Unix Makefiles', '-m64'),
+    'linux-x64-shared': TargetLinux('linux-x64-shared', 'Unix Makefiles', '-m64'),
 }
 
 available_targets = {
@@ -471,6 +501,7 @@ available_targets = {
         'win32-vc140-static': all_targets['win32-vc140-static'],
         'win32-vc120-static': all_targets['win32-vc120-static'],
         'win32-vc140-shared': all_targets['win32-vc140-shared'],
+        'win32-vc140-shared-nowmi': all_targets['win32-vc140-shared-nowmi'],
         'win32-vc120-shared': all_targets['win32-vc120-shared'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
         'win64-vc120-static': all_targets['win64-vc120-static'],
@@ -479,14 +510,19 @@ available_targets = {
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
 		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
 		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        'uwp-x86-vc140-shared': all_targets['uwp-x86-vc140-shared'],
+		'uwp-x64-vc140-shared': all_targets['uwp-x64-vc140-shared'],
+		'uwp-arm-vc140-shared': all_targets['uwp-arm-vc140-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
-        'linux-static': all_targets['linux-static'],
-        'linux-shared': all_targets['linux-shared'],
+        'linux-x86-static': all_targets['linux-x86-static'],
+        'linux-x86-shared': all_targets['linux-x86-shared'],
+        'linux-x64-static': all_targets['linux-x64-static'],
+        'linux-x64-shared': all_targets['linux-x64-shared'],
     }
 }[platform.system()]
 
