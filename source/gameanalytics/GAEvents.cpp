@@ -419,7 +419,7 @@ namespace gameanalytics
             Json::Value dataDict = pair.second;
             http::EGAHTTPApiResponse responseEnum = pair.first;
 
-            if (responseEnum == http::Ok) 
+            if (responseEnum == http::Ok)
             {
                 // Delete events
                 store::GAStore::executeQuerySync(deleteSql);
@@ -448,6 +448,17 @@ namespace gameanalytics
                     store::GAStore::executeQuerySync(deleteSql);
                 }
             }
+
+            GAEvents::updateSessionTime();
+        }
+
+        void GAEvents::updateSessionTime()
+        {
+            Json::Value ev = state::GAState::getEventAnnotations();
+            auto jsonDefaults = utilities::GAUtilities::jsonToString(ev);
+            std::string sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
+            std::vector<std::string> parameters = { ev["session_id"].asString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
+            store::GAStore::executeQuerySync(sql, parameters);
         }
 
         void GAEvents::cleanupEvents()

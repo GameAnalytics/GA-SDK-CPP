@@ -39,6 +39,7 @@ namespace gameanalytics
             static void fixMissingSessionEndEvents();
             static void addEventToStore(const Json::Value& eventData);
             static void addDimensionsToEvent(Json::Value& eventData);
+            static void updateSessionTime();
 
             static const std::string CategorySessionStart;
             static const std::string CategorySessionEnd;
