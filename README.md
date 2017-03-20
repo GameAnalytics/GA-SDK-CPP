@@ -23,6 +23,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.5**
+* session length precision improvement
+
 **1.3.4**
 * custom user id bug fix
 
