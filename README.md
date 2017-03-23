@@ -23,6 +23,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.6**
+* bug fix for end session when using manual session handling
+
 **1.3.5**
 * session length precision improvement
 
