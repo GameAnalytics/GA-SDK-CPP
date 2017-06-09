@@ -9,6 +9,7 @@
 #include "GALogger.h"
 #include "GAState.h"
 #include "GADevice.h"
+#include "GAHTTPApi.h"
 #include "GAValidator.h"
 #include "GAEvents.h"
 #include "GAUtilities.h"
@@ -232,6 +233,13 @@ namespace gameanalytics
             if (!store::GAStore::ensureDatabase(false, gameKey))
             {
                 logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
+            }
+
+            // TODO: Get HTTPS working on air for mac
+            if(device::GADevice::getRelevantSdkVersion().find("air ") != std::string::npos &&
+                device::GADevice::getBuildPlatform().find("mac_osx") != std::string::npos)
+            {
+                http::GAHTTPApi::switchProtocolToHttp();
             }
 
             state::GAState::internalInitialize();
