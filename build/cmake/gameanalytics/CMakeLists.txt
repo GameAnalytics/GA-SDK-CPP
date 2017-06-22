@@ -8,6 +8,7 @@ PROJECT (GameAnalytics)
 # useful Cmake macro for recursive search of files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../jenkins/CMakeIncludes")
 include("create_source_groups_macro")
+include("eval_condition_macro")
 
 message(STATUS ${CMAKE_MODULE_PATH})
 
@@ -15,6 +16,11 @@ set(GA_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../source/gameanalytics")
 set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
 
 message(STATUS "********************** platform is ${PLATFORM}")
+
+# osx platform
+EVAL_CONDITION(OSX_STATIC "${PLATFORM}" STREQUAL "osx-static")
+EVAL_CONDITION(OSX_SHARED "${PLATFORM}" STREQUAL "osx-shared")
+EVAL_CONDITION(OSX_ALL "${OSX_STATIC}" OR "${OSX_SHARED}")
 
 if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
@@ -30,13 +36,13 @@ elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "wi
     if(NOT "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
         add_definitions("-DUSE_WMI")
     endif(NOT "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
-elseif("${PLATFORM}" STREQUAL "osx-static")
+elseif("${OSX_STATIC}")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     set(EXTRA_LIBS z)
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "osx-shared")
+elseif("${OSX_SHARED}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
@@ -70,9 +76,9 @@ if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-
     add_definitions("-DGUID_WINDOWS")
 endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
 
-if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+if("${OSX_ALL}")
     add_definitions("-DGUID_CFUUID")
-endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+endif("${OSX_ALL}")
 
 if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
     add_definitions("-DGUID_LIBUUID")
@@ -103,7 +109,7 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
     )
-elseif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+elseif("${OSX_ALL}")
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
         # Add GameAnalytics Sources
@@ -174,11 +180,11 @@ create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
-if("${PLATFORM}" STREQUAL "osx-static")
+if("${OSX_STATIC}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
-endif("${PLATFORM}" STREQUAL "osx-static")
+endif("${OSX_STATIC}")
 
 if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
     include_directories(
@@ -188,7 +194,7 @@ if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x6
     set_target_properties(GameAnalytics PROPERTIES COMPILE_FLAGS "${TARGET_ARCH}" LINK_FLAGS "${TARGET_ARCH}")
 endif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
 
-if("${PLATFORM}" STREQUAL "osx-shared")
+if("${OSX_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
@@ -201,7 +207,7 @@ if("${PLATFORM}" STREQUAL "osx-shared")
         "-framework Foundation"
         "-framework CoreServices"
     )
-endif("${PLATFORM}" STREQUAL "osx-shared")
+endif("${OSX_SHARED}")
 
 if("${PLATFORM}" STREQUAL "linux-x64-shared")
     include_directories(
