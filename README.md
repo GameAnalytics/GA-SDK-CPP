@@ -6,7 +6,7 @@ GameAnalytics C++ SDK
 Supported platforms:
 
 * Mac OS X
-* Winddows 32-bit and 64-bit
+* Windows 32-bit and 64-bit
 * Linux
 * UWP
 * Tizen
