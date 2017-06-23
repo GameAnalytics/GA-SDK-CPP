@@ -36,20 +36,29 @@ if os.name == "nt":
 
     os.symlink = symlink
 
-def call_process(process_arguments, process_workingdir, silent=False):
+def call_process(process_arguments, process_workingdir, silent=False, useOutput=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
     current_workingdir = os.getcwd()
 
     if not LibTools.folder_exists(process_workingdir):
         os.makedirs(process_workingdir)
 
+    output = ''
     os.chdir(process_workingdir)
     if silent is True:
-        subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
+        if useOutput is True:
+            output = subprocess.check_output(process_arguments, stdout=open(os.devnull, 'wb')).strip()
+        else:
+            subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'))
     else:
-        subprocess.check_call(process_arguments)
+        if useOutput is True:
+            output = subprocess.check_output(process_arguments).strip()
+        else:
+            subprocess.check_call(process_arguments)
 
     os.chdir(current_workingdir)
+
+    return output
 
 
 class Target(object):
@@ -159,6 +168,25 @@ class TargetWin(TargetCMake):
         except OSError:
             print 'msbuild path not found'
         return ''
+
+        path = call_process(
+            [
+                os.path.join(
+                    Config.BUILD_ROOT,
+                    'vswhere'
+                ),
+                '-requires',
+                'Microsoft.Component.MSBuild',
+                '-property',
+                'installationPath'
+            ],
+            os.getcwd(),
+            useOutput=True
+        )
+
+        path = os.path.join(path, "MSBuild", "15.0", "Bin")
+
+        return path
 
     def build(self, silent=False):
         # call msbuild and compile projects in solution
@@ -470,12 +498,12 @@ all_targets = {
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
     'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
-    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 14'),
-	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 14 Win64'),
-	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 14 ARM'),
-    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 14'),
-	'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 14 Win64'),
-	'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 14 ARM'),
+    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 15'),
+	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 15 Win64'),
+	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 15 ARM'),
+    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 15'),
+	'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
+	'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
