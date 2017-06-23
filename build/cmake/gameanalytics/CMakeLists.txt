@@ -8,6 +8,7 @@ PROJECT (GameAnalytics)
 # useful Cmake macro for recursive search of files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../jenkins/CMakeIncludes")
 include("create_source_groups_macro")
+include("eval_condition_macro")
 
 message(STATUS ${CMAKE_MODULE_PATH})
 
@@ -16,12 +17,56 @@ set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
 
 message(STATUS "********************** platform is ${PLATFORM}")
 
-if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+# osx platforms
+EVAL_CONDITION(OSX_STATIC "${PLATFORM}" STREQUAL "osx-static")
+EVAL_CONDITION(OSX_SHARED "${PLATFORM}" STREQUAL "osx-shared")
+EVAL_CONDITION(OSX_ALL "${OSX_STATIC}" OR "${OSX_SHARED}")
+
+# windows platforms
+# vc120
+EVAL_CONDITION(WIN32_VC120_STATIC "${PLATFORM}" STREQUAL "win32-vc120-static")
+EVAL_CONDITION(WIN32_VC120_SHARED "${PLATFORM}" STREQUAL "win32-vc120-shared")
+EVAL_CONDITION(WIN64_VC120_STATIC "${PLATFORM}" STREQUAL "win64-vc120-static")
+EVAL_CONDITION(WIN64_VC120_SHARED "${PLATFORM}" STREQUAL "win64-vc120-shared")
+
+# vc140
+EVAL_CONDITION(WIN32_VC140_STATIC "${PLATFORM}" STREQUAL "win32-vc140-static")
+EVAL_CONDITION(WIN32_VC140_SHARED "${PLATFORM}" STREQUAL "win32-vc140-shared")
+EVAL_CONDITION(WIN32_VC140_SHARED_NO_WMI "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
+EVAL_CONDITION(WIN64_VC140_STATIC "${PLATFORM}" STREQUAL "win64-vc140-static")
+EVAL_CONDITION(WIN64_VC140_SHARED "${PLATFORM}" STREQUAL "win64-vc140-shared")
+EVAL_CONDITION(UWP_X86_VC140_STATIC "${PLATFORM}" STREQUAL "uwp-x86-vc140-static")
+EVAL_CONDITION(UWP_X86_VC140_SHARED "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared")
+EVAL_CONDITION(UWP_X64_VC140_STATIC "${PLATFORM}" STREQUAL "uwp-x64-vc140-static")
+EVAL_CONDITION(UWP_X64_VC140_SHARED "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared")
+EVAL_CONDITION(UWP_ARM_VC140_STATIC "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+EVAL_CONDITION(UWP_ARM_VC140_SHARED "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+
+EVAL_CONDITION(WIN_STATIC "${WIN32_VC120_STATIC}" OR "${WIN64_VC120_STATIC}" OR "${WIN32_VC140_STATIC}" OR "${WIN64_VC140_STATIC}")
+EVAL_CONDITION(UWP_STATIC "${UWP_X86_VC140_STATIC}" OR "${UWP_X64_VC140_STATIC}" OR "${UWP_ARM_VC140_STATIC}")
+EVAL_CONDITION(WIN_UWP_STATIC "${WIN_STATIC}" OR "${UWP_STATIC}")
+EVAL_CONDITION(WIN_SHARED "${WIN32_VC120_SHARED}" OR "${WIN64_VC120_SHARED}" OR "${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}" OR "${WIN64_VC140_SHARED}")
+EVAL_CONDITION(UWP_SHARED "${UWP_X86_VC140_SHARED}" OR "${UWP_X64_VC140_SHARED}" OR "${UWP_ARM_VC140_SHARED}")
+EVAL_CONDITION(WIN_UWP_SHARED "${WIN_SHARED}" OR "${UWP_SHARED}")
+EVAL_CONDITION(UWP_ALL "${UWP_STATIC}" OR "${UWP_SHARED}")
+EVAL_CONDITION(WIN_ALL "${WIN_STATIC}" OR "${WIN_SHARED}")
+
+# linux platforms
+EVAL_CONDITION(LINUX_X86_STATIC "${PLATFORM}" STREQUAL "linux-x86-static")
+EVAL_CONDITION(LINUX_X86_SHARED "${PLATFORM}" STREQUAL "linux-x86-shared")
+EVAL_CONDITION(LINUX_X64_STATIC "${PLATFORM}" STREQUAL "linux-x64-static")
+EVAL_CONDITION(LINUX_X64_SHARED "${PLATFORM}" STREQUAL "linux-x64-shared")
+
+EVAL_CONDITION(LINUX_STATIC "${LINUX_X86_STATIC}" OR "${LINUX_X64_STATIC}")
+EVAL_CONDITION(LINUX_SHARED "${LINUX_X86_SHARED}" OR "${LINUX_X64_SHARED}")
+EVAL_CONDITION(LINUX_ALL "${LINUX_STATIC}" OR "${LINUX_SHARED}")
+
+if("${WIN_UWP_STATIC}")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     add_definitions("-D_CRT_SECURE_NO_WARNINGS") #  warning C4996
     set(LIB_EXTENSION "lib")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+elseif("${WIN_UWP_SHARED}")
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /MP" ) # Multiprocessor compilation
     include(GenerateExportHeader)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS -DELPP_NO_DEFAULT_LOG_FILE") #  warning C4996
@@ -30,20 +75,20 @@ elseif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "wi
     if(NOT "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
         add_definitions("-DUSE_WMI")
     endif(NOT "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
-elseif("${PLATFORM}" STREQUAL "osx-static")
+elseif("${OSX_STATIC}")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     set(EXTRA_LIBS z)
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "osx-shared")
+elseif("${OSX_SHARED}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
     set(CMAKE_OSX_ARCHITECTURES "i386;x86_64") # for now, we only support 64bit
     add_definitions("-DELPP_NO_DEFAULT_LOG_FILE -DOSX")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE SHARED)
     add_definitions("-DGA_SHARED_LIB")
-elseif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static")
+elseif("${LINUX_STATIC}")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
@@ -51,7 +96,7 @@ elseif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linu
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE STATIC)
-elseif("${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
+elseif("${LINUX_SHARED}")
     set(LIB_EXTENSION "so")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
@@ -60,28 +105,28 @@ elseif("${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linu
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE SHARED)
     add_definitions("-DGA_SHARED_LIB")
-endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static")
+endif("${WIN_UWP_STATIC}")
 
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+if("${UWP_ALL}")
     add_definitions("-DUSE_UWP -ZW")
-endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+endif("${UWP_ALL}")
 
-if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
+if("${WIN_ALL}")
     add_definitions("-DGUID_WINDOWS")
-endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static" OR "${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "win64-vc120-static" OR "${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi" OR "${PLATFORM}" STREQUAL "win32-vc120-shared" OR "${PLATFORM}" STREQUAL "win64-vc140-shared" OR "${PLATFORM}" STREQUAL "win64-vc120-shared")
+endif("${WIN_ALL}")
 
-if("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+if("${OSX_ALL}")
     add_definitions("-DGUID_CFUUID")
-endif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+endif("${OSX_ALL}")
 
-if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
+if("${LINUX_ALL}")
     add_definitions("-DGUID_LIBUUID")
-endif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
+endif("${LINUX_ALL}")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
 
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+if("${UWP_ALL}")
     add_definitions("-DSQLITE_OS_WINRT")
 
     FILE(GLOB_RECURSE CPP_SOURCES
@@ -103,7 +148,7 @@ if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
     )
-elseif("${PLATFORM}" STREQUAL "osx-static" OR "${PLATFORM}" STREQUAL "osx-shared")
+elseif("${OSX_ALL}")
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
         # Add GameAnalytics Sources
@@ -168,27 +213,27 @@ else()
         "${DEPENDENCIES_DIR}/curl/include"
         "${DEPENDENCIES_DIR}/curlcpp/include"
     )
-endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+endif("${UWP_ALL}")
 
 create_source_groups( CPP_SOURCES )
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
-if("${PLATFORM}" STREQUAL "osx-static")
+if("${OSX_STATIC}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
-endif("${PLATFORM}" STREQUAL "osx-static")
+endif("${OSX_STATIC}")
 
-if("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
+if("${LINUX_ALL}")
     include_directories(
         "${DEPENDENCIES_DIR}/ooid"
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
     set_target_properties(GameAnalytics PROPERTIES COMPILE_FLAGS "${TARGET_ARCH}" LINK_FLAGS "${TARGET_ARCH}")
-endif("${PLATFORM}" STREQUAL "linux-x86-static" OR "${PLATFORM}" STREQUAL "linux-x64-static" OR "${PLATFORM}" STREQUAL "linux-x86-shared" OR "${PLATFORM}" STREQUAL "linux-x64-shared")
+endif("${LINUX_ALL}")
 
-if("${PLATFORM}" STREQUAL "osx-shared")
+if("${OSX_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
@@ -201,9 +246,9 @@ if("${PLATFORM}" STREQUAL "osx-shared")
         "-framework Foundation"
         "-framework CoreServices"
     )
-endif("${PLATFORM}" STREQUAL "osx-shared")
+endif("${OSX_SHARED}")
 
-if("${PLATFORM}" STREQUAL "linux-x64-shared")
+if("${LINUX_X64_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
@@ -213,9 +258,9 @@ if("${PLATFORM}" STREQUAL "linux-x64-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x64/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/linux_x64/libcurl.a
     )
-endif("${PLATFORM}" STREQUAL "linux-x64-shared")
+endif("${LINUX_X64_SHARED}")
 
-if("${PLATFORM}" STREQUAL "linux-x86-shared")
+if("${LINUX_X86_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
     )
@@ -225,15 +270,15 @@ if("${PLATFORM}" STREQUAL "linux-x86-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x86/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/linux_x86/libcurl.a
     )
-endif("${PLATFORM}" STREQUAL "linux-x86-shared")
+endif("${LINUX_X86_SHARED}")
 
-if("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
+if("${WIN_STATIC}" OR "${UWP_ALL}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
-endif("${PLATFORM}" STREQUAL "win32-vc140-static" OR "${PLATFORM}" STREQUAL "win32-vc120-static")
+endif("${WIN_STATIC}" OR "${UWP_ALL}")
 
-if("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
+if("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -243,9 +288,9 @@ if("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
-endif("${PLATFORM}" STREQUAL "win32-vc140-shared" OR "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
+endif("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}")
 
-if("${PLATFORM}" STREQUAL "win32-vc120-shared")
+if("${WIN32_VC120_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -255,19 +300,13 @@ if("${PLATFORM}" STREQUAL "win32-vc120-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
     )
-endif("${PLATFORM}" STREQUAL "win32-vc120-shared")
+endif("${WIN32_VC120_SHARED}")
 
-if("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
-    include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
-    )
-endif("${PLATFORM}" STREQUAL "win64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
-
-if("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+if("${UWP_ALL}")
     set_target_properties(GameAnalytics PROPERTIES VS_DESKTOP_EXTENSIONS_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
-endif("${PLATFORM}" STREQUAL "uwp-x86-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-static" OR "${PLATFORM}" STREQUAL "uwp-x86-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-x64-vc140-shared" OR "${PLATFORM}" STREQUAL "uwp-arm-vc140-shared")
+endif("${UWP_ALL}")
 
-if("${PLATFORM}" STREQUAL "win64-vc140-shared")
+if("${WIN64_VC140_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -277,15 +316,9 @@ if("${PLATFORM}" STREQUAL "win64-vc140-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
     )
-endif("${PLATFORM}" STREQUAL "win64-vc140-shared")
+endif("${WIN64_VC140_SHARED}")
 
-if("${PLATFORM}" STREQUAL "win64-vc120-static")
-    include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
-    )
-endif("${PLATFORM}" STREQUAL "win64-vc120-static")
-
-if("${PLATFORM}" STREQUAL "win64-vc120-shared")
+if("${WIN64_VC120_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -295,7 +328,7 @@ if("${PLATFORM}" STREQUAL "win64-vc120-shared")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
     )
-endif("${PLATFORM}" STREQUAL "win64-vc120-shared")
+endif("${WIN64_VC120_SHARED}")
 
 target_include_directories(
     GameAnalytics

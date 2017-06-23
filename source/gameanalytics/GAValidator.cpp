@@ -620,36 +620,19 @@ namespace gameanalytics
             Json::Value validatedDict;
 
             // validate enabled field
-            if (!initResponse["enabled"].isBool())
+            if(initResponse["enabled"].isBool())
             {
-                logging::GALogger::w("validateInitRequestResponse failed - invalid type in 'enabled' field.");
-                return{};
+                validatedDict["enabled"] = initResponse.get("enabled", true).asBool();
             }
-
-            validatedDict["enabled"] = initResponse["enabled"].asBool();
-
-            // validate feature flags TODO when added (nikolaj)
-            // if (!initResponse["flags"].isNull() && initResponse["flags"].isArray()) {
-            // }
 
             // validate server_ts
             if (initResponse["server_ts"].isNumeric())
             {
-                Json::Int64 serverTsNumber = initResponse["server_ts"].asInt64();
+                Json::Int64 serverTsNumber = initResponse.get("server_ts", -1).asInt64();
                 if (serverTsNumber > 0)
                 {
                     validatedDict["server_ts"] = serverTsNumber;
                 }
-                else
-                {
-                    logging::GALogger::w("validateInitRequestResponse failed - invalid value in 'server_ts' field.");
-                    return{};
-                }
-            }
-            else
-            {
-                logging::GALogger::w("validateInitRequestResponse failed - invalid type in 'server_ts' field.");
-                return{};
             }
 
             return validatedDict;

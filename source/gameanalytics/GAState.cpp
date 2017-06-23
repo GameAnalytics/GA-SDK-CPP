@@ -173,7 +173,7 @@ namespace gameanalytics
         {
             Json::Value currentSdkConfig = GAState::getSdkConfig();
 
-            if (currentSdkConfig.isObject() && currentSdkConfig.get("enabled", false).isBool() && currentSdkConfig.get("enabled", false).asBool() == false)
+            if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
             {
                 return false;
             }
