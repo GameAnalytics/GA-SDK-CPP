@@ -160,38 +160,41 @@ class TargetOSX(TargetCMake):
 
 class TargetWin(TargetCMake):
     @staticmethod
-    def get_msbuild_path():
-        try:
-            aReg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
-            aKey = OpenKey(aReg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0')
-            return QueryValueEx(aKey, "MSBuildToolsPath")[0]
-        except OSError:
-            print 'msbuild path not found'
-        return ''
+    def get_msbuild_path(vs="2017"):
+        if vs == "2015":
+            try:
+                aReg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+                aKey = OpenKey(aReg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0')
+                return QueryValueEx(aKey, "MSBuildToolsPath")[0]
+            except OSError:
+                print 'msbuild path not found'
+            return ''
+        elif vs == "2017":
+            path = call_process(
+                [
+                    os.path.join(
+                        Config.BUILD_ROOT,
+                        'vswhere'
+                    ),
+                    '-requires',
+                    'Microsoft.Component.MSBuild',
+                    '-property',
+                    'installationPath'
+                ],
+                os.getcwd(),
+                useOutput=True
+            )
 
-        path = call_process(
-            [
-                os.path.join(
-                    Config.BUILD_ROOT,
-                    'vswhere'
-                ),
-                '-requires',
-                'Microsoft.Component.MSBuild',
-                '-property',
-                'installationPath'
-            ],
-            os.getcwd(),
-            useOutput=True
-        )
+            path = os.path.join(path, "MSBuild", "15.0", "Bin")
 
-        path = os.path.join(path, "MSBuild", "15.0", "Bin")
+            return path
+        else:
+            return ''
 
-        return path
-
-    def build(self, silent=False):
+    def build(self, silent=False, vs="2017"):
         # call msbuild and compile projects in solution
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',
@@ -554,6 +557,11 @@ available_targets = {
     }
 }[platform.system()]
 
+valid_visual_studio = [
+    '2015',
+    '2017'
+]
+
 # Sorted since we want android-wrapper to be built after android-shared (due to jni generation)
 valid_target_names = sorted(available_targets.keys())
 
@@ -563,19 +571,30 @@ def print_help():
     print 'valid targets:'
     for target in valid_target_names:
         print '  ' + target
+    print 'valid visual studios:'
+    for vs in valid_visual_studio:
+        print '  ' + vs
 
 
-def build(target_name, silent=False):
+def build(target_name, silent=False, vs="2017"):
     if target_name not in available_targets:
         print('target %(target_name)s not supported on this platform' % locals())
         sys.exit(1)
 
+    if vs not in valid_visual_studio:
+        print('visual studio %(vs)s not supported')
+        sys.exit(1)
+
     target = available_targets[target_name]
     target.create_project_file()
-    target.build(silent=silent)
+
+    if platform.system() == 'Windows':
+        target.build(silent=silent, vs=vs)
+    else:
+        target.build(silent=silent)
 
 
-def build_targets(target_names, silent=False):
+def build_targets(target_names, silent=False, vs="2017"):
 
     for target_name in target_names:
         print ""
@@ -586,7 +605,7 @@ def build_targets(target_names, silent=False):
         print "-----------------------------------------"
         print ""
 
-        build(target_name, silent=silent)
+        build(target_name, silent=silent, vs=vs)
 
 
 # @timing - benchmarking build
@@ -598,12 +617,13 @@ def main(argv, silent=False):
     print argv
 
     try:
-        opts, args = getopt.getopt(argv, "t:h", ["target=", "help"])
+        opts, args = getopt.getopt(argv, "t:v:h", ["target=", "vs=", "help"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
 
     build_target_name = None
+    visual_studio = "2017"
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
@@ -616,12 +636,19 @@ def main(argv, silent=False):
                 print "Target: " + arg + " is not part of allowed targets."
                 print_help()
                 sys.exit(2)
+        elif opt in ('-v', '--vs'):
+            if arg in valid_target_names:
+                visual_studio = arg
+            else:
+                print "Visual Studio version: " + arg + " is not part of allowed visual studio versions."
+                print_help()
+                sys.exit(2)
 
     if build_target_name:
-        build_targets([arg], silent=silent)
+        build_targets([arg], silent=silent, vs=visual_studio)
     else:
         # build all
-        build_targets(valid_target_names, silent=silent)
+        build_targets(valid_target_names, silent=silent, vs=visual_studio)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
