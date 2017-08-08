@@ -7,7 +7,7 @@ Supported platforms:
 
 * Mac OS X
 * Windows 32-bit and 64-bit
-* Linux
+* Linux (tested on Ubuntu 16.04)
 * UWP
 * Tizen
 
