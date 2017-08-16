@@ -593,7 +593,10 @@ def build(target_name, silent=False, vs="2017"):
     target.create_project_file()
 
     if platform.system() == 'Windows':
-        target.build(silent=silent, vs=vs)
+        if 'tizen' in target_name:
+            target.build(silent=silent)
+        else:
+            target.build(silent=silent, vs=vs)
     else:
         target.build(silent=silent)
 
