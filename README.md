@@ -23,6 +23,9 @@ Dependencies
 
 Changelog
 ---------
+**1.3.7**
+* https fix in curl library for mac 
+
 **1.3.6**
 * bug fix for end session when using manual session handling
 
