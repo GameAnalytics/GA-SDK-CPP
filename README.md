@@ -136,7 +136,7 @@ Remember to include the GameAnalytics header file wherever you are using the SDK
  #include "GameAnalytics.h"
 ```
 
-###Configuration
+### Configuration
 
 Example:
 
@@ -178,7 +178,7 @@ Example:
  }
 ```
 
-###Initialization
+### Initialization
 
 Example:
 
@@ -186,7 +186,7 @@ Example:
  gameanalytics::GameAnalytics::initialize("<your game key>", "<your secret key");
 ```
 
-###Send events
+### Send events
 
 Example:
 
