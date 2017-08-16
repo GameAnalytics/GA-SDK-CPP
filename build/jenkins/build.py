@@ -202,7 +202,7 @@ class TargetWin(TargetCMake):
         ])
 
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',
@@ -580,7 +580,7 @@ def print_help():
         print '  ' + vs
 
 
-def build(target_name, silent=False, vs="2017"):
+def build(target_name, vs, silent=False):
     if target_name not in available_targets:
         print('target %(target_name)s not supported on this platform' % locals())
         sys.exit(1)
@@ -612,7 +612,7 @@ def build_targets(target_names, silent=False, vs="2017"):
         print "-----------------------------------------"
         print ""
 
-        build(target_name, silent=silent, vs=vs)
+        build(target_name, vs, silent=silent)
 
 
 # @timing - benchmarking build
@@ -644,7 +644,7 @@ def main(argv, silent=False):
                 print_help()
                 sys.exit(2)
         elif opt in ('-v', '--vs'):
-            if arg in valid_target_names:
+            if arg in valid_visual_studio:
                 visual_studio = arg
             else:
                 print "Visual Studio version: " + arg + " is not part of allowed visual studio versions."
@@ -652,7 +652,7 @@ def main(argv, silent=False):
                 sys.exit(2)
 
     if build_target_name:
-        build_targets([arg], silent=silent, vs=visual_studio)
+        build_targets([build_target_name], silent=silent, vs=visual_studio)
     else:
         # build all
         build_targets(valid_target_names, silent=silent, vs=visual_studio)
