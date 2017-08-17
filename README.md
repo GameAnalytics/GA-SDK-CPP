@@ -1,3 +1,5 @@
+[![Travis](https://img.shields.io/travis/GameAnalytics/GA-SDK-CPP.svg)]()
+
 GA-SDK-CPP
 ==========
 
