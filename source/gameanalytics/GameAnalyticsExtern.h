@@ -36,12 +36,15 @@ EXPORT void initialize(const char *gameKey, const char *gameSecret);
 
 // add events
 EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType);
+EXPORT void addBusinessEventJson(const char *jsonArgs);
 
 EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId);
+EXPORT void addResourceEventJson(const char *jsonArgs);
 
 EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03);
 
 EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score);
+EXPORT void addProgressionEventWithScoreJson(const char *jsonArgs);
 
 EXPORT void addDesignEvent(const char *eventId);
 EXPORT void addDesignEventWithValue(const char *eventId, double value);

@@ -120,10 +120,31 @@ void addBusinessEvent(const char *currency, double amount, const char *itemType,
     gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType);
 }
 
+void addBusinessEventJson(const char *jsonArgs)
+{
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(jsonArgs);
+
+    if(json.size() == 5)
+    {
+        gameanalytics::GameAnalytics::addBusinessEvent(json[0].asString(), (int)(json[1].asDouble()), json[2].asString(), json[3].asString(), json[4].asString());
+    }
+}
+
 void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId)
 {
     int flowTypeInt = (int)flowType;
     gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId);
+}
+
+void addResourceEventJson(const char *jsonArgs)
+{
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(jsonArgs);
+
+    if(json.size() == 5)
+    {
+        int flowTypeInt = (int)(int)(json[0].asDouble());
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString(), (float)(json[2].asDouble()), json[3].asString(), json[4].asString());
+    }
 }
 
 void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03)
@@ -136,6 +157,17 @@ void addProgressionEventWithScore(double progressionStatus, const char *progress
 {
     int progressionStatusInt = (int)progressionStatus;
     gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score);
+}
+
+void addProgressionEventWithScoreJson(const char *jsonArgs)
+{
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(jsonArgs);
+
+    if(json.size() == 5)
+    {
+        int progressionStatusInt = (int)(int)(json[0].asDouble());
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString(), json[2].asString(), json[3].asString(), (int)(json[4].asDouble()));
+    }
 }
 
 void addDesignEvent(const char *eventId)
