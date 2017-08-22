@@ -166,7 +166,7 @@ void addProgressionEventWithScoreJson(const char *jsonArgs)
     if(json.size() == 5)
     {
         int progressionStatusInt = (int)(int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString(), json[2].asString(), json[3].asString(), (int)(json[4].asDouble()));
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString(), json[2].asString(), json[3].asString(), (int)(json[4].asDouble()));
     }
 }
 
