@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 # from sys import platform
 
 
-def build(specific_target=None, silent=False):
+def build(specific_target=None, silent=False, vs="2017"):
     try:
         os.makedirs(config.BUILD_DIR)
     except OSError:
@@ -25,9 +25,9 @@ def build(specific_target=None, silent=False):
 
     os.chdir('..')
     if specific_target:
-        build_main(['-t', specific_target], silent=silent)
+        build_main(['-t', specific_target, '-v', vs], silent=silent)
     else:
-        build_main([], silent=silent)
+        build_main(['-v', vs], silent=silent)
 
 
 def print_help():
@@ -41,7 +41,7 @@ def print_help():
 # -t / --target: [specific target] (default all is built)
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "t:h:s", ["target=", "skip-dependencies", "help", "silent"])
+        opts, args = getopt.getopt(argv, "t:h:v:s", ["target=", "skip-dependencies", "help", "vs", "silent"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -49,6 +49,7 @@ def main(argv):
     build_dependencies = True
     build_target_name = None
     silent = False
+    visual_studio = "2017"
 
     for opt, arg in opts:
         if opt in ['-h', '--help']:
@@ -65,16 +66,18 @@ def main(argv):
         elif opt in ['-s', '--silent']:
             print "RUNNING EVERYTHING AS SILENTLY AS POSSIBLE"
             silent = True
+        elif opt in ('-v', '--vs'):
+            visual_studio = arg
 
     os.chdir(config.BUILD_ROOT)
     if build_dependencies is True:
         install_dependencies(silent=silent)
 
     if build_target_name is not None:
-        build(specific_target=build_target_name, silent=silent)
+        build(specific_target=build_target_name, silent=silent, vs=visual_studio)
     else:
         # build all
-        build(silent=silent)
+        build(silent=silent, vs=visual_studio)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
