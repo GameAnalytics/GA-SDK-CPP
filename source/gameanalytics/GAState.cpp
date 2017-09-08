@@ -14,6 +14,10 @@
 #include "GADevice.h"
 #include <utility>
 
+#define MAX_CUSTOM_FIELDS_COUNT 50
+#define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
+#define MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH 256
+
 namespace gameanalytics
 {
     namespace state
@@ -818,6 +822,70 @@ namespace gameanalytics
         bool GAState::sessionIsStarted()
         {
             return GAState::sharedInstance()->_sessionStart != 0;
+        }
+
+        const Json::Value validateAndCleanCustomFields(const Json::Value& fields)
+        {
+            Json::Value result;
+
+            if (!fields.empty())
+            {
+                int count = 0;
+
+                for (std::string key : fields.getMemberNames())
+                {
+                    if(fields[key].isNull())
+                    {
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                            " has been omitted because its key or value is null");
+                    }
+                    else if(count < MAX_CUSTOM_FIELDS_COUNT)
+                    {
+                        if(utilities::GAUtilities::stringMatch(key, "^[a-zA-Z0-9_]{1," + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + "}$"))
+                        {
+                            auto value = fields[key];
+
+                            if(value.isNumeric())
+                            {
+                                result[key] = value;
+                                ++count;
+                            }
+                            else if(value.isString())
+                            {
+                                std::string valueAsString = value.asString();
+
+                                if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
+                                {
+                                    result[key] = value;
+                                    ++count;
+                                }
+                                else
+                                {
+                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                        " has been omitted because its value is an empty string or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH) + ")");
+                                }
+                            }
+                            else
+                            {
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                    " has been omitted because its value is not a string or number");
+                            }
+                        }
+                        else
+                        {
+                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                " has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + ")");
+                        }
+                    }
+                    else
+                    {
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                            " has been omitted because it exceeds the max number of custom fields (" + std::to_string(MAX_CUSTOM_FIELDS_COUNT) + ")");
+                    }
+                }
+            }
+
+            return result;
         }
 
         Json::Int64 GAState::getClientTsAdjusted()

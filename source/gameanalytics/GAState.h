@@ -70,6 +70,7 @@ namespace gameanalytics
             static void setManualSessionHandling(bool flag);
             static bool useManualSessionHandling();
             static bool sessionIsStarted();
+            static const Json::Value validateAndCleanCustomFields(const Json::Value& fields);
 
          private:
             static void setDefaultUserId(const std::string& id);
@@ -116,4 +117,4 @@ namespace gameanalytics
             bool _useManualSessionHandling;
         };
     }
-} 
+}
