@@ -15,7 +15,8 @@ def make_test_build_dir():
         pass
 
 def remove_test_build_dir():
-    shutil.rmtree(BUILD_DIR)
+    if os.path.exists(BUILD_DIR):
+        shutil.rmtree(BUILD_DIR)
 
 def change_to_build_dir():
     os.chdir(BUILD_DIR)

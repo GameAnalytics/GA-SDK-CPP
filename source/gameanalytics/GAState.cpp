@@ -824,7 +824,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart != 0;
         }
 
-        const Json::Value validateAndCleanCustomFields(const Json::Value& fields)
+        const Json::Value GAState::validateAndCleanCustomFields(const Json::Value& fields)
         {
             Json::Value result;
 
