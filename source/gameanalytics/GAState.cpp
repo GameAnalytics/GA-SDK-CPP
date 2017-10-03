@@ -13,6 +13,8 @@
 #include "GALogger.h"
 #include "GADevice.h"
 #include <utility>
+#include <algorithm>
+#include <climits>
 
 #define MAX_CUSTOM_FIELDS_COUNT 50
 #define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
@@ -577,11 +579,11 @@ namespace gameanalytics
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 
-			std::string defaultId = state_dict.get("default_user_id", "").asString();
-			if(defaultId.empty())
-			{
-				instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
-			}
+            std::string defaultId = state_dict.get("default_user_id", "").asString();
+            if(defaultId.empty())
+            {
+                instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
+            }
             else
             {
                 instance->setDefaultUserId(defaultId);
@@ -769,6 +771,9 @@ namespace gameanalytics
             // set offset in state (memory) from current config (config could be from cache etc.)
             GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
 
+            // populate configurations
+            populateConfigurations(GAState::getSdkConfig());
+
             // if SDK is disabled in config
             if (!GAState::isEnabled())
             {
@@ -822,6 +827,70 @@ namespace gameanalytics
         bool GAState::sessionIsStarted()
         {
             return GAState::sharedInstance()->_sessionStart != 0;
+        }
+
+        std::string GAState::getConfigurationStringValue(const std::string& key, const std::string& defaultValue)
+        {
+            std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
+            return GAState::sharedInstance()->_configurations.isMember(key) ? GAState::sharedInstance()->_configurations[key].asString() : defaultValue;
+        }
+
+        bool GAState::isCommandCenterReady()
+        {
+            return GAState::sharedInstance()->_commandCenterIsReady;
+        }
+
+        void GAState::addCommandCenterListener(ICommandCenterListener* listener)
+        {
+            if(std::find(GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener) == GAState::sharedInstance()->_commandCenterListeners.end())
+            {
+                GAState::sharedInstance()->_commandCenterListeners.push_back(listener);
+            }
+        }
+
+        void GAState::removeCommandCenterListener(ICommandCenterListener* listener)
+        {
+            if(std::find(GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
+            {
+                GAState::sharedInstance()->_commandCenterListeners.erase(std::remove( GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener ), GAState::sharedInstance()->_commandCenterListeners.end());
+            }
+        }
+
+        void GAState::populateConfigurations(Json::Value sdkConfig)
+        {
+            GAState::sharedInstance()->_mtx.lock();
+
+            if(sdkConfig.isMember("configurations") && sdkConfig["configurations"].isArray())
+            {
+                Json::Value configurations = sdkConfig["configurations"];
+
+                for(int i = 0; i < configurations.size(); ++i)
+                {
+                    Json::Value configuration = configurations[i];
+
+                    if(!configuration.isNull())
+                    {
+                        std::string key = (configuration.isMember("key") && configuration["key"].isString()) ? configuration["key"].asString() : "";
+                        Json::Int64 start_ts = (configuration.isMember("start") && configuration["start"].isInt64()) ? configuration["start"].asInt64() : LONG_MIN;
+                        Json::Int64 end_ts = (configuration.isMember("end") && configuration["end"].isInt64()) ? configuration["start"].asInt64() : LONG_MAX;
+                        Json::Int64 client_ts_adjusted = getClientTsAdjusted();
+
+                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted && end_ts)
+                        {
+                            GAState::sharedInstance()->_configurations[key] = configuration["value"];
+                            logging::GALogger::d("configuration added: " + configuration.toStyledString());
+                        }
+                    }
+                }
+            }
+
+            GAState::sharedInstance()->_commandCenterIsReady = true;
+            for(std::vector<ICommandCenterListener*>::iterator listener = GAState::sharedInstance()->_commandCenterListeners.begin(); listener != GAState::sharedInstance()->_commandCenterListeners.end(); ++listener)
+            {
+                (*listener)->onCommandCenterUpdated();
+            }
+
+            GAState::sharedInstance()->_mtx.unlock();
         }
 
         const Json::Value GAState::validateAndCleanCustomFields(const Json::Value& fields)

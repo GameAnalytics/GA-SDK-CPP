@@ -502,6 +502,31 @@ namespace gameanalytics
         });
     }
 
+    std::string GameAnalytics::getCommandCenterValueAsString(const std::string& key)
+    {
+
+    }
+
+    std::string GameAnalytics::getCommandCenterValueAsString(const std::string& key, const std::string& defaultValue)
+    {
+
+    }
+
+    bool GameAnalytics::isCommandCenterReady()
+    {
+
+    }
+
+    void GameAnalytics::addCommandCenterListener(ICommandCenterListener* listener)
+    {
+
+    }
+
+    void GameAnalytics::removeCommandCenterListener(ICommandCenterListener* listener)
+    {
+        
+    }
+
     void GameAnalytics::startSession()
     {
         threading::GAThreading::performTaskOnGAThread([]()
@@ -649,39 +674,75 @@ namespace gameanalytics
     {
         initialize(utilities::GAUtilities::ws2s(gameKey), utilities::GAUtilities::ws2s(gameSecret));
     }
+
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType)
     {
-        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType));
+        addBusinessEvent(currency, amount, itemType, itemId, cartType, Json::Value());
+    }
+
+    void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const Json::Value& fields)
+    {
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType), fields);
     }
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
     {
-        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId));
+        addResourceEvent(flowType, currency, amount, itemType, itemId, Json::Value());
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const Json::Value& fields)
+    {
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), fields);
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03));
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, Json::Value());
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const Json::Value& fields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), fields);
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score);
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, Json::Value());
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const Json::Value& fields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score, fields);
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId));
+        addDesignEvent(eventId, Json::Value());
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, const Json::Value& fields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId), fields);
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value);
+        addDesignEvent(eventId, value, Json::Value());
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value, const Json::Value& fields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value, fields);
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
     {
-        addErrorEvent(severity, utilities::GAUtilities::ws2s(message));
+        addErrorEvent(severity, message, Json::Value());
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const Json::Value& fields)
+    {
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message), fields);
     }
 
     void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)
