@@ -840,19 +840,25 @@ namespace gameanalytics
             return GAState::sharedInstance()->_commandCenterIsReady;
         }
 
-        void GAState::addCommandCenterListener(ICommandCenterListener* listener)
+        void GAState::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
         {
-            if(std::find(GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener) == GAState::sharedInstance()->_commandCenterListeners.end())
+            GAState* instance = GAState::sharedInstance();
+
+            if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) == instance->_commandCenterListeners.end())
             {
-                GAState::sharedInstance()->_commandCenterListeners.push_back(listener);
+                instance->_commandCenterListeners.push_back(listener);
             }
         }
 
-        void GAState::removeCommandCenterListener(ICommandCenterListener* listener)
+        void GAState::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
         {
-            if(std::find(GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
+            GAState* instance = GAState::sharedInstance();
+
+            auto it = std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener);
+
+            if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
             {
-                GAState::sharedInstance()->_commandCenterListeners.erase(std::remove( GAState::sharedInstance()->_commandCenterListeners.begin(), GAState::sharedInstance()->_commandCenterListeners.end(), listener ), GAState::sharedInstance()->_commandCenterListeners.end());
+                instance->_commandCenterListeners.erase(std::remove(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener), instance->_commandCenterListeners.end());
             }
         }
 
@@ -885,9 +891,9 @@ namespace gameanalytics
             }
 
             GAState::sharedInstance()->_commandCenterIsReady = true;
-            for(std::vector<ICommandCenterListener*>::iterator listener = GAState::sharedInstance()->_commandCenterListeners.begin(); listener != GAState::sharedInstance()->_commandCenterListeners.end(); ++listener)
+            for(auto& listener : GAState::sharedInstance()->_commandCenterListeners)
             {
-                (*listener)->onCommandCenterUpdated();
+                listener->onCommandCenterUpdated();
             }
 
             GAState::sharedInstance()->_mtx.unlock();

@@ -504,27 +504,27 @@ namespace gameanalytics
 
     std::string GameAnalytics::getCommandCenterValueAsString(const std::string& key)
     {
-
+        return getCommandCenterValueAsString(key, "");
     }
 
     std::string GameAnalytics::getCommandCenterValueAsString(const std::string& key, const std::string& defaultValue)
     {
-
+        return state::GAState::getConfigurationStringValue(key, defaultValue);
     }
 
     bool GameAnalytics::isCommandCenterReady()
     {
-
+        return state::GAState::isCommandCenterReady();
     }
 
-    void GameAnalytics::addCommandCenterListener(ICommandCenterListener* listener)
+    void GameAnalytics::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
     {
-
+        state::GAState::addCommandCenterListener(listener);
     }
 
-    void GameAnalytics::removeCommandCenterListener(ICommandCenterListener* listener)
+    void GameAnalytics::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
     {
-        
+        state::GAState::removeCommandCenterListener(listener);
     }
 
     void GameAnalytics::startSession()

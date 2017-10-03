@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <mutex>
+#include <functional>
 #include "Foundation/GASingleton.h"
 #include <json/json.h>
 #include "GameAnalytics.h"
@@ -74,8 +75,8 @@ namespace gameanalytics
             static const Json::Value validateAndCleanCustomFields(const Json::Value& fields);
             static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
             static bool isCommandCenterReady();
-            static void addCommandCenterListener(ICommandCenterListener* listener);
-            static void removeCommandCenterListener(ICommandCenterListener* listener);
+            static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
 
          private:
             static void setDefaultUserId(const std::string& id);
@@ -123,7 +124,7 @@ namespace gameanalytics
             bool _useManualSessionHandling;
             Json::Value _configurations;
             bool _commandCenterIsReady;
-            std::vector<ICommandCenterListener*> _commandCenterListeners;
+            std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
             std::mutex _mtx;
         };
     }

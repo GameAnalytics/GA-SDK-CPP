@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <json/json.h>
 #if USE_TIZEN || GA_SHARED_LIB
 #include "GameAnalyticsExtern.h"
@@ -145,8 +146,8 @@ namespace gameanalytics
         static std::string getCommandCenterValueAsString(const std::string& key);
         static std::string getCommandCenterValueAsString(const std::string& key, const std::string& defaultValue);
         static bool isCommandCenterReady();
-        static void addCommandCenterListener(ICommandCenterListener* listener);
-        static void removeCommandCenterListener(ICommandCenterListener* listener);
+        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
 
         static void startSession();
         static void endSession();
