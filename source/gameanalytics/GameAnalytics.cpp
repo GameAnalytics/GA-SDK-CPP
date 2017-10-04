@@ -527,6 +527,11 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
+    std::string GameAnalytics::getConfigurationsContentAsString()
+    {
+        return state::GAState::getConfigurationsContentAsString();
+    }
+
     void GameAnalytics::startSession()
     {
         threading::GAThreading::performTaskOnGAThread([]()

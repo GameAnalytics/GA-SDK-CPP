@@ -77,6 +77,7 @@ namespace gameanalytics
             static bool isCommandCenterReady();
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static std::string getConfigurationsContentAsString();
 
          private:
             static void setDefaultUserId(const std::string& id);

@@ -525,6 +525,7 @@ namespace gameanalytics
         Json::Value GAState::getInitAnnotations()
         {
             Json::Value initAnnotations;
+            initAnnotations["user_id"] = getIdentifier();
             // SDK version
             initAnnotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
             // Operation system version
@@ -860,6 +861,11 @@ namespace gameanalytics
             {
                 instance->_commandCenterListeners.erase(std::remove(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener), instance->_commandCenterListeners.end());
             }
+        }
+
+        std::string GAState::getConfigurationsContentAsString()
+        {
+            return GAState::sharedInstance()->_configurations.toStyledString();
         }
 
         void GAState::populateConfigurations(Json::Value sdkConfig)
