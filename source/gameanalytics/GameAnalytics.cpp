@@ -235,13 +235,6 @@ namespace gameanalytics
                 logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
             }
 
-            // TODO: Get HTTPS working on air and defold for mac
-            if(((device::GADevice::getRelevantSdkVersion().find("defold ") != std::string::npos) &&
-                device::GADevice::getBuildPlatform().find("windows") != std::string::npos))
-            {
-                http::GAHTTPApi::switchProtocolToHttp();
-            }
-
             state::GAState::internalInitialize();
         });
     }
