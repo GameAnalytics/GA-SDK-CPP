@@ -237,6 +237,21 @@ void setGender(double gender)
     gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
 }
 
+double getCommandCenterValueAsString(const char *key)
+{
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
+}
+
+double getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
+{
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
+}
+
+bool isCommandCenterReady()
+{
+    return gameanalytics::GameAnalytics::isCommandCenterReady();
+}
+
 void setBirthYear(double birthYear)
 {
     gameanalytics::GameAnalytics::setBirthYear((int)birthYear);
