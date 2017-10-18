@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <json/json.h>
 #if USE_TIZEN || GA_SHARED_LIB
 #include "GameAnalyticsExtern.h"
 #endif
@@ -113,23 +112,23 @@ namespace gameanalytics
 
         // add events
         static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType);
-        static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const Json::Value& fields);
+        static void addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const std::string& fields);
 
         static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string& itemType, const std::string& itemId);
-        static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string& itemType, const std::string& itemId, const std::string& fields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, const Json::Value& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, const std::string& fields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score, const Json::Value& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score, const std::string& fields);
 
         static void addDesignEvent(const std::string& eventId);
-        static void addDesignEvent(const std::string& eventId, const Json::Value& fields);
+        static void addDesignEvent(const std::string& eventId, const std::string& fields);
         static void addDesignEvent(const std::string& eventId, double value);
-        static void addDesignEvent(const std::string& eventId, double value, const Json::Value& fields);
+        static void addDesignEvent(const std::string& eventId, double value, const std::string& fields);
         static void addErrorEvent(EGAErrorSeverity severity, const std::string& message);
-        static void addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields);
+        static void addErrorEvent(EGAErrorSeverity severity, const std::string& message, const std::string& fields);
 
         // set calls can be changed at any time (pre- and post-initialize)
         // some calls only work after a configure is called (setCustomDimension)

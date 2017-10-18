@@ -256,7 +256,7 @@ namespace gameanalytics
         const std::string& itemId,
         const std::string& cartType)
     {
-        addBusinessEvent(currency, amount, itemType, itemId, cartType, Json::Value());
+        addBusinessEvent(currency, amount, itemType, itemId, cartType, "");
     }
 
     void GameAnalytics::addBusinessEvent(
@@ -265,7 +265,7 @@ namespace gameanalytics
         const std::string& itemType,
         const std::string& itemId,
         const std::string& cartType,
-        const Json::Value& fields)
+        const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
         {
@@ -274,17 +274,17 @@ namespace gameanalytics
                 return;
             }
             // Send to events
-            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, fields);
+            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId)
     {
-        addResourceEvent(flowType, currency, amount, itemType, itemId, Json::Value());
+        addResourceEvent(flowType, currency, amount, itemType, itemId, "");
     }
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId, const Json::Value& fields)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, float amount, const std::string&itemType, const std::string& itemId, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
@@ -293,16 +293,16 @@ namespace gameanalytics
                 return;
             }
 
-            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, fields);
+            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03)
     {
-        addProgressionEvent(progressionStatus, progression01, progression02, progression03, Json::Value());
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, const Json::Value& fields)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
         {
@@ -312,16 +312,16 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, fields);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score)
     {
-        addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, Json::Value());
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score, const Json::Value& fields)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, int score, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
         {
@@ -331,16 +331,16 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, fields);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addDesignEvent(const std::string& eventId)
     {
-        addDesignEvent(eventId, Json::Value());
+        addDesignEvent(eventId, "");
     }
 
-    void GameAnalytics::addDesignEvent(const std::string& eventId, const Json::Value& fields)
+    void GameAnalytics::addDesignEvent(const std::string& eventId, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
@@ -348,16 +348,16 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, 0, false, fields);
+            events::GAEvents::addDesignEvent(eventId, 0, false, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addDesignEvent(const std::string& eventId, double value)
     {
-        addDesignEvent(eventId, value, Json::Value());
+        addDesignEvent(eventId, value, "");
     }
 
-    void GameAnalytics::addDesignEvent(const std::string& eventId, double value, const Json::Value& fields)
+    void GameAnalytics::addDesignEvent(const std::string& eventId, double value, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
@@ -365,16 +365,16 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value, true, fields);
+            events::GAEvents::addDesignEvent(eventId, value, true, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::string& message)
     {
-        addErrorEvent(severity, message, Json::Value());
+        addErrorEvent(severity, message, "");
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const std::string& fields)
     {
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
@@ -382,7 +382,7 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addErrorEvent(severity, message, fields);
+            events::GAEvents::addErrorEvent(severity, message, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 

@@ -909,7 +909,7 @@ namespace gameanalytics
         {
             Json::Value result;
 
-            if (!fields.empty())
+            if (fields.isObject() && !fields.empty())
             {
                 int count = 0;
 
