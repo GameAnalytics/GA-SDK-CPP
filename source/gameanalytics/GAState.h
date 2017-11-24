@@ -30,8 +30,8 @@ namespace gameanalytics
             static const std::string getIdentifier();
             static bool isInitialized();
             static Json::Int64 getSessionStart();
-            static double getSessionNum();
-            static double getTransactionNum();
+            static int getSessionNum();
+            static int getTransactionNum();
             static const std::string getSessionId();
             static const std::string getCurrentCustomDimension01();
             static const std::string getCurrentCustomDimension02();
@@ -97,8 +97,8 @@ namespace gameanalytics
             std::string _identifier;
             bool _initialized;
             Json::Int64 _sessionStart;
-            double _sessionNum;
-            double _transactionNum;
+            int _sessionNum;
+            int _transactionNum;
             std::string _sessionId;
             std::string _currentCustomDimension01;
             std::string _currentCustomDimension02;
