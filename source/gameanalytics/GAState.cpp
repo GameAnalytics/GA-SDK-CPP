@@ -583,9 +583,9 @@ namespace gameanalytics
                 instance->setDefaultUserId(defaultId);
             }
 
-            instance->_sessionNum = utilities::GAUtilities::parseString<double>(state_dict.get("session_num", "0.0").asString());
+            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.get("session_num", "0").asString());
 
-            instance->_transactionNum = utilities::GAUtilities::parseString<double>(state_dict.get("transaction_num", "0.0").asString());
+            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.get("transaction_num", "0").asString());
 
             // restore cross session user values
             if (!instance->_facebookId.empty())
