@@ -45,12 +45,12 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart;
         }
 
-        double GAState::getSessionNum()
+        int GAState::getSessionNum()
         {
             return GAState::sharedInstance()->_sessionNum;
         }
 
-        double GAState::getTransactionNum()
+        int GAState::getTransactionNum()
         {
             return GAState::sharedInstance()->_transactionNum;
         }
