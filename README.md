@@ -25,8 +25,11 @@ Dependencies
 
 Changelog
 ---------
+**1.3.8**
+* small correction to use int instead of double for session num 
+
 **1.3.7**
-* https fix in curl library for mac 
+* https fix in curl library for mac
 
 **1.3.6**
 * bug fix for end session when using manual session handling
