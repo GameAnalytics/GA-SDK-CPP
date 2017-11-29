@@ -281,7 +281,7 @@ namespace gameanalytics
             return utilities::GAUtilities::ws2s(hashedJsonBase64->Data());
 #else
             unsigned char mac[SHA256_DIGEST_SIZE];
-            hmac_sha256(
+            hmac_sha256_2(
                 (unsigned char*)key.data(),
                 key.size(),
                 (unsigned char*)data.data(),
