@@ -145,7 +145,7 @@ namespace gameanalytics
             GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
 
             // Log
-            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + "}");
+            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -181,7 +181,7 @@ namespace gameanalytics
             GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
 
             // Log
-            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + "}");
+            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -257,7 +257,7 @@ namespace gameanalytics
             GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
 
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + "}");
+            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -287,7 +287,7 @@ namespace gameanalytics
             GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
 
             // Log
-            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + "}");
+            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventData);
@@ -315,7 +315,7 @@ namespace gameanalytics
             GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
 
             // Log
-            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + "}");
+            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventData);
