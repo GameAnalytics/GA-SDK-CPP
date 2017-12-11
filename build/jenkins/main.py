@@ -50,6 +50,7 @@ def main(argv):
     build_target_name = None
     silent = False
     visual_studio = "2017"
+    installTizen = False
 
     for opt, arg in opts:
         if opt in ['-h', '--help']:
@@ -70,8 +71,13 @@ def main(argv):
             visual_studio = arg
 
     os.chdir(config.BUILD_ROOT)
+    if build_target_name is not None:
+        installTizen = 'tizen' in build_target_name
+    else:
+        installTizen = True
+    
     if build_dependencies is True:
-        install_dependencies(silent=silent)
+        install_dependencies(installTizen=installTizen, silent=silent)
 
     if build_target_name is not None:
         build(specific_target=build_target_name, silent=silent, vs=visual_studio)
