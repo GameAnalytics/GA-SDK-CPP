@@ -252,12 +252,13 @@ def install_tizen(silent=False):
                 ]
             )
 
-def install_dependencies(silent=False):
+def install_dependencies(installTizen=False, silent=False):
     if silent is True:
         print "SILENT DEPENDENCY INSTALL"
     install_cmake(silent=silent)
-    if not (platform in ('linux', 'linux2')):
-        install_tizen(silent=silent)
+    if installTizen is True:
+        if not (platform in ('linux', 'linux2')):
+            install_tizen(silent=silent)
 
 if __name__ == '__main__':
     os.chdir(config.BUILD_ROOT)

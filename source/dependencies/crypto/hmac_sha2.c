@@ -196,7 +196,7 @@ void hmac_sha256_final(hmac_sha256_ctx *ctx, unsigned char *mac,
     memcpy(mac, mac_temp, mac_size);
 }
 
-void hmac_sha256(const unsigned char *key, unsigned int key_size,
+void hmac_sha256_2(const unsigned char *key, unsigned int key_size,
           const unsigned char *message, unsigned int message_len,
           unsigned char *mac, unsigned mac_size)
 {
