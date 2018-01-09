@@ -62,8 +62,8 @@ EXPORT void setFacebookId(const char *facebookId);
 EXPORT void setGender(double gender);
 EXPORT void setBirthYear(double birthYear);
 
-EXPORT double getCommandCenterValueAsString(const char *key);
-EXPORT double getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
+EXPORT const char* getCommandCenterValueAsString(const char *key);
+EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
 EXPORT bool isCommandCenterReady();
 
 EXPORT void gameAnalyticsStartSession();
