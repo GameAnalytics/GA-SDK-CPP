@@ -42,6 +42,7 @@ EXPORT void addResourceEvent(double flowType, const char *currency, double amoun
 EXPORT void addResourceEventJson(const char *jsonArgs);
 
 EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, const char *fields);
+EXPORT void addProgressionEventJson(const char *jsonArgs);
 
 EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score, const char *fields);
 EXPORT void addProgressionEventWithScoreJson(const char *jsonArgs);

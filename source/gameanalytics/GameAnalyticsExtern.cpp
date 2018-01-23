@@ -153,6 +153,12 @@ void addProgressionEvent(double progressionStatus, const char *progression01, co
     gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
 }
 
+void addProgressionEventJson(const char *jsonArgs)
+{
+    int progressionStatusInt = (int)progressionStatus;
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
+}
+
 void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score, const char *fields)
 {
     int progressionStatusInt = (int)progressionStatus;
