@@ -155,8 +155,13 @@ void addProgressionEvent(double progressionStatus, const char *progression01, co
 
 void addProgressionEventJson(const char *jsonArgs)
 {
-    int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(jsonArgs);
+
+    if(json.size() == 5)
+    {
+        int progressionStatusInt = (int)(json[0].asDouble());
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString(), json[2].asString(), json[3].asString(), json[4].asString());
+    }
 }
 
 void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score, const char *fields)
