@@ -21,12 +21,12 @@ Dependencies
   * **Mac:** Should come with Python out of the box or else run *'brew install python'*
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
-* **Windows:** Visual Studio 2015
+* **Windows:** Visual Studio 2015 or 2017 + VS Common Tools
 
 Changelog
 ---------
 **1.3.8**
-* small correction to use int instead of double for session num 
+* small correction to use int instead of double for session num
 
 **1.3.7**
 * https fix in curl library for mac
@@ -86,11 +86,13 @@ How to build
 
 To start a build for all supported targets simply call
 
-**Mac: ./build.sh**
+**Mac/Linux: ./build.sh**
 
-**Windows: build.bat** (must be run as administrator when building for Tizen)
+**Windows: build.bat** (must be run as administrator when building for Tizen). By default the build script tries to use Visual Studio 2017 to use Visual Studio 2015 call **build.bat -v 2015**
 
 Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
+
+To build just a specific target call command with argument **-t <TARGET>** (available targets can be shown calling with **-h** argument).
 
 How to develop
 --------------
