@@ -86,11 +86,13 @@ How to build
 
 To start a build for all supported targets simply call
 
-**Mac: ./build.sh**
+**Mac/Linux: ./build.sh**
 
-**Windows: build.bat** (must be run as administrator when building for Tizen)
+**Windows: build.bat** (must be run as administrator when building for Tizen). By default the build script tries to use Visual Studio 2017 to use Visual Studio 2015 call **build.bat -v 2015**
 
 Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
+
+To build just a specific target call command with argument **-t <TARGET>** (available targets can be shown calling with **-h** argument).
 
 How to develop
 --------------
