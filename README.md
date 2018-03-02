@@ -21,7 +21,7 @@ Dependencies
   * **Mac:** Should come with Python out of the box or else run *'brew install python'*
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
-* **Windows:** Visual Studio 2015 or 2017 + VS Commonm Tools
+* **Windows:** Visual Studio 2015 or 2017 + VS Common Tools
 
 Changelog
 ---------
