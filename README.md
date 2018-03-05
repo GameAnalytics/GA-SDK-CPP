@@ -26,7 +26,7 @@ Dependencies
 Changelog
 ---------
 **1.3.8**
-* small correction to use int instead of double for session num 
+* small correction to use int instead of double for session num
 
 **1.3.7**
 * https fix in curl library for mac
@@ -90,9 +90,9 @@ To start a build for all supported targets simply call
 
 **Windows: build.bat** (must be run as administrator when building for Tizen). By default the build script tries to use Visual Studio 2017 to use Visual Studio 2015 call **build.bat -v 2015**
 
-Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
-
 This will build all targets and first time intall CMake and Tizen SDK.
+
+Or call **build.bat -h** or **./build.sh -h** to display the usage of the script and it will list all available targets.
 
 To build just a specific target call command with argument **-t <TARGET>** (available targets can be shown calling with **-h** argument).
 
