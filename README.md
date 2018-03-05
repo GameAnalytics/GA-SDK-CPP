@@ -21,7 +21,7 @@ Dependencies
   * **Mac:** Should come with Python out of the box or else run *'brew install python'*
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
-* **Windows:** Visual Studio 2015 or 2017 + VS Common Tools
+* **Windows:** Visual Studio 2015 or 2017 + Windows Development Kit
 
 Changelog
 ---------
@@ -91,6 +91,8 @@ To start a build for all supported targets simply call
 **Windows: build.bat** (must be run as administrator when building for Tizen). By default the build script tries to use Visual Studio 2017 to use Visual Studio 2015 call **build.bat -v 2015**
 
 Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
+
+This will build all targets and first time intall CMake and Tizen SDK.
 
 To build just a specific target call command with argument **-t <TARGET>** (available targets can be shown calling with **-h** argument).
 
