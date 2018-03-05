@@ -111,6 +111,7 @@ Folderstructure
 * **build/cmake** - Contains the cmake files for the project
 * **build/jenkins** - Contains the scripts and working directories for the automated builds
 * **export** - Target folder for the automated export of the GA lib
+* **precompiled** - Contains precompiled libraries for the different targets if you don't want to comile them yourself
 * **source** - Contains the complete source code for the project including the dependencies
 * **tests** - Contains tests for testing the functionality in the GA SDK, to run tests run **tests/run_tests_osx.py** (mac only)
 
