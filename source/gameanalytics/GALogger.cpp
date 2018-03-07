@@ -9,8 +9,8 @@
 #include <dlog.h>
 #else
 #include "GAUtilities.h"
-#include <plog/Log.h>
-#include <plog/Appenders/ConsoleAppender.h>
+#include <vector>
+#include <spdlog/sinks/ostream_sink.h>
 #endif
 
 #if USE_UWP
@@ -46,7 +46,7 @@ namespace gameanalytics
 #endif
 
 #if !USE_UWP && !USE_TIZEN
-            plogInitialized = false;
+            logInitialized = false;
 #endif
         }
 
@@ -64,40 +64,82 @@ namespace gameanalytics
         void GALogger::initializeLog()
         {
             GALogger *ga = GALogger::sharedInstance();
-            std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
 
-            static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
-            static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
-
-            if(ga->debugEnabled)
+            if(!ga->logInitialized)
             {
-                plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
-            }
-            else
-            {
-                plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
-            }
+                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+                std::vector<spdlog::sink_ptr> sinks;
+                sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
+                sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
+                ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
 
-            GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+                if(ga->debugEnabled)
+                {
+                    ga->logger->flush_on(spdlog::level::debug);
+                    spdlog::set_level(spdlog::level::debug);
+                }
+                else
+                {
+                    ga->logger->flush_on(spdlog::level::info);
+                    spdlog::set_level(spdlog::level::info);
+                }
+
+                spdlog::register_logger(ga->logger);
+
+                ga->logInitialized = true;
+
+                GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+            }
         }
 
         void GALogger::customInitializeLog()
         {
             GALogger *ga = GALogger::sharedInstance();
+
+            spdlog::drop("gameanalytics");
             std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+            std::vector<spdlog::sink_ptr> sinks;
+            sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
+            sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
+            ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
 
-            static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(p.c_str(), 1 * 1024 * 1024, 10);
-
-            if (ga->debugEnabled)
+            if(ga->debugEnabled)
             {
-                plog::init(plog::debug, &fileAppender);
+                ga->logger->flush_on(spdlog::level::debug);
+                spdlog::set_level(spdlog::level::debug);
             }
             else
             {
-                plog::init(plog::info, &fileAppender);
+                ga->logger->flush_on(spdlog::level::info);
+                spdlog::set_level(spdlog::level::info);
             }
 
+            spdlog::register_logger(ga->logger);
+
+            ga->logInitialized = true;
+
             GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+        }
+
+        void GALogger::addCustomLogStream(std::ostream& os)
+        {
+            spdlog::drop("gameanalytics_stream");
+            GALogger *ga = GALogger::sharedInstance();
+            auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_st>(os);
+            ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
+
+            if(ga->debugEnabled)
+            {
+                ga->custom_logger->flush_on(spdlog::level::debug);
+                spdlog::set_level(spdlog::level::debug);
+            }
+            else
+            {
+                ga->custom_logger->flush_on(spdlog::level::info);
+                spdlog::set_level(spdlog::level::info);
+            }
+
+            spdlog::register_logger(ga->custom_logger);
         }
 #endif
 
@@ -197,9 +239,8 @@ namespace gameanalytics
 #endif
 
 #if !USE_UWP && !USE_TIZEN
-            if(!plogInitialized)
+            if(!logInitialized)
             {
-                plogInitialized = true;
                 initializeLog();
             }
 #endif
@@ -218,7 +259,11 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_ERROR, GALogger::tag.c_str(), message.c_str());
 #else
-                    LOG_ERROR << message;
+                    logger->error(message.c_str());
+                    if(custom_logger)
+                    {
+                        custom_logger->error(message.c_str());
+                    }
 #endif
                     break;
 
@@ -235,7 +280,11 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_WARN, GALogger::tag.c_str(), message.c_str());
 #else
-                    LOG_WARNING << message;
+                    logger->warn(message.c_str());
+                    if(custom_logger)
+                    {
+                        custom_logger->warn(message.c_str());
+                    }
 #endif
                     break;
 
@@ -252,7 +301,11 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
 #else
-                    LOG_DEBUG << message;
+                    logger->debug(message.c_str());
+                    if(custom_logger)
+                    {
+                        custom_logger->debug(message.c_str());
+                    }
 #endif
                     break;
 
@@ -269,7 +322,11 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_INFO, GALogger::tag.c_str(), message.c_str());
 #else
-                    LOG_INFO << message;
+                    logger->info(message.c_str());
+                    if(custom_logger)
+                    {
+                        custom_logger->info(message.c_str());
+                    }
 #endif
                     break;
             }
