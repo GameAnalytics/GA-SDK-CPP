@@ -107,6 +107,7 @@ elseif("${LINUX_STATIC}")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE STATIC)
+    add_definitions("-D_GLIBCXX_USE_CXX11_ABI=0")
 elseif("${LINUX_SHARED}")
     set(LIB_EXTENSION "so")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -115,7 +116,7 @@ elseif("${LINUX_SHARED}")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     SET (LIB_TYPE SHARED)
-    add_definitions("-DGA_SHARED_LIB")
+    add_definitions("-DGA_SHARED_LIB -D_GLIBCXX_USE_CXX11_ABI=0")
 endif("${WIN_UWP_STATIC}")
 
 if("${UWP_ALL}")
@@ -174,7 +175,7 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/plog/*.h"
+        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
         "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
         "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
@@ -185,7 +186,7 @@ elseif("${OSX_ALL}")
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
-        "${DEPENDENCIES_DIR}/plog"
+        "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
@@ -206,7 +207,7 @@ else()
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/plog/*.h"
+        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
         "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
         "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
@@ -217,7 +218,7 @@ else()
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
-        "${DEPENDENCIES_DIR}/plog"
+        "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"

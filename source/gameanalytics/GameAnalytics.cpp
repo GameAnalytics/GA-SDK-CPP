@@ -582,6 +582,13 @@ namespace gameanalytics
         }
     }
 
+#if !USE_UWP && !USE_TIZEN
+    void GameAnalytics::addCustomLogStream(std::ostream& os)
+    {
+        logging::GALogger::addCustomLogStream(os);
+    }
+#endif
+
 #if USE_UWP
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions)
     {

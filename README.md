@@ -21,12 +21,12 @@ Dependencies
   * **Mac:** Should come with Python out of the box or else run *'brew install python'*
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
-* **Windows:** Visual Studio 2015
+* **Windows:** Visual Studio 2015 or 2017 + Windows Development Kit
 
 Changelog
 ---------
 **1.3.8**
-* small correction to use int instead of double for session num 
+* small correction to use int instead of double for session num
 
 **1.3.7**
 * https fix in curl library for mac
@@ -86,11 +86,15 @@ How to build
 
 To start a build for all supported targets simply call
 
-**Mac: ./build.sh**
+**Mac/Linux: ./build.sh**
 
-**Windows: build.bat** (must be run as administrator when building for Tizen)
+**Windows: build.bat** (must be run as administrator when building for Tizen). By default the build script tries to use Visual Studio 2017 to use Visual Studio 2015 call **build.bat -v 2015**
 
-Or call **build.bat -h** or **./build.sh -h** to display the usage of the script.
+This will build all targets and first time intall CMake and Tizen SDK.
+
+Or call **build.bat -h** or **./build.sh -h** to display the usage of the script and it will list all available targets.
+
+To build just a specific target call command with argument **-t <TARGET>** (available targets can be shown calling with **-h** argument).
 
 How to develop
 --------------
@@ -107,6 +111,7 @@ Folderstructure
 * **build/cmake** - Contains the cmake files for the project
 * **build/jenkins** - Contains the scripts and working directories for the automated builds
 * **export** - Target folder for the automated export of the GA lib
+* **precompiled** - Contains precompiled libraries for the different targets if you don't want to comile them yourself
 * **source** - Contains the complete source code for the project including the dependencies
 * **tests** - Contains tests for testing the functionality in the GA SDK, to run tests run **tests/run_tests_osx.py** (mac only)
 
