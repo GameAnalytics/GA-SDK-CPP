@@ -25,6 +25,10 @@ Dependencies
 
 Changelog
 ---------
+**1.4.0**
+* updated to new logging library (windows, osx, linux)
+* added precompiled GameAnalytics libraries
+
 **1.3.8**
 * small correction to use int instead of double for session num
 
