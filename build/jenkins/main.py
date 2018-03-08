@@ -85,7 +85,7 @@ def main(argv):
     else:
         installTizen = True
 
-    if skip_tizen is False:
+    if skip_tizen is True:
         installTizen = False
 
     if build_dependencies is True:
