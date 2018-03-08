@@ -605,9 +605,11 @@ def build(target_name, vs, silent=False):
         target.build(silent=silent)
 
 
-def build_targets(target_names, silent=False, vs="2017"):
+def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
 
     for target_name in target_names:
+        if skip_tizen and 'tizen' in target_name:
+            continue
         print ""
         print "-----------------------------------------"
         print ""
@@ -628,13 +630,14 @@ def main(argv, silent=False):
     print argv
 
     try:
-        opts, args = getopt.getopt(argv, "t:v:h", ["target=", "vs=", "help"])
+        opts, args = getopt.getopt(argv, "t:v:nh", ["target=", "vs=", "notizen", "help"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
 
     build_target_name = None
     visual_studio = "2017"
+    skip_tizen = False
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
@@ -647,6 +650,8 @@ def main(argv, silent=False):
                 print "Target: " + arg + " is not part of allowed targets."
                 print_help()
                 sys.exit(2)
+        elif opt in ('-n', '--notizen'):
+            skip_tizen = True
         elif opt in ('-v', '--vs'):
             if arg in valid_visual_studio:
                 visual_studio = arg
@@ -656,10 +661,10 @@ def main(argv, silent=False):
                 sys.exit(2)
 
     if build_target_name:
-        build_targets([build_target_name], silent=silent, vs=visual_studio)
+        build_targets([build_target_name], silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
     else:
         # build all
-        build_targets(valid_target_names, silent=silent, vs=visual_studio)
+        build_targets(valid_target_names, silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
