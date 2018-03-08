@@ -7,6 +7,10 @@
 
 #include <Foundation/GASingleton.h>
 #include <string>
+#include <memory>
+#if !USE_UWP && !USE_TIZEN
+#include <spdlog/spdlog.h>
+#endif
 
 namespace gameanalytics
 {
@@ -40,6 +44,7 @@ namespace gameanalytics
 
 #if !USE_UWP && !USE_TIZEN
             static void customInitializeLog();
+            static void addCustomLogStream(std::ostream& os);
 #endif
          private:
 #if !USE_UWP && !USE_TIZEN
@@ -55,7 +60,9 @@ namespace gameanalytics
             Windows::Storage::StorageFile^ file;
 #endif
 #if !USE_UWP && !USE_TIZEN
-            bool plogInitialized;
+            std::shared_ptr<spdlog::logger> logger;
+            bool logInitialized;
+            std::shared_ptr<spdlog::logger> custom_logger;
 #endif
         };
     }

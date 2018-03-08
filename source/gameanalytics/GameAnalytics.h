@@ -15,6 +15,9 @@
 #if USE_TIZEN || GA_SHARED_LIB
 #include "GameAnalyticsExtern.h"
 #endif
+#if !USE_UWP && !USE_TIZEN
+#include <ostream>
+#endif
 
 namespace gameanalytics
 {
@@ -135,6 +138,10 @@ namespace gameanalytics
         // will affect how session is started / ended
         static void onResume();
         static void onStop();
+
+#if !USE_UWP && !USE_TIZEN
+        static void addCustomLogStream(std::ostream& os);
+#endif
 
 #if USE_UWP
         static void configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions);
