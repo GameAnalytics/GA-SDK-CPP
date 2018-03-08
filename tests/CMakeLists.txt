@@ -24,7 +24,7 @@ add_definitions("-DGUID_CFUUID")
 set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 
 target_link_libraries(${PROJECT_NAME}
-	${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
+    ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
     ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
     ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     "-framework CoreFoundation"
@@ -34,11 +34,11 @@ target_link_libraries(${PROJECT_NAME}
 
 # enable c++11 via -std=c++11 when compiler is clang or gcc
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-	target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_nonstatic_member_init)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   target_link_libraries(${PROJECT_NAME} Rpcrt4.lib)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -47,10 +47,11 @@ endif()
 
 # include external dependency
 target_include_directories(
-	${PROJECT_NAME}
-	PRIVATE
-	"${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
-	"${DEPENDENCIES_DIR}/jsoncpp/"
+    ${PROJECT_NAME}
+    PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
+    "${DEPENDENCIES_DIR}/jsoncpp/"
+    "${DEPENDENCIES_DIR}/spdlog/include"
     "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
     "${DEPENDENCIES_DIR}/curlcpp/include"
 )
