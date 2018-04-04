@@ -1,6 +1,6 @@
 ﻿//
 // GA-SDK-CPP
-// Copyright 2015 CppWrapper. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
