@@ -68,7 +68,8 @@ EXPORT void gameAnalyticsEndSession();
 // game state changes
 // will affect how session is started / ended
 EXPORT void onResume();
-EXPORT void onStop();
+EXPORT void onSuspend();
+EXPORT void onQuit();
 
 #ifdef __cplusplus
 }

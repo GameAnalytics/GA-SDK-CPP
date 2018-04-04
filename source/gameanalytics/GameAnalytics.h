@@ -137,7 +137,8 @@ namespace gameanalytics
         // game state changes
         // will affect how session is started / ended
         static void onResume();
-        static void onStop();
+        static void onSuspend();
+        static void onQuit();
 
 #if !USE_UWP && !USE_TIZEN
         static void addCustomLogStream(std::ostream& os);

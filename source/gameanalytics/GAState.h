@@ -60,7 +60,7 @@ namespace gameanalytics
             static bool hasAvailableResourceCurrency(const std::string& currency);
             static bool hasAvailableResourceItemType(const std::string& itemType);
             static void setKeys(const std::string& gameKey, const std::string& gameSecret);
-            static void endSessionAndStopQueue();
+            static void endSessionAndStopQueue(bool endThread);
             static void resumeSessionAndStartQueue();
             static Json::Value getEventAnnotations();
             static Json::Value getSdkErrorEventAnnotations();

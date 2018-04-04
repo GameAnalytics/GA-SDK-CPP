@@ -469,7 +469,7 @@ namespace gameanalytics
 
                 if(state::GAState::isEnabled() && state::GAState::sessionIsStarted())
                 {
-                    state::GAState::endSessionAndStopQueue();
+                    state::GAState::endSessionAndStopQueue(false);
                 }
 
                 state::GAState::resumeSessionAndStartQueue();
@@ -481,7 +481,7 @@ namespace gameanalytics
     {
         if (state::GAState::useManualSessionHandling())
         {
-            onStop();
+            onSuspend();
         }
     }
 
@@ -499,13 +499,27 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::onStop()
+    void GameAnalytics::onSuspend()
     {
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
             {
-                state::GAState::endSessionAndStopQueue();
+                state::GAState::endSessionAndStopQueue(false);
+            });
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+
+    void GameAnalytics::onQuit()
+    {
+        try
+        {
+            threading::GAThreading::performTaskOnGAThread([]()
+            {
+                state::GAState::endSessionAndStopQueue(true);
             });
         }
         catch (const std::exception&)
@@ -724,11 +738,11 @@ namespace gameanalytics
 
         if (!state::GAState::useManualSessionHandling())
         {
-            onStop();
+            onSuspend();
         }
         else
         {
-            logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnStop() as using manual session handling");
+            logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnSuspend() as using manual session handling");
         }
         deferral->Complete();
     }

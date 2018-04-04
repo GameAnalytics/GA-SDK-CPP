@@ -57,7 +57,7 @@ def download(url, destination, silent=False):
         urllib.urlretrieve(url, destination)
     else:
         urllib.urlretrieve(url, destination, reporthook)
-    print 'download done'
+    print('download done')
 
 # windows has an restriction about the size of a filename (260)
 # the android sdk contains some eclipse files, which are very long
@@ -69,7 +69,7 @@ def download(url, destination, silent=False):
 #   with zipfile.ZipFile(zip_file_location, 'r') as zf:
 #       root_in_zip = zf.namelist()[0].split('/')[0]
 #
-#       print root_in_zip
+#       print(root_in_zip)
 #       sys.exit(1)
 #
 #       for archive_member in zf.infolist():
@@ -113,15 +113,15 @@ def uncompress(package, dst, silent=False):
 
 def install_cmake(silent=False):
     if not os.path.exists(config.CMAKE_ROOT):
-        print "-------------- CMAKE ---------------"
+        print("-------------- CMAKE ---------------")
         if not os.path.exists(cmake_package):
-            print "--> DOWNLOADING CMAKE"
+            print("--> DOWNLOADING CMAKE")
             download(CMAKE_URL, cmake_package, silent=silent)
-        print "--> UNCOMPRESSING CMAKE"
+        print("--> UNCOMPRESSING CMAKE")
         uncompress(cmake_package, config.CMAKE_ROOT, silent=silent)
 
         if platform == 'darwin':
-            print "--> MOVING CMAKE + CLEANUP"
+            print("--> MOVING CMAKE + CLEANUP")
             shutil.move(
                 os.path.join(config.CMAKE_ROOT, 'CMake.app', 'Contents'),
                 config.CMAKE_ROOT + '_'
@@ -133,12 +133,12 @@ def install_cmake(silent=False):
 
 def install_tizen(silent=False):
     if (platform in ('linux', 'linux2')):
-        print "Don't install tizen on Linux"
+        print("Don't install tizen on Linux")
         return
     if not os.path.exists(config.TIZEN_ROOT):
-        print "-------------- TIZEN ---------------"
+        print("-------------- TIZEN ---------------")
         if not os.path.exists(tizen_package):
-            print "--> DOWNLOADING TIZEN"
+            print("--> DOWNLOADING TIZEN")
             download(TIZEN_URL, tizen_package, silent=silent)
 
         with open(profile_tmp_file) as infile, open(profile_file, 'w') as outfile:
@@ -254,7 +254,7 @@ def install_tizen(silent=False):
 
 def install_dependencies(installTizen=False, silent=False):
     if silent is True:
-        print "SILENT DEPENDENCY INSTALL"
+        print("SILENT DEPENDENCY INSTALL")
     install_cmake(silent=silent)
     if installTizen is True:
         if not (platform in ('linux', 'linux2')):

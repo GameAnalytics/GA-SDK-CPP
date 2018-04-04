@@ -380,7 +380,7 @@ namespace gameanalytics
             events::GAEvents::ensureEventQueueIsRunning();
         }
 
-        void GAState::endSessionAndStopQueue()
+        void GAState::endSessionAndStopQueue(bool endThread)
         {
             if(GAState::isInitialized())
             {
@@ -390,6 +390,11 @@ namespace gameanalytics
                 {
                     events::GAEvents::addSessionEndEvent();
                     GAState::sharedInstance()->_sessionStart = 0;
+                }
+
+                if(endThread)
+                {
+                    threading::GAThreading::endThread();
                 }
             }
         }

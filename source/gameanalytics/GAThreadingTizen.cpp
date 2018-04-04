@@ -34,6 +34,10 @@ namespace gameanalytics
             ecore_thread_run(_perform_task_function, _end_function, NULL, new BlockHolder(taskBlock));
         }
 
+        void GAThreading::endThread()
+        {
+        }
+
         Eina_Bool GAThreading::_scheduled_function(void* data)
         {
             BlockHolder* blockHolder = static_cast<BlockHolder*>(data);
