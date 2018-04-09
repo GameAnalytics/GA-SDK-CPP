@@ -1,6 +1,6 @@
 ﻿//
 // GA-SDK-CPP
-// Copyright 2015 CppWrapper. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
@@ -137,7 +137,8 @@ namespace gameanalytics
         // game state changes
         // will affect how session is started / ended
         static void onResume();
-        static void onStop();
+        static void onSuspend();
+        static void onQuit();
 
 #if !USE_UWP && !USE_TIZEN
         static void addCustomLogStream(std::ostream& os);

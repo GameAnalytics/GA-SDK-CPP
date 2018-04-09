@@ -25,6 +25,10 @@ Dependencies
 
 Changelog
 ---------
+**1.4.1**
+* renamed onStop function to onSuspend
+* added a onQuit function
+
 **1.4.0**
 * updated to new logging library (windows, osx, linux)
 * added precompiled GameAnalytics libraries

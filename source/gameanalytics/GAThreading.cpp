@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include "GAThreading.h"
@@ -44,6 +44,13 @@ namespace gameanalytics
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
+        void GAThreading::endThread()
+        {
+            logging::GALogger::d("ending thread");
+            GAThreadHelpers::scoped_lock lock(state->mutex);
+            state->endThread = true;
+        }
+
         bool GAThreading::getNextBlock(TimedBlock& timedBlock)
         {
             GAThreadHelpers::scoped_lock lock(state->mutex);
@@ -84,6 +91,11 @@ namespace gameanalytics
                         }
                         // clear the block, so that the assert works
                         timedBlock.block = {};
+                    }
+
+                    if(state->endThread)
+                    {
+                        break;
                     }
 
                     std::this_thread::sleep_for(std::chrono::seconds(1));

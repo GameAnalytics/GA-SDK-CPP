@@ -167,7 +167,7 @@ class TargetWin(TargetCMake):
                 aKey = OpenKey(aReg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0')
                 return QueryValueEx(aKey, "MSBuildToolsPath")[0]
             except OSError:
-                print 'msbuild path not found'
+                print('msbuild path not found')
             return ''
         elif vs == "2017":
             path = call_process(
@@ -395,7 +395,7 @@ class TargetLinux(TargetCMake):
         self.architecture = architecture
 
     def create_project_file(self):
-        print 'Skip create_project_file for Linux'
+        print('Skip create_project_file for Linux')
 
 
     def build(self, silent=False):
@@ -575,13 +575,13 @@ valid_target_names = sorted(available_targets.keys())
 
 
 def print_help():
-    print 'build.py <list_of_targets>'
-    print 'valid targets:'
+    print('build.py <list_of_targets>')
+    print('valid targets:')
     for target in valid_target_names:
-        print '  ' + target
-    print 'valid visual studios:'
+        print('  ' + target)
+    print('valid visual studios:')
     for vs in valid_visual_studio:
-        print '  ' + vs
+        print('  ' + vs)
 
 
 def build(target_name, vs, silent=False):
@@ -610,24 +610,24 @@ def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
     for target_name in target_names:
         if skip_tizen and 'tizen' in target_name:
             continue
-        print ""
-        print "-----------------------------------------"
-        print ""
-        print "    BUILDING TARGET: " + target_name
-        print ""
-        print "-----------------------------------------"
-        print ""
+        print("")
+        print("-----------------------------------------")
+        print("")
+        print("    BUILDING TARGET: " + target_name)
+        print("")
+        print("-----------------------------------------")
+        print("")
 
         build(target_name, vs, silent=silent)
 
 
 # @timing - benchmarking build
 def main(argv, silent=False):
-    print "-----------------------------------------"
-    print "    BUILDING"
-    print "-----------------------------------------"
-    print "Build arguments..."
-    print argv
+    print("-----------------------------------------")
+    print("    BUILDING")
+    print("-----------------------------------------")
+    print("Build arguments...")
+    print(argv)
 
     try:
         opts, args = getopt.getopt(argv, "t:v:nh", ["target=", "vs=", "notizen", "help"])
@@ -647,7 +647,7 @@ def main(argv, silent=False):
             if arg in valid_target_names:
                 build_target_name = arg
             else:
-                print "Target: " + arg + " is not part of allowed targets."
+                print("Target: " + arg + " is not part of allowed targets.")
                 print_help()
                 sys.exit(2)
         elif opt in ('-n', '--notizen'):
@@ -656,7 +656,7 @@ def main(argv, silent=False):
             if arg in valid_visual_studio:
                 visual_studio = arg
             else:
-                print "Visual Studio version: " + arg + " is not part of allowed visual studio versions."
+                print("Visual Studio version: " + arg + " is not part of allowed visual studio versions.")
                 print_help()
                 sys.exit(2)
 
