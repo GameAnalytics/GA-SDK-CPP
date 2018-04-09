@@ -1,7 +1,7 @@
 #if USE_TIZEN
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include "GAThreading.h"
@@ -32,6 +32,10 @@ namespace gameanalytics
         {
             initIfNeeded();
             ecore_thread_run(_perform_task_function, _end_function, NULL, new BlockHolder(taskBlock));
+        }
+
+        void GAThreading::endThread()
+        {
         }
 
         Eina_Bool GAThreading::_scheduled_function(void* data)

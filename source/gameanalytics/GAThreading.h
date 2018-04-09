@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #pragma once
@@ -57,6 +57,8 @@ namespace gameanalytics
             // timers
             static void scheduleTimer(double interval, const Block& callback);
 
+            static void endThread();
+
          private:
 
 #if USE_TIZEN
@@ -110,6 +112,7 @@ namespace gameanalytics
                 GAThreadHelpers::mutex mutex;
 
                 GAThreadHelpers::scoped_thread thread;
+                bool endThread;
             };
 
             static std::shared_ptr<State> state;

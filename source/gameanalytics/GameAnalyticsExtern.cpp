@@ -278,9 +278,14 @@ void onResume()
     gameanalytics::GameAnalytics::onResume();
 }
 
-void onStop()
+void onSuspend()
 {
-    gameanalytics::GameAnalytics::onStop();
+    gameanalytics::GameAnalytics::onSuspend();
+}
+
+void onQuit()
+{
+    gameanalytics::GameAnalytics::onQuit();
 }
 
 #endif

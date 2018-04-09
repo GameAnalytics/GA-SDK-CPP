@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #include "GAState.h"
@@ -386,7 +386,7 @@ namespace gameanalytics
             events::GAEvents::ensureEventQueueIsRunning();
         }
 
-        void GAState::endSessionAndStopQueue()
+        void GAState::endSessionAndStopQueue(bool endThread)
         {
             if(GAState::isInitialized())
             {
@@ -396,6 +396,11 @@ namespace gameanalytics
                 {
                     events::GAEvents::addSessionEndEvent();
                     GAState::sharedInstance()->_sessionStart = 0;
+                }
+
+                if(endThread)
+                {
+                    threading::GAThreading::endThread();
                 }
             }
         }

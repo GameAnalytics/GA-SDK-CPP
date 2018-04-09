@@ -36,10 +36,10 @@ def build(specific_target=None, silent=False, vs="2017", skip_tizen=False):
             build_main(['-v', vs], silent=silent)
 
 def print_help():
-    print 'main.py -t <target> --skip-dependencies --help'
-    print 'Valid targets:'
+    print('main.py -t <target> --skip-dependencies --help')
+    print('Valid targets:')
     for target in valid_target_names:
-        print '  ' + target
+        print('  ' + target)
 
 
 # @timing - bencharking build
@@ -66,17 +66,17 @@ def main(argv):
             if arg in valid_target_names:
                 build_target_name = arg
             else:
-                print "ERROR: target name specified not in valid names: " + arg
+                print("ERROR: target name specified not in valid names: " + arg)
         elif opt in ['--skip-dependencies']:
-            print "!! SKIPPING DEPENDENCIES INSTALLATION !!"
+            print("!! SKIPPING DEPENDENCIES INSTALLATION !!")
             build_dependencies = False
         elif opt in ['-s', '--silent']:
-            print "RUNNING EVERYTHING AS SILENTLY AS POSSIBLE"
+            print("RUNNING EVERYTHING AS SILENTLY AS POSSIBLE")
             silent = True
         elif opt in ['-v', '--vs']:
             visual_studio = arg
         elif opt in ['-n', '--notizen']:
-            print "SKIPPING TIZEN INSTALLATION"
+            print("SKIPPING TIZEN INSTALLATION")
             skip_tizen = True
 
     os.chdir(config.BUILD_ROOT)

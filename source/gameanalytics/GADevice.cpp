@@ -1,6 +1,6 @@
 //
 // GA-SDK-CPP
-// Copyright 2015 GameAnalytics. All rights reserved.
+// Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
 
 #if defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
@@ -69,11 +69,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.4.0";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 1.4.1";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 1.4.0";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 1.4.1";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 1.4.0";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 1.4.1";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
