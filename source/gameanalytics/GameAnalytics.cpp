@@ -726,6 +726,16 @@ namespace gameanalytics
             }
             return false;
         }
+
+        // Is session started
+        if (needsInitialized && !state::GAState::sessionIsStarted())
+        {
+            if (warn)
+            {
+                logging::GALogger::w(message + "Session has not started yet");
+            }
+            return false;
+        }
         return true;
     }
 
