@@ -25,6 +25,10 @@ Dependencies
 
 Changelog
 ---------
+**1.4.2**
+* fixed session length bug
+* fixed to not allow adding events when not in a session
+
 **1.4.1**
 * renamed onStop function to onSuspend
 * added a onQuit function
