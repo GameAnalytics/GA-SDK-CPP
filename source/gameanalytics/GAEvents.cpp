@@ -367,6 +367,7 @@ namespace gameanalytics
             if (events.empty())
             {
                 logging::GALogger::i("Event queue: No events to send");
+                GAEvents::updateSessionTime();
                 return;
             }
 
@@ -458,8 +459,6 @@ namespace gameanalytics
                     store::GAStore::executeQuerySync(deleteSql);
                 }
             }
-
-            GAEvents::updateSessionTime();
         }
 
         void GAEvents::updateSessionTime()
