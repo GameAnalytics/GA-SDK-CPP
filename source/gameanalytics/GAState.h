@@ -86,10 +86,10 @@ namespace gameanalytics
 
             std::string _userId;
             std::string _identifier;
-            bool _initialized;
-            Json::Int64 _sessionStart;
-            int _sessionNum;
-            int _transactionNum;
+            bool _initialized = false;
+            Json::Int64 _sessionStart = 0;
+            int _sessionNum = 0;
+            int _transactionNum = 0;
             std::string _sessionId;
             std::string _currentCustomDimension01;
             std::string _currentCustomDimension02;
@@ -104,16 +104,16 @@ namespace gameanalytics
             std::string _build;
             std::string _facebookId;
             std::string _gender;
-            int _birthYear;
-            bool _initAuthorized;
-            Json::Int64 _clientServerTimeOffset;
+            int _birthYear = 0;
+            bool _initAuthorized = false;
+            Json::Int64 _clientServerTimeOffset = 0;
             std::string _defaultUserId;
             std::map<std::string, int> _progressionTries;
             Json::Value _sdkConfigDefault;
             Json::Value _sdkConfig;
             Json::Value _sdkConfigCached;
             static const std::string CategorySdkError;
-            bool _useManualSessionHandling;
+            bool _useManualSessionHandling = false;
         };
     }
 }
