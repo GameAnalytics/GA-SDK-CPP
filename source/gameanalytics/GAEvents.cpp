@@ -278,6 +278,9 @@ namespace gameanalytics
                 eventData["value"] = value;
             }
 
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
+
             // Log
             logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + "}");
 
@@ -303,6 +306,9 @@ namespace gameanalytics
             eventData["category"] = GAEvents::CategoryError;
             eventData["severity"] = severityString;
             eventData["message"] = message;
+
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
 
             // Log
             logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + "}");
