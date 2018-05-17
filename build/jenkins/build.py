@@ -7,14 +7,16 @@ import platform
 import sys
 import getopt
 import subprocess
-import re
 import config as Config
 import libs.tools as LibTools
 import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import *
+    from _winreg import ConnectRegistry
+    from _winreg import HKEY_LOCAL_MACHINE
+    from _winreg import OpenKey
+    from _winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
@@ -433,7 +435,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -450,6 +453,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=clang',
+                '-DCMAKE_CXX_COMPILER=clang++',
                 '-G',
                 self.generator
             ],
@@ -467,7 +472,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
