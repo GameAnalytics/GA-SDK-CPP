@@ -529,6 +529,7 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
+    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles', '-m32'),
     'linux-x86-shared': TargetLinux('linux-x86-shared', 'Unix Makefiles', '-m32'),
     'linux-x64-static': TargetLinux('linux-x64-static', 'Unix Makefiles', '-m64'),
     'linux-x64-shared': TargetLinux('linux-x64-shared', 'Unix Makefiles', '-m64'),
@@ -569,6 +570,7 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
+        'linux-x86-static': all_targets['linux-x86-static'],
         'linux-x86-shared': all_targets['linux-x86-shared'],
         'linux-x64-static': all_targets['linux-x64-static'],
         'linux-x64-shared': all_targets['linux-x64-shared'],
