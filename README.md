@@ -24,9 +24,15 @@ Dependencies
 * cmake (will be automatically downloaded)
 * **Mac:** XCode
 * **Windows:** Visual Studio 2015 or 2017 + Windows Development Kit
+* **Linux:** LLVM's libc++
 
 Changelog
 ---------
+**1.4.3**
+* added custom dimensions to design and error events
+* added GAState zero initialisation of fields
+* fixed linux build script
+
 **1.4.2**
 * fixed session length bug
 * fixed to not allow adding events when not in a session
