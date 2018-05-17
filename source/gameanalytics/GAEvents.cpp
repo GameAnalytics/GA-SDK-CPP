@@ -286,6 +286,9 @@ namespace gameanalytics
 
             GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
 
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
+
             // Log
             logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
@@ -313,6 +316,9 @@ namespace gameanalytics
             eventData["message"] = message;
 
             GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
+
+            // Add custom dimensions
+            GAEvents::addDimensionsToEvent(eventData);
 
             // Log
             logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");

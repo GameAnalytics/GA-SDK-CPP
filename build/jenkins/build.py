@@ -7,17 +7,20 @@ import platform
 import sys
 import getopt
 import subprocess
-import re
 import config as Config
 import libs.tools as LibTools
 import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import *
+    from _winreg import ConnectRegistry
+    from _winreg import HKEY_LOCAL_MACHINE
+    from _winreg import OpenKey
+    from _winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
+
     def symlink(source, link_name):
         '''symlink(source, link_name)
            Creates a symbolic link pointing to source named link_name'''
@@ -35,6 +38,7 @@ if os.name == "nt":
             raise ctypes.WinError()
 
     os.symlink = symlink
+
 
 def call_process(process_arguments, process_workingdir, silent=False, useOutput=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
@@ -158,6 +162,7 @@ class TargetOSX(TargetCMake):
             os.path.join(release_dir, self.target_name)
         )
 
+
 class TargetWin(TargetCMake):
     @staticmethod
     def get_msbuild_path(vs="2017"):
@@ -226,6 +231,7 @@ class TargetWin(TargetCMake):
             release_dir
         )
 
+
 class TargetWin10(TargetWin):
     def create_project_file(self):
         call_process(
@@ -244,6 +250,7 @@ class TargetWin10(TargetWin):
             ],
             self.build_dir()
         )
+
 
 class TargetTizen(TargetCMake):
     def create_project_file(self):
@@ -389,6 +396,7 @@ class TargetTizen(TargetCMake):
             release_file
         )
 
+
 class TargetLinux(TargetCMake):
     def __init__(self, name, generator, architecture):
         super(TargetLinux, self).__init__(name, generator)
@@ -397,9 +405,8 @@ class TargetLinux(TargetCMake):
     def create_project_file(self):
         print('Skip create_project_file for Linux')
 
-
     def build(self, silent=False):
-	    # 32-bit libs
+        # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -410,7 +417,7 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
-		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-G',
                 self.generator
             ],
@@ -428,7 +435,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -444,7 +452,9 @@ class TargetLinux(TargetCMake):
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
-		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=clang',
+                '-DCMAKE_CXX_COMPILER=clang++',
                 '-G',
                 self.generator
             ],
@@ -462,7 +472,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -491,6 +502,7 @@ class TargetLinux(TargetCMake):
             release_file
         )
 
+
 all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
@@ -506,11 +518,11 @@ all_targets = {
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
     'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
     'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 15'),
-	'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 15 Win64'),
-	'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 15 ARM'),
+    'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 15 Win64'),
+    'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 15 ARM'),
     'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 15'),
-	'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
-	'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
+    'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
+    'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
@@ -547,11 +559,11 @@ available_targets = {
         'win64-vc140-shared': all_targets['win64-vc140-shared'],
         'win64-vc120-shared': all_targets['win64-vc120-shared'],
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
-		'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
-		'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
+        'uwp-x64-vc140-static': all_targets['uwp-x64-vc140-static'],
+        'uwp-arm-vc140-static': all_targets['uwp-arm-vc140-static'],
         'uwp-x86-vc140-shared': all_targets['uwp-x86-vc140-shared'],
-		'uwp-x64-vc140-shared': all_targets['uwp-x64-vc140-shared'],
-		'uwp-arm-vc140-shared': all_targets['uwp-arm-vc140-shared'],
+        'uwp-x64-vc140-shared': all_targets['uwp-x64-vc140-shared'],
+        'uwp-arm-vc140-shared': all_targets['uwp-arm-vc140-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
@@ -665,6 +677,7 @@ def main(argv, silent=False):
     else:
         # build all
         build_targets(valid_target_names, silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
