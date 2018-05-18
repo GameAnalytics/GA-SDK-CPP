@@ -112,7 +112,7 @@ namespace gameanalytics
                 GAThreadHelpers::mutex mutex;
 
                 GAThreadHelpers::scoped_thread thread;
-                bool endThread;
+                bool endThread = false;
             };
 
             static std::shared_ptr<State> state;

@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**1.4.4**
+* bug fix to events thread stopping and not starting again
+
 **1.4.3**
 * added custom dimensions to design and error events
 * added GAState zero initialisation of fields

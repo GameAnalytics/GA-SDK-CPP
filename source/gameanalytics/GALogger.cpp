@@ -128,16 +128,8 @@ namespace gameanalytics
             auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_st>(os);
             ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
 
-            if(ga->debugEnabled)
-            {
-                ga->custom_logger->flush_on(spdlog::level::debug);
-                spdlog::set_level(spdlog::level::debug);
-            }
-            else
-            {
-                ga->custom_logger->flush_on(spdlog::level::info);
-                spdlog::set_level(spdlog::level::info);
-            }
+            ga->custom_logger->flush_on(spdlog::level::info);
+            spdlog::set_level(spdlog::level::info);
 
             spdlog::register_logger(ga->custom_logger);
         }
@@ -301,10 +293,10 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
 #else
-                    logger->debug(message.c_str());
+                    logger->info(message.c_str());
                     if(custom_logger)
                     {
-                        custom_logger->debug(message.c_str());
+                        custom_logger->info(message.c_str());
                     }
 #endif
                     break;
