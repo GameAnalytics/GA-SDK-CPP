@@ -406,7 +406,6 @@ class TargetLinux(TargetCMake):
         print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
-        # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -418,6 +417,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=clang',
+                '-DCMAKE_CXX_COMPILER=clang++',
                 '-G',
                 self.generator
             ],
