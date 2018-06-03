@@ -145,7 +145,7 @@ if("${OSX_ALL}")
 endif("${OSX_ALL}")
 
 if("${LINUX_ALL}")
-    add_definitions("-DGUID_LIBUUID")
+    add_definitions("-DGUID_LIBUUID -DUSE_LINUX")
 endif("${LINUX_ALL}")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
