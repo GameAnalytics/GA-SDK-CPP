@@ -26,6 +26,9 @@ Dependencies
 
 Changelog
 ---------
+**1.4.5**
+* fixes for Linux interface
+
 **1.4.4**
 * bug fix to events thread stopping and not starting again
 
