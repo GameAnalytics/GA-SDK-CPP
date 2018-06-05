@@ -398,15 +398,16 @@ class TargetTizen(TargetCMake):
 
 
 class TargetLinux(TargetCMake):
-    def __init__(self, name, generator, architecture):
+    def __init__(self, name, generator, architecture, ccompiler, cppcompiler):
         super(TargetLinux, self).__init__(name, generator)
         self.architecture = architecture
+        self.ccompiler = ccompiler
+        self.cppcompiler = cppcompiler
 
     def create_project_file(self):
         print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
-        # 32-bit libs
         call_process(
             [
                 os.path.join(
@@ -418,6 +419,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
                 '-G',
                 self.generator
             ],
@@ -453,8 +456,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
-                '-DCMAKE_C_COMPILER=clang',
-                '-DCMAKE_CXX_COMPILER=clang++',
+                '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
                 '-G',
                 self.generator
             ],
@@ -529,10 +532,14 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-x86-static': TargetLinux('linux-x86-static', 'Unix Makefiles', '-m32'),
-    'linux-x86-shared': TargetLinux('linux-x86-shared', 'Unix Makefiles', '-m32'),
-    'linux-x64-static': TargetLinux('linux-x64-static', 'Unix Makefiles', '-m64'),
-    'linux-x64-shared': TargetLinux('linux-x64-shared', 'Unix Makefiles', '-m64'),
+    'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    'linux-x86-clang-shared': TargetLinux('linux-clang-x86-shared', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
+    'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc', 'g++'),
+    'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
+    'linux-x64-gcc-shared': TargetLinux('linux-x64-gcc-shared', 'Unix Makefiles', '-m64', 'gcc', 'g++'),
 }
 
 available_targets = {
@@ -570,10 +577,14 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
-        'linux-x86-static': all_targets['linux-x86-static'],
-        'linux-x86-shared': all_targets['linux-x86-shared'],
-        'linux-x64-static': all_targets['linux-x64-static'],
-        'linux-x64-shared': all_targets['linux-x64-shared'],
+        'linux-x86-clang-static': all_targets['linux-x86-clang-static'],
+        'linux-x86-gcc-static': all_targets['linux-x86-gcc-static'],
+        'linux-x86-clang-shared': all_targets['linux-x86-clang-shared'],
+        'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
+        'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
+        'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
+        'linux-x64-clang-shared': all_targets['linux-x64-clang-shared'],
+        'linux-x64-gcc-shared': all_targets['linux-x64-gcc-shared'],
     }
 }[platform.system()]
 
@@ -621,6 +632,8 @@ def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
 
     for target_name in target_names:
         if skip_tizen and 'tizen' in target_name:
+            continue
+        if skip_tizen and 'clang' in target_name:
             continue
         print("")
         print("-----------------------------------------")
