@@ -31,8 +31,7 @@ namespace gameanalytics
             initIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
 
-            GAThreading::BlockIdentifier blockIdentifier = GAThreading::BlockIdentifier::make();
-            state->blocks.push_back({ callback, blockIdentifier, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
+            state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -40,7 +39,7 @@ namespace gameanalytics
         {
             initIfNeeded();
             GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now()} );
+            state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -85,10 +84,7 @@ namespace gameanalytics
                     {
                         assert(timedBlock.block);
                         assert(timedBlock.deadline <= std::chrono::steady_clock::now());
-                        if (!timedBlock.ignore)
-                        {
-                            timedBlock.block();
-                        }
+                        timedBlock.block();
                         // clear the block, so that the assert works
                         timedBlock.block = {};
                     }

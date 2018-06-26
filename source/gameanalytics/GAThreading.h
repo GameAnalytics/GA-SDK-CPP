@@ -14,6 +14,7 @@
 #include <vector>
 #include <chrono>
 #include <memory>
+#include <future>
 #endif
 
 namespace gameanalytics
@@ -25,32 +26,6 @@ namespace gameanalytics
          public:
 
             typedef std::function<void()> Block;
-
-#if !USE_TIZEN
-            struct BlockIdentifier
-            {
-                static BlockIdentifier make()
-                {
-                    static unsigned long counter = 1;
-                    BlockIdentifier result = none();
-                    result.id = counter++;
-                    return result;
-                }
-
-                static BlockIdentifier none()
-                {
-                    return BlockIdentifier();
-                }
-
-                bool isValid() const { return id != 0; }
-                bool operator == (const BlockIdentifier& other)
-                {
-                    return id == other.id;
-                }
-             private:
-                unsigned long id = 0;
-            };
-#endif
 
             static void performTaskOnGAThread(const Block& taskBlock);
 
@@ -84,13 +59,10 @@ namespace gameanalytics
 
                 TimedBlock() {}
 
-                TimedBlock(const Block& block, const BlockIdentifier& blockIdentifier, const time_point& deadline)
-                    :block(block), blockIdentifier(blockIdentifier), deadline(deadline), ignore(false) {}
+                TimedBlock(const Block& block, const time_point& deadline) :block(block), deadline(deadline) {}
 
                 Block block;
-                BlockIdentifier blockIdentifier;
                 time_point deadline;
-                bool ignore;
 
                 bool operator < (const TimedBlock& o) const
                 {
@@ -103,15 +75,21 @@ namespace gameanalytics
 
             struct State
             {
-                State(GAThreadHelpers::start_routine routine) : thread(routine)
+                State(GAThreadHelpers::start_routine routine)
                 {
+                    handle = std::async(std::launch::async, [routine]{ routine(nullptr); });
                     GAThreadHelpers::mutex_init(mutex);
+                }
+
+                ~State()
+                {
+                    endThread = true;
                 }
 
                 TimedBlocks blocks;
                 GAThreadHelpers::mutex mutex;
 
-                GAThreadHelpers::scoped_thread thread;
+                std::future<void> handle;
                 bool endThread = false;
             };
 

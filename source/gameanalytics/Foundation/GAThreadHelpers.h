@@ -40,7 +40,10 @@ namespace
 
         void thread_join(thread& t)
         {
-            t.join();
+            if(t.joinable())
+            {
+                t.join();
+            }
         }
 
 
