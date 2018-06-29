@@ -31,21 +31,6 @@ namespace
             mtx.unlock();
         }
 
-        typedef std::thread thread;
-
-        void thread_create(thread& t, start_routine f, void* arg)
-        {
-            t = thread(f, arg);
-        }
-
-        void thread_join(thread& t)
-        {
-            if(t.joinable())
-            {
-                t.join();
-            }
-        }
-
 
         struct scoped_lock
         {
@@ -61,23 +46,6 @@ namespace
             }
          private:
             mutex& mutex_;
-        };
-
-        struct scoped_thread
-        {
-            // TODO(nikolaj): added explicit - remove if not working
-            explicit scoped_thread(start_routine routine)
-            {
-                thread_create(thread_, routine, nullptr);
-            }
-
-            ~scoped_thread()
-            {
-                thread_join(thread_);
-            }
-
-         private:
-            thread thread_;
         };
     } // namespace GAThreadHelpers
 } // namespace
