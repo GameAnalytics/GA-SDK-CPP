@@ -65,7 +65,7 @@ namespace gameanalytics
             return false;
         }
 
-        void* GAThreading::thread_routine(void*)
+        void GAThreading::thread_routine()
         {
             logging::GALogger::d("thread_routine start");
             while(!state)
@@ -104,8 +104,6 @@ namespace gameanalytics
                 logging::GALogger::e("Error on GA thread");
                 logging::GALogger::e(e.what());
             }
-
-            return nullptr;
         }
     }
 }
