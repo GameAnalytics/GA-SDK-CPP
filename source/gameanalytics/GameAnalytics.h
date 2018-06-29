@@ -126,23 +126,17 @@ namespace gameanalytics
 
         // add events
         static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType);
-        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
 
         static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId);
-        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
 
         static void addDesignEvent(STRING eventId);
-        static void addDesignEvent(STRING eventId, STRING fields);
+
         static void addDesignEvent(STRING eventId, double value);
-        static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message);
-        static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
 
         // set calls can be changed at any time (pre- and post-initialize)
         // some calls only work after a configure is called (setCustomDimension)
@@ -211,6 +205,14 @@ namespace gameanalytics
 #endif
 
      private:
+        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
+        static void addDesignEvent(STRING eventId, STRING fields);
+        static void addDesignEvent(STRING eventId, double value, STRING fields);
+        static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
+
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
         static bool isSdkReady(bool needsInitialized, bool warn, std::string message);
