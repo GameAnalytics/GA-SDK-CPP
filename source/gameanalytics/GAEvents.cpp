@@ -110,7 +110,7 @@ namespace gameanalytics
         }
 
         // BUSINESS EVENT
-        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType)
+        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const Json::Value& fields)
         {
             // Validate event params
             if (!validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId))
@@ -142,14 +142,16 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
+            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+
             // Log
-            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + "}");
+            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields)
         {
             // Validate event params
             if (!validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId))
@@ -176,14 +178,16 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
+            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+
             // Log
-            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + "}");
+            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const Json::Value& fields)
         {
             std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
 
@@ -250,14 +254,16 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
+            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + "}");
+            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue)
+        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const Json::Value& fields)
         {
             // Validate
             if (!validators::GAValidator::validateDesignEvent(eventId, value))
@@ -278,17 +284,19 @@ namespace gameanalytics
                 eventData["value"] = value;
             }
 
+            GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
+
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
             // Log
-            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + "}");
+            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
         {
             std::string severityString = errorSeverityString(severity);
 
@@ -307,11 +315,13 @@ namespace gameanalytics
             eventData["severity"] = severityString;
             eventData["message"] = message;
 
+            GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
+
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
             // Log
-            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + "}");
+            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
 
             // Send to store
             addEventToStore(eventData);
@@ -591,6 +601,19 @@ namespace gameanalytics
             if (!state::GAState::getCurrentCustomDimension03().empty())
             {
                 eventData["custom_03"] = state::GAState::getCurrentCustomDimension03();
+            }
+        }
+
+        void GAEvents::addFieldsToEvent(Json::Value& eventData, const Json::Value& fields)
+        {
+            if(eventData.empty())
+            {
+                return;
+            }
+
+            if(!fields.empty())
+            {
+                eventData["custom_fields"] = fields;
             }
         }
 

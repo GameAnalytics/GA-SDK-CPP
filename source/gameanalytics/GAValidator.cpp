@@ -635,6 +635,11 @@ namespace gameanalytics
                 }
             }
 
+            if (initResponse["configurations"].isArray())
+            {
+                validatedDict["configurations"] = initResponse["configurations"];
+            }
+
             return validatedDict;
         }
     }

@@ -5,6 +5,8 @@ GA-SDK-CPP
 
 GameAnalytics C++ SDK
 
+Documentation can be found [here](https://gameanalytics.com/docs/cpp-sdk).
+
 Supported platforms:
 
 * Mac OS X
