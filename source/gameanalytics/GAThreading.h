@@ -15,7 +15,6 @@
 #include <chrono>
 #include <memory>
 #include <future>
-#include "GALogger.h"
 #endif
 
 namespace gameanalytics
