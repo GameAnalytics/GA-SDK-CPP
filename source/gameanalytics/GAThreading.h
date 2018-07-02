@@ -84,6 +84,7 @@ namespace gameanalytics
                 ~State()
                 {
                     endThread = true;
+                    handle.wait();
                 }
 
                 TimedBlocks blocks;

@@ -87,6 +87,11 @@ namespace gameanalytics
                         timedBlock.block();
                         // clear the block, so that the assert works
                         timedBlock.block = {};
+
+                        if(state->endThread)
+                        {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        }
                     }
 
                     if(state->endThread)
