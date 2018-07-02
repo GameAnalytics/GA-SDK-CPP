@@ -15,6 +15,7 @@
 #include <chrono>
 #include <memory>
 #include <future>
+#include "GALogger.h"
 #endif
 
 namespace gameanalytics
@@ -77,8 +78,8 @@ namespace gameanalytics
             {
                 State(GAThreadHelpers::start_routine routine)
                 {
-                    handle = std::async(std::launch::async, routine, nullptr);
                     GAThreadHelpers::mutex_init(mutex);
+                    handle = std::async(std::launch::async, routine, nullptr);
                 }
 
                 ~State()
