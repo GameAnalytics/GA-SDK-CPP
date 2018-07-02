@@ -75,9 +75,9 @@ namespace gameanalytics
 
             struct State
             {
-                State(std::function<void()> routine)
+                State(GAThreadHelpers::start_routine routine)
                 {
-                    handle = std::async(std::launch::async, routine);
+                    handle = std::async(std::launch::async, routine, nullptr);
                     GAThreadHelpers::mutex_init(mutex);
                 }
 
@@ -89,14 +89,14 @@ namespace gameanalytics
                 TimedBlocks blocks;
                 GAThreadHelpers::mutex mutex;
 
-                std::future<void> handle;
+                std::future<void*> handle;
                 bool endThread = false;
             };
 
             static std::shared_ptr<State> state;
 
             //< The function that's running in the gaThread
-            static void thread_routine();
+            static void* thread_routine(void*);
             /*!
             retrieves the next block to execute.
             This will either be a regular Block or a Timed Block.
