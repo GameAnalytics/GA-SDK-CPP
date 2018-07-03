@@ -17,11 +17,14 @@ namespace gameanalytics
     {
         // static members
         std::shared_ptr<GAThreading::State> GAThreading::state;
+        std::atomic<bool> GAThreading::initialized(false);
+        std::atomic<bool> GAThreading::_endThread(false);
 
         void GAThreading::initIfNeeded()
         {
-            if (!state)
+            if (!initialized)
             {
+                initialized = true;
                 state = std::make_shared<State>(GAThreading::thread_routine);
             }
         }
@@ -29,7 +32,7 @@ namespace gameanalytics
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
             initIfNeeded();
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            std::lock_guard<std::mutex> lock(state->mutex);
 
             state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
@@ -38,21 +41,19 @@ namespace gameanalytics
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
             initIfNeeded();
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            std::lock_guard<std::mutex> lock(state->mutex);
             state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
         void GAThreading::endThread()
         {
-            logging::GALogger::d("ending thread");
-            GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->endThread = true;
+            _endThread = true;
         }
 
         bool GAThreading::getNextBlock(TimedBlock& timedBlock)
         {
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            std::lock_guard<std::mutex> lock(state->mutex);
 
             if((!state->blocks.empty() && state->blocks.front().deadline <= std::chrono::steady_clock::now()))
             {
@@ -87,14 +88,9 @@ namespace gameanalytics
                         timedBlock.block();
                         // clear the block, so that the assert works
                         timedBlock.block = {};
-
-                        if(state->endThread)
-                        {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                        }
                     }
 
-                    if(state->endThread)
+                    if(_endThread)
                     {
                         break;
                     }

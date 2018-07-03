@@ -7,14 +7,15 @@
 
 
 #include <functional>
+#include <atomic>
 #if USE_TIZEN
 #include <Ecore.h>
 #else
-#include <Foundation/GAThreadHelpers.h>
 #include <vector>
 #include <chrono>
 #include <memory>
 #include <future>
+#include <mutex>
 #endif
 
 namespace gameanalytics
@@ -37,8 +38,6 @@ namespace gameanalytics
          private:
 
 #if USE_TIZEN
-            static bool initialized;
-
             struct BlockHolder
             {
                 BlockHolder() {}
@@ -72,27 +71,28 @@ namespace gameanalytics
             };
 
             typedef std::vector<TimedBlock> TimedBlocks;
+            typedef void *(*start_routine) (void *);
 
             struct State
             {
-                State(GAThreadHelpers::start_routine routine)
+                State(start_routine routine)
                 {
-                    GAThreadHelpers::mutex_init(mutex);
                     handle = std::async(std::launch::async, routine, nullptr);
                 }
 
                 ~State()
                 {
-                    endThread = true;
+                    GAThreading::_endThread = true;
                     handle.wait();
                 }
 
                 TimedBlocks blocks;
-                GAThreadHelpers::mutex mutex;
+                std::mutex mutex;
 
                 std::future<void*> handle;
-                bool endThread = false;
             };
+
+            static std::atomic<bool> _endThread;
 
             static std::shared_ptr<State> state;
 
@@ -105,7 +105,7 @@ namespace gameanalytics
             */
             static bool getNextBlock(TimedBlock& timedBlock);
 #endif
-
+            static std::atomic<bool> initialized;
             static void initIfNeeded();
         };
     }
