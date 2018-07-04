@@ -67,7 +67,6 @@ namespace gameanalytics
             {
                 timedBlock = state->blocks.front();
                 std::pop_heap(state->blocks.begin(), state->blocks.end());
-                state->blocks.pop_back();
                 return true;
             }
 

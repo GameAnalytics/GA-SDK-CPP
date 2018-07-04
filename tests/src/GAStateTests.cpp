@@ -17,21 +17,23 @@ TEST(GAStateTest, testValidateAndCleanCustomFields)
 
     {
         map = Json::Value();
-        for(int i = 0; i < 100; ++i)
+        while(map.size() < 100)
         {
             map[GATestHelpers::getRandomString(4)] = GATestHelpers::getRandomString(4);
         }
     }
+    ASSERT_EQ(100, map.size());
     ASSERT_TRUE(gameanalytics::state::GAState::validateAndCleanCustomFields(map).size() == 50);
 
     {
         map = Json::Value();
-        for(int i = 0; i < 50; ++i)
+        while(map.size() < 50)
         {
             map[GATestHelpers::getRandomString(4)] = GATestHelpers::getRandomString(4);
         }
     }
-    ASSERT_TRUE(gameanalytics::state::GAState::validateAndCleanCustomFields(map).size() == 50);
+    ASSERT_EQ(50, map.size());
+    ASSERT_EQ(50, gameanalytics::state::GAState::validateAndCleanCustomFields(map).size());
 
     {
         map = Json::Value();

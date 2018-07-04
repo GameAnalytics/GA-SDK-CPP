@@ -77,6 +77,7 @@ namespace gameanalytics
             {
                 State(start_routine routine)
                 {
+                    std::make_heap(blocks.begin(), blocks.end());
                     handle = std::async(std::launch::async, routine, nullptr);
                 }
 
