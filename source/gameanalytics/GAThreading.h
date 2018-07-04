@@ -83,12 +83,10 @@ namespace gameanalytics
                 ~State()
                 {
                     GAThreading::_endThread = true;
-                    handle.wait();
                 }
 
                 TimedBlocks blocks;
                 std::mutex mutex;
-
                 std::future<void*> handle;
             };
 

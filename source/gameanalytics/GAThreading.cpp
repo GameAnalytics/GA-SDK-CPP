@@ -31,6 +31,10 @@ namespace gameanalytics
 
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
+            if(_endThread)
+            {
+                return;
+            }
             initIfNeeded();
             std::lock_guard<std::mutex> lock(state->mutex);
 
@@ -40,6 +44,10 @@ namespace gameanalytics
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
+            if(_endThread)
+            {
+                return;
+            }
             initIfNeeded();
             std::lock_guard<std::mutex> lock(state->mutex);
             state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
