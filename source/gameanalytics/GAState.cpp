@@ -704,7 +704,15 @@ namespace gameanalytics
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict().get();
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            try
+            {
+                pair = httpApi->requestInitReturningDict().get();
+            }
+            catch(Platform::COMException^ e)
+            {
+                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+            }
 #else
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
 #endif
