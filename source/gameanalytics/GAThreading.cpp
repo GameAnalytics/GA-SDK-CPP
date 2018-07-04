@@ -16,18 +16,8 @@ namespace gameanalytics
     namespace threading
     {
         // static members
-        std::shared_ptr<GAThreading::State> GAThreading::state;
-        std::atomic<bool> GAThreading::initialized(false);
         std::atomic<bool> GAThreading::_endThread(false);
-
-        void GAThreading::initIfNeeded()
-        {
-            if (!initialized)
-            {
-                initialized = true;
-                state = std::make_shared<State>(GAThreading::thread_routine);
-            }
-        }
+        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine));
 
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
@@ -35,7 +25,6 @@ namespace gameanalytics
             {
                 return;
             }
-            initIfNeeded();
             std::lock_guard<std::mutex> lock(state->mutex);
 
             state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
@@ -48,7 +37,6 @@ namespace gameanalytics
             {
                 return;
             }
-            initIfNeeded();
             std::lock_guard<std::mutex> lock(state->mutex);
             state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
@@ -67,6 +55,7 @@ namespace gameanalytics
             {
                 timedBlock = state->blocks.front();
                 std::pop_heap(state->blocks.begin(), state->blocks.end());
+                state->blocks.pop_back();
                 return true;
             }
 
@@ -76,15 +65,10 @@ namespace gameanalytics
         void* GAThreading::thread_routine(void*)
         {
             logging::GALogger::d("thread_routine start");
-            while(!state)
-            {
-                // wait for the assignment to be complete
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
 
             try
             {
-                while (std::shared_ptr<State> state = GAThreading::state)
+                while (!_endThread && state)
                 {
                     TimedBlock timedBlock;
 
@@ -95,11 +79,6 @@ namespace gameanalytics
                         timedBlock.block();
                         // clear the block, so that the assert works
                         timedBlock.block = {};
-                    }
-
-                    if(_endThread)
-                    {
-                        break;
                     }
 
                     std::this_thread::sleep_for(std::chrono::seconds(1));

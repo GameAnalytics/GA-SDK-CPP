@@ -50,6 +50,9 @@ namespace gameanalytics
             static Eina_Bool _scheduled_function(void* data);
             static void _perform_task_function(void* data, Ecore_Thread* thread);
             static void _end_function(void* data, Ecore_Thread* thread);
+
+            static std::atomic<bool> initialized;
+            static void initIfNeeded();
 #else
             //timers
             struct TimedBlock
@@ -92,8 +95,7 @@ namespace gameanalytics
             };
 
             static std::atomic<bool> _endThread;
-
-            static std::shared_ptr<State> state;
+            static std::unique_ptr<State> state;
 
             //< The function that's running in the gaThread
             static void* thread_routine(void*);
@@ -104,8 +106,6 @@ namespace gameanalytics
             */
             static bool getNextBlock(TimedBlock& timedBlock);
 #endif
-            static std::atomic<bool> initialized;
-            static void initIfNeeded();
         };
     }
 }
