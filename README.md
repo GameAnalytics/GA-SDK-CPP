@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**1.4.6**
+* fixes for occasional crashes when shutting down
+* fixes crashes on UWP
+
 **1.4.5**
 * fixes for Linux interface
 
