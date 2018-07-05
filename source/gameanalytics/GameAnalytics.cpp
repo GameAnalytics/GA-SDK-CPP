@@ -315,34 +315,55 @@ namespace gameanalytics
         STRING itemId,
         STRING cartType)
     {
-        threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType]()
+        addBusinessEvent(currency, amount, itemType, itemId, cartType, "");
+    }
+
+    void GameAnalytics::addBusinessEvent(
+        STRING currency,
+        int amount,
+        STRING itemType,
+        STRING itemId,
+        STRING cartType,
+        STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
         {
             if (!isSdkReady(true, true, "Could not add business event"))
             {
                 return;
             }
             // Send to events
-            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType);
+            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId)
     {
-        threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId]()
+        addResourceEvent(flowType, currency, amount, itemType, itemId, "");
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add resource event"))
             {
                 return;
             }
 
-            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId);
+            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03)
     {
-        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03]()
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, "");
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
             {
@@ -350,14 +371,18 @@ namespace gameanalytics
             }
 
             // Send to events
-            // TODO(nikolaj): check if passing 0 / null as the last argument is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score)
     {
-        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score]()
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, "");
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
             {
@@ -365,44 +390,58 @@ namespace gameanalytics
             }
 
             // Send to events
-            // TODO(nikolaj): check if this cast from int to double is OK
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addDesignEvent(STRING eventId)
     {
-        threading::GAThreading::performTaskOnGAThread([eventId]()
+        addDesignEvent(eventId, "");
+    }
+
+    void GameAnalytics::addDesignEvent(STRING eventId, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, 0, false);
+            events::GAEvents::addDesignEvent(eventId, 0, false, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addDesignEvent(STRING eventId, double value)
     {
-        threading::GAThreading::performTaskOnGAThread([eventId, value]()
+        addDesignEvent(eventId, value, "");
+    }
+
+    void GameAnalytics::addDesignEvent(STRING eventId, double value, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value, true);
+            events::GAEvents::addDesignEvent(eventId, value, true, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message)
     {
-        threading::GAThreading::performTaskOnGAThread([severity, message]()
+        addErrorEvent(severity, message, "");
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields)
+    {
+        threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
             if (!isSdkReady(true, true, "Could not add error event"))
             {
                 return;
             }
-            events::GAEvents::addErrorEvent(severity, message);
+            events::GAEvents::addErrorEvent(severity, message, utilities::GAUtilities::jsonFromString(fields));
         });
     }
 
@@ -520,6 +559,36 @@ namespace gameanalytics
                 state::GAState::setBirthYear(birthYear);
             }
         });
+    }
+
+    std::string GameAnalytics::getCommandCenterValueAsString(STRING key)
+    {
+        return getCommandCenterValueAsString(key, "");
+    }
+
+    std::string GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
+    {
+        return state::GAState::getConfigurationStringValue(key, defaultValue);
+    }
+
+    bool GameAnalytics::isCommandCenterReady()
+    {
+        return state::GAState::isCommandCenterReady();
+    }
+
+    void GameAnalytics::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+    {
+        state::GAState::addCommandCenterListener(listener);
+    }
+
+    void GameAnalytics::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+    {
+        state::GAState::removeCommandCenterListener(listener);
+    }
+
+    std::string GameAnalytics::getConfigurationsContentAsString()
+    {
+        return state::GAState::getConfigurationsContentAsString();
     }
 
     void GameAnalytics::startSession()
@@ -690,39 +759,75 @@ namespace gameanalytics
     {
         initialize(utilities::GAUtilities::ws2s(gameKey), utilities::GAUtilities::ws2s(gameSecret));
     }
+
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType)
     {
-        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType));
+        addBusinessEvent(currency, amount, itemType, itemId, cartType, L"");
+    }
+
+    void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields)
+    {
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType), utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
     {
-        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId));
+        addResourceEvent(flowType, currency, amount, itemType, itemId, L"");
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const std::wstring& fields)
+    {
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03));
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, L"");
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score);
+        addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, L"");
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score, utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId));
+        addDesignEvent(eventId, L"");
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, const std::wstring& fields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId), utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value);
+        addDesignEvent(eventId, value, L"");
+    }
+
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value, utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
     {
-        addErrorEvent(severity, utilities::GAUtilities::ws2s(message));
+        addErrorEvent(severity, message, L"");
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields)
+    {
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message), utilities::GAUtilities::ws2s(fields));
     }
 
     void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)

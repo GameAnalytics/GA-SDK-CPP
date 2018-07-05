@@ -2,7 +2,7 @@
 
 std::string GATestHelpers::getRandomString(size_t numberOfCharacters)
 {
-    auto letters = "abcdefghijklmfalsepqrstuvwxyzABCDEFGHIJKLMfalsePQRSTUVWXYZ0123456789";
+    auto letters = "abcdefghijklmpqrstuvwxyzABCDEFGHIJKLMPQRSTUVWXYZ0123456789";
 
     std::random_device rd;
     std::mt19937 gen(rd());

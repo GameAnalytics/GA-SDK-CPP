@@ -13,6 +13,12 @@
 #include "GALogger.h"
 #include "GADevice.h"
 #include <utility>
+#include <algorithm>
+#include <climits>
+
+#define MAX_CUSTOM_FIELDS_COUNT 50
+#define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
+#define MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH 256
 
 namespace gameanalytics
 {
@@ -524,6 +530,7 @@ namespace gameanalytics
         Json::Value GAState::getInitAnnotations()
         {
             Json::Value initAnnotations;
+            initAnnotations["user_id"] = getIdentifier();
             // SDK version
             initAnnotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
             // Operation system version
@@ -578,11 +585,11 @@ namespace gameanalytics
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 
-			std::string defaultId = state_dict.get("default_user_id", "").asString();
-			if(defaultId.empty())
-			{
-				instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
-			}
+            std::string defaultId = state_dict.get("default_user_id", "").asString();
+            if(defaultId.empty())
+            {
+                instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
+            }
             else
             {
                 instance->setDefaultUserId(defaultId);
@@ -697,7 +704,15 @@ namespace gameanalytics
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict().get();
+            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            try
+            {
+                pair = httpApi->requestInitReturningDict().get();
+            }
+            catch(Platform::COMException^ e)
+            {
+                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+            }
 #else
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
 #endif
@@ -770,6 +785,9 @@ namespace gameanalytics
             // set offset in state (memory) from current config (config could be from cache etc.)
             GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
 
+            // populate configurations
+            populateConfigurations(GAState::getSdkConfig());
+
             // if SDK is disabled in config
             if (!GAState::isEnabled())
             {
@@ -823,6 +841,145 @@ namespace gameanalytics
         bool GAState::sessionIsStarted()
         {
             return GAState::sharedInstance()->_sessionStart != 0;
+        }
+
+        std::string GAState::getConfigurationStringValue(const std::string& key, const std::string& defaultValue)
+        {
+            std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
+            return GAState::sharedInstance()->_configurations.isMember(key) ? GAState::sharedInstance()->_configurations[key].asString() : defaultValue;
+        }
+
+        bool GAState::isCommandCenterReady()
+        {
+            return GAState::sharedInstance()->_commandCenterIsReady;
+        }
+
+        void GAState::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+        {
+            GAState* instance = GAState::sharedInstance();
+
+            if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) == instance->_commandCenterListeners.end())
+            {
+                instance->_commandCenterListeners.push_back(listener);
+            }
+        }
+
+        void GAState::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+        {
+            GAState* instance = GAState::sharedInstance();
+
+            auto it = std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener);
+
+            if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
+            {
+                instance->_commandCenterListeners.erase(std::remove(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener), instance->_commandCenterListeners.end());
+            }
+        }
+
+        std::string GAState::getConfigurationsContentAsString()
+        {
+            return GAState::sharedInstance()->_configurations.toStyledString();
+        }
+
+        void GAState::populateConfigurations(Json::Value sdkConfig)
+        {
+            GAState::sharedInstance()->_mtx.lock();
+
+            if(sdkConfig.isMember("configurations") && sdkConfig["configurations"].isArray())
+            {
+                Json::Value configurations = sdkConfig["configurations"];
+
+                for(int i = 0; i < configurations.size(); ++i)
+                {
+                    Json::Value configuration = configurations[i];
+
+                    if(!configuration.isNull())
+                    {
+                        std::string key = (configuration.isMember("key") && configuration["key"].isString()) ? configuration["key"].asString() : "";
+                        Json::Int64 start_ts = (configuration.isMember("start") && configuration["start"].isInt64()) ? configuration["start"].asInt64() : LONG_MIN;
+                        Json::Int64 end_ts = (configuration.isMember("end") && configuration["end"].isInt64()) ? configuration["start"].asInt64() : LONG_MAX;
+                        Json::Int64 client_ts_adjusted = getClientTsAdjusted();
+
+                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted && end_ts)
+                        {
+                            GAState::sharedInstance()->_configurations[key] = configuration["value"];
+                            logging::GALogger::d("configuration added: " + configuration.toStyledString());
+                        }
+                    }
+                }
+            }
+
+            GAState::sharedInstance()->_commandCenterIsReady = true;
+            for(auto& listener : GAState::sharedInstance()->_commandCenterListeners)
+            {
+                listener->onCommandCenterUpdated();
+            }
+
+            GAState::sharedInstance()->_mtx.unlock();
+        }
+
+        const Json::Value GAState::validateAndCleanCustomFields(const Json::Value& fields)
+        {
+            Json::Value result;
+
+            if (fields.isObject() && !fields.empty())
+            {
+                int count = 0;
+
+                for (std::string key : fields.getMemberNames())
+                {
+                    if(fields[key].isNull())
+                    {
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                            " has been omitted because its key or value is null");
+                    }
+                    else if(count < MAX_CUSTOM_FIELDS_COUNT)
+                    {
+                        if(utilities::GAUtilities::stringMatch(key, "^[a-zA-Z0-9_]{1," + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + "}$"))
+                        {
+                            auto value = fields[key];
+
+                            if(value.isNumeric())
+                            {
+                                result[key] = value;
+                                ++count;
+                            }
+                            else if(value.isString())
+                            {
+                                std::string valueAsString = value.asString();
+
+                                if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
+                                {
+                                    result[key] = value;
+                                    ++count;
+                                }
+                                else
+                                {
+                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                        " has been omitted because its value is an empty string or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH) + ")");
+                                }
+                            }
+                            else
+                            {
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                    " has been omitted because its value is not a string or number");
+                            }
+                        }
+                        else
+                        {
+                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                " has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + ")");
+                        }
+                    }
+                    else
+                    {
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                            " has been omitted because it exceeds the max number of custom fields (" + std::to_string(MAX_CUSTOM_FIELDS_COUNT) + ")");
+                    }
+                }
+            }
+
+            return result;
         }
 
         Json::Int64 GAState::getClientTsAdjusted()

@@ -7,13 +7,15 @@
 
 
 #include <functional>
+#include <atomic>
 #if USE_TIZEN
 #include <Ecore.h>
 #else
-#include <Foundation/GAThreadHelpers.h>
 #include <vector>
 #include <chrono>
 #include <memory>
+#include <future>
+#include <mutex>
 #endif
 
 namespace gameanalytics
@@ -26,32 +28,6 @@ namespace gameanalytics
 
             typedef std::function<void()> Block;
 
-#if !USE_TIZEN
-            struct BlockIdentifier
-            {
-                static BlockIdentifier make()
-                {
-                    static unsigned long counter = 1;
-                    BlockIdentifier result = none();
-                    result.id = counter++;
-                    return result;
-                }
-
-                static BlockIdentifier none()
-                {
-                    return BlockIdentifier();
-                }
-
-                bool isValid() const { return id != 0; }
-                bool operator == (const BlockIdentifier& other)
-                {
-                    return id == other.id;
-                }
-             private:
-                unsigned long id = 0;
-            };
-#endif
-
             static void performTaskOnGAThread(const Block& taskBlock);
 
             // timers
@@ -62,8 +38,6 @@ namespace gameanalytics
          private:
 
 #if USE_TIZEN
-            static bool initialized;
-
             struct BlockHolder
             {
                 BlockHolder() {}
@@ -76,6 +50,9 @@ namespace gameanalytics
             static Eina_Bool _scheduled_function(void* data);
             static void _perform_task_function(void* data, Ecore_Thread* thread);
             static void _end_function(void* data, Ecore_Thread* thread);
+
+            static std::atomic<bool> initialized;
+            static void initIfNeeded();
 #else
             //timers
             struct TimedBlock
@@ -84,13 +61,10 @@ namespace gameanalytics
 
                 TimedBlock() {}
 
-                TimedBlock(const Block& block, const BlockIdentifier& blockIdentifier, const time_point& deadline)
-                    :block(block), blockIdentifier(blockIdentifier), deadline(deadline), ignore(false) {}
+                TimedBlock(const Block& block, const time_point& deadline) :block(block), deadline(deadline) {}
 
                 Block block;
-                BlockIdentifier blockIdentifier;
                 time_point deadline;
-                bool ignore;
 
                 bool operator < (const TimedBlock& o) const
                 {
@@ -100,22 +74,28 @@ namespace gameanalytics
             };
 
             typedef std::vector<TimedBlock> TimedBlocks;
+            typedef void *(*start_routine) (void *);
 
             struct State
             {
-                State(GAThreadHelpers::start_routine routine) : thread(routine)
+                State(start_routine routine)
                 {
-                    GAThreadHelpers::mutex_init(mutex);
+                    std::make_heap(blocks.begin(), blocks.end());
+                    handle = std::async(std::launch::async, routine, nullptr);
+                }
+
+                ~State()
+                {
+                    GAThreading::_endThread = true;
                 }
 
                 TimedBlocks blocks;
-                GAThreadHelpers::mutex mutex;
-
-                GAThreadHelpers::scoped_thread thread;
-                bool endThread = false;
+                std::mutex mutex;
+                std::future<void*> handle;
             };
 
-            static std::shared_ptr<State> state;
+            static std::atomic<bool> _endThread;
+            static std::unique_ptr<State> state;
 
             //< The function that's running in the gaThread
             static void* thread_routine(void*);
@@ -126,8 +106,6 @@ namespace gameanalytics
             */
             static bool getNextBlock(TimedBlock& timedBlock);
 #endif
-
-            static void initIfNeeded();
         };
     }
 }

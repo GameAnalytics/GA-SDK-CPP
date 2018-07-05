@@ -11,7 +11,7 @@ namespace gameanalytics
 {
     namespace threading
     {
-        bool GAThreading::initialized = false;
+        std::atomic<bool> GAThreading::initialized(false);
 
         void GAThreading::initIfNeeded()
         {

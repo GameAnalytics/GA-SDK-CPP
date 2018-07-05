@@ -1,4 +1,4 @@
-﻿//
+//
 // GA-SDK-CPP
 // Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #if USE_TIZEN || GA_SHARED_LIB
 #include "GameAnalyticsExtern.h"
 #endif
@@ -86,6 +87,12 @@ namespace gameanalytics
         Female = 2
     };
 
+    class ICommandCenterListener
+    {
+        public:
+            virtual void onCommandCenterUpdated() = 0;
+    };
+
     class GameAnalytics
     {
      public:
@@ -127,6 +134,7 @@ namespace gameanalytics
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score);
 
         static void addDesignEvent(STRING eventId);
+
         static void addDesignEvent(STRING eventId, double value);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message);
 
@@ -183,6 +191,30 @@ namespace gameanalytics
 #endif
 
      private:
+#if USE_UWP
+        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields);
+        static void addDesignEvent(const std::wstring& eventId, const std::wstring& fields);
+        static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
+        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
+#endif
+        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
+        static void addDesignEvent(STRING eventId, STRING fields);
+        static void addDesignEvent(STRING eventId, double value, STRING fields);
+        static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
+
+        static std::string getCommandCenterValueAsString(STRING key);
+        static std::string getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static bool isCommandCenterReady();
+        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static std::string getConfigurationsContentAsString();
+
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
         static bool isSdkReady(bool needsInitialized, bool warn, std::string message);

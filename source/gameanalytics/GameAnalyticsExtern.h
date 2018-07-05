@@ -35,20 +35,21 @@ EXPORT void configureUserId(const char *uId);
 EXPORT void initialize(const char *gameKey, const char *gameSecret);
 
 // add events
-EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType);
+EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType/*, const char *fields*/);
 EXPORT void addBusinessEventJson(const char *jsonArgs);
 
-EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId);
+EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId/*, const char *fields*/);
 EXPORT void addResourceEventJson(const char *jsonArgs);
 
-EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03);
+EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03/*, const char *fields*/);
+EXPORT void addProgressionEventJson(const char *jsonArgs);
 
-EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score);
+EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score/*, const char *fields*/);
 EXPORT void addProgressionEventWithScoreJson(const char *jsonArgs);
 
-EXPORT void addDesignEvent(const char *eventId);
-EXPORT void addDesignEventWithValue(const char *eventId, double value);
-EXPORT void addErrorEvent(double severity, const char *message);
+EXPORT void addDesignEvent(const char *eventId/*, const char *fields*/);
+EXPORT void addDesignEventWithValue(const char *eventId, double value/*, const char *fields*/);
+EXPORT void addErrorEvent(double severity, const char *message/*, const char *fields*/);
 
 // set calls can be changed at any time (pre- and post-initialize)
 // some calls only work after a configure is called (setCustomDimension)
@@ -61,6 +62,10 @@ EXPORT void setCustomDimension03(const char *dimension03);
 EXPORT void setFacebookId(const char *facebookId);
 EXPORT void setGender(double gender);
 EXPORT void setBirthYear(double birthYear);
+
+// EXPORT const char* getCommandCenterValueAsString(const char *key);
+// EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
+// EXPORT bool isCommandCenterReady();
 
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
