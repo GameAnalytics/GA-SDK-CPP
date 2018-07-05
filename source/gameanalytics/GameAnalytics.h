@@ -150,13 +150,6 @@ namespace gameanalytics
         static void setGender(EGAGender gender);
         static void setBirthYear(int birthYear);
 
-        static std::string getCommandCenterValueAsString(STRING key);
-        static std::string getCommandCenterValueAsString(STRING key, STRING defaultValue);
-        static bool isCommandCenterReady();
-        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static std::string getConfigurationsContentAsString();
-
         static void startSession();
         static void endSession();
 
@@ -185,19 +178,12 @@ namespace gameanalytics
         static void configureUserId(const std::wstring& uId);
         static void initialize(const std::wstring& gameKey, const std::wstring& gameSecret);
         static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType);
-        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields);
         static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId);
-        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields);
         static void addDesignEvent(const std::wstring& eventId);
-        static void addDesignEvent(const std::wstring& eventId, const std::wstring& fields);
         static void addDesignEvent(const std::wstring& eventId, double value);
-        static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
         static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message);
-        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
         static void setCustomDimension01(const std::wstring& dimension01);
         static void setCustomDimension02(const std::wstring& dimension02);
         static void setCustomDimension03(const std::wstring& dimension03);
@@ -212,6 +198,13 @@ namespace gameanalytics
         static void addDesignEvent(STRING eventId, STRING fields);
         static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
+
+        static std::string getCommandCenterValueAsString(STRING key);
+        static std::string getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static bool isCommandCenterReady();
+        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static std::string getConfigurationsContentAsString();
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
