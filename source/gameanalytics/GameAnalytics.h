@@ -191,6 +191,15 @@ namespace gameanalytics
 #endif
 
      private:
+#if USE_UWP
+        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields);
+        static void addDesignEvent(const std::wstring& eventId, const std::wstring& fields);
+        static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
+        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
+#endif
         static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
         static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
