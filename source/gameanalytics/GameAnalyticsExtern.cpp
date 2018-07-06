@@ -11,7 +11,7 @@ void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(list);
@@ -24,7 +24,7 @@ void configureAvailableCustomDimensions02(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(list);
@@ -37,7 +37,7 @@ void configureAvailableCustomDimensions03(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(list);
@@ -50,7 +50,7 @@ void configureAvailableResourceCurrencies(const char *resourceCurrenciesJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(list);
@@ -63,7 +63,7 @@ void configureAvailableResourceItemTypes(const char *resourceItemTypesJson)
 
     for (unsigned int index = 0; index < json.size(); ++index )
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(list);
@@ -126,7 +126,7 @@ void addBusinessEventJson(const char *jsonArgs)
 
     if(json.size() == 5)
     {
-        gameanalytics::GameAnalytics::addBusinessEvent(json[0].asString(), (int)(json[1].asDouble()), json[2].asString(), json[3].asString(), json[4].asString()/*, json[5].asString()*/);
+        gameanalytics::GameAnalytics::addBusinessEvent(json[0].asString().c_str(), (int)(json[1].asDouble()), json[2].asString().c_str(), json[3].asString().c_str(), json[4].asString().c_str()/*, json[5].asString().c_str()*/);
     }
 }
 
@@ -143,7 +143,7 @@ void addResourceEventJson(const char *jsonArgs)
     if(json.size() == 5)
     {
         int flowTypeInt = (int)(int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString(), (float)(json[2].asDouble()), json[3].asString(), json[4].asString()/*, json[5].asString()*/);
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString().c_str(), (float)(json[2].asDouble()), json[3].asString().c_str(), json[4].asString().c_str()/*, json[5].asString().c_str()*/);
     }
 }
 
@@ -160,7 +160,7 @@ void addProgressionEventJson(const char *jsonArgs)
     if(json.size() == 4)
     {
         int progressionStatusInt = (int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString(), json[2].asString(), json[3].asString()/*, json[4].asString()*/);
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString().c_str(), json[2].asString().c_str(), json[3].asString().c_str()/*, json[4].asString().c_str()*/);
     }
 }
 
@@ -177,7 +177,7 @@ void addProgressionEventWithScoreJson(const char *jsonArgs)
     if(json.size() == 5)
     {
         int progressionStatusInt = (int)(int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString(), json[2].asString(), json[3].asString(), (int)(json[4].asDouble())/*, json[5].asString()*/);
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString().c_str(), json[2].asString().c_str(), json[3].asString().c_str(), (int)(json[4].asDouble())/*, json[5].asString().c_str()*/);
     }
 }
 
