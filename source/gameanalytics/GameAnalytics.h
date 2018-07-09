@@ -208,12 +208,12 @@ namespace gameanalytics
         static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
 
-        static std::string getCommandCenterValueAsString(STRING key);
-        static std::string getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static STRING getCommandCenterValueAsString(STRING key);
+        static STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static std::string getConfigurationsContentAsString();
+        static STRING getConfigurationsContentAsString();
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
