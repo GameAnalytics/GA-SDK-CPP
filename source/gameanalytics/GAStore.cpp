@@ -73,8 +73,8 @@ namespace gameanalytics
                 // Bind parameters
                 if (!parameters.empty())
                 {
-                    unsigned parametersCount = parameters.size();
-                    for (unsigned index = 0; index < parametersCount; index++)
+                    size_t parametersCount = parameters.size();
+                    for (size_t index = 0; index < parametersCount; index++)
                     {
                         sqlite3_bind_text(statement, static_cast<int>(index + 1), parameters[index].c_str(), -1, 0);
                     }

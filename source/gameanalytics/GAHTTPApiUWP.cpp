@@ -362,7 +362,7 @@ namespace gameanalytics
 
             return create_task([=]()
             {
-                unsigned int size = data.size();
+                size_t size = data.size();
                 Buffer^ buffer = ref new Buffer(size);
                 buffer->Length = size;
 

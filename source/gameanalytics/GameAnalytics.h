@@ -22,8 +22,10 @@
 
 #if USE_LINUX
 using STRING = const char*;
+using RETURN_STRING = const char*;
 #else
 using STRING = const std::string&;
+using RETURN_STRING = std::string;
 #endif
 
 namespace gameanalytics
@@ -208,12 +210,12 @@ namespace gameanalytics
         static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
 
-        static STRING getCommandCenterValueAsString(STRING key);
-        static STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static RETURN_STRING getCommandCenterValueAsString(STRING key);
+        static RETURN_STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static STRING getConfigurationsContentAsString();
+        static RETURN_STRING getConfigurationsContentAsString();
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
