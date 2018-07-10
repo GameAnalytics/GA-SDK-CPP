@@ -16,6 +16,7 @@
 #include <memory>
 #include <future>
 #include <mutex>
+#include <algorithm>
 #endif
 
 namespace gameanalytics
