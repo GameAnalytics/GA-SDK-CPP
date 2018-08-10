@@ -155,6 +155,13 @@ namespace gameanalytics
         static void startSession();
         static void endSession();
 
+        static RETURN_STRING getCommandCenterValueAsString(STRING key);
+        static RETURN_STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static bool isCommandCenterReady();
+        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+        static RETURN_STRING getConfigurationsContentAsString();
+
         // game state changes
         // will affect how session is started / ended
         static void onResume();
@@ -209,13 +216,6 @@ namespace gameanalytics
         static void addDesignEvent(STRING eventId, STRING fields);
         static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
-
-        static RETURN_STRING getCommandCenterValueAsString(STRING key);
-        static RETURN_STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
-        static bool isCommandCenterReady();
-        static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static RETURN_STRING getConfigurationsContentAsString();
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
