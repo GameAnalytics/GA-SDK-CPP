@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.0.0**
+* added command center functionality
+
 **1.4.6**
 * fixes for occasional crashes when shutting down
 * fixes crashes on UWP
