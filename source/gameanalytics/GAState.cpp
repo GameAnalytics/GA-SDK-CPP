@@ -889,7 +889,7 @@ namespace gameanalytics
             {
                 Json::Value configurations = sdkConfig["configurations"];
 
-                for(int i = 0; i < configurations.size(); ++i)
+                for(unsigned int i = 0; i < configurations.size(); ++i)
                 {
                     Json::Value configuration = configurations[i];
 

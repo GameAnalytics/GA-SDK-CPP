@@ -44,7 +44,7 @@ namespace gameanalytics
             //zs.next_in = reinterpret_cast<Bytef*>(str.data());
 
             // set the z_stream's input
-            zs.avail_in = str.size();
+            zs.avail_in = static_cast<unsigned int>(str.size());
             int ret;
             static char outbuffer[32768];
             std::string outstring;
@@ -210,7 +210,7 @@ namespace gameanalytics
 
             // Note: apparently, the crc is never validated on ther server side. So I'm not sure, if I have to convert it to little endian.
             uint32_t crc = to_little_endian(crc32(0, (unsigned char*)str.data(), str.size()));
-            uint32 size  = to_little_endian(str.size());
+            uint32 size  = to_little_endian(static_cast<unsigned int>(str.size()));
 
             ss.write(gzip_header, sizeof(gzip_header));
             ss.write(deflated.data(), deflated.size());
@@ -267,10 +267,10 @@ namespace gameanalytics
 
             auto keyString = ref new String(utilities::GAUtilities::s2ws(key).c_str());
             auto alg = MacAlgorithmProvider::OpenAlgorithm(MacAlgorithmNames::HmacSha256);
-            Platform::Array<unsigned char>^ byteArray = ref new Platform::Array<unsigned char>(data.size());
-            for (unsigned int i = 0; i < data.size(); ++i)
+            Platform::Array<unsigned char>^ byteArray = ref new Platform::Array<unsigned char>(static_cast<unsigned int>(data.size()));
+            for (size_t i = 0; i < data.size(); ++i)
             {
-                byteArray[i] = data[i];
+                byteArray[static_cast<int>(i)] = data[static_cast<int>(i)];
             }
             auto dataBuffer = CryptographicBuffer::CreateFromByteArray(byteArray);
             auto secretKeyBuffer = CryptographicBuffer::ConvertStringToBinary(keyString, BinaryStringEncoding::Utf8);

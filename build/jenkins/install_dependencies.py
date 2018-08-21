@@ -17,7 +17,7 @@ def is_os_64bit():
     return 'PROGRAMFILES(X86)' in os.environ
 
 if platform == 'win32':  # win32 and/or win64
-    CMAKE_URL = 'https://cmake.org/files/v3.11/cmake-3.11.4-win32-x86.zip'
+    CMAKE_URL = 'https://cmake.org/files/v3.12/cmake-3.12.1-win32-x86.zip'
     if is_os_64bit():
         TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-64.exe'
     else:

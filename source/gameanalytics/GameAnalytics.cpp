@@ -597,12 +597,12 @@ namespace gameanalytics
         });
     }
 
-    STRING GameAnalytics::getCommandCenterValueAsString(STRING key)
+    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key)
     {
         return getCommandCenterValueAsString(key, "");
     }
 
-    STRING GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
+    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
     {
 #if USE_LINUX
         return state::GAState::getConfigurationStringValue(key, defaultValue).c_str();
@@ -626,7 +626,7 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
-    STRING GameAnalytics::getConfigurationsContentAsString()
+    RETURN_STRING GameAnalytics::getConfigurationsContentAsString()
     {
 #if USE_LINUX
         return state::GAState::getConfigurationsContentAsString().c_str();
