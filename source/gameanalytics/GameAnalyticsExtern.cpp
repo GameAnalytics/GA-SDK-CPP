@@ -290,12 +290,20 @@ void onQuit()
 
 const char* getCommandCenterValueAsString(const char *key)
 {
+#if USE_LINUX
     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
+#else
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key).c_str();
+#endif
 }
 
 const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
 {
+#if USE_LINUX
     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
+#else
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue).c_str();
+#endif
 }
 
 double isCommandCenterReady()
@@ -305,7 +313,11 @@ double isCommandCenterReady()
 
 const char* getConfigurationsContentAsString()
 {
+#if USE_LINUX
     return gameanalytics::GameAnalytics::getConfigurationsContentAsString();
+#else
+    return gameanalytics::GameAnalytics::getConfigurationsContentAsString().c_str();
+#endif
 }
 
 #endif
