@@ -288,4 +288,24 @@ void onQuit()
     gameanalytics::GameAnalytics::onQuit();
 }
 
+const char* getCommandCenterValueAsString(const char *key)
+{
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
+}
+
+const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
+{
+    return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
+}
+
+double isCommandCenterReady()
+{
+    return gameanalytics::GameAnalytics::isCommandCenterReady() ? 1 : 0;
+}
+
+const char* getConfigurationsContentAsString()
+{
+    return gameanalytics::GameAnalytics::getConfigurationsContentAsString();
+}
+
 #endif
