@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.0.1**
+* added command center functions to extern interface
+
 **2.0.0**
 * added command center functionality
 
