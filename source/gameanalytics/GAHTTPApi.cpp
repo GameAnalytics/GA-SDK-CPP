@@ -64,7 +64,7 @@ namespace gameanalytics
                 return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
             }
 
-            std::string payloadData = createPayloadData(JSONstring, useGzip);
+            std::string payloadData = createPayloadData(JSONstring, false);
             std::ostringstream os;
             curl::curl_ios<std::ostringstream> writer(os);
             curl::curl_easy curl(writer);
