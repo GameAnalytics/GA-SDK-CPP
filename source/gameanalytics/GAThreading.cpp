@@ -17,7 +17,7 @@ namespace gameanalytics
     {
         // static members
         std::atomic<bool> GAThreading::_endThread(false);
-        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine));
+        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine, GAThreading::_endThread));
 
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
@@ -44,6 +44,7 @@ namespace gameanalytics
 
         void GAThreading::endThread()
         {
+            logging::GALogger::d("endThread now");
             _endThread = true;
         }
 
@@ -62,13 +63,13 @@ namespace gameanalytics
             return false;
         }
 
-        void* GAThreading::thread_routine(void*)
+        void GAThreading::thread_routine(std::atomic<bool>& endThread)
         {
             logging::GALogger::d("thread_routine start");
 
             try
             {
-                while (!_endThread && state)
+                while (!endThread && state)
                 {
                     TimedBlock timedBlock;
 
@@ -91,8 +92,6 @@ namespace gameanalytics
                 logging::GALogger::e("Error on GA thread");
                 logging::GALogger::e(e.what());
             }
-
-            return nullptr;
         }
     }
 }
