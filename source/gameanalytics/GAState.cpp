@@ -397,11 +397,11 @@ namespace gameanalytics
                     events::GAEvents::addSessionEndEvent();
                     GAState::sharedInstance()->_sessionStart = 0;
                 }
+            }
 
-                if(endThread)
-                {
-                    threading::GAThreading::endThread();
-                }
+            if(endThread)
+            {
+                threading::GAThreading::endThread();
             }
         }
 
