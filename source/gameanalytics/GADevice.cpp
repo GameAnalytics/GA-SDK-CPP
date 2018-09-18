@@ -69,11 +69,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 2.0.1";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 2.0.2";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 2.0.1";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 2.0.2";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 2.0.1";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 2.0.2";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)

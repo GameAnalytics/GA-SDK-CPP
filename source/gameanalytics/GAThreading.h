@@ -75,14 +75,14 @@ namespace gameanalytics
             };
 
             typedef std::vector<TimedBlock> TimedBlocks;
-            typedef void *(*start_routine) (void *);
+            typedef void (*start_routine) (std::atomic<bool>&);
 
             struct State
             {
-                State(start_routine routine)
+                State(start_routine routine, std::atomic<bool>& endThread)
                 {
                     std::make_heap(blocks.begin(), blocks.end());
-                    handle = std::async(std::launch::async, routine, nullptr);
+                    handle = std::async(std::launch::async, routine, std::ref(endThread));
                 }
 
                 ~State()
@@ -92,14 +92,14 @@ namespace gameanalytics
 
                 TimedBlocks blocks;
                 std::mutex mutex;
-                std::future<void*> handle;
+                std::future<void> handle;
             };
 
             static std::atomic<bool> _endThread;
             static std::unique_ptr<State> state;
 
             //< The function that's running in the gaThread
-            static void* thread_routine(void*);
+            static void thread_routine(std::atomic<bool>& endThread);
             /*!
             retrieves the next block to execute.
             This will either be a regular Block or a Timed Block.
