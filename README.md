@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.0.3**
+* fixed shutdown issues
+
 **2.0.2**
 * fixed thread hanging on shutdown
 
