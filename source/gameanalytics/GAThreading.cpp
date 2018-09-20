@@ -85,12 +85,18 @@ namespace gameanalytics
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
 
-                logging::GALogger::d("thread_routine stopped");
+                if(!endThread)
+                {
+                    logging::GALogger::d("thread_routine stopped");
+                }
             }
             catch(const std::exception& e)
             {
-                logging::GALogger::e("Error on GA thread");
-                logging::GALogger::e(e.what());
+                if(!endThread)
+                {
+                    logging::GALogger::e("Error on GA thread");
+                    logging::GALogger::e(e.what());
+                }
             }
         }
     }
