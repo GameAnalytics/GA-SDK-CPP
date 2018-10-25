@@ -18,10 +18,17 @@
 
 namespace gameanalytics
 {
+    bool GameAnalytics::_endThread = false;
+
     // ----------------------- CONFIGURE ---------------------- //
 
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
             if (isSdkReady(true, false))
@@ -48,6 +55,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
             if (isSdkReady(true, false))
@@ -74,6 +86,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([customDimensions]()
         {
             if (isSdkReady(true, false))
@@ -100,6 +117,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([resourceCurrencies]()
         {
             if (isSdkReady(true, false))
@@ -126,6 +148,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([resourceItemTypes]()
         {
             if (isSdkReady(true, false))
@@ -152,6 +179,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureBuild(STRING build_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string build(build_);
         threading::GAThreading::performTaskOnGAThread([build]()
         {
@@ -171,6 +203,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureWritablePath(STRING writablePath_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string writablePath(writablePath_);
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
@@ -188,6 +225,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureDeviceModel(STRING deviceModel_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string deviceModel(deviceModel_);
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
@@ -207,6 +249,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureDeviceManufacturer(STRING deviceManufacturer_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string deviceManufacturer(deviceManufacturer_);
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
@@ -226,6 +273,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureSdkGameEngineVersion(STRING sdkGameEngineVersion_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string sdkGameEngineVersion(sdkGameEngineVersion_);
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
@@ -244,6 +296,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureGameEngineVersion(STRING gameEngineVersion_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string gameEngineVersion(gameEngineVersion_);
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
@@ -262,6 +319,11 @@ namespace gameanalytics
 
     void GameAnalytics::configureUserId(STRING uId_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string uId(uId_);
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
@@ -284,6 +346,11 @@ namespace gameanalytics
 
     void GameAnalytics::initialize(STRING gameKey_, STRING gameSecret_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string gameKey(gameKey_);
         std::string gameSecret(gameSecret_);
 #if USE_UWP
@@ -335,6 +402,11 @@ namespace gameanalytics
         STRING cartType_,
         STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string currency(currency_);
         std::string itemType(itemType_);
         std::string itemId(itemId_);
@@ -359,6 +431,11 @@ namespace gameanalytics
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency_, float amount, STRING itemType_, STRING itemId_, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string currency(currency_);
         std::string itemType(itemType_);
         std::string itemId(itemId_);
@@ -381,6 +458,11 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string progression01(progression01_);
         std::string progression02(progression02_);
         std::string progression03(progression03_);
@@ -404,6 +486,11 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, int score, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string progression01(progression01_);
         std::string progression02(progression02_);
         std::string progression03(progression03_);
@@ -427,6 +514,11 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(STRING eventId_, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string eventId(eventId_);
         std::string fields(fields_);
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
@@ -446,6 +538,11 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(STRING eventId_, double value, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string eventId(eventId_);
         std::string fields(fields_);
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
@@ -465,6 +562,11 @@ namespace gameanalytics
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message_, STRING fields_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string message(message_);
         std::string fields(fields_);
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
@@ -481,6 +583,11 @@ namespace gameanalytics
 
     void GameAnalytics::setEnabledInfoLog(bool flag)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([flag]()
         {
             if (flag)
@@ -498,6 +605,11 @@ namespace gameanalytics
 
     void GameAnalytics::setEnabledVerboseLog(bool flag)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([flag]()
         {
             if (flag)
@@ -515,6 +627,11 @@ namespace gameanalytics
 
     void GameAnalytics::setEnabledManualSessionHandling(bool flag)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([flag]()
         {
             state::GAState::setManualSessionHandling(flag);
@@ -523,6 +640,11 @@ namespace gameanalytics
 
     void GameAnalytics::setCustomDimension01(STRING dimension_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string dimension(dimension_);
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -537,6 +659,11 @@ namespace gameanalytics
 
     void GameAnalytics::setCustomDimension02(STRING dimension_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string dimension(dimension_);
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -551,6 +678,11 @@ namespace gameanalytics
 
     void GameAnalytics::setCustomDimension03(STRING dimension_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string dimension(dimension_);
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
@@ -565,6 +697,11 @@ namespace gameanalytics
 
     void GameAnalytics::setFacebookId(STRING facebookId_)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         std::string facebookId(facebookId_);
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
@@ -577,6 +714,11 @@ namespace gameanalytics
 
     void GameAnalytics::setGender(EGAGender gender)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([gender]()
         {
             if (validators::GAValidator::validateGender(gender))
@@ -588,6 +730,11 @@ namespace gameanalytics
 
     void GameAnalytics::setBirthYear(int birthYear)
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([birthYear]()
         {
             if (validators::GAValidator::validateBirthyear(birthYear))
@@ -637,6 +784,11 @@ namespace gameanalytics
 
     void GameAnalytics::startSession()
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([]()
         {
             if(state::GAState::useManualSessionHandling())
@@ -669,6 +821,11 @@ namespace gameanalytics
 
     void GameAnalytics::onResume()
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         threading::GAThreading::performTaskOnGAThread([]()
         {
             if(!state::GAState::useManualSessionHandling())
@@ -680,6 +837,11 @@ namespace gameanalytics
 
     void GameAnalytics::onSuspend()
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
@@ -694,10 +856,16 @@ namespace gameanalytics
 
     void GameAnalytics::onQuit()
     {
+        if(_endThread)
+        {
+            return;
+        }
+
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
             {
+                _endThread = true;
                 state::GAState::endSessionAndStopQueue(true);
             });
         }
@@ -975,6 +1143,11 @@ namespace gameanalytics
     void GameAnalytics::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)
     {
         (void)sender;    // Unused parameter
+
+        if(_endThread)
+        {
+            return;
+        }
 
         threading::GAThreading::performTaskOnGAThread([]()
         {

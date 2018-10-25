@@ -13,8 +13,10 @@ import time
 
 from sys import platform
 
+
 def is_os_64bit():
     return 'PROGRAMFILES(X86)' in os.environ
+
 
 if platform == 'win32':  # win32 and/or win64
     CMAKE_URL = 'https://cmake.org/files/v3.12/cmake-3.12.1-win32-x86.zip'
@@ -23,7 +25,7 @@ if platform == 'win32':  # win32 and/or win64
     else:
         TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-32.exe'
 elif platform == 'darwin':  # OSX
-    CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Darwin-universal.tar.gz'
+    CMAKE_URL = 'https://cmake.org/files/v3.12/cmake-3.12.3-Darwin-x86_64.tar.gz'
     TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
 elif platform in ('linux', 'linux2'):
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz'
@@ -36,6 +38,7 @@ if not (platform in ('linux', 'linux2')):
 profile_tmp_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles_tmp.xml'))
 profile_file = os.path.abspath(os.path.join(config.BUILD_ROOT, '..', 'tizen', 'profiles.xml'))
 
+
 def call_process(process_arguments, silent=False, shell=False):
     print('Call process ' + str(process_arguments))
 
@@ -43,6 +46,7 @@ def call_process(process_arguments, silent=False, shell=False):
         subprocess.check_call(process_arguments, stdout=open(os.devnull, 'wb'), shell=shell)
     else:
         subprocess.check_call(process_arguments, shell=shell)
+
 
 def download(url, destination, silent=False):
     def reporthook(count, block_size, total_size):
@@ -130,6 +134,7 @@ def install_cmake(silent=False):
             shutil.move(config.CMAKE_ROOT + '_', config.CMAKE_ROOT)
 
         os.unlink(cmake_package)
+
 
 def install_tizen(silent=False):
     if (platform in ('linux', 'linux2')):
@@ -252,6 +257,7 @@ def install_tizen(silent=False):
                 ]
             )
 
+
 def install_dependencies(installTizen=False, silent=False):
     if silent is True:
         print("SILENT DEPENDENCY INSTALL")
@@ -259,6 +265,7 @@ def install_dependencies(installTizen=False, silent=False):
     if installTizen is True:
         if not (platform in ('linux', 'linux2')):
             install_tizen(silent=silent)
+
 
 if __name__ == '__main__':
     os.chdir(config.BUILD_ROOT)
