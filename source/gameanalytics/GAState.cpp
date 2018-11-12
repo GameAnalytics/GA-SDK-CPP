@@ -900,7 +900,7 @@ namespace gameanalytics
                         Json::Int64 end_ts = (configuration.isMember("end") && configuration["end"].isInt64()) ? configuration["start"].asInt64() : LONG_MAX;
                         Json::Int64 client_ts_adjusted = getClientTsAdjusted();
 
-                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted && end_ts)
+                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
                         {
                             GAState::sharedInstance()->_configurations[key] = configuration["value"];
                             logging::GALogger::d("configuration added: " + configuration.toStyledString());
