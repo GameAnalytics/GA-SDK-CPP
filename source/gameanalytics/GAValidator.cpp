@@ -30,7 +30,11 @@ namespace gameanalytics
                 return false;
             }
 
-            // do not validate amount - integer is never null !
+            if (amount < 0)
+            {
+                logging::GALogger::i("Validation fail - business event - amount. Cannot be less than 0. String: " + amount);
+                return false;
+            }
 
             // validate cartType
             if (!GAValidator::validateShortString(cartType, true))
