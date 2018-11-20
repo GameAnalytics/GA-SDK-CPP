@@ -32,7 +32,7 @@ namespace gameanalytics
 
             if (amount < 0)
             {
-                logging::GALogger::i("Validation fail - business event - amount. Cannot be less than 0. String: " + amount);
+                logging::GALogger::i("Validation fail - business event - amount. Cannot be less than 0. String: " + std::to_string(amount));
                 return false;
             }
 
