@@ -200,6 +200,7 @@ namespace gameanalytics
 #endif
 
      private:
+         static bool _endThread;
 #if USE_UWP
         static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields);
         static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& fields);

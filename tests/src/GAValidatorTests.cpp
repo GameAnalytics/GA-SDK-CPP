@@ -117,9 +117,9 @@
      isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 0, "", "itemType", "itemId");
      ASSERT_TRUE(isValid) << "Business event should allow amount 0";
 
-     // Should allow negative amount
+     // Should not allow negative amount
      isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", -99, "", "itemType", "itemId");
-     ASSERT_TRUE(isValid) << "Business event should allow amount less than 0";
+     ASSERT_FALSE(isValid) << "Business event should allow amount less than 0";
 
      // Should fail on empty item type
      isValid = gameanalytics::validators::GAValidator::validateBusinessEvent("USD", 99, "", "", "itemId");
@@ -474,6 +474,6 @@
 TEST(GAValidator, testValidateUserId)
 {
     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateUserId("fhjkdfghdfjkgh"));
-    
+
     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateUserId(""));
 }
