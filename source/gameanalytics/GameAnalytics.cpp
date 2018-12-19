@@ -14,6 +14,9 @@
 #include "GAEvents.h"
 #include "GAUtilities.h"
 #include "GAStore.h"
+#if !USE_UWP && !USE_TIZEN
+#include "GAUncaughtExceptionHandler.h"
+#endif
 #include <json/json.h>
 
 namespace gameanalytics
@@ -364,6 +367,10 @@ namespace gameanalytics
                 logging::GALogger::w("SDK already initialized. Can only be called once.");
                 return;
             }
+#if !USE_UWP && !USE_TIZEN
+            errorreporter::GAUncaughtExceptionHandler::setUncaughtExceptionHandlers();
+#endif
+
             if (!validators::GAValidator::validateKeys(gameKey, gameSecret))
             {
                 logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: " + gameKey + ", secretKey: " + gameSecret);
@@ -635,6 +642,19 @@ namespace gameanalytics
         threading::GAThreading::performTaskOnGAThread([flag]()
         {
             state::GAState::setManualSessionHandling(flag);
+        });
+    }
+
+    void GameAnalytics::setEnabledErrorReporting(bool flag)
+    {
+        if(_endThread)
+        {
+            return;
+        }
+
+        threading::GAThreading::performTaskOnGAThread([flag]()
+        {
+            state::GAState::setEnableErrorReporting(flag);
         });
     }
 

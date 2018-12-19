@@ -1040,5 +1040,23 @@ namespace gameanalytics
         {
             return sharedInstance()->_useManualSessionHandling;
         }
+
+        void GAState::setEnableErrorReporting(bool flag)
+        {
+            sharedInstance()->_enableErrorReporting = flag;
+            if(flag)
+            {
+                logging::GALogger::i("Use error reporting: true");
+            }
+            else
+            {
+                logging::GALogger::i("Use error reporting: false");
+            }
+        }
+
+        bool GAState::useErrorReporting()
+        {
+            return sharedInstance()->_enableErrorReporting;
+        }
     }
 }

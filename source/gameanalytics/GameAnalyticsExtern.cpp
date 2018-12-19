@@ -215,6 +215,11 @@ void setEnabledManualSessionHandling(double flag)
     gameanalytics::GameAnalytics::setEnabledManualSessionHandling(flag != 0.0);
 }
 
+void setEnabledErrorReporting(double flag)
+{
+    gameanalytics::GameAnalytics::setEnabledErrorReporting(flag != 0.0);
+}
+
 void setCustomDimension01(const char *dimension01)
 {
     gameanalytics::GameAnalytics::setCustomDimension01(dimension01);
