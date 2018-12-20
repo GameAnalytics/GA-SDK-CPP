@@ -2,17 +2,23 @@
 // GA-SDK-CPP
 // Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
-
+#if !USE_UWP && !USE_TIZEN
 #include "GAUncaughtExceptionHandler.h"
 #include "GAState.h"
 #include "GAEvents.h"
 #include <iostream>
 #include <sstream>
 #include <signal.h>
+#include <stacktrace/call_stack.hpp>
+#if defined(_WIN32)
+#include <stdlib.h>
+#include <tchar.h>
+#else
 #include <execinfo.h>
 #include <cstdarg>
 #include <cstring>
 #include <cstdlib>
+#endif
 
 namespace gameanalytics
 {
@@ -22,6 +28,34 @@ namespace gameanalytics
         int GAUncaughtExceptionHandler::errorCount = 0;
         int GAUncaughtExceptionHandler::MAX_ERROR_TYPE_COUNT = 100;
 
+#if defined(_WIN32)
+        void GAUncaughtExceptionHandler::signalHandler(int sig)
+        {
+            stacktrace::call_stack st;
+            std::stringstream ss;
+
+            ss << "Uncaught Signal (" << sig << ")" << std::endl;
+            ss << "Stack trace:" << std::endl;
+            ss << st.to_string() << std::endl;
+
+            if(errorCount <= MAX_ERROR_TYPE_COUNT)
+            {
+                errorCount = errorCount + 1;
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str(), {});
+                events::GAEvents::processEvents("error", false);
+            }
+
+            std::_Exit( EXIT_FAILURE );
+        }
+
+        void GAUncaughtExceptionHandler::setupUncaughtSignals()
+        {
+            signal(SIGILL, signalHandler);
+            signal(SIGABRT, signalHandler);
+            signal(SIGFPE, signalHandler);
+            signal(SIGSEGV, signalHandler);
+        }
+#else
         void GAUncaughtExceptionHandler::setupUncaughtSignals()
         {
             struct sigaction mySigAction;
@@ -93,6 +127,20 @@ namespace gameanalytics
             std::_Exit( EXIT_FAILURE );
         }
 
+        const std::string GAUncaughtExceptionHandler::format(const std::string& format, ...)
+        {
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format.c_str(), args);
+            va_end (args);
+            std::vector<char> vec(len + 1);
+            va_start (args, format);
+            std::vsnprintf(&vec[0], len + 1, format.c_str(), args);
+            va_end (args);
+            return &vec[0];
+        }
+#endif
+
         /*    terminateHandler
          *
          *        C++ exception terminate handler
@@ -104,9 +152,7 @@ namespace gameanalytics
                 return;
             }
 
-            void *frames[128];
-            int i,len = backtrace(frames, 128);
-            char **symbols = backtrace_symbols(frames,len);
+            stacktrace::call_stack st;
 
             /*
              *    Now format into a message for sending to the user
@@ -115,11 +161,7 @@ namespace gameanalytics
             std::stringstream ss;
             ss << "Uncaught C++ Exception" << std::endl;
             ss << "Stack trace:" << std::endl;
-
-            for (i = 0; i < len; ++i)
-            {
-                ss << format("%4d - %s", i, symbols[i]) << std::endl;
-            }
+            ss << st.to_string() << std::endl;
 
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
@@ -138,19 +180,6 @@ namespace gameanalytics
             }
         }
 
-        const std::string GAUncaughtExceptionHandler::format(const std::string& format, ...)
-        {
-            va_list args;
-            va_start (args, format);
-            size_t len = std::vsnprintf(NULL, 0, format.c_str(), args);
-            va_end (args);
-            std::vector<char> vec(len + 1);
-            va_start (args, format);
-            std::vsnprintf(&vec[0], len + 1, format.c_str(), args);
-            va_end (args);
-            return &vec[0];
-        }
-
         void GAUncaughtExceptionHandler::setUncaughtExceptionHandlers()
         {
             if(state::GAState::useErrorReporting())
@@ -161,3 +190,4 @@ namespace gameanalytics
         }
     }
 }
+#endif

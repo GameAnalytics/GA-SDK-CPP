@@ -5,6 +5,7 @@
 
 #pragma once
 
+#if !USE_UWP && !USE_TIZEN
 #include <exception>
 #include <string>
 
@@ -17,10 +18,14 @@ namespace gameanalytics
         public:
             static void setUncaughtExceptionHandlers();
         private:
-            static void setupUncaughtSignals();
+#if defined(_WIN32)
+            static void signalHandler(int sig);
+#else
             static void signalHandler(int sig, siginfo_t *info, void *context);
-            static void terminateHandler();
             static const std::string format(const std::string& format, ...);
+#endif
+            static void setupUncaughtSignals();
+            static void terminateHandler();
 
             static std::terminate_handler previousTerminateHandler;
             static int errorCount;
@@ -28,3 +33,4 @@ namespace gameanalytics
         };
     }
 }
+#endif

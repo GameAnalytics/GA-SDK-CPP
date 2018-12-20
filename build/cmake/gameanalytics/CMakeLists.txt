@@ -186,6 +186,8 @@ elseif("${OSX_ALL}")
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
@@ -201,6 +203,7 @@ elseif("${OSX_ALL}")
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
@@ -218,6 +221,9 @@ else()
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
         "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+        "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
@@ -233,6 +239,8 @@ else()
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/stacktrace"
+        "${DEPENDENCIES_DIR}/stackwalker"
         "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
