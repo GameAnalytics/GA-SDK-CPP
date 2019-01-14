@@ -658,6 +658,28 @@ namespace gameanalytics
         });
     }
 
+    void GameAnalytics::setEnabledEventSubmission(bool flag)
+    {
+        if(_endThread)
+        {
+            return;
+        }
+
+        threading::GAThreading::performTaskOnGAThread([flag]()
+        {
+            if (flag)
+            {
+                state::GAState::setEnabledEventSubmission(flag);
+                logging::GALogger::i("Event submission enabled");
+            }
+            else
+            {
+                logging::GALogger::i("Event submission disabled");
+                state::GAState::setEnabledEventSubmission(flag);
+            }
+        });
+    }
+
     void GameAnalytics::setCustomDimension01(STRING dimension_)
     {
         if(_endThread)

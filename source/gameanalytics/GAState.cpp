@@ -1058,5 +1058,15 @@ namespace gameanalytics
         {
             return sharedInstance()->_enableErrorReporting;
         }
+
+        void GAState::setEnabledEventSubmission(bool flag)
+        {
+            sharedInstance()->_enableEventSubmission = flag;
+        }
+
+        bool GAState::isEventSubmissionEnabled()
+        {
+            return sharedInstance()->_enableEventSubmission;
+        }
     }
 }

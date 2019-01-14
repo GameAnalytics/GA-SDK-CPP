@@ -220,6 +220,11 @@ void setEnabledErrorReporting(double flag)
     gameanalytics::GameAnalytics::setEnabledErrorReporting(flag != 0.0);
 }
 
+void setEnabledEventSubmission(double flag)
+{
+    gameanalytics::GameAnalytics::setEnabledEventSubmission(flag != 0.0);
+}
+
 void setCustomDimension01(const char *dimension01)
 {
     gameanalytics::GameAnalytics::setCustomDimension01(dimension01);

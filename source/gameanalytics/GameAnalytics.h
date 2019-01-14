@@ -146,6 +146,7 @@ namespace gameanalytics
         static void setEnabledVerboseLog(bool flag);
         static void setEnabledManualSessionHandling(bool flag);
         static void setEnabledErrorReporting(bool flag);
+        static void setEnabledEventSubmission(bool flag);
         static void setCustomDimension01(STRING dimension01);
         static void setCustomDimension02(STRING dimension02);
         static void setCustomDimension03(STRING dimension03);

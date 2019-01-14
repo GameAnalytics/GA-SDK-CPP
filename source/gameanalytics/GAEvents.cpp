@@ -50,6 +50,11 @@ namespace gameanalytics
         // USER EVENTS
         void GAEvents::addSessionStartEvent()
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             std::string categorySessionStart = GAEvents::CategorySessionStart;
 
             // Event specific data
@@ -78,6 +83,11 @@ namespace gameanalytics
 
         void GAEvents::addSessionEndEvent()
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             Json::Int64 session_start_ts = state::GAState::sharedInstance()->getSessionStart();
             Json::Int64 client_ts_adjusted = state::GAState::getClientTsAdjusted();
             Json::Int64 sessionLength = client_ts_adjusted - session_start_ts;
@@ -112,6 +122,11 @@ namespace gameanalytics
         // BUSINESS EVENT
         void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const Json::Value& fields)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Validate event params
             if (!validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId))
             {
@@ -153,6 +168,11 @@ namespace gameanalytics
 
         void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Validate event params
             if (!validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId))
             {
@@ -189,6 +209,11 @@ namespace gameanalytics
 
         void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const Json::Value& fields)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
 
             // Validate event params
@@ -265,6 +290,11 @@ namespace gameanalytics
 
         void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const Json::Value& fields)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Validate
             if (!validators::GAValidator::validateDesignEvent(eventId, value))
             {
@@ -298,6 +328,11 @@ namespace gameanalytics
 
         void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             std::string severityString = errorSeverityString(severity);
 
             // Validate
@@ -342,6 +377,11 @@ namespace gameanalytics
 
         void GAEvents::processEvents(const std::string& category, bool performCleanup)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Request identifier
             std::string requestIdentifier = utilities::GAUtilities::generateUUID();
 
@@ -495,6 +535,11 @@ namespace gameanalytics
 
         void GAEvents::fixMissingSessionEndEvents()
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Get all sessions that are not current
             std::vector<std::string> parameters = { state::GAState::getSessionId() };
 
@@ -530,6 +575,11 @@ namespace gameanalytics
         // GENERAL
         void GAEvents::addEventToStore(const Json::Value& eventData)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             // Check if datastore is available
             if (!store::GAStore::sharedInstance()->getTableReady())
             {

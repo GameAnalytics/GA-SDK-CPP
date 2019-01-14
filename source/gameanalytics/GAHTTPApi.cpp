@@ -237,6 +237,11 @@ namespace gameanalytics
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
         {
+            if(!state::GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
             std::string gameKey = state::GAState::getGameKey();
             std::string secretKey = state::GAState::getGameSecret();
 

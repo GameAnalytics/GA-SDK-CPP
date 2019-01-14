@@ -57,6 +57,7 @@ EXPORT void setEnabledInfoLog(double flag);
 EXPORT void setEnabledVerboseLog(double flag);
 EXPORT void setEnabledManualSessionHandling(double flag);
 EXPORT void setEnabledErrorReporting(double flag);
+EXPORT void setEnabledEventSubmission(double flag);
 EXPORT void setCustomDimension01(const char *dimension01);
 EXPORT void setCustomDimension02(const char *dimension02);
 EXPORT void setCustomDimension03(const char *dimension03);
