@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**2.1.0**
+* added automatic error reporting
+* added enable/disable event submission
+
 **2.0.4**
 * fixed business event validation
 

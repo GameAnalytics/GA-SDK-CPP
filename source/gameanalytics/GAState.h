@@ -71,6 +71,10 @@ namespace gameanalytics
             static Json::Int64 getClientTsAdjusted();
             static void setManualSessionHandling(bool flag);
             static bool useManualSessionHandling();
+            static void setEnableErrorReporting(bool flag);
+            static bool useErrorReporting();
+            static void setEnabledEventSubmission(bool flag);
+            static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
             static const Json::Value validateAndCleanCustomFields(const Json::Value& fields);
             static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
@@ -123,6 +127,8 @@ namespace gameanalytics
             Json::Value _sdkConfigCached;
             static const std::string CategorySdkError;
             bool _useManualSessionHandling = false;
+            bool _enableErrorReporting = true;
+            bool _enableEventSubmission = true;
             Json::Value _configurations;
             bool _commandCenterIsReady;
             std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;

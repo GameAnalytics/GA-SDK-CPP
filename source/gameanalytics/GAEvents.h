@@ -31,10 +31,10 @@ namespace gameanalytics
             static const std::string progressionStatusString(EGAProgressionStatus progressionStatus);
             static const std::string errorSeverityString(EGAErrorSeverity errorSeverity);
             static const std::string resourceFlowTypeString(EGAResourceFlowType flowType);
+            static void processEvents(const std::string& category, bool performCleanUp);
 
          private:
             static void processEventQueue();
-            static void processEvents(const std::string& category, bool performCleanUp);
             static void cleanupEvents();
             static void fixMissingSessionEndEvents();
             static void addEventToStore(const Json::Value& eventData);
