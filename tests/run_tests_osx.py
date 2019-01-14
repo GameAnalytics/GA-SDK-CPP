@@ -5,6 +5,7 @@ import shutil
 from os.path import expanduser
 
 BUILD_ROOT = os.path.abspath(os.path.join(__file__, '..'))
+CMAKE_BIN_FILE = os.path.abspath(os.path.join(__file__, '..', '..', 'build', 'jenkins', 'dependencies', 'cmake', 'bin', 'cmake'))
 BUILD_DIR = os.path.join(BUILD_ROOT, "build")
 GA_DIR = os.path.join(expanduser("~"), "GameAnalytics")
 
@@ -31,7 +32,7 @@ def change_to_build_dir():
 
 
 def run_cmake_tests():
-    cmake_call = 'cmake -DPLATFORM:STRING=osx-static -G Xcode ..'
+    cmake_call = CMAKE_BIN_FILE + ' -DPLATFORM:STRING=osx-static -G Xcode ..'
     subprocess.call(cmake_call, shell=True)
 
 
