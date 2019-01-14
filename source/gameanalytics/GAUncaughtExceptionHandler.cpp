@@ -8,7 +8,6 @@
 #include "GAEvents.h"
 #include <iostream>
 #include <sstream>
-#include <signal.h>
 #include <stacktrace/call_stack.hpp>
 #if defined(_WIN32)
 #include <stdlib.h>
@@ -67,7 +66,9 @@ namespace gameanalytics
             sigaction(SIGILL, &mySigAction, NULL);
             sigaction(SIGTRAP, &mySigAction, NULL);
             sigaction(SIGABRT, &mySigAction, NULL);
+#if !USE_LINUX
             sigaction(SIGEMT, &mySigAction, NULL);
+#endif
             sigaction(SIGFPE, &mySigAction, NULL);
             sigaction(SIGBUS, &mySigAction, NULL);
             sigaction(SIGSEGV, &mySigAction, NULL);

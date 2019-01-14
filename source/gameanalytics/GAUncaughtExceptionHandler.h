@@ -8,6 +8,9 @@
 #if !USE_UWP && !USE_TIZEN
 #include <exception>
 #include <string>
+#if USE_LINUX
+#include <signal.h>
+#endif
 
 namespace gameanalytics
 {

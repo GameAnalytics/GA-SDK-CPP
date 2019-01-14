@@ -211,6 +211,41 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/curl/include"
         "${DEPENDENCIES_DIR}/curlcpp/include"
     )
+elseif("${LINUX_ALL}")
+    # traverse all the subdirectories of the matched directory
+    FILE(GLOB_RECURSE CPP_SOURCES
+        # Add GameAnalytics Sources
+        "${GA_SOURCE_DIR}/*.cpp"
+        "${GA_SOURCE_DIR}/*.h"
+
+        # Add dependencies
+        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+        "${DEPENDENCIES_DIR}/sqlite/*.c"
+        "${DEPENDENCIES_DIR}/sqlite/*.h"
+        "${DEPENDENCIES_DIR}/crypto/*.c"
+        "${DEPENDENCIES_DIR}/crypto/*.cpp"
+        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/miniz/*.c"
+        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
+        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
+    )
+
+    add_definitions("-DCRYPTOPP_DISABLE_ASM")
+
+    include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
+        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/stacktrace"
+        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/crypto"
+        "${DEPENDENCIES_DIR}/miniz"
+        "${DEPENDENCIES_DIR}/curl/include"
+        "${DEPENDENCIES_DIR}/curlcpp/include"
+    )
 else()
     # traverse all the subdirectories of the matched directory
     FILE(GLOB_RECURSE CPP_SOURCES
