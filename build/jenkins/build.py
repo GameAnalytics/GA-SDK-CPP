@@ -513,7 +513,7 @@ all_targets = {
     'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
     'win32-vc120-mt-static': TargetWin('win32-vc120-mt-static', 'Visual Studio 12'),
-    'win32-vc141-shared': TargetWin('win32-vc140-shared', 'Visual Studio 15'),
+    'win32-vc141-shared': TargetWin('win32-vc141-shared', 'Visual Studio 15'),
     'win32-vc140-shared': TargetWin('win32-vc140-shared', 'Visual Studio 14'),
     'win32-vc140-shared-nowmi': TargetWin('win32-vc140-shared-nowmi', 'Visual Studio 14'),
     'win32-vc120-shared': TargetWin('win32-vc120-shared', 'Visual Studio 12'),

@@ -359,7 +359,7 @@ if("${WIN_STATIC}" OR "${UWP_ALL}")
     )
 endif("${WIN_STATIC}" OR "${UWP_ALL}")
 
-if("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}")
+if("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}" OR "${WIN32_VC141_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -369,7 +369,7 @@ if("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
-endif("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}")
+endif("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}" OR "${WIN32_VC141_SHARED}")
 
 if("${WIN32_VC120_SHARED}")
     include_directories(
@@ -387,7 +387,7 @@ if("${UWP_ALL}")
     set_target_properties(GameAnalytics PROPERTIES VS_DESKTOP_EXTENSIONS_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
 endif("${UWP_ALL}")
 
-if("${WIN64_VC140_SHARED}")
+if("${WIN64_VC140_SHARED}" OR "${WIN64_VC141_SHARED}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
     )
@@ -397,7 +397,7 @@ if("${WIN64_VC140_SHARED}")
         ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
     )
-endif("${WIN64_VC140_SHARED}")
+endif("${WIN64_VC140_SHARED}" OR "${WIN64_VC141_SHARED}")
 
 if("${WIN64_VC120_SHARED}")
     include_directories(
