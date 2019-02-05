@@ -507,17 +507,23 @@ class TargetLinux(TargetCMake):
 
 
 all_targets = {
+    'win32-vc141-static': TargetWin('win32-vc141-static', 'Visual Studio 15'),
+    'win32-vc141-mt-static': TargetWin('win32-vc141-mt-static', 'Visual Studio 15'),
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
     'win32-vc120-mt-static': TargetWin('win32-vc120-mt-static', 'Visual Studio 12'),
+    'win32-vc141-shared': TargetWin('win32-vc141-shared', 'Visual Studio 15'),
     'win32-vc140-shared': TargetWin('win32-vc140-shared', 'Visual Studio 14'),
     'win32-vc140-shared-nowmi': TargetWin('win32-vc140-shared-nowmi', 'Visual Studio 14'),
     'win32-vc120-shared': TargetWin('win32-vc120-shared', 'Visual Studio 12'),
+    'win64-vc141-static': TargetWin('win64-vc141-static', 'Visual Studio 15 Win64'),
+    'win64-vc141-mt-static': TargetWin('win64-vc141-mt-static', 'Visual Studio 15 Win64'),
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
     'win64-vc140-mt-static': TargetWin('win64-vc140-mt-static', 'Visual Studio 14 Win64'),
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
     'win64-vc120-mt-static': TargetWin('win64-vc120-mt-static', 'Visual Studio 12 Win64'),
+    'win64-vc141-shared': TargetWin('win64-vc141-shared', 'Visual Studio 15 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
     'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
     'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 15'),
@@ -552,17 +558,23 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Windows': {
+        'win32-vc141-static': all_targets['win32-vc141-static'],
+        'win32-vc141-mt-static': all_targets['win32-vc141-mt-static'],
         'win32-vc140-static': all_targets['win32-vc140-static'],
         'win32-vc140-mt-static': all_targets['win32-vc140-mt-static'],
         # 'win32-vc120-static': all_targets['win32-vc120-static'],
         # 'win32-vc120-mt-static': all_targets['win32-vc120-mt-static'],
+        'win32-vc141-shared': all_targets['win32-vc141-shared'],
         'win32-vc140-shared': all_targets['win32-vc140-shared'],
         'win32-vc140-shared-nowmi': all_targets['win32-vc140-shared-nowmi'],
         # 'win32-vc120-shared': all_targets['win32-vc120-shared'],
+        'win64-vc141-static': all_targets['win64-vc141-static'],
+        'win64-vc141-mt-static': all_targets['win64-vc141-mt-static'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
         'win64-vc140-mt-static': all_targets['win64-vc140-mt-static'],
         # 'win64-vc120-static': all_targets['win64-vc120-static'],
         # 'win64-vc120-mt-static': all_targets['win64-vc120-mt-static'],
+        'win64-vc141-shared': all_targets['win64-vc141-shared'],
         'win64-vc140-shared': all_targets['win64-vc140-shared'],
         # 'win64-vc120-shared': all_targets['win64-vc120-shared'],
         'uwp-x86-vc140-static': all_targets['uwp-x86-vc140-static'],
@@ -615,6 +627,11 @@ def build(target_name, vs, silent=False):
     if vs not in valid_visual_studio:
         print('visual studio %(vs)s not supported')
         sys.exit(1)
+
+    if platform.system() == 'Windows':
+        if vs != "2017" and 'vc141' in target_name:
+            print('can only build vc141 target on visual studio 2017')
+            sys.exit(1)
 
     target = available_targets[target_name]
     target.create_project_file()
