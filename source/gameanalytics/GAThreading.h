@@ -75,14 +75,23 @@ namespace gameanalytics
             };
 
             typedef std::vector<TimedBlock> TimedBlocks;
-            typedef void (*start_routine) (std::atomic<bool>&);
+            typedef void (*start_routine) (std::atomic<bool>&, std::atomic_llong&);
 
             struct State
             {
-                State(start_routine routine, std::atomic<bool>& endThread)
+                State()
                 {
                     std::make_heap(blocks.begin(), blocks.end());
-                    handle = std::async(std::launch::async, routine, std::ref(endThread));
+                }
+
+                void setThread(start_routine routine, std::atomic<bool>& endThread, std::atomic_llong& threadDeadline)
+                {
+                    handle = std::async(std::launch::async, routine, std::ref(endThread), std::ref(threadDeadline));
+                }
+
+                bool isThreadFinished()
+                {
+                    return !handle.valid() || handle.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
                 }
 
                 ~State()
@@ -96,10 +105,14 @@ namespace gameanalytics
             };
 
             static std::atomic<bool> _endThread;
+            static std::atomic_llong _threadDeadline;
             static std::unique_ptr<State> state;
 
+            static long long getTimeInNs();
+            static long long getTimeInNs(double delay);
+
             //< The function that's running in the gaThread
-            static void thread_routine(std::atomic<bool>& endThread);
+            static void thread_routine(std::atomic<bool>& endThread, std::atomic_llong& threadDeadline);
             /*!
             retrieves the next block to execute.
             This will either be a regular Block or a Timed Block.
