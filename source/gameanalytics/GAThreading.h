@@ -82,6 +82,8 @@ namespace gameanalytics
                 State()
                 {
                     std::make_heap(blocks.begin(), blocks.end());
+                    scheduledBlock = { {}, std::chrono::steady_clock::now() };
+                    hasScheduledBlockRun = true;
                 }
 
                 void setThread(start_routine routine, std::atomic<bool>& endThread, std::atomic_llong& threadDeadline)
@@ -100,6 +102,8 @@ namespace gameanalytics
                 }
 
                 TimedBlocks blocks;
+                TimedBlock scheduledBlock;
+                bool hasScheduledBlockRun;
                 std::mutex mutex;
                 std::future<void> handle;
             };
@@ -119,6 +123,7 @@ namespace gameanalytics
             return true, if a Block is retrieved, false if a TimedBlock is retrieved.
             */
             static bool getNextBlock(TimedBlock& timedBlock);
+            static bool getScheduledBlock(TimedBlock& timedBlock);
 #endif
         };
     }

@@ -28,12 +28,15 @@ namespace gameanalytics
             }
             std::lock_guard<std::mutex> lock(state->mutex);
 
-            state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
-            std::push_heap(state->blocks.begin(), state->blocks.end());
-            GAThreading::_threadDeadline = GAThreading::getTimeInNs(10.0);
-            if(state->isThreadFinished())
+            if(state->hasScheduledBlockRun)
             {
-                state->setThread(GAThreading::thread_routine, GAThreading::_endThread, GAThreading::_threadDeadline);
+                state->scheduledBlock = { callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) };
+                state->hasScheduledBlockRun = false;
+                GAThreading::_threadDeadline = GAThreading::getTimeInNs(interval + 2.0);
+                if(state->isThreadFinished())
+                {
+                    state->setThread(GAThreading::thread_routine, GAThreading::_endThread, GAThreading::_threadDeadline);
+                }
             }
         }
 
@@ -74,6 +77,20 @@ namespace gameanalytics
             return false;
         }
 
+        bool GAThreading::getScheduledBlock(TimedBlock& timedBlock)
+        {
+            std::lock_guard<std::mutex> lock(state->mutex);
+
+            if(!state->hasScheduledBlockRun && state->scheduledBlock.deadline <= std::chrono::steady_clock::now())
+            {
+                state->hasScheduledBlockRun = true;
+                timedBlock = state->scheduledBlock;
+                return true;
+            }
+
+            return false;
+        }
+
         long long GAThreading::getTimeInNs()
         {
             return GAThreading::getTimeInNs(0);
@@ -95,6 +112,15 @@ namespace gameanalytics
                     TimedBlock timedBlock;
 
                     while (getNextBlock(timedBlock))
+                    {
+                        assert(timedBlock.block);
+                        assert(timedBlock.deadline <= std::chrono::steady_clock::now());
+                        timedBlock.block();
+                        // clear the block, so that the assert works
+                        timedBlock.block = {};
+                    }
+
+                    if(getScheduledBlock(timedBlock))
                     {
                         assert(timedBlock.block);
                         assert(timedBlock.deadline <= std::chrono::steady_clock::now());
