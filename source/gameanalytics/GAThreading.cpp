@@ -112,6 +112,11 @@ namespace gameanalytics
 
         void GAThreading::runBlocks()
         {
+            if(!state)
+            {
+                return;
+            }
+
             TimedBlock timedBlock;
 
             while (getNextBlock(timedBlock))
@@ -141,6 +146,10 @@ namespace gameanalytics
             {
                 while (!endThread && threadDeadline >= GAThreading::getTimeInNs())
                 {
+                    if(!state)
+                    {
+                        break;
+                    }
                     runBlocks();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
