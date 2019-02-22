@@ -36,6 +36,10 @@ namespace gameanalytics
 
             static void endThread();
 
+            static bool isThreadFinished();
+
+            static bool isThreadEnding();
+
          private:
 
 #if USE_TIZEN
@@ -98,7 +102,12 @@ namespace gameanalytics
 
                 ~State()
                 {
-                    GAThreading::_endThread = true;
+                    endThread();
+
+                    while (!isThreadFinished())
+                    {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    }
                 }
 
                 TimedBlocks blocks;
@@ -124,6 +133,7 @@ namespace gameanalytics
             */
             static bool getNextBlock(TimedBlock& timedBlock);
             static bool getScheduledBlock(TimedBlock& timedBlock);
+            static void runBlocks();
 #endif
         };
     }

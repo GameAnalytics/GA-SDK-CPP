@@ -170,6 +170,8 @@ namespace gameanalytics
         static void onSuspend();
         static void onQuit();
 
+        static bool isThreadEnding();
+
 #if !USE_UWP && !USE_TIZEN
         static void addCustomLogStream(std::ostream& os);
 #endif

@@ -1,4 +1,5 @@
 #include "GALogger.h"
+#include "GameAnalytics.h"
 #include <iostream>
 #include "GADevice.h"
 #if USE_UWP
@@ -224,6 +225,10 @@ namespace gameanalytics
 
         void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
         {
+            if(GameAnalytics::isThreadEnding())
+            {
+                return;
+            }
 #if USE_UWP
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
             Platform::Collections::Vector<Platform::String^>^ lines = ref new Platform::Collections::Vector<Platform::String^>();

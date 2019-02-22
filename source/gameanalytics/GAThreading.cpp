@@ -58,8 +58,17 @@ namespace gameanalytics
 
         void GAThreading::endThread()
         {
-            logging::GALogger::d("endThread now");
             _endThread = true;
+        }
+
+        bool GAThreading::isThreadFinished()
+        {
+            return state->isThreadFinished();
+        }
+
+        bool GAThreading::isThreadEnding()
+        {
+            return _endThread;
         }
 
         bool GAThreading::getNextBlock(TimedBlock& timedBlock)
@@ -101,6 +110,29 @@ namespace gameanalytics
             return std::chrono::duration_cast<std::chrono::nanoseconds>((std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * delay))).time_since_epoch()).count();
         }
 
+        void GAThreading::runBlocks()
+        {
+            TimedBlock timedBlock;
+
+            while (getNextBlock(timedBlock))
+            {
+                assert(timedBlock.block);
+                assert(timedBlock.deadline <= std::chrono::steady_clock::now());
+                timedBlock.block();
+                // clear the block, so that the assert works
+                timedBlock.block = {};
+            }
+
+            if(getScheduledBlock(timedBlock))
+            {
+                assert(timedBlock.block);
+                assert(timedBlock.deadline <= std::chrono::steady_clock::now());
+                timedBlock.block();
+                // clear the block, so that the assert works
+                timedBlock.block = {};
+            }
+        }
+
         void GAThreading::thread_routine(std::atomic<bool>& endThread, std::atomic_llong& threadDeadline)
         {
             logging::GALogger::d("thread_routine start");
@@ -109,28 +141,12 @@ namespace gameanalytics
             {
                 while (!endThread && threadDeadline >= GAThreading::getTimeInNs())
                 {
-                    TimedBlock timedBlock;
-
-                    while (getNextBlock(timedBlock))
-                    {
-                        assert(timedBlock.block);
-                        assert(timedBlock.deadline <= std::chrono::steady_clock::now());
-                        timedBlock.block();
-                        // clear the block, so that the assert works
-                        timedBlock.block = {};
-                    }
-
-                    if(getScheduledBlock(timedBlock))
-                    {
-                        assert(timedBlock.block);
-                        assert(timedBlock.deadline <= std::chrono::steady_clock::now());
-                        timedBlock.block();
-                        // clear the block, so that the assert works
-                        timedBlock.block = {};
-                    }
-
+                    runBlocks();
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
+
+                // run any last blocks added
+                runBlocks();
 
                 if(!endThread)
                 {

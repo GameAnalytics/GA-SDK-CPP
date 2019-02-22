@@ -30,6 +30,11 @@ namespace gameanalytics
         {
         }
 
+        GAState::~GAState()
+        {
+            state::GAState::endSessionAndStopQueue(false);
+        }
+
         void GAState::setUserId(const std::string& id)
         {
             sharedInstance()->_userId = id;
@@ -177,20 +182,7 @@ namespace gameanalytics
 
         bool GAState::isEnabled()
         {
-            Json::Value currentSdkConfig = GAState::getSdkConfig();
-
-            if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
-            {
-                return false;
-            }
-            else if (!GAState::sharedInstance()->_initAuthorized)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return GAState::sharedInstance()->_enabled;
         }
 
         void GAState::setCustomDimension01(const std::string& dimension)
@@ -780,6 +772,23 @@ namespace gameanalytics
                     logging::GALogger::i("Init call (session start) failed - using cached init values.");
                 }
                 GAState::sharedInstance()->_initAuthorized = true;
+            }
+
+            {
+                Json::Value currentSdkConfig = GAState::getSdkConfig();
+
+                if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
+                {
+                    GAState::sharedInstance()->_enabled = false;
+                }
+                else if (!GAState::sharedInstance()->_initAuthorized)
+                {
+                    GAState::sharedInstance()->_enabled = false;
+                }
+                else
+                {
+                    GAState::sharedInstance()->_enabled = true;
+                }
             }
 
             // set offset in state (memory) from current config (config could be from cache etc.)

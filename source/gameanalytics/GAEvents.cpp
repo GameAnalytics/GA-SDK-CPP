@@ -43,7 +43,7 @@ namespace gameanalytics
             if (!GAEvents::sharedInstance()->isRunning)
             {
                 GAEvents::sharedInstance()->isRunning = true;
-                //threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
+                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
             }
         }
 
@@ -164,12 +164,6 @@ namespace gameanalytics
 
             // Send to store
             addEventToStore(eventDict);
-
-            // add process request in case has not been added yet
-            if (GAEvents::sharedInstance()->keepRunning)
-            {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
-            }
         }
 
         void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields)
@@ -211,11 +205,6 @@ namespace gameanalytics
 
             // Send to store
             addEventToStore(eventDict);
-            // add process request in case has not been added yet
-            if (GAEvents::sharedInstance()->keepRunning)
-            {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
-            }
         }
 
         void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const Json::Value& fields)
@@ -297,11 +286,6 @@ namespace gameanalytics
 
             // Send to store
             addEventToStore(eventDict);
-            // add process request in case has not been added yet
-            if (GAEvents::sharedInstance()->keepRunning)
-            {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
-            }
         }
 
         void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const Json::Value& fields)
@@ -340,11 +324,6 @@ namespace gameanalytics
 
             // Send to store
             addEventToStore(eventData);
-            // add process request in case has not been added yet
-            if (GAEvents::sharedInstance()->keepRunning)
-            {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
-            }
         }
 
         void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
@@ -381,11 +360,6 @@ namespace gameanalytics
 
             // Send to store
             addEventToStore(eventData);
-            // add process request in case has not been added yet
-            if (GAEvents::sharedInstance()->keepRunning)
-            {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
-            }
         }
 
         void GAEvents::processEventQueue()
@@ -393,7 +367,7 @@ namespace gameanalytics
             processEvents("", true);
             if (GAEvents::sharedInstance()->keepRunning)
             {
-                //threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
+                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
             }
             else
             {
