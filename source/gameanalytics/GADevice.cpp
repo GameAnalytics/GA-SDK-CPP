@@ -32,7 +32,7 @@
 #include <direct.h>
 #include <windows.h>
 #include <VersionHelpers.h>
-#if USE_WMI
+#if !GA_SHARED_LIB
 #include <comdef.h>
 #include <wbemidl.h>
 #pragma comment(lib, "wbemuuid.lib")
@@ -69,11 +69,11 @@ namespace gameanalytics
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.1";
+        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.2";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 2.1.1";
+        const std::string GADevice::_sdkWrapperVersion = "tizen 2.1.2";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 2.1.1";
+        const std::string GADevice::_sdkWrapperVersion = "cpp 2.1.2";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
@@ -254,7 +254,7 @@ namespace gameanalytics
 
             return result;
 #else
-#if defined(_WIN32) && USE_WMI
+#if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
             IWbemServices *services = nullptr;
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -354,7 +354,7 @@ namespace gameanalytics
 
             return result;
 #else
-#if defined(_WIN32) && USE_WMI
+#if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
             IWbemServices *services = nullptr;
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
