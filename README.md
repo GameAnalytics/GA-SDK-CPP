@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**2.1.2**
+* thread fixes
+* dll freeze bug fix
+
 **2.1.1**
 * thread fixes
 
