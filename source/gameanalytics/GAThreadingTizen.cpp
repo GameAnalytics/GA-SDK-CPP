@@ -38,6 +38,16 @@ namespace gameanalytics
         {
         }
 
+        bool GAThreading::isThreadFinished()
+        {
+            return true;
+        }
+
+        bool GAThreading::isThreadEnding()
+        {
+            return false;
+        }
+
         Eina_Bool GAThreading::_scheduled_function(void* data)
         {
             BlockHolder* blockHolder = static_cast<BlockHolder*>(data);

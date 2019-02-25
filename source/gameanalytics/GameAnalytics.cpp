@@ -18,6 +18,10 @@
 #include "GAUncaughtExceptionHandler.h"
 #endif
 #include <json/json.h>
+#include <cstdlib>
+#if USE_UWP
+#include <thread>
+#endif
 
 namespace gameanalytics
 {
@@ -910,10 +914,22 @@ namespace gameanalytics
                 _endThread = true;
                 state::GAState::endSessionAndStopQueue(true);
             });
+
+#if !USE_TIZEN
+            while (!threading::GAThreading::isThreadFinished())
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+#endif
         }
         catch (const std::exception&)
         {
         }
+    }
+
+    bool GameAnalytics::isThreadEnding()
+    {
+        return _endThread || threading::GAThreading::isThreadEnding();
     }
 
 #if !USE_UWP && !USE_TIZEN
@@ -1171,15 +1187,25 @@ namespace gameanalytics
 
         auto deferral = e->SuspendingOperation->GetDeferral();
 
-        if (!state::GAState::useManualSessionHandling())
+        Concurrency::create_task([deferral]()
         {
-            onSuspend();
-        }
-        else
-        {
-            logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnSuspend() as using manual session handling");
-        }
-        deferral->Complete();
+            if (!state::GAState::useManualSessionHandling())
+            {
+                onSuspend();
+
+                while(!threading::GAThreading::isThreadFinished())
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+            }
+            else
+            {
+                logging::GALogger::i("OnSuspending: Not calling GameAnalytics.OnSuspend() as using manual session handling");
+            }
+            deferral->Complete();
+        });
+
+
     }
 
     void GameAnalytics::OnAppResuming(Platform::Object ^sender, Platform::Object ^args)

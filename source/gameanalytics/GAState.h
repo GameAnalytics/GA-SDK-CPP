@@ -25,6 +25,7 @@ namespace gameanalytics
         {
          public:
             GAState();
+            ~GAState();
 
             static void setUserId(const std::string& id);
             static const std::string getIdentifier();
@@ -119,6 +120,7 @@ namespace gameanalytics
             std::string _gender;
             int _birthYear = 0;
             bool _initAuthorized = false;
+            bool _enabled = false;
             Json::Int64 _clientServerTimeOffset = 0;
             std::string _defaultUserId;
             std::map<std::string, int> _progressionTries;

@@ -15,22 +15,21 @@ namespace gameanalytics
 {
     namespace http
     {
+        // base url settings
+        std::string GAHTTPApi::protocol = "https";
+        const std::string GAHTTPApi::hostName = "api.gameanalytics.com";
+
+        const std::string GAHTTPApi::version = "v2";
+
+        // create base url
+        std::string GAHTTPApi::baseUrl = getBaseUrl();
+
+        // route paths
+        const std::string GAHTTPApi::initializeUrlPath = "init";
+        const std::string GAHTTPApi::eventsUrlPath = "events";
         // Constructor - setup the basic information for HTTP
         GAHTTPApi::GAHTTPApi()
         {
-            // base url settings
-            protocol = "https";
-            hostName = "api.gameanalytics.com";
-
-            version = "v2";
-
-            // create base url
-            baseUrl = protocol + "://" + hostName + "/" + version;
-
-            // route paths
-            initializeUrlPath = "init";
-            eventsUrlPath = "events";
-
             // use gzip compression on JSON body
 #if defined(_DEBUG)
             useGzip = false;
@@ -47,6 +46,11 @@ namespace gameanalytics
         void GANetworkStatus::NetworkInformationOnNetworkStatusChanged(Platform::Object^ sender)
         {
             CheckInternetAccess();
+        }
+
+        const std::string GAHTTPApi::getBaseUrl()
+        {
+            return protocol + "://" + hostName + "/" + version;
         }
 
         void GANetworkStatus::CheckInternetAccess()

@@ -76,8 +76,8 @@ namespace gameanalytics
 
             static void switchProtocolToHttp()
             {
-                sharedInstance()->protocol = "http";
-                sharedInstance()->baseUrl = sharedInstance()->protocol + "://" + sharedInstance()->hostName + "/" + sharedInstance()->version;
+                protocol = "http";
+                baseUrl = protocol + "://" + hostName + "/" + version;
             }
 
          private:
@@ -92,12 +92,14 @@ namespace gameanalytics
             EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
 #endif
 
-            std::string protocol;
-            std::string hostName;
-            std::string version;
-            std::string baseUrl;
-            std::string initializeUrlPath;
-            std::string eventsUrlPath;
+            static const std::string getBaseUrl();
+
+            static std::string protocol;
+            static const std::string hostName;
+            static const std::string version;
+            static std::string baseUrl;
+            static const std::string initializeUrlPath;
+            static const std::string eventsUrlPath;
             bool useGzip;
             static const int MaxCount;
             static std::map<EGASdkErrorType, int> countMap;
