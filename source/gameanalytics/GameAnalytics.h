@@ -108,7 +108,7 @@ namespace gameanalytics
         static void configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies);
         static void configureAvailableResourceCurrencies(STRING resourceCurrencies);
         static void configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes);
-        static void configureAvailableResourceItemTypes(STRING resourceCurrencies);
+        static void configureAvailableResourceItemTypes(STRING resourceItemTypes);
         static void configureBuild(STRING build);
         static void configureWritablePath(STRING writablePath);
         static void configureDeviceModel(STRING deviceModel);
