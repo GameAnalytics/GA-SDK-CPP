@@ -537,14 +537,14 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
-    'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc-5', 'g++-5'),
-    'linux-x86-clang-shared': TargetLinux('linux-x86-clang-shared', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
-    'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc-5', 'g++-5'),
-    'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
-    'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc-5', 'g++-5'),
-    'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
-    'linux-x64-gcc-shared': TargetLinux('linux-x64-gcc-shared', 'Unix Makefiles', '-m64', 'gcc-5', 'g++-5'),
+    'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang-5.0', 'clang++-5.0'),
+    'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc-4.8', 'g++-4.8'),
+    'linux-x86-clang-shared': TargetLinux('linux-x86-clang-shared', 'Unix Makefiles', '-m32', 'clang-5.0', 'clang++-5.0'),
+    'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc-4.8', 'g++-4.8'),
+    'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
+    'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc-4.8', 'g++-4.8'),
+    'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
+    'linux-x64-gcc-shared': TargetLinux('linux-x64-gcc-shared', 'Unix Makefiles', '-m64', 'gcc-4.8', 'g++-4.8'),
 }
 
 available_targets = {

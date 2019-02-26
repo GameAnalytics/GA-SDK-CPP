@@ -7,7 +7,12 @@
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <algorithm>
+#if USE_LINUX
+#include <regex.h>
+#include <iterator>
+#else
 #include <regex>
+#endif
 #include <limits.h>
 #if USE_UWP
 #include <Objbase.h>
@@ -303,9 +308,22 @@ namespace gameanalytics
         // TODO(nikolaj): explain function
         bool GAUtilities::stringMatch(const std::string& string, const std::string& pattern)
         {
+            
+#if USE_LINUX
+           int status;
+           regex_t re;
+           if(regcomp(&re, pattern.c_str(), REG_EXTENDED|REG_NOSUB) != 0)
+           {
+               return true;
+           }
+
+           status = regexec(&re, string.c_str(), (size_t)0, NULL, 0);
+           regfree(&re);
+           return status == 0;
+#else
             try
             {
-                std::regex expression(pattern);
+		std::regex expression(pattern);
                 return std::regex_match(string, expression);
             }
             catch (const std::regex_error& e)
@@ -318,6 +336,7 @@ namespace gameanalytics
                 return true;
                 #endif
             }
+#endif
         }
 
         std::string GAUtilities::gzipCompress(const std::string& data)
