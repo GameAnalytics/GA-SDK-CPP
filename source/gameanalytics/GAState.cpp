@@ -113,7 +113,7 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            logging::GALogger::i("Set available custom02 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
         void GAState::setAvailableCustomDimensions03(const std::vector<std::string>& availableCustomDimensions)
@@ -128,7 +128,7 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            logging::GALogger::i("Set available custom03 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
         void GAState::setAvailableResourceCurrencies(const std::vector<std::string>& availableResourceCurrencies)
