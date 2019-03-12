@@ -196,8 +196,11 @@ namespace gameanalytics
             }
             catch (curl::curl_easy_exception error)
             {
-                error.print_traceback();
+                auto errors = error.get_traceback();
                 logging::GALogger::d(error.what());
+                std::for_each(errors.begin(), errors.end(),[](const curl::curlcpp_traceback_object &value) {
+                    logging::GALogger::d("ERROR: " + value.first + " ::::: FUNCTION: " + value.second);
+                });
             }
 
             std::string body = os.str();

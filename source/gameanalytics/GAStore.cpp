@@ -121,7 +121,6 @@ namespace gameanalytics
                 results.clear();
             }
 
-
             // Destroy statement
             if (sqlite3_finalize(statement) == SQLITE_OK)
             {

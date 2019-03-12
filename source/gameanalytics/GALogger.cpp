@@ -227,7 +227,7 @@ namespace gameanalytics
         {
             if(GameAnalytics::isThreadEnding())
             {
-                return;
+                //return;
             }
 #if USE_UWP
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
