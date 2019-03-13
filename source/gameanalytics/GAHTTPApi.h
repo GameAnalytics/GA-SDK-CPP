@@ -74,12 +74,6 @@ namespace gameanalytics
                 return{};
             }
 
-            static void switchProtocolToHttp()
-            {
-                protocol = "http";
-                baseUrl = protocol + "://" + hostName + "/" + version;
-            }
-
          private:
             const std::string createPayloadData(const std::string& payload, bool gzip);
 
