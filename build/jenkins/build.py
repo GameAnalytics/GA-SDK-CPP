@@ -543,8 +543,10 @@ all_targets = {
     'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc-4.8', 'g++-4.8'),
     'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
     'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc-4.8', 'g++-4.8'),
+    'linux-x64-gcc5-static': TargetLinux('linux-x64-gcc5-static', 'Unix Makefiles', '-m64', 'gcc-5', 'g++-5'),
     'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
     'linux-x64-gcc-shared': TargetLinux('linux-x64-gcc-shared', 'Unix Makefiles', '-m64', 'gcc-4.8', 'g++-4.8'),
+    'linux-x64-gcc5-shared': TargetLinux('linux-x64-gcc5-shared', 'Unix Makefiles', '-m64', 'gcc-5', 'g++-5'),
 }
 
 available_targets = {
@@ -593,8 +595,10 @@ available_targets = {
         'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
         'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
         'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
+        'linux-x64-gcc5-static': all_targets['linux-x64-gcc5-static'],
         'linux-x64-clang-shared': all_targets['linux-x64-clang-shared'],
         'linux-x64-gcc-shared': all_targets['linux-x64-gcc-shared'],
+        'linux-x64-gcc5-shared': all_targets['linux-x64-gcc5-shared'],
     }
 }[platform.system()]
 
