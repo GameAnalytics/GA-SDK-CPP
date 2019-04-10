@@ -18,7 +18,6 @@ notifications:
 
 before_install:
     - brew update
-    - brew install p7zip
     - travis_wait 40 python build/jenkins/main.py -s -t osx-static
 
 install:
