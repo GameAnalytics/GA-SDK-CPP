@@ -15,6 +15,7 @@
 #include <utility>
 #include <algorithm>
 #include <climits>
+#include <string.h>
 
 #define MAX_CUSTOM_FIELDS_COUNT 50
 #define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
@@ -51,7 +52,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_initialized;
         }
 
-        Json::Int64 GAState::getSessionStart()
+        long GAState::getSessionStart()
         {
             return GAState::sharedInstance()->_sessionStart;
         }
@@ -166,13 +167,13 @@ namespace gameanalytics
             cacheIdentifier();
         }
 
-        Json::Value GAState::getSdkConfig()
+        const rapidjson::Value& GAState::getSdkConfig()
         {
-            if (GAState::sharedInstance()->_sdkConfig.isObject())
+            if (GAState::sharedInstance()->_sdkConfig.IsObject())
             {
                 return GAState::sharedInstance()->_sdkConfig;
             }
-            else if (GAState::sharedInstance()->_sdkConfigCached.isObject())
+            else if (GAState::sharedInstance()->_sdkConfigCached.IsObject())
             {
                 return GAState::sharedInstance()->_sdkConfigCached;
             }
@@ -432,7 +433,7 @@ namespace gameanalytics
                 annotations["connection_type"] = connection_type;
             }
 
-            if (!device::GADevice::getGameEngineVersion().empty())
+            if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
                 annotations["engine_version"] = device::GADevice::getGameEngineVersion();
             }
@@ -511,7 +512,7 @@ namespace gameanalytics
                 annotations["connection_type"] = connection_type;
             }
 
-            if (!device::GADevice::getGameEngineVersion().empty())
+            if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
                 annotations["engine_version"] = device::GADevice::getGameEngineVersion();
             }
@@ -876,8 +877,6 @@ namespace gameanalytics
         void GAState::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
         {
             GAState* instance = GAState::sharedInstance();
-
-            auto it = std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener);
 
             if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
             {

@@ -308,7 +308,7 @@ namespace gameanalytics
         // TODO(nikolaj): explain function
         bool GAUtilities::stringMatch(const std::string& string, const std::string& pattern)
         {
-            
+
 #if USE_LINUX
            int status;
            regex_t re;
@@ -345,7 +345,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::jsonToString(const Json::Value& obj)
+        std::string GAUtilities::jsonToString(const rapidjson::Value& obj)
         {
             Json::FastWriter writer;
             std::string output = writer.write(obj);
@@ -364,16 +364,11 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        Json::Value GAUtilities::jsonFromString(const std::string& string)
+        const rapidjson::Value& GAUtilities::jsonFromString(const char* string)
         {
-            Json::Reader reader;
-            Json::Value parsingResult;
-            bool parsed = reader.parse(string, parsingResult);
-            if (!parsed)
-            {
-                return {};
-            }
-            return parsingResult;
+            rapidjson::Document d;
+            reader.Parse(string);
+            return d;
         }
 
         // TODO(nikolaj): explain function

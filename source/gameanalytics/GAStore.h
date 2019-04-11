@@ -8,7 +8,7 @@
 #include <sqlite3.h>
 #include <string>
 #include <vector>
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include "Foundation/GASingleton.h"
 
 namespace gameanalytics
@@ -26,11 +26,11 @@ namespace gameanalytics
 
             static void setState(const std::string& key, const std::string& value);
 
-            static Json::Value executeQuerySync(const std::string& sql);
+            static const rapidjson::Value& executeQuerySync(const std::string& sql);
 
-            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
+            static const rapidjson::Value& executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
 
-            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
+            static const rapidjson::Value& executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
 
             static long long getDbSizeBytes();
 

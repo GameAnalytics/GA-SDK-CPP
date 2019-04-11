@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <string>
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include "GameAnalytics.h"
 #include "GAHTTPApi.h"
 
@@ -90,7 +90,7 @@ namespace gameanalytics
             static bool validateDimension02(const std::string& dimension02);
             static bool validateDimension03(const std::string& dimension03);
 
-            static Json::Value validateAndCleanInitRequestResponse(Json::Value& initResponse);
+            static const rapidjson::Value& validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse);
 
             // array of strings
             static bool validateArrayOfStrings(
@@ -104,9 +104,9 @@ namespace gameanalytics
             static bool validateFacebookId(const std::string& facebookId);
             static bool validateGender(EGAGender gender);
             static bool validateBirthyear(long birthYear);
-            static bool validateClientTs(Json::Int64 clientTs);
+            static bool validateClientTs(long clientTs);
 
             static bool validateUserId(const std::string& uId);
         };
     }
-} 
+}

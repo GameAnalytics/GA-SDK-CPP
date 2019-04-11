@@ -58,7 +58,7 @@ namespace gameanalytics
             std::string categorySessionStart = GAEvents::CategorySessionStart;
 
             // Event specific data
-            Json::Value eventDict;
+            rapidjson::Value eventDict;
             eventDict["category"] = categorySessionStart;
 
             // Increment session number  and persist
@@ -88,9 +88,9 @@ namespace gameanalytics
                 return;
             }
 
-            Json::Int64 session_start_ts = state::GAState::sharedInstance()->getSessionStart();
-            Json::Int64 client_ts_adjusted = state::GAState::getClientTsAdjusted();
-            Json::Int64 sessionLength = client_ts_adjusted - session_start_ts;
+            long session_start_ts = state::GAState::sharedInstance()->getSessionStart();
+            long client_ts_adjusted = state::GAState::getClientTsAdjusted();
+            long sessionLength = client_ts_adjusted - session_start_ts;
 
             if(sessionLength < 0)
             {
@@ -101,7 +101,7 @@ namespace gameanalytics
             }
 
             // Event specific data
-            Json::Value eventDict;
+            rapidjson::Value eventDict;
 
             eventDict["category"] = GAEvents::CategorySessionEnd;
             eventDict["length"] = sessionLength;
@@ -120,7 +120,7 @@ namespace gameanalytics
         }
 
         // BUSINESS EVENT
-        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const Json::Value& fields)
+        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -135,7 +135,7 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Value eventDict;
 
             // Increment transaction number and persist
             state::GAState::incrementTransactionNum();
@@ -166,7 +166,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -187,7 +187,7 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Value eventDict;
 
             // insert event specific values
             std::string flowTypeString = resourceFlowTypeString(flowType);
@@ -207,7 +207,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const Json::Value& fields)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -224,7 +224,7 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Value eventDict;
 
             // Progression identifier
             std::string progressionIdentifier;
@@ -288,7 +288,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const Json::Value& fields)
+        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -326,7 +326,7 @@ namespace gameanalytics
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {

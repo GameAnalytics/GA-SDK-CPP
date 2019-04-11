@@ -170,7 +170,6 @@ if("${UWP_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
@@ -178,7 +177,7 @@ if("${UWP_ALL}")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
     )
@@ -192,7 +191,6 @@ elseif("${OSX_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
@@ -209,7 +207,7 @@ elseif("${OSX_ALL}")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
@@ -227,7 +225,6 @@ elseif("${LINUX_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
@@ -244,7 +241,7 @@ elseif("${LINUX_ALL}")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/spdlog/include"
         "${DEPENDENCIES_DIR}/sqlite"
@@ -262,7 +259,6 @@ else()
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
@@ -280,7 +276,7 @@ else()
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/stackwalker"
         "${DEPENDENCIES_DIR}/spdlog/include"

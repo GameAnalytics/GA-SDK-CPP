@@ -11,7 +11,7 @@
 #include <mutex>
 #include <functional>
 #include "Foundation/GASingleton.h"
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include "GameAnalytics.h"
 
 namespace gameanalytics
@@ -30,7 +30,7 @@ namespace gameanalytics
             static void setUserId(const std::string& id);
             static const std::string getIdentifier();
             static bool isInitialized();
-            static Json::Int64 getSessionStart();
+            static long getSessionStart();
             static int getSessionNum();
             static int getTransactionNum();
             static const std::string getSessionId();
@@ -65,11 +65,11 @@ namespace gameanalytics
             static void setKeys(const std::string& gameKey, const std::string& gameSecret);
             static void endSessionAndStopQueue(bool endThread);
             static void resumeSessionAndStartQueue();
-            static Json::Value getEventAnnotations();
-            static Json::Value getSdkErrorEventAnnotations();
-            static Json::Value getInitAnnotations();
+            static const rapidjson::Value& getEventAnnotations();
+            static const rapidjson::Value& getSdkErrorEventAnnotations();
+            static rapidjson::Value& getInitAnnotations();
             static void internalInitialize();
-            static Json::Int64 getClientTsAdjusted();
+            static long getClientTsAdjusted();
             static void setManualSessionHandling(bool flag);
             static bool useManualSessionHandling();
             static void setEnableErrorReporting(bool flag);
@@ -77,7 +77,7 @@ namespace gameanalytics
             static void setEnabledEventSubmission(bool flag);
             static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
-            static const Json::Value validateAndCleanCustomFields(const Json::Value& fields);
+            static const rapidjson::Value& validateAndCleanCustomFields(const rapidjson::Value& fields);
             static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
             static bool isCommandCenterReady();
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
@@ -86,7 +86,7 @@ namespace gameanalytics
 
          private:
             static void setDefaultUserId(const std::string& id);
-            static Json::Value getSdkConfig();
+            static const rapidjson::Value& getSdkConfig();
             static void cacheIdentifier();
             static void ensurePersistedStates();
             static void startNewSession();
@@ -95,13 +95,13 @@ namespace gameanalytics
             static const std::string getFacebookId();
             static const std::string getGender();
             static int getBirthYear();
-            static Json::Int64 calculateServerTimeOffset(Json::Int64 serverTs);
-            static void populateConfigurations(Json::Value sdkConfig);
+            static long calculateServerTimeOffset(long serverTs);
+            static void populateConfigurations(rapidjson::Value& sdkConfig);
 
             std::string _userId;
             std::string _identifier;
             bool _initialized = false;
-            Json::Int64 _sessionStart = 0;
+            long _sessionStart = 0;
             int _sessionNum = 0;
             int _transactionNum = 0;
             std::string _sessionId;
@@ -121,17 +121,17 @@ namespace gameanalytics
             int _birthYear = 0;
             bool _initAuthorized = false;
             bool _enabled = false;
-            Json::Int64 _clientServerTimeOffset = 0;
+            long _clientServerTimeOffset = 0;
             std::string _defaultUserId;
             std::map<std::string, int> _progressionTries;
-            Json::Value _sdkConfigDefault;
-            Json::Value _sdkConfig;
-            Json::Value _sdkConfigCached;
+            rapidjson::Value _sdkConfigDefault;
+            rapidjson::Value _sdkConfig;
+            rapidjson::Value _sdkConfigCached;
             static const std::string CategorySdkError;
             bool _useManualSessionHandling = false;
             bool _enableErrorReporting = true;
             bool _enableEventSubmission = true;
-            Json::Value _configurations;
+            rapidjson::Value _configurations;
             bool _commandCenterIsReady;
             std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
             std::mutex _mtx;

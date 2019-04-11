@@ -5,7 +5,9 @@
 
 #pragma once
 
+#if USE_UWP || USE_TIZEN
 #include <string>
+#endif
 
 namespace gameanalytics
 {
@@ -14,34 +16,34 @@ namespace gameanalytics
         class GADevice
         {
         public:
-        	static void setSdkGameEngineVersion(const std::string& sdkGameEngineVersion);
-        	static const std::string getGameEngineVersion();
-        	static void setGameEngineVersion(const std::string& gameEngineVersion);
-            static void setConnectionType(const std::string& connectionType);
-            static const std::string getConnectionType();
-        	static const std::string getRelevantSdkVersion();
-        	static const std::string getBuildPlatform();
-        	static const std::string getOSVersion();
-            static void setDeviceModel(const std::string& deviceModel);
-        	static const std::string getDeviceModel();
-            static void setDeviceManufacturer(const std::string& deviceManufacturer);
-        	static const std::string getDeviceManufacturer();
-            static void setWritablePath(const std::string& writablePath);
-        	static const std::string getWritablePath();
+        	static void setSdkGameEngineVersion(const char* sdkGameEngineVersion);
+        	static const char* getGameEngineVersion();
+        	static void setGameEngineVersion(const char* gameEngineVersion);
+            static void setConnectionType(const char* connectionType);
+            static const char* getConnectionType();
+        	static const char* getRelevantSdkVersion();
+        	static const char* getBuildPlatform();
+        	static const char* getOSVersion();
+            static void setDeviceModel(const char* deviceModel);
+        	static const char* getDeviceModel();
+            static void setDeviceManufacturer(const char* deviceManufacturer);
+        	static const char* getDeviceManufacturer();
+            static void setWritablePath(const char* writablePath);
+        	static const char* getWritablePath();
 #if USE_UWP
-            static const std::string getDeviceId();
-            static const std::string getAdvertisingId();
+            static const char* getDeviceId();
+            static const char* getAdvertisingId();
 #elif USE_TIZEN
-            static const std::string getDeviceId();
+            static const char* getDeviceId();
 #endif
             static void UpdateConnectionType();
 
         private:
-            static const std::string getOSVersionString();
-            static const std::string deviceManufacturer();
-            static const std::string deviceModel();
-            static const std::string runtimePlatformToString();
-            static const std::string getPersistentPath();
+            static void initOSVersion();
+            static void initDeviceManufacturer();
+            static void initDeviceModel();
+            static void initRuntimePlatform();
+            static void initPersistentPath();
 #if USE_UWP
             static const std::string deviceId();
 
@@ -53,15 +55,15 @@ namespace gameanalytics
             static const std::string _deviceId;
 #endif
 
-            static const std::string _buildPlatform;
-            static const std::string _osVersion;
-            static std::string _deviceModel;
-            static std::string _deviceManufacturer;
-            static std::string _writablepath;
-            static std::string _sdkGameEngineVersion;
-            static std::string _gameEngineVersion;
-            static std::string _connectionType;
-            static const std::string _sdkWrapperVersion;
+            static char _buildPlatform[];
+            static char _osVersion[];
+            static char _deviceModel[];
+            static char _deviceManufacturer[];
+            static char _writablepath[];
+            static char _sdkGameEngineVersion[];
+            static char _gameEngineVersion[];
+            static char _connectionType[];
+            static const char* _sdkWrapperVersion;
         };
     }
 }

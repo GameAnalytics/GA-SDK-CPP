@@ -223,7 +223,7 @@ namespace gameanalytics
                 logging::GALogger::w("Writable path must be set before SDK is initialized.");
                 return;
             }
-            device::GADevice::setWritablePath(writablePath);
+            device::GADevice::setWritablePath(writablePath.c_str());
 #if !USE_UWP && !USE_TIZEN
             logging::GALogger::customInitializeLog();
 #endif
@@ -250,7 +250,7 @@ namespace gameanalytics
                 logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: " + deviceModel);
                 return;
             }
-            device::GADevice::setDeviceModel(deviceModel);
+            device::GADevice::setDeviceModel(deviceModel.c_str());
         });
     }
 
@@ -274,7 +274,7 @@ namespace gameanalytics
                 logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: " + deviceManufacturer);
                 return;
             }
-            device::GADevice::setDeviceManufacturer(deviceManufacturer);
+            device::GADevice::setDeviceManufacturer(deviceManufacturer.c_str());
         });
     }
 
@@ -297,7 +297,7 @@ namespace gameanalytics
                 logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: " + sdkGameEngineVersion);
                 return;
             }
-            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion);
+            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion.c_str());
         });
     }
 
@@ -320,7 +320,7 @@ namespace gameanalytics
                 logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: " + gameEngineVersion);
                 return;
             }
-            device::GADevice::setGameEngineVersion(gameEngineVersion);
+            device::GADevice::setGameEngineVersion(gameEngineVersion.c_str());
         });
     }
 
@@ -385,7 +385,7 @@ namespace gameanalytics
 
             if (!store::GAStore::ensureDatabase(false, gameKey))
             {
-                logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
+                logging::GALogger::w("Could not ensure/validate local event database: " + std::string(device::GADevice::getWritablePath()));
             }
 
             state::GAState::internalInitialize();

@@ -89,7 +89,7 @@ namespace gameanalytics
 
                 ga->logInitialized = true;
 
-                GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+                GALogger::i("Log file added under: " + std::string(device::GADevice::getWritablePath()));
             }
         }
 
@@ -119,7 +119,7 @@ namespace gameanalytics
 
             ga->logInitialized = true;
 
-            GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+            GALogger::i("Log file added under: " + std::string(device::GADevice::getWritablePath()));
         }
 
         void GALogger::addCustomLogStream(std::ostream& os)

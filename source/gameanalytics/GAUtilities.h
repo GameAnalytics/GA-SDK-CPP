@@ -7,7 +7,8 @@
 
 #include <vector>
 #include <string>
-#include <json/json.h>
+#include <sstream>
+#include "rapidjson/document.h"
 #if USE_UWP
 #include <locale>
 #include <codecvt>
@@ -23,9 +24,8 @@ namespace gameanalytics
             static std::string getPathSeparator();
             static std::string generateUUID();
             static std::string hmacWithKey(const std::string& key, const std::string& data);
-            static std::string jsonToString(const Json::Value& obj);
-            static std::string arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr);
-            static Json::Value jsonFromString(const std::string& string);
+            static std::string jsonToString(const rapidjson::Value& obj);
+            static const rapidjson::Value& jsonFromString(const char* string);
             static bool stringMatch(const std::string& string, const std::string& pattern);
             static std::string gzipCompress(const std::string& data);
 
@@ -33,7 +33,7 @@ namespace gameanalytics
             static std::string uppercaseString(std::string s);
             static std::string lowercaseString(std::string s);
             static bool stringVectorContainsString(std::vector<std::string> vector, std::string search);
-            static Json::Int64 timeIntervalSince1970();
+            static long timeIntervalSince1970();
             static std::string joinStringArray(const std::vector<std::string>& v, const std::string& delimiter = ", ");
 #if !USE_UWP
             static int base64_needed_encoded_length(int length_of_data);
