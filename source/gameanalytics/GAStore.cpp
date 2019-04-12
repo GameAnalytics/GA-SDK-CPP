@@ -72,7 +72,7 @@ namespace gameanalytics
 
             // Create mutable array for results
             rapidjson::Document results;
-            document.SetArray();
+            results.SetArray();
 
             if (useTransaction)
             {
@@ -102,7 +102,7 @@ namespace gameanalytics
                 // get columns count
                 int columnCount = sqlite3_column_count(statement);
 
-                rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+                rapidjson::Document::AllocatorType& allocator = results.GetAllocator();
                 // Loop through results
                 while (sqlite3_step(statement) == SQLITE_ROW)
                 {
@@ -138,7 +138,7 @@ namespace gameanalytics
             {
                 // TODO(nikolaj): Should we do a db validation to see if the db is corrupt here?
                 logging::GALogger::e(std::string("SQLITE3 PREPARE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                results.clear();
+                results.Clear();
             }
 
             // Destroy statement
@@ -149,14 +149,14 @@ namespace gameanalytics
                     if (sqlite3_exec(sqlDatabasePtr, "COMMIT", 0, 0, 0) != SQLITE_OK)
                     {
                         logging::GALogger::e(std::string("SQLITE3 COMMIT ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                        results.clear();
+                        results.Clear();
                     }
                 }
             }
             else
             {
                 logging::GALogger::d(std::string("SQLITE3 FINALIZE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                results.clear();
+                results.Clear();
                 if (useTransaction)
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "ROLLBACK", 0, 0, 0) != SQLITE_OK)
@@ -167,7 +167,7 @@ namespace gameanalytics
             }
 
             // Return results
-            return results;
+            out = results;
         }
 
         sqlite3* GAStore::getDatabase()

@@ -294,14 +294,22 @@ namespace gameanalytics
             std::string url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
             logging::GALogger::d("Sending 'events' URL: " + url);
 
-            Json::Value json = state::GAState::getSdkErrorEventAnnotations();
+            rapidjson::Value json;
+            state::GAState::getSdkErrorEventAnnotations(json);
 
             std::string typeString = sdkErrorTypeToString(type);
             json["type"] = typeString;
 
-            std::vector<Json::Value> eventArray;
-            eventArray.push_back(json);
-            std::string payloadJSONString = utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
+            rapidjson::Document eventArray;
+            eventArray.SetArray();
+            rapidjson::Document::AllocatorType& allocator = eventArray.GetAllocator();
+            eventArray.PushBack(json, allocator);
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                eventArray.Accept(writer);
+            }
+            std::string payloadJSONString = buffer.GetString();
 
             if(payloadJSONString.empty())
             {

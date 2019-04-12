@@ -985,7 +985,7 @@ namespace gameanalytics
                         {
                             const rapidjson::Value& value = fields[key];
 
-                            if(value.isNumeric())
+                            if(value.IsNumber())
                             {
                                 result[key] = value.GetDouble();
                                 ++count;
@@ -996,30 +996,30 @@ namespace gameanalytics
 
                                 if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
                                 {
-                                    result[key] = value;
+                                    result[key] = rapidjson::StringRef(value.GetString());
                                     ++count;
                                 }
                                 else
                                 {
-                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
                                         " has been omitted because its value is an empty string or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH) + ")");
                                 }
                             }
                             else
                             {
-                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
                                     " has been omitted because its value is not a string or number");
                             }
                         }
                         else
                         {
-                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
                                 " has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + ")");
                         }
                     }
                     else
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
                             " has been omitted because it exceeds the max number of custom fields (" + std::to_string(MAX_CUSTOM_FIELDS_COUNT) + ")");
                     }
                 }
@@ -1028,10 +1028,10 @@ namespace gameanalytics
             out = result;
         }
 
-        Json::Int64 GAState::getClientTsAdjusted()
+        int64_t GAState::getClientTsAdjusted()
         {
-            Json::Int64 clientTs = utilities::GAUtilities::timeIntervalSince1970();
-            Json::Int64 clientTsAdjustedInteger = clientTs + GAState::sharedInstance()->_clientServerTimeOffset;
+            int64_t clientTs = utilities::GAUtilities::timeIntervalSince1970();
+            int64_t clientTsAdjustedInteger = clientTs + GAState::sharedInstance()->_clientServerTimeOffset;
 
             if (validators::GAValidator::validateClientTs(clientTsAdjustedInteger))
             {
@@ -1063,9 +1063,9 @@ namespace gameanalytics
             return sharedInstance()->_birthYear;
         }
 
-        Json::Int64 GAState::calculateServerTimeOffset(Json::Int64 serverTs)
+        int64_t GAState::calculateServerTimeOffset(int64_t serverTs)
         {
-            Json::Int64 clientTs = utilities::GAUtilities::timeIntervalSince1970();
+            int64_t clientTs = utilities::GAUtilities::timeIntervalSince1970();
             return serverTs - clientTs;
         }
 
