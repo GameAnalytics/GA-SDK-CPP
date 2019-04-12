@@ -26,11 +26,14 @@ namespace gameanalytics
 
             static void setState(const std::string& key, const std::string& value);
 
-            static const rapidjson::Value& executeQuerySync(const std::string& sql);
+            static void executeQuerySync(const std::string& sql);
+            static void executeQuerySync(const std::string& sql, rapidjson::Value& out);
 
-            static const rapidjson::Value& executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
+            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
+            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, rapidjson::Value& out);
 
-            static const rapidjson::Value& executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
+            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
+            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction, rapidjson::Value& out);
 
             static long long getDbSizeBytes();
 

@@ -303,7 +303,7 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventData;
+            rapidjson::Value eventData;
 
             // Append event specifics
             eventData["category"] = GAEvents::CategoryDesign;
@@ -343,7 +343,7 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventData;
+            rapidjson::Value eventData;
 
             // Append event specifics
             eventData["category"] = GAEvents::CategoryError;
@@ -407,10 +407,10 @@ namespace gameanalytics
             updateSql = "UPDATE ga_events SET status = '" + requestIdentifier + "' WHERE status = 'new' " + andCategory + ";";
 
             // Get events to process
-            auto events = store::GAStore::executeQuerySync(selectSql);
+            rapidjson::Value& events = store::GAStore::executeQuerySync(selectSql);
 
             // Check for errors or empty
-            if (events.empty())
+            if (events.IsNull() || events.Empty())
             {
                 logging::GALogger::i("Event queue: No events to send");
                 GAEvents::updateSessionTime();
@@ -418,24 +418,24 @@ namespace gameanalytics
             }
 
             // Check number of events and take some action if there are too many?
-            if (events.size() > GAEvents::MaxEventCount)
+            if (events.Size() > GAEvents::MaxEventCount)
             {
                 // Make a limit request
                 selectSql = "SELECT client_ts FROM ga_events WHERE status = 'new' " + andCategory + " ORDER BY client_ts ASC LIMIT 0," + std::to_string(GAEvents::MaxEventCount) + ";";
                 events = store::GAStore::executeQuerySync(selectSql);
-                if (events.empty())
+                if (events.IsNull() || events.Empty())
                 {
                     return;
                 }
 
                 // Get last timestamp
-                auto lastItem = events[events.size() - 1];
-                auto lastTimestamp = lastItem["client_ts"].asString();
+                const rapidjson::Value& lastItem = events[events.Size() - 1];
+                const char* lastTimestamp = lastItem["client_ts"].GetString();
 
                 // Select again
                 selectSql = "SELECT event FROM ga_events WHERE status = 'new' " + andCategory + " AND client_ts<='" + lastTimestamp + "';";
                 events = store::GAStore::executeQuerySync(selectSql);
-                if (events.empty())
+                if (events.IsNull() || events.Empty())
                 {
                     return;
                 }
@@ -447,7 +447,7 @@ namespace gameanalytics
 
 
             // Log
-            logging::GALogger::i("Event queue: Sending " + std::to_string(events.size()) + " events.");
+            logging::GALogger::i("Event queue: Sending " + std::to_string(events.Size()) + " events.");
 
             // Set status of events to 'sending' (also check for error)
             if (store::GAStore::executeQuerySync(updateSql).isNull())

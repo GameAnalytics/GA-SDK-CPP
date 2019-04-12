@@ -398,9 +398,9 @@ namespace gameanalytics
             }
         }
 
-        Json::Value GAState::getEventAnnotations()
+        void GAState::getEventAnnotations(rapidjson::Value& out)
         {
-            Json::Value annotations;
+            rapidjson::Value annotations;
 
             // ---- REQUIRED ---- //
 
@@ -412,15 +412,15 @@ namespace gameanalytics
             // Client Timestamp (the adjusted timestamp)
             annotations["client_ts"] = GAState::getClientTsAdjusted();
             // SDK version
-            annotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            annotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
             // Operation system version
-            annotations["os_version"] = device::GADevice::getOSVersion();
+            annotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = device::GADevice::getDeviceManufacturer();
+            annotations["manufacturer"] = rapidjson::StringRef(device::GADevice::getDeviceManufacturer());
             // Device version
-            annotations["device"] = device::GADevice::getDeviceModel();
+            annotations["device"] = rapidjson::StringRef(device::GADevice::getDeviceModel());
             // Platform (operating system)
-            annotations["platform"] = device::GADevice::getBuildPlatform();
+            annotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
             // Session identifier
             annotations["session_id"] = sharedInstance()->_sessionId;
             // Session number
@@ -435,7 +435,7 @@ namespace gameanalytics
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = device::GADevice::getGameEngineVersion();
+                annotations["engine_version"] = rapidjson::StringRef(device::GADevice::getGameEngineVersion());
             }
 
 #if USE_UWP
@@ -480,12 +480,12 @@ namespace gameanalytics
                 annotations["birth_year"] = getBirthYear();
             }
 
-            return annotations;
+            out = annotations;
         }
 
-        Json::Value GAState::getSdkErrorEventAnnotations()
+        void GAState::getSdkErrorEventAnnotations(rapidjson::Value& out)
         {
-            Json::Value annotations;
+            rapidjson::Value annotations;
 
             // ---- REQUIRED ---- //
 
@@ -495,15 +495,15 @@ namespace gameanalytics
             // Category
             annotations["category"] = GAState::CategorySdkError;
             // SDK version
-            annotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            annotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
             // Operation system version
-            annotations["os_version"] = device::GADevice::getOSVersion();
+            annotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = device::GADevice::getDeviceManufacturer();
+            annotations["manufacturer"] = rapidjson::StringRef(device::GADevice::getDeviceManufacturer());
             // Device version
-            annotations["device"] = device::GADevice::getDeviceModel();
+            annotations["device"] = rapidjson::StringRef(device::GADevice::getDeviceModel());
             // Platform (operating system)
-            annotations["platform"] = device::GADevice::getBuildPlatform();
+            annotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
 
             // type of connection the user is currently on (add if valid)
             std::string connection_type = device::GADevice::getConnectionType();
@@ -514,24 +514,24 @@ namespace gameanalytics
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = device::GADevice::getGameEngineVersion();
+                annotations["engine_version"] = rapidjson::StringRef(device::GADevice::getGameEngineVersion());
             }
 
-            return annotations;
+            out = annotations;
         }
 
-        Json::Value GAState::getInitAnnotations()
+        void GAState::getInitAnnotations(rapidjson::Value& out)
         {
-            Json::Value initAnnotations;
+            rapidjson::Value initAnnotations;
             initAnnotations["user_id"] = getIdentifier();
             // SDK version
-            initAnnotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            initAnnotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
             // Operation system version
-            initAnnotations["os_version"] = device::GADevice::getOSVersion();
+            initAnnotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
 
             // Platform (operating system)
-            initAnnotations["platform"] = device::GADevice::getBuildPlatform();
-            return initAnnotations;
+            initAnnotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
+            out = initAnnotations;
         }
 
         void GAState::cacheIdentifier()
@@ -566,19 +566,25 @@ namespace gameanalytics
         void GAState::ensurePersistedStates()
         {
             // get and extract stored states
-            Json::Value state_dict;
-            Json::Value results_ga_state = store::GAStore::executeQuerySync("SELECT * FROM ga_state;");
+            rapidjson::Value state_dict;
+            rapidjson::Value results_ga_state;
+            store::GAStore::executeQuerySync("SELECT * FROM ga_state;", results_ga_state);
 
-            if (!results_ga_state.empty()) {
-                for (auto result : results_ga_state) {
-                    state_dict[result["key"].asString()] = result["value"];
+            if (!results_ga_state.IsNull() && !results_ga_state.Empty())
+            {
+                for (rapidjson::Value::ConstValueIterator itr = results_ga_state.Begin(); itr != results_ga_state.End(); ++itr)
+                {
+                    if(itr->HasMember("key") && itr->HasMember("value"))
+                    {
+                        state_dict[(*itr)["key"].GetString()] = rapidjson::StringRef((*itr)["value"].GetString());
+                    }
                 }
             }
 
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 
-            std::string defaultId = state_dict.get("default_user_id", "").asString();
+            std::string defaultId = state_dict.HasMember("default_user_id") ? state_dict["default_user_id"].GetString() : "";
             if(defaultId.empty())
             {
                 instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
@@ -588,9 +594,9 @@ namespace gameanalytics
                 instance->setDefaultUserId(defaultId);
             }
 
-            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.get("session_num", "0").asString());
+            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.HasMember("session_num") ? state_dict["session_num"].GetString() : "0");
 
-            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.get("transaction_num", "0").asString());
+            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0");
 
             // restore cross session user values
             if (!instance->_facebookId.empty())
@@ -599,7 +605,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_facebookId = state_dict.get("facebook_id", "").asString();
+                instance->_facebookId = state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "";
                 if (!instance->_facebookId.empty()) {
                     logging::GALogger::d("facebookid found in DB: " + instance->_facebookId);
                 }
@@ -611,7 +617,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_gender = state_dict.get("gender", "").asString();
+                instance->_gender = state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "";
                 if (!instance->_gender.empty()) {
                     logging::GALogger::d("gender found in DB: " + instance->_gender);
                 }
@@ -623,7 +629,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.get("birth_year", "0").asString());
+                instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0");
                 if (instance->_birthYear != 0) {
                     logging::GALogger::d("birthYear found in DB: " + std::to_string(instance->_birthYear));
                 }
@@ -636,7 +642,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_currentCustomDimension01 = state_dict.get("dimension01", "").asString();
+                instance->_currentCustomDimension01 = state_dict.HasMember("dimension01") ? state_dict["dimension01"].GetString() : "";
                 if (!instance->_currentCustomDimension01.empty()) {
                     logging::GALogger::d("Dimension01 found in cache: " + instance->_currentCustomDimension01);
                 }
@@ -648,7 +654,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_currentCustomDimension02 = state_dict.get("dimension02", "").asString();
+                instance->_currentCustomDimension02 = state_dict.HasMember("dimension02") ? state_dict["dimension02"].GetString() : "";
                 if (!instance->_currentCustomDimension02.empty()) {
                     logging::GALogger::d("Dimension02 found cache: " + instance->_currentCustomDimension02);
                 }
@@ -660,27 +666,33 @@ namespace gameanalytics
             }
             else
             {
-                instance->_currentCustomDimension03 = state_dict.get("dimension03", "").asString();
+                instance->_currentCustomDimension03 = state_dict.HasMember("dimension03") ? state_dict["dimension03"].GetString() : "";
                 if (!instance->_currentCustomDimension03.empty()) {
                     logging::GALogger::d("Dimension03 found in cache: " + instance->_currentCustomDimension03);
                 }
             }
 
             // get cached init call values
-            std::string sdkConfigCachedString = state_dict.get("sdk_config_cached", "").asString();
-            if (!sdkConfigCachedString.empty()) {
+            std::string sdkConfigCachedString = state_dict.HasMember("sdk_config_cached") ? state_dict["sdk_config_cached"].GetString() : "";
+            if (!sdkConfigCachedString.empty())
+            {
                 // decode JSON
-                Json::Value sdkConfigCached = utilities::GAUtilities::jsonFromString(sdkConfigCachedString);
-                if (!sdkConfigCached.isNull()) {
-                    instance->_sdkConfigCached = sdkConfigCached;
+                rapidjson::Document d;
+                d.Parse(sdkConfigCachedString.c_str());
+                if (!d.IsNull())
+                {
+                    instance->_sdkConfigCached = d.GetObject();
                 }
             }
 
-            Json::Value results_ga_progression = store::GAStore::executeQuerySync("SELECT * FROM ga_progression;");
+            rapidjson::Value results_ga_progression;
+            store::GAStore::executeQuerySync("SELECT * FROM ga_progression;", results_ga_progression);
 
-            if (!results_ga_progression.empty()) {
-                for (Json::Value result : results_ga_progression) {
-                    sharedInstance()->_progressionTries[result["progression"].asString()] = utilities::GAUtilities::parseString<int>(result["tries"].asString());
+            if (!results_ga_progression.IsNull() && !results_ga_progression.Empty())
+            {
+                for (rapidjson::Value::ConstValueIterator itr = results_ga_progression.Begin(); itr != results_ga_progression.End(); ++itr)
+                {
+                    sharedInstance()->_progressionTries[(*itr)["progression"].GetString()] = utilities::GAUtilities::parseString<int>((*itr)["tries"].GetString());
                 }
             }
 
@@ -696,6 +708,8 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
+            rapidjson::Value initResponseDict;
+            http::EGAHTTPApiResponse initResponse;
 #if USE_UWP
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
             try
@@ -707,15 +721,15 @@ namespace gameanalytics
                 pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
             }
 #else
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
+
+            httpApi->requestInitReturningDict(initResponse, initResponseDict);
 #endif
-            Json::Value initResponseDict = pair.second;
-            http::EGAHTTPApiResponse initResponse = pair.first;
 
             // init is ok
-            if (initResponse == http::Ok && !initResponseDict.isNull()) {
+            if (initResponse == http::Ok && !initResponseDict.IsNull())
+            {
                 // set the time offset - how many seconds the local time is different from servertime
-                Json::Int64 timeOffsetSeconds = 0;
+                long timeOffsetSeconds = 0;
                 if (initResponseDict.get("server_ts", -1.0).asInt64() > 0) {
                     Json::Int64 serverTs = initResponseDict.get("server_ts", -1).asInt64();
                     timeOffsetSeconds = calculateServerTimeOffset(serverTs);

@@ -364,14 +364,6 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        const rapidjson::Value& GAUtilities::jsonFromString(const char* string)
-        {
-            rapidjson::Document d;
-            reader.Parse(string);
-            return d;
-        }
-
-        // TODO(nikolaj): explain function
         bool GAUtilities::stringVectorContainsString(std::vector<std::string> vector, std::string search)
         {
             if (vector.size() == 0) {

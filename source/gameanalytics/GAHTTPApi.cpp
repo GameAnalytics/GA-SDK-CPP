@@ -16,6 +16,7 @@
 #include <utility>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
+#include <string.h>
 #if USE_TIZEN
 #include <net_connection.h>
 #endif
@@ -53,7 +54,7 @@ namespace gameanalytics
             return protocol + "://" + hostName + "/" + version;
         }
 
-        std::pair<EGAHTTPApiResponse, rapidjson::Value> GAHTTPApi::requestInitReturningDict()
+        void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out)
         {
             std::string gameKey = state::GAState::getGameKey();
 
@@ -62,14 +63,17 @@ namespace gameanalytics
             url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
             logging::GALogger::d("Sending 'init' URL: " + url);
 
-            rapidjson::Value& initAnnotations = state::GAState::getInitAnnotations();
+            rapidjson::Value initAnnotations;
+            state::GAState::getInitAnnotations(initAnnotations);
 
             // make JSON string from data
             std::string JSONstring = utilities::GAUtilities::jsonToString(initAnnotations);
 
             if (JSONstring.empty())
             {
-                return std::pair<EGAHTTPApiResponse, rapidjson::Value>(JsonEncodeFailed, rapidjson::Value(rapidjson::kObjectType));
+                response_out = JsonEncodeFailed;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             std::string payloadData = createPayloadData(JSONstring, false);
@@ -83,7 +87,9 @@ namespace gameanalytics
             conn_err = connection_create(&connection);
             if (conn_err != CONNECTION_ERROR_NONE)
             {
-                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                response_out = NoResponse;
+                rapidjson::Value result;
+                json_out = result;
             }
 #endif
 
@@ -113,7 +119,9 @@ namespace gameanalytics
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, rapidjson::Value>(requestResponseEnum, rapidjson::Value(rapidjson::kObjectType));
+                response_out = requestResponseEnum;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             if (requestJsonDict.IsNull())
@@ -122,7 +130,9 @@ namespace gameanalytics
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, rapidjson::Value>(JsonDecodeFailed, rapidjson::Value(rapidjson::kObjectType));
+                response_out = JsonDecodeFailed;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             // print reason if bad request
@@ -136,18 +146,22 @@ namespace gameanalytics
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, rapidjson::Value>(requestResponseEnum, rapidjson::Value(rapidjson::kObjectType));
+                response_out = requestResponseEnum;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             // validate Init call values
-            const rapidjson::Value& validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
+            rapidjson::Value& validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
 
             if (validatedInitValues.IsNull())
             {
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, rapidjson::Value>(BadResponse, rapidjson::Value(rapidjson::kObjectType));
+                response_out = BadResponse;
+                rapidjson::Value result;
+                json_out = result;
             }
 
 #if USE_TIZEN
@@ -155,13 +169,13 @@ namespace gameanalytics
 #endif
 
             // all ok
-            rapidjson::Value result = validatedInitValues;
-            return std::pair<EGAHTTPApiResponse, rapidjson::Value>(Ok, result);
+            response_out = Ok;
+            json_out = validatedInitValues;
         }
 
-        std::pair<EGAHTTPApiResponse, rapidjson::Value> GAHTTPApi::sendEventsInArray(const std::vector<rapidjson::Value>& eventArray)
+        void GAHTTPApi::sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray)
         {
-            if (eventArray.empty())
+            if (eventArray.Empty())
             {
                 logging::GALogger::d("sendEventsInArray called with missing eventArray");
             }
@@ -173,12 +187,20 @@ namespace gameanalytics
             logging::GALogger::d("Sending 'events' URL: " + url);
 
             // make JSON string from data
-            auto JSONstring = utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                eventArray.Accept(writer);
+            }
 
-            if (JSONstring.empty())
+            const char* JSONstring = buffer.GetString();
+
+            if (strlen(JSONstring) == 0)
             {
                 logging::GALogger::d("sendEventsInArray JSON encoding failed of eventArray");
-                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonEncodeFailed, Json::Value());
+                response_out = JsonEncodeFailed;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             std::string payloadData = createPayloadData(JSONstring, useGzip);
@@ -192,7 +214,9 @@ namespace gameanalytics
             conn_err = connection_create(&connection);
             if (conn_err != CONNECTION_ERROR_NONE)
             {
-                return std::pair<EGAHTTPApiResponse, Json::Value>(NoResponse, Json::Value());
+                response_out = NoResponse;
+                rapidjson::Value result;
+                json_out = result;
             }
 #endif
             std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
@@ -222,7 +246,9 @@ namespace gameanalytics
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, Json::Value());
+                response_out = requestResponseEnum;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             // decode JSON
@@ -233,7 +259,9 @@ namespace gameanalytics
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
-                return std::pair<EGAHTTPApiResponse, Json::Value>(JsonDecodeFailed, Json::Value());
+                response_out = JsonDecodeFailed;
+                rapidjson::Value result;
+                json_out = result;
             }
 
             // print reason if bad request
@@ -247,7 +275,8 @@ namespace gameanalytics
 #endif
 
             // return response
-            return std::pair<EGAHTTPApiResponse, Json::Value>(requestResponseEnum, requestJsonDict);
+            response_out = requestResponseEnum;
+            json_out = requestJsonDict;
         }
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)

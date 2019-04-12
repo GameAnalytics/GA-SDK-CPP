@@ -25,7 +25,6 @@ namespace gameanalytics
             static std::string generateUUID();
             static std::string hmacWithKey(const std::string& key, const std::string& data);
             static std::string jsonToString(const rapidjson::Value& obj);
-            static const rapidjson::Value& jsonFromString(const char* string);
             static bool stringMatch(const std::string& string, const std::string& pattern);
             static std::string gzipCompress(const std::string& data);
 

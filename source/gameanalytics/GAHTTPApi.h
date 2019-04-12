@@ -10,7 +10,6 @@
 #include <map>
 #include "Foundation/GASingleton.h"
 #include "rapidjson/document.h"
-#include <utility>
 #if USE_UWP
 #include <ppltasks.h>
 #else
@@ -56,11 +55,11 @@ namespace gameanalytics
             GAHTTPApi();
 
 #if USE_UWP
-            concurrency::task<std::pair<EGAHTTPApiResponse, rapidjson::Value>> requestInitReturningDict();
-            concurrency::task<std::pair<EGAHTTPApiResponse, rapidjson::Value>> sendEventsInArray(const rapidjson::Value& eventArray);
+            concurrency::task<Void> requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out);
+            concurrency::task<Void> sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #else
-            std::pair<EGAHTTPApiResponse, rapidjson::Value> requestInitReturningDict();
-            std::pair<EGAHTTPApiResponse, rapidjson::Value> sendEventsInArray(const rapidjson::Value& eventArray);
+            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out);
+            void sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);
 
