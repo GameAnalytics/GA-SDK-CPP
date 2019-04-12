@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <climits>
 #include <string.h>
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
 
 #define MAX_CUSTOM_FIELDS_COUNT 50
 #define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
@@ -52,7 +54,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_initialized;
         }
 
-        long GAState::getSessionStart()
+        int64_t GAState::getSessionStart()
         {
             return GAState::sharedInstance()->_sessionStart;
         }
@@ -167,18 +169,18 @@ namespace gameanalytics
             cacheIdentifier();
         }
 
-        const rapidjson::Value& GAState::getSdkConfig()
+        void GAState::getSdkConfig(rapidjson::Value& out)
         {
             if (GAState::sharedInstance()->_sdkConfig.IsObject())
             {
-                return GAState::sharedInstance()->_sdkConfig;
+                out = GAState::sharedInstance()->_sdkConfig;
             }
             else if (GAState::sharedInstance()->_sdkConfigCached.IsObject())
             {
-                return GAState::sharedInstance()->_sdkConfigCached;
+                out = GAState::sharedInstance()->_sdkConfigCached;
             }
 
-            return GAState::sharedInstance()->_sdkConfigDefault;
+            out = GAState::sharedInstance()->_sdkConfigDefault;
         }
 
         bool GAState::isEnabled()
@@ -729,10 +731,11 @@ namespace gameanalytics
             if (initResponse == http::Ok && !initResponseDict.IsNull())
             {
                 // set the time offset - how many seconds the local time is different from servertime
-                long timeOffsetSeconds = 0;
-                if (initResponseDict.get("server_ts", -1.0).asInt64() > 0) {
-                    Json::Int64 serverTs = initResponseDict.get("server_ts", -1).asInt64();
-                    timeOffsetSeconds = calculateServerTimeOffset(serverTs);
+                int64_t timeOffsetSeconds = 0;
+                int64_t server_ts = initResponseDict.HasMember("server_ts") ? initResponseDict["server_ts"].GetInt64() : -1;
+                if (server_ts > 0)
+                {
+                    timeOffsetSeconds = calculateServerTimeOffset(server_ts);
                 }
                 // insert timeOffset in received init config (so it can be used when offline)
                 initResponseDict["time_offset"] = timeOffsetSeconds;
@@ -767,9 +770,9 @@ namespace gameanalytics
                 }
 
                 // init call failed (perhaps offline)
-                if (GAState::sharedInstance()->_sdkConfig.isNull())
+                if (GAState::sharedInstance()->_sdkConfig.IsNull())
                 {
-                    if (!GAState::sharedInstance()->_sdkConfigCached.isNull())
+                    if (!GAState::sharedInstance()->_sdkConfigCached.IsNull())
                     {
                         logging::GALogger::i("Init call (session start) failed - using cached init values.");
                         // set last cross session stored config init values
@@ -789,10 +792,10 @@ namespace gameanalytics
                 GAState::sharedInstance()->_initAuthorized = true;
             }
 
+            rapidjson::Value currentSdkConfig;
+            GAState::getSdkConfig(currentSdkConfig);
             {
-                Json::Value currentSdkConfig = GAState::getSdkConfig();
-
-                if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
+                if (currentSdkConfig.IsObject() && ((currentSdkConfig.HasMember("enabled") && currentSdkConfig["enabled"].IsBool()) ? currentSdkConfig["enabled"].GetBool() : true) == false)
                 {
                     GAState::sharedInstance()->_enabled = false;
                 }
@@ -807,10 +810,11 @@ namespace gameanalytics
             }
 
             // set offset in state (memory) from current config (config could be from cache etc.)
-            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
+
+            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<int64_t>(currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetString() : "0.0");
 
             // populate configurations
-            populateConfigurations(GAState::getSdkConfig());
+            populateConfigurations(currentSdkConfig);
 
             // if SDK is disabled in config
             if (!GAState::isEnabled())
@@ -870,7 +874,7 @@ namespace gameanalytics
         std::string GAState::getConfigurationStringValue(const std::string& key, const std::string& defaultValue)
         {
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
-            return GAState::sharedInstance()->_configurations.isMember(key) ? GAState::sharedInstance()->_configurations[key].asString() : defaultValue;
+            return GAState::sharedInstance()->_configurations.HasMember(key.c_str()) ? GAState::sharedInstance()->_configurations[key.c_str()].GetString() : defaultValue;
         }
 
         bool GAState::isCommandCenterReady()
@@ -900,32 +904,51 @@ namespace gameanalytics
 
         std::string GAState::getConfigurationsContentAsString()
         {
-            return GAState::sharedInstance()->_configurations.toStyledString();
+            rapidjson::StringBuffer buffer;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+            GAState::sharedInstance()->_configurations.Accept(writer);
+            return buffer.GetString();
         }
 
-        void GAState::populateConfigurations(Json::Value sdkConfig)
+        void GAState::populateConfigurations(rapidjson::Value& sdkConfig)
         {
             GAState::sharedInstance()->_mtx.lock();
 
-            if(sdkConfig.isMember("configurations") && sdkConfig["configurations"].isArray())
+            if(GAState::sharedInstance()->_configurations.IsNull())
             {
-                Json::Value configurations = sdkConfig["configurations"];
+                GAState::sharedInstance()->_configurations.SetObject();
+            }
 
-                for(unsigned int i = 0; i < configurations.size(); ++i)
+            if(sdkConfig.HasMember("configurations") && sdkConfig["configurations"].IsArray())
+            {
+                rapidjson::Value& configurations = sdkConfig["configurations"];
+
+                for (rapidjson::Value::ConstValueIterator itr = configurations.Begin(); itr != configurations.End(); ++itr)
                 {
-                    Json::Value configuration = configurations[i];
+                    const rapidjson::Value& configuration = *itr;
 
-                    if(!configuration.isNull())
+                    if(!configuration.IsNull())
                     {
-                        std::string key = (configuration.isMember("key") && configuration["key"].isString()) ? configuration["key"].asString() : "";
-                        Json::Int64 start_ts = (configuration.isMember("start") && configuration["start"].isInt64()) ? configuration["start"].asInt64() : LONG_MIN;
-                        Json::Int64 end_ts = (configuration.isMember("end") && configuration["end"].isInt64()) ? configuration["start"].asInt64() : LONG_MAX;
-                        Json::Int64 client_ts_adjusted = getClientTsAdjusted();
+                        std::string key = (configuration.HasMember("key") && configuration["key"].IsString()) ? configuration["key"].GetString() : "";
+                        int64_t start_ts = (configuration.HasMember("start") && configuration["start"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MIN;
+                        int64_t end_ts = (configuration.HasMember("end") && configuration["end"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MAX;
+                        int64_t client_ts_adjusted = getClientTsAdjusted();
 
-                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
+                        if(!key.empty() && configuration.HasMember("value") && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
                         {
-                            GAState::sharedInstance()->_configurations[key] = configuration["value"];
-                            logging::GALogger::d("configuration added: " + configuration.toStyledString());
+                            if(configuration["value"].IsString())
+                            {
+                                GAState::sharedInstance()->_configurations[key.c_str()] = rapidjson::StringRef(configuration["value"].GetString());
+                            }
+                            else if(configuration["value"].IsNumber())
+                            {
+                                GAState::sharedInstance()->_configurations[key.c_str()] = configuration["value"].GetDouble();
+                            }
+
+                            rapidjson::StringBuffer buffer;
+                            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+                            configuration.Accept(writer);
+                            logging::GALogger::d("configuration added: " + std::string(buffer.GetString()));
                         }
                     }
                 }
@@ -940,35 +963,36 @@ namespace gameanalytics
             GAState::sharedInstance()->_mtx.unlock();
         }
 
-        const Json::Value GAState::validateAndCleanCustomFields(const Json::Value& fields)
+        void GAState::validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out)
         {
-            Json::Value result;
+            rapidjson::Value result;
 
-            if (fields.isObject() && !fields.empty())
+            if (fields.IsObject() && !fields.Empty())
             {
                 int count = 0;
 
-                for (std::string key : fields.getMemberNames())
+                for (rapidjson::Value::ConstMemberIterator itr = fields.MemberBegin(); itr != fields.MemberEnd(); ++itr)
                 {
-                    if(fields[key].isNull())
+                    const char* key = itr->name.GetString();
+                    if(fields[key].IsNull())
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
                             " has been omitted because its key or value is null");
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
                         if(utilities::GAUtilities::stringMatch(key, "^[a-zA-Z0-9_]{1," + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + "}$"))
                         {
-                            auto value = fields[key];
+                            const rapidjson::Value& value = fields[key];
 
                             if(value.isNumeric())
                             {
-                                result[key] = value;
+                                result[key] = value.GetDouble();
                                 ++count;
                             }
-                            else if(value.isString())
+                            else if(value.IsString())
                             {
-                                std::string valueAsString = value.asString();
+                                std::string valueAsString = value.GetString();
 
                                 if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
                                 {
@@ -1001,7 +1025,7 @@ namespace gameanalytics
                 }
             }
 
-            return result;
+            out = result;
         }
 
         Json::Int64 GAState::getClientTsAdjusted()

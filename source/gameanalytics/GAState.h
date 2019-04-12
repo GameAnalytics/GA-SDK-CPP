@@ -30,7 +30,7 @@ namespace gameanalytics
             static void setUserId(const std::string& id);
             static const std::string getIdentifier();
             static bool isInitialized();
-            static long getSessionStart();
+            static int64_t getSessionStart();
             static int getSessionNum();
             static int getTransactionNum();
             static const std::string getSessionId();
@@ -69,7 +69,7 @@ namespace gameanalytics
             static void getSdkErrorEventAnnotations(rapidjson::Value& out);
             static void getInitAnnotations(rapidjson::Value& out);
             static void internalInitialize();
-            static long getClientTsAdjusted();
+            static int64_t getClientTsAdjusted();
             static void setManualSessionHandling(bool flag);
             static bool useManualSessionHandling();
             static void setEnableErrorReporting(bool flag);
@@ -77,7 +77,7 @@ namespace gameanalytics
             static void setEnabledEventSubmission(bool flag);
             static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
-            static const rapidjson::Value& validateAndCleanCustomFields(const rapidjson::Value& fields);
+            static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
             static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
             static bool isCommandCenterReady();
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
@@ -86,7 +86,7 @@ namespace gameanalytics
 
          private:
             static void setDefaultUserId(const std::string& id);
-            static const rapidjson::Value& getSdkConfig();
+            static void getSdkConfig(rapidjson::Value& out);
             static void cacheIdentifier();
             static void ensurePersistedStates();
             static void startNewSession();
@@ -95,13 +95,13 @@ namespace gameanalytics
             static const std::string getFacebookId();
             static const std::string getGender();
             static int getBirthYear();
-            static long calculateServerTimeOffset(long serverTs);
+            static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
 
             std::string _userId;
             std::string _identifier;
             bool _initialized = false;
-            long _sessionStart = 0;
+            int64_t _sessionStart = 0;
             int _sessionNum = 0;
             int _transactionNum = 0;
             std::string _sessionId;
@@ -121,7 +121,7 @@ namespace gameanalytics
             int _birthYear = 0;
             bool _initAuthorized = false;
             bool _enabled = false;
-            long _clientServerTimeOffset = 0;
+            int64_t _clientServerTimeOffset = 0;
             std::string _defaultUserId;
             std::map<std::string, int> _progressionTries;
             rapidjson::Value _sdkConfigDefault;

@@ -407,7 +407,8 @@ namespace gameanalytics
             updateSql = "UPDATE ga_events SET status = '" + requestIdentifier + "' WHERE status = 'new' " + andCategory + ";";
 
             // Get events to process
-            rapidjson::Value& events = store::GAStore::executeQuerySync(selectSql);
+            rapidjson::Value events;
+            store::GAStore::executeQuerySync(selectSql, events);
 
             // Check for errors or empty
             if (events.IsNull() || events.Empty())
@@ -422,7 +423,7 @@ namespace gameanalytics
             {
                 // Make a limit request
                 selectSql = "SELECT client_ts FROM ga_events WHERE status = 'new' " + andCategory + " ORDER BY client_ts ASC LIMIT 0," + std::to_string(GAEvents::MaxEventCount) + ";";
-                events = store::GAStore::executeQuerySync(selectSql);
+                store::GAStore::executeQuerySync(selectSql, events);
                 if (events.IsNull() || events.Empty())
                 {
                     return;

@@ -30,18 +30,36 @@ namespace gameanalytics
         {
         }
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql)
+        void GAStore::executeQuerySync(const std::string& sql)
         {
-            return executeQuerySync(sql, {});
+            rapidjson::Value v;
+            executeQuerySync(sql, v);
+        }
+
+        void GAStore::executeQuerySync(const std::string& sql, rapidjson::Value& out)
+        {
+            executeQuerySync(sql, {}, out);
         }
 
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
+        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
         {
-            return executeQuerySync(sql, parameters, false);
+            rapidjson::Value v;
+            executeQuerySync(sql, parameters, false, v);
         }
 
-        Json::Value GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
+        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, rapidjson::Value& out)
+        {
+            executeQuerySync(sql, parameters, false, out);
+        }
+
+        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
+        {
+            rapidjson::Value v;
+            executeQuerySync(sql, parameters, useTransaction, v);
+        }
+
+        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction, rapidjson::Value& out)
         {
             // Force transaction if it is an update, insert or delete.
             if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)"))
@@ -53,14 +71,15 @@ namespace gameanalytics
             sqlite3 *sqlDatabasePtr = sharedInstance()->getDatabase();
 
             // Create mutable array for results
-            Json::Value results(Json::arrayValue);
+            rapidjson::Document results;
+            document.SetArray();
 
             if (useTransaction)
             {
                 if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK)
                 {
                     logging::GALogger::e(std::string("SQLITE3 BEGIN ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                    return{};
+                    out = rapidjson::Value();
                 }
             }
 
@@ -83,10 +102,11 @@ namespace gameanalytics
                 // get columns count
                 int columnCount = sqlite3_column_count(statement);
 
+                rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
                 // Loop through results
                 while (sqlite3_step(statement) == SQLITE_ROW)
                 {
-                    Json::Value row;
+                    rapidjson::Value row;
                     for (int i = 0; i < columnCount; i++)
                     {
                         const char *column = (const char *)sqlite3_column_name(statement, i);
@@ -106,12 +126,12 @@ namespace gameanalytics
                             row[column] = utilities::GAUtilities::parseString<double>(value);
                             break;
                         default:
-                            row[column] = value;
+                            row[column] = rapidjson::StringRef(value);
                         }
 
                         //row[column] = value;
                     }
-                    results.append(row);
+                    results.PushBack(row, allocator);
                 }
             }
             else
