@@ -409,7 +409,7 @@ namespace gameanalytics
             // collector event API version
             annotations["v"] = 2;
             // User identifier
-            annotations["user_id"] = getIdentifier();
+            annotations["user_id"] = rapidjson::StringRef(getIdentifier().c_str());
 
             // Client Timestamp (the adjusted timestamp)
             annotations["client_ts"] = GAState::getClientTsAdjusted();
@@ -424,7 +424,7 @@ namespace gameanalytics
             // Platform (operating system)
             annotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
             // Session identifier
-            annotations["session_id"] = sharedInstance()->_sessionId;
+            annotations["session_id"] = rapidjson::StringRef(sharedInstance()->_sessionId.c_str());
             // Session number
             annotations["session_num"] = getSessionNum();
 
@@ -432,7 +432,7 @@ namespace gameanalytics
             std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = connection_type;
+                annotations["connection_type"] = rapidjson::StringRef(connection_type.c_str());
             }
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
@@ -461,7 +461,7 @@ namespace gameanalytics
             // App build version (use if not nil)
             if (!getBuild().empty())
             {
-                annotations["build"] = getBuild();
+                annotations["build"] = rapidjson::StringRef(getBuild().c_str());
             }
 
             // ---- OPTIONAL cross-session ---- //
@@ -469,12 +469,12 @@ namespace gameanalytics
             // facebook id (optional)
             if (!getFacebookId().empty())
             {
-                annotations["facebook_id"] = getFacebookId();
+                annotations["facebook_id"] = rapidjson::StringRef(getFacebookId().c_str());
             }
             // gender (optional)
             if (!getGender().empty())
             {
-                annotations["gender"] = getGender();
+                annotations["gender"] = rapidjson::StringRef(getGender().c_str());
             }
             // birth_year (optional)
             if (getBirthYear() != 0)
@@ -495,7 +495,7 @@ namespace gameanalytics
             annotations["v"] = 2;
 
             // Category
-            annotations["category"] = GAState::CategorySdkError;
+            annotations["category"] = rapidjson::StringRef(GAState::CategorySdkError.c_str());
             // SDK version
             annotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
             // Operation system version
@@ -511,7 +511,7 @@ namespace gameanalytics
             std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = connection_type;
+                annotations["connection_type"] = rapidjson::StringRef(connection_type.c_str());
             }
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
@@ -525,7 +525,7 @@ namespace gameanalytics
         void GAState::getInitAnnotations(rapidjson::Value& out)
         {
             rapidjson::Value initAnnotations;
-            initAnnotations["user_id"] = getIdentifier();
+            initAnnotations["user_id"] = rapidjson::StringRef(getIdentifier().c_str());
             // SDK version
             initAnnotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
             // Operation system version
@@ -740,8 +740,14 @@ namespace gameanalytics
                 // insert timeOffset in received init config (so it can be used when offline)
                 initResponseDict["time_offset"] = timeOffsetSeconds;
 
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    initResponseDict.Accept(writer);
+                }
+
                 // insert new config in sql lite cross session storage
-                store::GAStore::setState("sdk_config_cached", utilities::GAUtilities::jsonToString(initResponseDict));
+                store::GAStore::setState("sdk_config_cached", buffer.GetString());
 
                 // set new config and cache in memory
                 GAState::sharedInstance()->_sdkConfigCached = initResponseDict;

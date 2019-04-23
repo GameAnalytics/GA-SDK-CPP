@@ -30,10 +30,11 @@ namespace gameanalytics
         {
         }
 
-        void GAStore::executeQuerySync(const std::string& sql)
+        bool GAStore::executeQuerySync(const std::string& sql)
         {
             rapidjson::Value v;
             executeQuerySync(sql, v);
+            return !v.IsNull() && !v.Empty();
         }
 
         void GAStore::executeQuerySync(const std::string& sql, rapidjson::Value& out)
@@ -73,6 +74,7 @@ namespace gameanalytics
             // Create mutable array for results
             rapidjson::Document results;
             results.SetArray();
+            rapidjson::Document::AllocatorType& allocator = results.GetAllocator();
 
             if (useTransaction)
             {
@@ -102,7 +104,6 @@ namespace gameanalytics
                 // get columns count
                 int columnCount = sqlite3_column_count(statement);
 
-                rapidjson::Document::AllocatorType& allocator = results.GetAllocator();
                 // Loop through results
                 while (sqlite3_step(statement) == SQLITE_ROW)
                 {
@@ -167,7 +168,7 @@ namespace gameanalytics
             }
 
             // Return results
-            out = results;
+            out.CopyFrom(results, allocator);
         }
 
         sqlite3* GAStore::getDatabase()
@@ -228,19 +229,20 @@ namespace gameanalytics
             auto sql_ga_state = "CREATE TABLE IF NOT EXISTS ga_state(key CHAR(255) PRIMARY KEY NOT NULL, value TEXT);";
             auto sql_ga_progression = "CREATE TABLE IF NOT EXISTS ga_progression(progression CHAR(255) PRIMARY KEY NOT NULL, tries CHAR(255));";
 
-            auto results = GAStore::executeQuerySync(sql_ga_events);
+            rapidjson::Value results;
+            GAStore::executeQuerySync(sql_ga_events, results);
 
-            if (results.isNull())
+            if (results.IsNull() || results.Empty())
             {
                 return false;
             }
 
-            if (GAStore::executeQuerySync("SELECT status FROM ga_events LIMIT 0,1").isNull())
+            if (!GAStore::executeQuerySync("SELECT status FROM ga_events LIMIT 0,1"))
             {
                 logging::GALogger::d("ga_events corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_events");
                 results = GAStore::executeQuerySync(sql_ga_events);
-                if (results.isNull())
+                if (results.IsNull() || results.Empty())
                 {
                     logging::GALogger::w("ga_events corrupt, could not recreate it.");
                     return false;
@@ -249,17 +251,17 @@ namespace gameanalytics
 
             results = GAStore::executeQuerySync(sql_ga_session);
 
-            if (results.isNull())
+            if (results.IsNull())
             {
                 return false;
             }
 
-            if (GAStore::executeQuerySync("SELECT session_id FROM ga_session LIMIT 0,1").isNull())
+            if (!GAStore::executeQuerySync("SELECT session_id FROM ga_session LIMIT 0,1"))
             {
                 logging::GALogger::d("ga_session corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_session");
                 results = GAStore::executeQuerySync(sql_ga_session);
-                if (results.isNull())
+                if (results.IsNull() || results.Empty())
                 {
                     logging::GALogger::w("ga_session corrupt, could not recreate it.");
                     return false;
@@ -267,12 +269,12 @@ namespace gameanalytics
             }
 
             results = GAStore::executeQuerySync(sql_ga_state);
-            if (results.isNull())
+            if (results.IsNull() || results.Empty())
             {
                 return false;
             }
 
-            if (GAStore::executeQuerySync("SELECT key FROM ga_state LIMIT 0,1").isNull())
+            if (!GAStore::executeQuerySync("SELECT key FROM ga_state LIMIT 0,1"))
             {
                 logging::GALogger::d("ga_state corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_state");
@@ -285,17 +287,17 @@ namespace gameanalytics
             }
 
             results = GAStore::executeQuerySync(sql_ga_progression);
-            if (results.isNull())
+            if (results.isNull() || results.Empty())
             {
                 return false;
             }
 
-            if (GAStore::executeQuerySync("SELECT progression FROM ga_progression LIMIT 0,1").isNull())
+            if (!GAStore::executeQuerySync("SELECT progression FROM ga_progression LIMIT 0,1"))
             {
                 logging::GALogger::d("ga_progression corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_progression");
                 results = GAStore::executeQuerySync(sql_ga_progression);
-                if (results.isNull())
+                if (results.isNull() || results.Empty())
                 {
                     logging::GALogger::w("ga_progression corrupt, could not recreate it.");
                     return false;

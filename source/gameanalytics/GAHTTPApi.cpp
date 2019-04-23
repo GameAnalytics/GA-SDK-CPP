@@ -67,7 +67,12 @@ namespace gameanalytics
             state::GAState::getInitAnnotations(initAnnotations);
 
             // make JSON string from data
-            std::string JSONstring = utilities::GAUtilities::jsonToString(initAnnotations);
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                initAnnotations.Accept(writer);
+            }
+            std::string JSONstring = buffer.GetString();
 
             if (JSONstring.empty())
             {
@@ -298,7 +303,7 @@ namespace gameanalytics
             state::GAState::getSdkErrorEventAnnotations(json);
 
             std::string typeString = sdkErrorTypeToString(type);
-            json["type"] = typeString;
+            json["type"] = rapidjson::StringRef(typeString.c_str());
 
             rapidjson::Document eventArray;
             eventArray.SetArray();

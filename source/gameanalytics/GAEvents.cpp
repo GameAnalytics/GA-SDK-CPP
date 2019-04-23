@@ -62,7 +62,7 @@ namespace gameanalytics
 
             // Event specific data
             rapidjson::Value eventDict;
-            eventDict["category"] = categorySessionStart;
+            eventDict["category"] = rapidjson::StringRef(categorySessionStart.c_str());
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
@@ -91,9 +91,9 @@ namespace gameanalytics
                 return;
             }
 
-            long session_start_ts = state::GAState::sharedInstance()->getSessionStart();
-            long client_ts_adjusted = state::GAState::getClientTsAdjusted();
-            long sessionLength = client_ts_adjusted - session_start_ts;
+            int64_t session_start_ts = state::GAState::sharedInstance()->getSessionStart();
+            int64_t client_ts_adjusted = state::GAState::getClientTsAdjusted();
+            int64_t sessionLength = client_ts_adjusted - session_start_ts;
 
             if(sessionLength < 0)
             {
@@ -106,7 +106,7 @@ namespace gameanalytics
             // Event specific data
             rapidjson::Value eventDict;
 
-            eventDict["category"] = GAEvents::CategorySessionEnd;
+            eventDict["category"] = rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str());
             eventDict["length"] = sessionLength;
 
             // Add custom dimensions
@@ -145,27 +145,34 @@ namespace gameanalytics
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", {"transaction_num", std::to_string(state::GAState::getTransactionNum())});
 
             // Required
-            eventDict["event_id"] = itemType + ":" + itemId;
-            eventDict["category"] = GAEvents::CategoryBusiness;
-            eventDict["currency"] = currency;
+            eventDict["event_id"] = rapidjson::StringRef((itemType + ":" + itemId).c_str());
+            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryBusiness.c_str());
+            eventDict["currency"] = rapidjson::StringRef(currency.c_str());
             eventDict["amount"] = amount;
             eventDict["transaction_num"] = state::GAState::getTransactionNum();
 
             // Optional
             if (!cartType.empty())
             {
-                eventDict["cart_type"] = cartType;
+                eventDict["cart_type"] = rapidjson::StringRef(cartType.c_str());
             }
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            rapidjson::Value cleanedFields;
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventDict, cleanedFields);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + ", fields:" + std::string(buffer.GetString()) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -196,19 +203,26 @@ namespace gameanalytics
 
             // insert event specific values
             std::string flowTypeString = resourceFlowTypeString(flowType);
-            eventDict["event_id"] = flowTypeString + ":" + currency + ":" + itemType + ":" + itemId;
-            eventDict["category"] = GAEvents::CategoryResource;
+            eventDict["event_id"] = rapidjson::StringRef((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str());
+            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryResource.c_str());
             eventDict["amount"] = amount;
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            rapidjson::Value cleanedFields;
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventDict, cleanedFields);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + std::string(buffer.GetString()) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -250,8 +264,8 @@ namespace gameanalytics
             }
 
             // Append event specifics
-            eventDict["category"] = GAEvents::CategoryProgression;
-            eventDict["event_id"] = progressionStatusString + ":" + progressionIdentifier;
+            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryProgression.c_str());
+            eventDict["event_id"] = rapidjson::StringRef((progressionStatusString + ":" + progressionIdentifier).c_str());
 
             // Attempt
             double attempt_num = 0;
@@ -286,12 +300,19 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            rapidjson::Value cleanedFields;
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventDict, cleanedFields);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + std::string(buffer.GetString()) + "}");
 
             // Send to store
             addEventToStore(eventDict);
@@ -315,23 +336,30 @@ namespace gameanalytics
             rapidjson::Value eventData;
 
             // Append event specifics
-            eventData["category"] = GAEvents::CategoryDesign;
-            eventData["event_id"] = eventId;
+            eventData["category"] = rapidjson::StringRef(GAEvents::CategoryDesign.c_str());
+            eventData["event_id"] = rapidjson::StringRef(eventId.c_str());
 
             if (sendValue)
             {
                 eventData["value"] = value;
             }
 
-            rapidjson::Value cleanedFields;
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + std::string(buffer.GetString()) + "}");
 
             // Send to store
             addEventToStore(eventData);
@@ -357,19 +385,26 @@ namespace gameanalytics
             rapidjson::Value eventData;
 
             // Append event specifics
-            eventData["category"] = GAEvents::CategoryError;
-            eventData["severity"] = severityString;
-            eventData["message"] = message;
+            eventData["category"] = rapidjson::StringRef(GAEvents::CategoryError.c_str());
+            eventData["severity"] = rapidjson::StringRef(severityString.c_str());
+            eventData["message"] = rapidjson::StringRef(message.c_str());
 
-            rapidjson::Value cleanedFields;
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + std::string(buffer.GetString()) + "}");
 
             // Send to store
             addEventToStore(eventData);
@@ -540,7 +575,12 @@ namespace gameanalytics
             {
                 rapidjson::Value ev;
                 state::GAState::getEventAnnotations(ev);
-                auto jsonDefaults = utilities::GAUtilities::jsonToString(ev);
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    ev.Accept(writer);
+                }
+                std::string jsonDefaults = buffer.GetString();
                 std::string sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
                 std::vector<std::string> parameters = { ev["session_id"].GetString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
                 store::GAStore::executeQuerySync(sql, parameters);
@@ -582,7 +622,8 @@ namespace gameanalytics
                     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                     session.Accept(writer);
                 }
-                const char* sessionEndEvent = buffer.GetString();
+                rapidjson::Document sessionEndEvent;
+                sessionEndEvent.Parse(buffer.GetString());
                 int64_t event_ts = sessionEndEvent["client_ts"].GetInt64();
                 int64_t start_ts = utilities::GAUtilities::parseString<int64_t>(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0");
 
@@ -590,7 +631,7 @@ namespace gameanalytics
 
                 logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
 
-                sessionEndEvent["category"] = GAEvents::CategorySessionEnd;
+                sessionEndEvent["category"] = rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str());
                 sessionEndEvent["length"] = length;
 
                 // Add to store
@@ -599,7 +640,7 @@ namespace gameanalytics
         }
 
         // GENERAL
-        void GAEvents::addEventToStore(const Json::Value& eventData)
+        void GAEvents::addEventToStore(const rapidjson::Value& eventData)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -622,83 +663,110 @@ namespace gameanalytics
 
             // Check db size limits (10mb)
             // If database is too large block all except user, session and business
-            if (store::GAStore::isDbTooLargeForEvents() && !utilities::GAUtilities::stringMatch(eventData["category"].asString(), "^(user|session_end|business)$"))
+            if (store::GAStore::isDbTooLargeForEvents() && !utilities::GAUtilities::stringMatch(eventData["category"].GetString(), "^(user|session_end|business)$"))
             {
                 logging::GALogger::w("Database too large. Event has been blocked.");
                 return;
             }
 
             // Get default annotations
-            Json::Value ev = state::GAState::getEventAnnotations();
+            rapidjson::Document ev;
+            state::GAState::getEventAnnotations(ev);
 
             // Create json with only default annotations
-            auto jsonDefaults = utilities::GAUtilities::jsonToString(ev);
+            std::string jsonDefaults;
+            {
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    ev.Accept(writer);
+                }
+                jsonDefaults = buffer.GetString();
+            }
 
             // Merge with eventData
-            for (auto e : eventData.getMemberNames())
+            for (rapidjson::Value::ConstMemberIterator itr = eventData.MemberBegin(); itr != eventData.MemberEnd(); ++itr)
             {
-                ev[e] = eventData[e];
+                const char* key = itr->name.GetString();
+                const rapidjson::Value& value = eventData[key];
+                if(value.IsNumber())
+                {
+                    ev[key] = value.GetDouble();
+                }
+                else if(value.IsString())
+                {
+                    ev[key] = rapidjson::StringRef(value.GetString());
+                }
             }
 
             // Create json string representation
-            std::string json = utilities::GAUtilities::jsonToString(ev);
+            std::string json;
+            {
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    ev.Accept(writer);
+                }
+                json = buffer.GetString();
+            }
 
             // output if VERBOSE LOG enabled
-
             logging::GALogger::ii("Event added to queue: " + json);
 
             // Add to store
-            std::vector<std::string> parameters = { "new", ev["category"].asString(), ev["session_id"].asString(), ev["client_ts"].asString(), json };
+            std::vector<std::string> parameters = { "new", ev["category"].GetString(), ev["session_id"].GetString(), ev["client_ts"].GetString(), json };
             std::string sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
 
             store::GAStore::executeQuerySync(sql, parameters);
 
             // Add to session store if not last
-            if (eventData["category"].asString() == GAEvents::CategorySessionEnd)
+            if (eventData["category"].GetString() == GAEvents::CategorySessionEnd)
             {
-                parameters = { ev["session_id"].asString() };
+                parameters = { ev["session_id"].GetString() };
                 sql = "DELETE FROM ga_session WHERE session_id = ?;";
                 store::GAStore::executeQuerySync(sql, parameters);
             }
             else
             {
                 sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
-                parameters = { ev["session_id"].asString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
+                parameters = { ev["session_id"].GetString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
                 store::GAStore::executeQuerySync(sql, parameters);
             }
         }
 
-        void GAEvents::addDimensionsToEvent(Json::Value& eventData)
+        void GAEvents::addDimensionsToEvent(rapidjson::Value& eventData)
         {
-            if (!eventData)
+            if (eventData.IsNull())
             {
                 return;
             }
             // add to dict (if not nil)
             if (!state::GAState::getCurrentCustomDimension01().empty())
             {
-                eventData["custom_01"] = state::GAState::getCurrentCustomDimension01();
+                eventData["custom_01"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension01().c_str());
             }
             if (!state::GAState::getCurrentCustomDimension02().empty())
             {
-                eventData["custom_02"] = state::GAState::getCurrentCustomDimension02();
+                eventData["custom_02"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension02().c_str());
             }
             if (!state::GAState::getCurrentCustomDimension03().empty())
             {
-                eventData["custom_03"] = state::GAState::getCurrentCustomDimension03();
+                eventData["custom_03"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension03().c_str());
             }
         }
 
-        void GAEvents::addFieldsToEvent(Json::Value& eventData, const Json::Value& fields)
+        void GAEvents::addFieldsToEvent(rapidjson::Value& eventData, rapidjson::Document& fields)
         {
-            if(eventData.empty())
+            if(eventData.IsNull())
             {
                 return;
             }
 
-            if(!fields.empty())
+            if(!fields.Empty())
             {
-                eventData["custom_fields"] = fields;
+                rapidjson::Value v;
+                v.CopyFrom(fields, fields.GetAllocator());
+                eventData["custom_fields"] = v;
             }
         }
 

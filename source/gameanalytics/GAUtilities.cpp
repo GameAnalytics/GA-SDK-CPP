@@ -345,25 +345,6 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::jsonToString(const rapidjson::Value& obj)
-        {
-            Json::FastWriter writer;
-            std::string output = writer.write(obj);
-            return output;
-        }
-
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr)
-        {
-            Json::Value json_array(Json::arrayValue);
-            for (const auto& x : arr)
-            {
-                json_array.append(x);
-            }
-            return jsonToString(json_array);
-        }
-
-        // TODO(nikolaj): explain function
         bool GAUtilities::stringVectorContainsString(std::vector<std::string> vector, std::string search)
         {
             if (vector.size() == 0) {

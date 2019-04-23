@@ -39,7 +39,7 @@ namespace gameanalytics
             static void fixMissingSessionEndEvents();
             static void addEventToStore(const rapidjson::Value& eventData);
             static void addDimensionsToEvent(rapidjson::Value& eventData);
-            static void addFieldsToEvent(rapidjson::Value& eventData, const rapidjson::Value& fields);
+            static void addFieldsToEvent(rapidjson::Value& eventData, rapidjson::Document& fields);
             static void updateSessionTime();
 
             static const std::string CategorySessionStart;
