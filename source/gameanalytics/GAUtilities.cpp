@@ -356,7 +356,7 @@ namespace gameanalytics
         }
 
         // using std::chrono to get time
-        Json::Int64 GAUtilities::timeIntervalSince1970()
+        int64_t GAUtilities::timeIntervalSince1970()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         }

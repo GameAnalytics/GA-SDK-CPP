@@ -90,7 +90,7 @@ namespace gameanalytics
             static bool validateDimension02(const std::string& dimension02);
             static bool validateDimension03(const std::string& dimension03);
 
-            static rapidjson::Value& validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse);
+            static void validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Value& out);
 
             // array of strings
             static bool validateArrayOfStrings(
@@ -103,8 +103,8 @@ namespace gameanalytics
             // facebook id, gender, birthyear
             static bool validateFacebookId(const std::string& facebookId);
             static bool validateGender(EGAGender gender);
-            static bool validateBirthyear(long birthYear);
-            static bool validateClientTs(long clientTs);
+            static bool validateBirthyear(int64_t birthYear);
+            static bool validateClientTs(int64_t clientTs);
 
             static bool validateUserId(const std::string& uId);
         };

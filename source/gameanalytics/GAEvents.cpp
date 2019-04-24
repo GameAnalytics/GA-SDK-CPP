@@ -61,8 +61,10 @@ namespace gameanalytics
             std::string categorySessionStart = GAEvents::CategorySessionStart;
 
             // Event specific data
-            rapidjson::Value eventDict;
-            eventDict["category"] = rapidjson::StringRef(categorySessionStart.c_str());
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
+            eventDict.AddMember("category", rapidjson::StringRef(categorySessionStart.c_str()), allocator);
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
@@ -104,10 +106,12 @@ namespace gameanalytics
             }
 
             // Event specific data
-            rapidjson::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
-            eventDict["category"] = rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str());
-            eventDict["length"] = sessionLength;
+            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str()), allocator);
+            eventDict.AddMember("length", sessionLength, allocator);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
@@ -138,23 +142,25 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            rapidjson::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // Increment transaction number and persist
             state::GAState::incrementTransactionNum();
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", {"transaction_num", std::to_string(state::GAState::getTransactionNum())});
 
             // Required
-            eventDict["event_id"] = rapidjson::StringRef((itemType + ":" + itemId).c_str());
-            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryBusiness.c_str());
-            eventDict["currency"] = rapidjson::StringRef(currency.c_str());
-            eventDict["amount"] = amount;
-            eventDict["transaction_num"] = state::GAState::getTransactionNum();
+            eventDict.AddMember("event_id", rapidjson::StringRef((itemType + ":" + itemId).c_str()), allocator);
+            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryBusiness.c_str()), allocator);
+            eventDict.AddMember("currency", rapidjson::StringRef(currency.c_str()), allocator);
+            eventDict.AddMember("amount", amount, allocator);
+            eventDict.AddMember("transaction_num", state::GAState::getTransactionNum(), allocator);
 
             // Optional
             if (!cartType.empty())
             {
-                eventDict["cart_type"] = rapidjson::StringRef(cartType.c_str());
+                eventDict.AddMember("cart_type", rapidjson::StringRef(cartType.c_str()), allocator);
             }
 
             // Add custom dimensions
@@ -199,13 +205,15 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            rapidjson::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // insert event specific values
             std::string flowTypeString = resourceFlowTypeString(flowType);
-            eventDict["event_id"] = rapidjson::StringRef((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str());
-            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryResource.c_str());
-            eventDict["amount"] = amount;
+            eventDict.AddMember("event_id", rapidjson::StringRef((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str()), allocator);
+            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryResource.c_str()), allocator);
+            eventDict.AddMember("amount", amount, allocator);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
@@ -245,7 +253,9 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            rapidjson::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // Progression identifier
             std::string progressionIdentifier;
@@ -264,8 +274,8 @@ namespace gameanalytics
             }
 
             // Append event specifics
-            eventDict["category"] = rapidjson::StringRef(GAEvents::CategoryProgression.c_str());
-            eventDict["event_id"] = rapidjson::StringRef((progressionStatusString + ":" + progressionIdentifier).c_str());
+            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryProgression.c_str()), allocator);
+            eventDict.AddMember("event_id", rapidjson::StringRef((progressionStatusString + ":" + progressionIdentifier).c_str()), allocator);
 
             // Attempt
             double attempt_num = 0;
@@ -273,7 +283,7 @@ namespace gameanalytics
             // Add score if specified and status is not start
             if (sendScore && progressionStatus != EGAProgressionStatus::Start)
             {
-                eventDict["score"] = score;
+                eventDict.AddMember("score", score, allocator);
             }
 
             // Count attempts on each progression fail and persist
@@ -291,7 +301,7 @@ namespace gameanalytics
 
                 // Add to event
                 attempt_num = state::GAState::getProgressionTries(progressionIdentifier);
-                eventDict["attempt_num"] = attempt_num;
+                eventDict.AddMember("attempt_num", attempt_num, allocator);
 
                 // Clear
                 state::GAState::clearProgressionTries(progressionIdentifier);
@@ -333,15 +343,17 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            rapidjson::Value eventData;
+            rapidjson::Document eventData;
+            eventData.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData["category"] = rapidjson::StringRef(GAEvents::CategoryDesign.c_str());
-            eventData["event_id"] = rapidjson::StringRef(eventId.c_str());
+            eventData.AddMember("category", rapidjson::StringRef(GAEvents::CategoryDesign.c_str()), allocator);
+            eventData.AddMember("event_id", rapidjson::StringRef(eventId.c_str()), allocator);
 
             if (sendValue)
             {
-                eventData["value"] = value;
+                eventData.AddMember("value", value, allocator);
             }
 
             rapidjson::Document cleanedFields;
@@ -382,12 +394,14 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            rapidjson::Value eventData;
+            rapidjson::Document eventData;
+            eventData.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData["category"] = rapidjson::StringRef(GAEvents::CategoryError.c_str());
-            eventData["severity"] = rapidjson::StringRef(severityString.c_str());
-            eventData["message"] = rapidjson::StringRef(message.c_str());
+            eventData.AddMember("category", rapidjson::StringRef(GAEvents::CategoryError.c_str()), allocator);
+            eventData.AddMember("severity", rapidjson::StringRef(severityString.c_str()), allocator);
+            eventData.AddMember("message", rapidjson::StringRef(message.c_str()), allocator);
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
@@ -499,7 +513,7 @@ namespace gameanalytics
             logging::GALogger::i("Event queue: Sending " + std::to_string(events.Size()) + " events.");
 
             // Set status of events to 'sending' (also check for error)
-            rapidjson::Value updateResult;
+            rapidjson::Value updateResult(rapidjson::kObjectType);
             store::GAStore::executeQuerySync(updateSql, updateResult);
             if (updateResult.IsNull())
             {
@@ -521,7 +535,7 @@ namespace gameanalytics
             }
 
             // send events
-            rapidjson::Value dataDict;
+            rapidjson::Value dataDict(rapidjson::kArrayType);
             http::EGAHTTPApiResponse responseEnum;
 #if USE_UWP
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
@@ -573,7 +587,7 @@ namespace gameanalytics
         {
             if(state::GAState::sessionIsStarted())
             {
-                rapidjson::Value ev;
+                rapidjson::Value ev(rapidjson::kObjectType);
                 state::GAState::getEventAnnotations(ev);
                 rapidjson::StringBuffer buffer;
                 {
@@ -603,7 +617,7 @@ namespace gameanalytics
             std::vector<std::string> parameters = { state::GAState::getSessionId() };
 
             std::string sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
-            rapidjson::Value sessions;
+            rapidjson::Value sessions(rapidjson::kArrayType);
             store::GAStore::executeQuerySync(sql, parameters, sessions);
 
             if (sessions.Empty())
@@ -624,6 +638,7 @@ namespace gameanalytics
                 }
                 rapidjson::Document sessionEndEvent;
                 sessionEndEvent.Parse(buffer.GetString());
+                rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
                 int64_t event_ts = sessionEndEvent["client_ts"].GetInt64();
                 int64_t start_ts = utilities::GAUtilities::parseString<int64_t>(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0");
 
@@ -631,8 +646,8 @@ namespace gameanalytics
 
                 logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
 
-                sessionEndEvent["category"] = rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str());
-                sessionEndEvent["length"] = length;
+                sessionEndEvent.AddMember("category", rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str()), allocator);
+                sessionEndEvent.AddMember("length", length, allocator);
 
                 // Add to store
                 addEventToStore(sessionEndEvent);
@@ -671,6 +686,7 @@ namespace gameanalytics
 
             // Get default annotations
             rapidjson::Document ev;
+            ev.SetObject();
             state::GAState::getEventAnnotations(ev);
 
             // Create json with only default annotations
@@ -734,39 +750,42 @@ namespace gameanalytics
             }
         }
 
-        void GAEvents::addDimensionsToEvent(rapidjson::Value& eventData)
+        void GAEvents::addDimensionsToEvent(rapidjson::Document& eventData)
         {
             if (eventData.IsNull())
             {
                 return;
             }
+
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
+
             // add to dict (if not nil)
             if (!state::GAState::getCurrentCustomDimension01().empty())
             {
-                eventData["custom_01"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension01().c_str());
+                eventData.AddMember("custom_01", rapidjson::StringRef(state::GAState::getCurrentCustomDimension01().c_str()), allocator);
             }
             if (!state::GAState::getCurrentCustomDimension02().empty())
             {
-                eventData["custom_02"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension02().c_str());
+                eventData.AddMember("custom_02", rapidjson::StringRef(state::GAState::getCurrentCustomDimension02().c_str()), allocator);
             }
             if (!state::GAState::getCurrentCustomDimension03().empty())
             {
-                eventData["custom_03"] = rapidjson::StringRef(state::GAState::getCurrentCustomDimension03().c_str());
+                eventData.AddMember("custom_03", rapidjson::StringRef(state::GAState::getCurrentCustomDimension03().c_str()), allocator);
             }
         }
 
-        void GAEvents::addFieldsToEvent(rapidjson::Value& eventData, rapidjson::Document& fields)
+        void GAEvents::addFieldsToEvent(rapidjson::Document& eventData, rapidjson::Document& fields)
         {
             if(eventData.IsNull())
             {
                 return;
             }
 
-            if(!fields.Empty())
+            if(!fields.ObjectEmpty())
             {
-                rapidjson::Value v;
+                rapidjson::Value v(rapidjson::kObjectType);
                 v.CopyFrom(fields, fields.GetAllocator());
-                eventData["custom_fields"] = v;
+                eventData.AddMember("custom_fields", v, eventData.GetAllocator());
             }
         }
 

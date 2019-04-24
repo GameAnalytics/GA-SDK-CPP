@@ -233,7 +233,7 @@ namespace gameanalytics
             }
             if (!GAValidator::validateLongString(message, true))
             {
-                logging::GALogger::w("Validation fail - error event - message: Message cannot be above 8192 characters.");
+                logging::GALogger::w("Validation fail - error event - message: Message cannot be above 8192 characters. message=" + message);
                 return false;
             }
             return true;
@@ -582,7 +582,7 @@ namespace gameanalytics
             return false;
         }
 
-        bool GAValidator::validateBirthyear(long birthYear)
+        bool GAValidator::validateBirthyear(int64_t birthYear)
         {
             if (birthYear < 0 || birthYear > 9999)
             {
@@ -592,7 +592,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateClientTs(Json::Int64 clientTs)
+        bool GAValidator::validateClientTs(int64_t clientTs)
         {
             // server regex: ^([0-9]{10,11})$
             if (clientTs < 1000000000 || clientTs > 9999999999)
@@ -612,39 +612,44 @@ namespace gameanalytics
             return true;
         }
 
-        Json::Value GAValidator::validateAndCleanInitRequestResponse(Json::Value& initResponse)
+        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Value& out)
         {
             // make sure we have a valid dict
-            if (initResponse.isNull())
+            if (initResponse.IsNull())
             {
                 logging::GALogger::w("validateInitRequestResponse failed - no response dictionary.");
-                return{};
+                rapidjson::Value v(rapidjson::kObjectType);
+                out = v;
+                return;
             }
 
-            Json::Value validatedDict;
+            rapidjson::Document validatedDict;
+            validatedDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = validatedDict.GetAllocator();
 
             // validate enabled field
-            if(initResponse["enabled"].isBool())
+            if(initResponse.HasMember("enabled") && initResponse["enabled"].IsBool())
             {
-                validatedDict["enabled"] = initResponse.get("enabled", true).asBool();
+                validatedDict.AddMember("enabled", initResponse["enabled"].GetBool(), allocator);
             }
 
             // validate server_ts
-            if (initResponse["server_ts"].isNumeric())
+            if (initResponse.HasMember("server_ts") && initResponse["server_ts"].IsNumber())
             {
-                Json::Int64 serverTsNumber = initResponse.get("server_ts", -1).asInt64();
+                int64_t serverTsNumber = initResponse["server_ts"].GetInt64();
                 if (serverTsNumber > 0)
                 {
-                    validatedDict["server_ts"] = serverTsNumber;
+                    validatedDict.AddMember("server_ts", serverTsNumber, allocator);
                 }
             }
 
-            if (initResponse["configurations"].isArray())
+            if (initResponse.HasMember("configurations") && initResponse["configurations"].IsArray())
             {
-                validatedDict["configurations"] = initResponse["configurations"];
+                rapidjson::Value configurations = rapidjson::Value(initResponse["configurations"], allocator);
+                validatedDict.AddMember("configurations", configurations, allocator);
             }
 
-            return validatedDict;
+            out.CopyFrom(validatedDict, allocator);
         }
     }
 }

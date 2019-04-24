@@ -17,7 +17,7 @@
 #if !USE_UWP && !USE_TIZEN
 #include "GAUncaughtExceptionHandler.h"
 #endif
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include <cstdlib>
 #if USE_UWP
 #include <thread>
@@ -49,12 +49,13 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableCustomDimensions01(STRING customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson.c_str());
         std::vector<std::string> list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.push_back((*itr).GetString());
         }
 
         configureAvailableCustomDimensions01(list);
@@ -80,12 +81,13 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableCustomDimensions02(STRING customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson.c_str());
         std::vector<std::string> list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.push_back((*itr).GetString());
         }
 
         configureAvailableCustomDimensions02(list);
@@ -111,12 +113,13 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableCustomDimensions03(STRING customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson.c_str());
         std::vector<std::string> list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.push_back((*itr).GetString());
         }
 
         configureAvailableCustomDimensions03(list);
@@ -142,12 +145,13 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableResourceCurrencies(STRING resourceCurrenciesJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
+        rapidjson::Document json;
+        json.Parse(resourceCurrenciesJson.c_str());
         std::vector<std::string> list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.push_back((*itr).GetString());
         }
 
         configureAvailableResourceCurrencies(list);
@@ -173,12 +177,13 @@ namespace gameanalytics
 
     void GameAnalytics::configureAvailableResourceItemTypes(STRING resourceItemTypesJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
+        rapidjson::Document json;
+        json.Parse(resourceItemTypesJson.c_str());
         std::vector<std::string> list;
 
-        for (unsigned int index = 0; index < json.size(); ++index )
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.push_back((*itr).GetString());
         }
 
         configureAvailableResourceItemTypes(list);
@@ -430,7 +435,9 @@ namespace gameanalytics
                 return;
             }
             // Send to events
-            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, fieldsJson);
         });
     }
 
@@ -458,7 +465,9 @@ namespace gameanalytics
                 return;
             }
 
-            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, fieldsJson);
         });
     }
 
@@ -486,7 +495,9 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, fieldsJson);
         });
     }
 
@@ -514,7 +525,9 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, fieldsJson);
         });
     }
 
@@ -538,7 +551,9 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, 0, false, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addDesignEvent(eventId, 0, false, fieldsJson);
         });
     }
 
@@ -562,7 +577,9 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value, true, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addDesignEvent(eventId, value, true, fieldsJson);
         });
     }
 
@@ -586,7 +603,9 @@ namespace gameanalytics
             {
                 return;
             }
-            events::GAEvents::addErrorEvent(severity, message, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.c_str());
+            events::GAEvents::addErrorEvent(severity, message, fieldsJson);
         });
     }
 

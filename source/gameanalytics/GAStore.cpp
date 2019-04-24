@@ -32,9 +32,9 @@ namespace gameanalytics
 
         bool GAStore::executeQuerySync(const std::string& sql)
         {
-            rapidjson::Value v;
+            rapidjson::Value v(rapidjson::kObjectType);
             executeQuerySync(sql, v);
-            return !v.IsNull() && !v.Empty();
+            return !v.IsNull();
         }
 
         void GAStore::executeQuerySync(const std::string& sql, rapidjson::Value& out)
@@ -45,7 +45,7 @@ namespace gameanalytics
 
         void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
         {
-            rapidjson::Value v;
+            rapidjson::Value v(rapidjson::kObjectType);
             executeQuerySync(sql, parameters, false, v);
         }
 
@@ -56,7 +56,7 @@ namespace gameanalytics
 
         void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
         {
-            rapidjson::Value v;
+            rapidjson::Value v(rapidjson::kObjectType);
             executeQuerySync(sql, parameters, useTransaction, v);
         }
 
@@ -82,6 +82,7 @@ namespace gameanalytics
                 {
                     logging::GALogger::e(std::string("SQLITE3 BEGIN ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                     out = rapidjson::Value();
+                    return;
                 }
             }
 
@@ -107,7 +108,7 @@ namespace gameanalytics
                 // Loop through results
                 while (sqlite3_step(statement) == SQLITE_ROW)
                 {
-                    rapidjson::Value row;
+                    rapidjson::Value row(rapidjson::kObjectType);
                     for (int i = 0; i < columnCount; i++)
                     {
                         const char *column = (const char *)sqlite3_column_name(statement, i);
@@ -139,7 +140,8 @@ namespace gameanalytics
             {
                 // TODO(nikolaj): Should we do a db validation to see if the db is corrupt here?
                 logging::GALogger::e(std::string("SQLITE3 PREPARE ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                results.Clear();
+                out = rapidjson::Value();
+                return;
             }
 
             // Destroy statement
@@ -150,7 +152,8 @@ namespace gameanalytics
                     if (sqlite3_exec(sqlDatabasePtr, "COMMIT", 0, 0, 0) != SQLITE_OK)
                     {
                         logging::GALogger::e(std::string("SQLITE3 COMMIT ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
-                        results.Clear();
+                        out = rapidjson::Value();
+                        return;
                     }
                 }
             }
@@ -165,6 +168,8 @@ namespace gameanalytics
                         logging::GALogger::e(std::string("SQLITE3 ROLLBACK ERROR: ") + sqlite3_errmsg(sqlDatabasePtr));
                     }
                 }
+                out = rapidjson::Value();
+                return;
             }
 
             // Return results
@@ -229,11 +234,11 @@ namespace gameanalytics
             auto sql_ga_state = "CREATE TABLE IF NOT EXISTS ga_state(key CHAR(255) PRIMARY KEY NOT NULL, value TEXT);";
             auto sql_ga_progression = "CREATE TABLE IF NOT EXISTS ga_progression(progression CHAR(255) PRIMARY KEY NOT NULL, tries CHAR(255));";
 
-            rapidjson::Value results;
-            GAStore::executeQuerySync(sql_ga_events, results);
+            ;
 
-            if (results.IsNull() || results.Empty())
+            if (!GAStore::executeQuerySync(sql_ga_events))
             {
+                logging::GALogger::d("ensureDatabase failed: " + std::string(sql_ga_events));
                 return false;
             }
 
@@ -241,17 +246,14 @@ namespace gameanalytics
             {
                 logging::GALogger::d("ga_events corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_events");
-                results = GAStore::executeQuerySync(sql_ga_events);
-                if (results.IsNull() || results.Empty())
+                if (!GAStore::executeQuerySync(sql_ga_events))
                 {
                     logging::GALogger::w("ga_events corrupt, could not recreate it.");
                     return false;
                 }
             }
 
-            results = GAStore::executeQuerySync(sql_ga_session);
-
-            if (results.IsNull())
+            if (!GAStore::executeQuerySync(sql_ga_session))
             {
                 return false;
             }
@@ -260,16 +262,14 @@ namespace gameanalytics
             {
                 logging::GALogger::d("ga_session corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_session");
-                results = GAStore::executeQuerySync(sql_ga_session);
-                if (results.IsNull() || results.Empty())
+                if (!GAStore::executeQuerySync(sql_ga_session))
                 {
                     logging::GALogger::w("ga_session corrupt, could not recreate it.");
                     return false;
                 }
             }
 
-            results = GAStore::executeQuerySync(sql_ga_state);
-            if (results.IsNull() || results.Empty())
+            if (!GAStore::executeQuerySync(sql_ga_state))
             {
                 return false;
             }
@@ -278,16 +278,14 @@ namespace gameanalytics
             {
                 logging::GALogger::d("ga_state corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_state");
-                results = GAStore::executeQuerySync(sql_ga_state);
-                if (results.isNull())
+                if (!GAStore::executeQuerySync(sql_ga_state))
                 {
                     logging::GALogger::w("ga_state corrupt, could not recreate it.");
                     return false;
                 }
             }
 
-            results = GAStore::executeQuerySync(sql_ga_progression);
-            if (results.isNull() || results.Empty())
+            if (!GAStore::executeQuerySync(sql_ga_progression))
             {
                 return false;
             }
@@ -296,8 +294,7 @@ namespace gameanalytics
             {
                 logging::GALogger::d("ga_progression corrupt, recreating.");
                 GAStore::executeQuerySync("DROP TABLE ga_progression");
-                results = GAStore::executeQuerySync(sql_ga_progression);
-                if (results.isNull() || results.Empty())
+                if (!GAStore::executeQuerySync(sql_ga_progression))
                 {
                     logging::GALogger::w("ga_progression corrupt, could not recreate it.");
                     return false;
@@ -351,17 +348,19 @@ namespace gameanalytics
         {
             if(getDbSizeBytes() > MaxDbSizeBytesBeforeTrim)
             {
-                Json::Value resultSessionArray = executeQuerySync("SELECT session_id, Max(client_ts) FROM ga_events GROUP BY session_id ORDER BY client_ts LIMIT 3");
+                rapidjson::Value resultSessionArray(rapidjson::kArrayType);
+                executeQuerySync("SELECT session_id, Max(client_ts) FROM ga_events GROUP BY session_id ORDER BY client_ts LIMIT 3", resultSessionArray);
 
-                if(resultSessionArray.size() > 0)
+                if(resultSessionArray.Size() > 0)
                 {
                     std::string sessionDeleteString = "";
 
                     unsigned int i = 0;
-                    for (auto result : resultSessionArray)
+                    for (rapidjson::Value::ConstValueIterator itr = resultSessionArray.Begin(); itr != resultSessionArray.End(); ++itr)
                     {
-                        sessionDeleteString += result.asString();
-                        if(i < resultSessionArray.size() - 1)
+                        const rapidjson::Value& result = *itr;
+                        sessionDeleteString += result.GetString();
+                        if(i < resultSessionArray.Size() - 1)
                         {
                             sessionDeleteString += ",";
                         }

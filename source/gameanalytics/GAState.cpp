@@ -402,57 +402,59 @@ namespace gameanalytics
 
         void GAState::getEventAnnotations(rapidjson::Value& out)
         {
-            rapidjson::Value annotations;
+            rapidjson::Document annotations;
+            annotations.SetObject();
+            rapidjson::Document::AllocatorType& allocator = annotations.GetAllocator();
 
             // ---- REQUIRED ---- //
 
             // collector event API version
-            annotations["v"] = 2;
+            annotations.AddMember("v", 2, allocator);
             // User identifier
-            annotations["user_id"] = rapidjson::StringRef(getIdentifier().c_str());
+            annotations.AddMember("user_id", rapidjson::StringRef(getIdentifier().c_str()), allocator);
 
             // Client Timestamp (the adjusted timestamp)
-            annotations["client_ts"] = GAState::getClientTsAdjusted();
+            annotations.AddMember("client_ts", GAState::getClientTsAdjusted(), allocator);
             // SDK version
-            annotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
+            annotations.AddMember("sdk_version", rapidjson::StringRef(device::GADevice::getRelevantSdkVersion()), allocator);
             // Operation system version
-            annotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
+            annotations.AddMember("os_version", rapidjson::StringRef(device::GADevice::getOSVersion()), allocator);
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = rapidjson::StringRef(device::GADevice::getDeviceManufacturer());
+            annotations.AddMember("manufacturer", rapidjson::StringRef(device::GADevice::getDeviceManufacturer()), allocator);
             // Device version
-            annotations["device"] = rapidjson::StringRef(device::GADevice::getDeviceModel());
+            annotations.AddMember("device", rapidjson::StringRef(device::GADevice::getDeviceModel()), allocator);
             // Platform (operating system)
-            annotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
+            annotations.AddMember("platform", rapidjson::StringRef(device::GADevice::getBuildPlatform()), allocator);
             // Session identifier
-            annotations["session_id"] = rapidjson::StringRef(sharedInstance()->_sessionId.c_str());
+            annotations.AddMember("session_id", rapidjson::StringRef(sharedInstance()->_sessionId.c_str()), allocator);
             // Session number
-            annotations["session_num"] = getSessionNum();
+            annotations.AddMember("session_num", getSessionNum(), allocator);
 
             // type of connection the user is currently on (add if valid)
             std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = rapidjson::StringRef(connection_type.c_str());
+                annotations.AddMember("connection_type", rapidjson::StringRef(connection_type.c_str()), allocator);
             }
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = rapidjson::StringRef(device::GADevice::getGameEngineVersion());
+                annotations.AddMember("engine_version", rapidjson::StringRef(device::GADevice::getGameEngineVersion()), allocator);
             }
 
 #if USE_UWP
             if (!device::GADevice::getAdvertisingId().empty())
             {
-                annotations["uwp_aid"] = device::GADevice::getAdvertisingId();
+                annotations.AddMember("uwp_aid", device::GADevice::getAdvertisingId(), allocator);
             }
             else if (!device::GADevice::getDeviceId().empty())
             {
-                annotations["uwp_id"] = device::GADevice::getDeviceId();
+                annotations.AddMember("uwp_id", device::GADevice::getDeviceId(), allocator);
             }
 #elif USE_TIZEN
             if (!device::GADevice::getDeviceId().empty())
             {
-                annotations["tizen_id"] = device::GADevice::getDeviceId();
+                annotations.AddMember("tizen_id", device::GADevice::getDeviceId(), allocator);
             }
 #endif
 
@@ -461,7 +463,7 @@ namespace gameanalytics
             // App build version (use if not nil)
             if (!getBuild().empty())
             {
-                annotations["build"] = rapidjson::StringRef(getBuild().c_str());
+                annotations.AddMember("build", rapidjson::StringRef(getBuild().c_str()), allocator);
             }
 
             // ---- OPTIONAL cross-session ---- //
@@ -469,71 +471,76 @@ namespace gameanalytics
             // facebook id (optional)
             if (!getFacebookId().empty())
             {
-                annotations["facebook_id"] = rapidjson::StringRef(getFacebookId().c_str());
+                annotations.AddMember("facebook_id", rapidjson::StringRef(getFacebookId().c_str()), allocator);
             }
             // gender (optional)
             if (!getGender().empty())
             {
-                annotations["gender"] = rapidjson::StringRef(getGender().c_str());
+                annotations.AddMember("gender", rapidjson::StringRef(getGender().c_str()), allocator);
             }
             // birth_year (optional)
             if (getBirthYear() != 0)
             {
-                annotations["birth_year"] = getBirthYear();
+                annotations.AddMember("birth_year", getBirthYear(), allocator);
             }
 
-            out = annotations;
+            out.CopyFrom(annotations, allocator);
         }
 
         void GAState::getSdkErrorEventAnnotations(rapidjson::Value& out)
         {
-            rapidjson::Value annotations;
+            rapidjson::Document annotations;
+            annotations.SetObject();
+            rapidjson::Document::AllocatorType& allocator = annotations.GetAllocator();
 
             // ---- REQUIRED ---- //
 
             // collector event API version
-            annotations["v"] = 2;
+            annotations.AddMember("v", 2, allocator);
 
             // Category
-            annotations["category"] = rapidjson::StringRef(GAState::CategorySdkError.c_str());
+            annotations.AddMember("category", rapidjson::StringRef(GAState::CategorySdkError.c_str()), allocator);
             // SDK version
-            annotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
+            annotations.AddMember("sdk_version", rapidjson::StringRef(device::GADevice::getRelevantSdkVersion()), allocator);
             // Operation system version
-            annotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
+            annotations.AddMember("os_version", rapidjson::StringRef(device::GADevice::getOSVersion()), allocator);
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = rapidjson::StringRef(device::GADevice::getDeviceManufacturer());
+            annotations.AddMember("manufacturer", rapidjson::StringRef(device::GADevice::getDeviceManufacturer()), allocator);
             // Device version
-            annotations["device"] = rapidjson::StringRef(device::GADevice::getDeviceModel());
+            annotations.AddMember("device", rapidjson::StringRef(device::GADevice::getDeviceModel()), allocator);
             // Platform (operating system)
-            annotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
+            annotations.AddMember("platform", rapidjson::StringRef(device::GADevice::getBuildPlatform()), allocator);
 
             // type of connection the user is currently on (add if valid)
             std::string connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = rapidjson::StringRef(connection_type.c_str());
+                annotations.AddMember("connection_type", rapidjson::StringRef(connection_type.c_str()), allocator);
             }
 
             if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = rapidjson::StringRef(device::GADevice::getGameEngineVersion());
+                annotations.AddMember("engine_version", rapidjson::StringRef(device::GADevice::getGameEngineVersion()), allocator);
             }
 
-            out = annotations;
+            out.CopyFrom(annotations, allocator);
         }
 
         void GAState::getInitAnnotations(rapidjson::Value& out)
         {
-            rapidjson::Value initAnnotations;
-            initAnnotations["user_id"] = rapidjson::StringRef(getIdentifier().c_str());
+            rapidjson::Document initAnnotations;
+            initAnnotations.SetObject();
+            rapidjson::Document::AllocatorType& allocator = initAnnotations.GetAllocator();
+
+            initAnnotations.AddMember("user_id", rapidjson::StringRef(getIdentifier().c_str()), allocator);
             // SDK version
-            initAnnotations["sdk_version"] = rapidjson::StringRef(device::GADevice::getRelevantSdkVersion());
+            initAnnotations.AddMember("sdk_version", rapidjson::StringRef(device::GADevice::getRelevantSdkVersion()), allocator);
             // Operation system version
-            initAnnotations["os_version"] = rapidjson::StringRef(device::GADevice::getOSVersion());
+            initAnnotations.AddMember("os_version", rapidjson::StringRef(device::GADevice::getOSVersion()), allocator);
 
             // Platform (operating system)
-            initAnnotations["platform"] = rapidjson::StringRef(device::GADevice::getBuildPlatform());
-            out = initAnnotations;
+            initAnnotations.AddMember("platform", rapidjson::StringRef(device::GADevice::getBuildPlatform()), allocator);
+            out.CopyFrom(initAnnotations, allocator);
         }
 
         void GAState::cacheIdentifier()
@@ -568,8 +575,8 @@ namespace gameanalytics
         void GAState::ensurePersistedStates()
         {
             // get and extract stored states
-            rapidjson::Value state_dict;
-            rapidjson::Value results_ga_state;
+            rapidjson::Value state_dict(rapidjson::kObjectType);
+            rapidjson::Value results_ga_state(rapidjson::kArrayType);
             store::GAStore::executeQuerySync("SELECT * FROM ga_state;", results_ga_state);
 
             if (!results_ga_state.IsNull() && !results_ga_state.Empty())
@@ -687,7 +694,7 @@ namespace gameanalytics
                 }
             }
 
-            rapidjson::Value results_ga_progression;
+            rapidjson::Value results_ga_progression(rapidjson::kArrayType);
             store::GAStore::executeQuerySync("SELECT * FROM ga_progression;", results_ga_progression);
 
             if (!results_ga_progression.IsNull() && !results_ga_progression.Empty())
@@ -710,7 +717,9 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
-            rapidjson::Value initResponseDict;
+            rapidjson::Document initResponseDict;
+            initResponseDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = initResponseDict.GetAllocator();
             http::EGAHTTPApiResponse initResponse;
 #if USE_UWP
             std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
@@ -738,7 +747,7 @@ namespace gameanalytics
                     timeOffsetSeconds = calculateServerTimeOffset(server_ts);
                 }
                 // insert timeOffset in received init config (so it can be used when offline)
-                initResponseDict["time_offset"] = timeOffsetSeconds;
+                initResponseDict.AddMember("time_offset", timeOffsetSeconds, allocator);
 
                 rapidjson::StringBuffer buffer;
                 {
@@ -750,8 +759,8 @@ namespace gameanalytics
                 store::GAStore::setState("sdk_config_cached", buffer.GetString());
 
                 // set new config and cache in memory
-                GAState::sharedInstance()->_sdkConfigCached = initResponseDict;
-                GAState::sharedInstance()->_sdkConfig = initResponseDict;
+                GAState::sharedInstance()->_sdkConfigCached.CopyFrom(initResponseDict, allocator);
+                GAState::sharedInstance()->_sdkConfig.CopyFrom(initResponseDict, allocator);
 
                 GAState::sharedInstance()->_initAuthorized = true;
             }
@@ -798,7 +807,7 @@ namespace gameanalytics
                 GAState::sharedInstance()->_initAuthorized = true;
             }
 
-            rapidjson::Value currentSdkConfig;
+            rapidjson::Value currentSdkConfig(rapidjson::kObjectType);
             GAState::getSdkConfig(currentSdkConfig);
             {
                 if (currentSdkConfig.IsObject() && ((currentSdkConfig.HasMember("enabled") && currentSdkConfig["enabled"].IsBool()) ? currentSdkConfig["enabled"].GetBool() : true) == false)
@@ -971,7 +980,7 @@ namespace gameanalytics
 
         void GAState::validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out)
         {
-            rapidjson::Value result;
+            rapidjson::Value result(rapidjson::kObjectType);
 
             if (fields.IsObject() && !fields.Empty())
             {

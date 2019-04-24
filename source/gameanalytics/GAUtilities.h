@@ -31,7 +31,7 @@ namespace gameanalytics
             static std::string uppercaseString(std::string s);
             static std::string lowercaseString(std::string s);
             static bool stringVectorContainsString(std::vector<std::string> vector, std::string search);
-            static long timeIntervalSince1970();
+            static int64_t timeIntervalSince1970();
             static std::string joinStringArray(const std::vector<std::string>& v, const std::string& delimiter = ", ");
 #if !USE_UWP
             static int base64_needed_encoded_length(int length_of_data);

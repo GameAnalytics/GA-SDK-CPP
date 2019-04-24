@@ -63,7 +63,7 @@ namespace gameanalytics
             url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
             logging::GALogger::d("Sending 'init' URL: " + url);
 
-            rapidjson::Value initAnnotations;
+            rapidjson::Value initAnnotations(rapidjson::kObjectType);
             state::GAState::getInitAnnotations(initAnnotations);
 
             // make JSON string from data
@@ -153,7 +153,8 @@ namespace gameanalytics
             }
 
             // validate Init call values
-            rapidjson::Value& validatedInitValues = validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict);
+            rapidjson::Value validatedInitValues(rapidjson::kObjectType);
+            validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, validatedInitValues);
 
             if (validatedInitValues.IsNull())
             {
@@ -299,11 +300,12 @@ namespace gameanalytics
             std::string url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
             logging::GALogger::d("Sending 'events' URL: " + url);
 
-            rapidjson::Value json;
+            rapidjson::Document json;
+            json.SetObject();
             state::GAState::getSdkErrorEventAnnotations(json);
 
             std::string typeString = sdkErrorTypeToString(type);
-            json["type"] = rapidjson::StringRef(typeString.c_str());
+            json.AddMember("type", rapidjson::StringRef(typeString.c_str()), json.GetAllocator());
 
             rapidjson::Document eventArray;
             eventArray.SetArray();

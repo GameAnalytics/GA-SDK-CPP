@@ -25,7 +25,7 @@ namespace gameanalytics
     {
         std::terminate_handler GAUncaughtExceptionHandler::previousTerminateHandler = NULL;
         int GAUncaughtExceptionHandler::errorCount = 0;
-        int GAUncaughtExceptionHandler::MAX_ERROR_TYPE_COUNT = 100;
+        int GAUncaughtExceptionHandler::MAX_ERROR_TYPE_COUNT = 5;
 
 #if defined(_WIN32)
         void GAUncaughtExceptionHandler::signalHandler(int sig)
