@@ -383,5 +383,18 @@ namespace gameanalytics
             copy(v.begin(), v.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
             return s.str();
         }
+
+        void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const char* newValue)
+        {
+            rapidjson::Value::MemberIterator iter = d.FindMember(key);
+            if (iter == d.MemberEnd())
+            {
+                d.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(newValue), d.GetAllocator());
+            }
+            else
+            {
+                iter->value = rapidjson::StringRef(newValue);
+            }
+        }
     }
 }

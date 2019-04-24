@@ -131,7 +131,7 @@ namespace gameanalytics
             bool _useManualSessionHandling = false;
             bool _enableErrorReporting = true;
             bool _enableEventSubmission = true;
-            rapidjson::Value _configurations;
+            rapidjson::Document _configurations;
             bool _commandCenterIsReady;
             std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
             std::mutex _mtx;

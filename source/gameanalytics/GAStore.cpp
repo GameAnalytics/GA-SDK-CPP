@@ -45,7 +45,7 @@ namespace gameanalytics
 
         void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
         {
-            rapidjson::Value v(rapidjson::kObjectType);
+            rapidjson::Value v;
             executeQuerySync(sql, parameters, false, v);
         }
 
@@ -122,13 +122,13 @@ namespace gameanalytics
                         switch (sqlite3_column_type(statement, i))
                         {
                         case SQLITE_INTEGER:
-                            row[column] = utilities::GAUtilities::parseString<int>(value);
+                            row.AddMember(rapidjson::StringRef(column), utilities::GAUtilities::parseString<int>(value), allocator);
                             break;
                         case SQLITE_FLOAT:
-                            row[column] = utilities::GAUtilities::parseString<double>(value);
+                            row.AddMember(rapidjson::StringRef(column), utilities::GAUtilities::parseString<double>(value), allocator);
                             break;
                         default:
-                            row[column] = rapidjson::StringRef(value);
+                            row.AddMember(rapidjson::StringRef(column), rapidjson::StringRef(value), allocator);
                         }
 
                         //row[column] = value;

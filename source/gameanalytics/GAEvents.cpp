@@ -473,7 +473,7 @@ namespace gameanalytics
             store::GAStore::executeQuerySync(selectSql, events);
 
             // Check for errors or empty
-            if (events.IsNull() || events.Empty())
+            if (events.IsNull())
             {
                 logging::GALogger::i("Event queue: No events to send");
                 GAEvents::updateSessionTime();
@@ -486,7 +486,7 @@ namespace gameanalytics
                 // Make a limit request
                 selectSql = "SELECT client_ts FROM ga_events WHERE status = 'new' " + andCategory + " ORDER BY client_ts ASC LIMIT 0," + std::to_string(GAEvents::MaxEventCount) + ";";
                 store::GAStore::executeQuerySync(selectSql, events);
-                if (events.IsNull() || events.Empty())
+                if (events.IsNull())
                 {
                     return;
                 }
@@ -498,7 +498,7 @@ namespace gameanalytics
                 // Select again
                 selectSql = "SELECT event FROM ga_events WHERE status = 'new' " + andCategory + " AND client_ts<='" + lastTimestamp + "';";
                 store::GAStore::executeQuerySync(selectSql, events);
-                if (events.IsNull() || events.Empty())
+                if (events.IsNull())
                 {
                     return;
                 }
@@ -687,6 +687,7 @@ namespace gameanalytics
             // Get default annotations
             rapidjson::Document ev;
             ev.SetObject();
+            rapidjson::Document::AllocatorType& allocator = ev.GetAllocator();
             state::GAState::getEventAnnotations(ev);
 
             // Create json with only default annotations
@@ -707,11 +708,11 @@ namespace gameanalytics
                 const rapidjson::Value& value = eventData[key];
                 if(value.IsNumber())
                 {
-                    ev[key] = value.GetDouble();
+                    ev.AddMember(rapidjson::StringRef(key), value.GetDouble(), allocator);
                 }
                 else if(value.IsString())
                 {
-                    ev[key] = rapidjson::StringRef(value.GetString());
+                    ev.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value.GetString()), allocator);
                 }
             }
 

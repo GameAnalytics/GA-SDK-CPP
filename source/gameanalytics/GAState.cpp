@@ -575,7 +575,9 @@ namespace gameanalytics
         void GAState::ensurePersistedStates()
         {
             // get and extract stored states
-            rapidjson::Value state_dict(rapidjson::kObjectType);
+            rapidjson::Document state_dict;
+            state_dict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = state_dict.GetAllocator();
             rapidjson::Value results_ga_state(rapidjson::kArrayType);
             store::GAStore::executeQuerySync("SELECT * FROM ga_state;", results_ga_state);
 
@@ -585,7 +587,7 @@ namespace gameanalytics
                 {
                     if(itr->HasMember("key") && itr->HasMember("value"))
                     {
-                        state_dict[(*itr)["key"].GetString()] = rapidjson::StringRef((*itr)["value"].GetString());
+                        state_dict.AddMember(rapidjson::StringRef((*itr)["key"].GetString()), rapidjson::StringRef((*itr)["value"].GetString()), allocator);
                     }
                 }
             }
@@ -929,10 +931,8 @@ namespace gameanalytics
         {
             GAState::sharedInstance()->_mtx.lock();
 
-            if(GAState::sharedInstance()->_configurations.IsNull())
-            {
-                GAState::sharedInstance()->_configurations.SetObject();
-            }
+            GAState::sharedInstance()->_configurations.SetObject();
+            rapidjson::Document::AllocatorType& allocator = GAState::sharedInstance()->_configurations.GetAllocator();
 
             if(sdkConfig.HasMember("configurations") && sdkConfig["configurations"].IsArray())
             {
@@ -953,11 +953,11 @@ namespace gameanalytics
                         {
                             if(configuration["value"].IsString())
                             {
-                                GAState::sharedInstance()->_configurations[key.c_str()] = rapidjson::StringRef(configuration["value"].GetString());
+                                GAState::sharedInstance()->_configurations.AddMember(rapidjson::StringRef(key.c_str()), rapidjson::StringRef(configuration["value"].GetString()), allocator);
                             }
                             else if(configuration["value"].IsNumber())
                             {
-                                GAState::sharedInstance()->_configurations[key.c_str()] = configuration["value"].GetDouble();
+                                GAState::sharedInstance()->_configurations.AddMember(rapidjson::StringRef(key.c_str()), configuration["value"].GetDouble(), allocator);
                             }
 
                             rapidjson::StringBuffer buffer;
@@ -980,7 +980,9 @@ namespace gameanalytics
 
         void GAState::validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out)
         {
-            rapidjson::Value result(rapidjson::kObjectType);
+            rapidjson::Document result;
+            result.SetObject();
+            rapidjson::Document::AllocatorType& allocator = result.GetAllocator();
 
             if (fields.IsObject() && !fields.Empty())
             {
@@ -1002,7 +1004,7 @@ namespace gameanalytics
 
                             if(value.IsNumber())
                             {
-                                result[key] = value.GetDouble();
+                                result.AddMember(rapidjson::StringRef(key), value.GetDouble(), allocator);
                                 ++count;
                             }
                             else if(value.IsString())
@@ -1011,7 +1013,7 @@ namespace gameanalytics
 
                                 if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
                                 {
-                                    result[key] = rapidjson::StringRef(value.GetString());
+                                    result.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value.GetString()), allocator);
                                     ++count;
                                 }
                                 else
@@ -1040,7 +1042,7 @@ namespace gameanalytics
                 }
             }
 
-            out = result;
+            out.CopyFrom(result, allocator);
         }
 
         int64_t GAState::getClientTsAdjusted()
