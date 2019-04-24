@@ -55,10 +55,10 @@ namespace gameanalytics
             GAHTTPApi();
 
 #if USE_UWP
-            concurrency::task<Void> requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out);
+            concurrency::task<Void> requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
             concurrency::task<Void> sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #else
-            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out);
+            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
             void sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);

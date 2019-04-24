@@ -126,7 +126,7 @@ namespace gameanalytics
         {
             if(strlen(GADevice::_osVersion) == 0)
             {
-                initRuntimePlatform();
+                initOSVersion();
             }
             return GADevice::_osVersion;
         }

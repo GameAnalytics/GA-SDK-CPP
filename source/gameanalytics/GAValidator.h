@@ -90,7 +90,7 @@ namespace gameanalytics
             static bool validateDimension02(const std::string& dimension02);
             static bool validateDimension03(const std::string& dimension03);
 
-            static void validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Value& out);
+            static void validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out);
 
             // array of strings
             static bool validateArrayOfStrings(

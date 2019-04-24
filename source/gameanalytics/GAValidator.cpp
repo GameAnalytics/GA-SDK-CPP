@@ -612,25 +612,24 @@ namespace gameanalytics
             return true;
         }
 
-        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Value& out)
+        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out)
         {
             // make sure we have a valid dict
             if (initResponse.IsNull())
             {
                 logging::GALogger::w("validateInitRequestResponse failed - no response dictionary.");
                 rapidjson::Value v(rapidjson::kObjectType);
-                out = v;
+                out.SetNull();
                 return;
             }
 
-            rapidjson::Document validatedDict;
-            validatedDict.SetObject();
-            rapidjson::Document::AllocatorType& allocator = validatedDict.GetAllocator();
+            out.SetObject();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             // validate enabled field
             if(initResponse.HasMember("enabled") && initResponse["enabled"].IsBool())
             {
-                validatedDict.AddMember("enabled", initResponse["enabled"].GetBool(), allocator);
+                out.AddMember("enabled", initResponse["enabled"].GetBool(), allocator);
             }
 
             // validate server_ts
@@ -639,17 +638,15 @@ namespace gameanalytics
                 int64_t serverTsNumber = initResponse["server_ts"].GetInt64();
                 if (serverTsNumber > 0)
                 {
-                    validatedDict.AddMember("server_ts", serverTsNumber, allocator);
+                    out.AddMember("server_ts", serverTsNumber, allocator);
                 }
             }
 
             if (initResponse.HasMember("configurations") && initResponse["configurations"].IsArray())
             {
                 rapidjson::Value configurations = rapidjson::Value(initResponse["configurations"], allocator);
-                validatedDict.AddMember("configurations", configurations, allocator);
+                out.AddMember("configurations", configurations, allocator);
             }
-
-            out.CopyFrom(validatedDict, allocator);
         }
     }
 }

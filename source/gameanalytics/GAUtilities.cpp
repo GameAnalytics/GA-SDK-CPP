@@ -389,11 +389,14 @@ namespace gameanalytics
             rapidjson::Value::MemberIterator iter = d.FindMember(key);
             if (iter == d.MemberEnd())
             {
-                d.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(newValue), d.GetAllocator());
+                rapidjson::Value v(key, d.GetAllocator());
+                rapidjson::Value v1(newValue, d.GetAllocator());
+                d.AddMember(v.Move(), v1.Move(), d.GetAllocator());
             }
             else
             {
-                iter->value = rapidjson::StringRef(newValue);
+                rapidjson::Value v(newValue, d.GetAllocator());
+                iter->value = v.Move();
             }
         }
     }

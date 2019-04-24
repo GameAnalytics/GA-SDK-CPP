@@ -65,9 +65,9 @@ namespace gameanalytics
             static void setKeys(const std::string& gameKey, const std::string& gameSecret);
             static void endSessionAndStopQueue(bool endThread);
             static void resumeSessionAndStartQueue();
-            static void getEventAnnotations(rapidjson::Value& out);
-            static void getSdkErrorEventAnnotations(rapidjson::Value& out);
-            static void getInitAnnotations(rapidjson::Value& out);
+            static void getEventAnnotations(rapidjson::Document& out);
+            static void getSdkErrorEventAnnotations(rapidjson::Document& out);
+            static void getInitAnnotations(rapidjson::Document& out);
             static void internalInitialize();
             static int64_t getClientTsAdjusted();
             static void setManualSessionHandling(bool flag);

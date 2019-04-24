@@ -64,7 +64,11 @@ namespace gameanalytics
             rapidjson::Document eventDict;
             eventDict.SetObject();
             rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
-            eventDict.AddMember("category", rapidjson::StringRef(categorySessionStart.c_str()), allocator);
+            {
+                rapidjson::Value v(categorySessionStart.c_str(), allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
@@ -110,7 +114,10 @@ namespace gameanalytics
             eventDict.SetObject();
             rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
-            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str()), allocator);
+            {
+                rapidjson::Value v(GAEvents::CategorySessionEnd.c_str(), allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
             eventDict.AddMember("length", sessionLength, allocator);
 
             // Add custom dimensions
@@ -151,16 +158,26 @@ namespace gameanalytics
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", {"transaction_num", std::to_string(state::GAState::getTransactionNum())});
 
             // Required
-            eventDict.AddMember("event_id", rapidjson::StringRef((itemType + ":" + itemId).c_str()), allocator);
-            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryBusiness.c_str()), allocator);
-            eventDict.AddMember("currency", rapidjson::StringRef(currency.c_str()), allocator);
+            {
+                rapidjson::Value v((itemType + ":" + itemId).c_str(), allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(GAEvents::CategoryBusiness.c_str(), allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(currency.c_str(), allocator);
+                eventDict.AddMember("currency", v.Move(), allocator);
+            }
             eventDict.AddMember("amount", amount, allocator);
             eventDict.AddMember("transaction_num", state::GAState::getTransactionNum(), allocator);
 
             // Optional
             if (!cartType.empty())
             {
-                eventDict.AddMember("cart_type", rapidjson::StringRef(cartType.c_str()), allocator);
+                rapidjson::Value v(cartType.c_str(), allocator);
+                eventDict.AddMember("cart_type", v.Move(), allocator);
             }
 
             // Add custom dimensions
@@ -211,8 +228,14 @@ namespace gameanalytics
 
             // insert event specific values
             std::string flowTypeString = resourceFlowTypeString(flowType);
-            eventDict.AddMember("event_id", rapidjson::StringRef((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str()), allocator);
-            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryResource.c_str()), allocator);
+            {
+                rapidjson::Value v((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str(), allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(GAEvents::CategoryResource.c_str(), allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
             eventDict.AddMember("amount", amount, allocator);
 
             // Add custom dimensions
@@ -274,8 +297,14 @@ namespace gameanalytics
             }
 
             // Append event specifics
-            eventDict.AddMember("category", rapidjson::StringRef(GAEvents::CategoryProgression.c_str()), allocator);
-            eventDict.AddMember("event_id", rapidjson::StringRef((progressionStatusString + ":" + progressionIdentifier).c_str()), allocator);
+            {
+                rapidjson::Value v(GAEvents::CategoryProgression.c_str(), allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v((progressionStatusString + ":" + progressionIdentifier).c_str(), allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
 
             // Attempt
             double attempt_num = 0;
@@ -348,8 +377,14 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData.AddMember("category", rapidjson::StringRef(GAEvents::CategoryDesign.c_str()), allocator);
-            eventData.AddMember("event_id", rapidjson::StringRef(eventId.c_str()), allocator);
+            {
+                rapidjson::Value v(GAEvents::CategoryDesign.c_str(), allocator);
+                eventData.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(eventId.c_str(), allocator);
+                eventData.AddMember("event_id", v.Move(), allocator);
+            }
 
             if (sendValue)
             {
@@ -399,9 +434,18 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData.AddMember("category", rapidjson::StringRef(GAEvents::CategoryError.c_str()), allocator);
-            eventData.AddMember("severity", rapidjson::StringRef(severityString.c_str()), allocator);
-            eventData.AddMember("message", rapidjson::StringRef(message.c_str()), allocator);
+            {
+                rapidjson::Value v(GAEvents::CategoryError.c_str(), allocator);
+                eventData.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(severityString.c_str(), allocator);
+                eventData.AddMember("severity", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(message.c_str(), allocator);
+                eventData.AddMember("message", v.Move(), allocator);
+            }
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
@@ -530,8 +574,15 @@ namespace gameanalytics
                 const char* eventDict = (*itr).HasMember("event") ? (*itr)["event"].GetString() : "";
                 if (strlen(eventDict) > 0)
                 {
-                    payloadArray.PushBack(rapidjson::StringRef(eventDict), allocator);
+                    rapidjson::Value v(eventDict, allocator);
+                    payloadArray.PushBack(v.Move(), allocator);
                 }
+            }
+
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                events.Accept(writer);
             }
 
             // send events
@@ -587,7 +638,8 @@ namespace gameanalytics
         {
             if(state::GAState::sessionIsStarted())
             {
-                rapidjson::Value ev(rapidjson::kObjectType);
+                rapidjson::Document ev;
+                ev.SetObject();
                 state::GAState::getEventAnnotations(ev);
                 rapidjson::StringBuffer buffer;
                 {
@@ -637,16 +689,20 @@ namespace gameanalytics
                     session.Accept(writer);
                 }
                 rapidjson::Document sessionEndEvent;
+                logging::GALogger::d("Add missing session_end events: " + std::string(buffer.GetString()));
                 sessionEndEvent.Parse(buffer.GetString());
                 rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
-                int64_t event_ts = sessionEndEvent["client_ts"].GetInt64();
+                int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
                 int64_t start_ts = utilities::GAUtilities::parseString<int64_t>(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0");
 
                 int64_t length = event_ts - start_ts;
 
                 logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
 
-                sessionEndEvent.AddMember("category", rapidjson::StringRef(GAEvents::CategorySessionEnd.c_str()), allocator);
+                {
+                    rapidjson::Value v(GAEvents::CategorySessionEnd.c_str(), allocator);
+                    sessionEndEvent.AddMember("category", v.Move(), allocator);
+                }
                 sessionEndEvent.AddMember("length", length, allocator);
 
                 // Add to store
@@ -706,13 +762,17 @@ namespace gameanalytics
             {
                 const char* key = itr->name.GetString();
                 const rapidjson::Value& value = eventData[key];
+
                 if(value.IsNumber())
                 {
-                    ev.AddMember(rapidjson::StringRef(key), value.GetDouble(), allocator);
+                    rapidjson::Value v(key, allocator);
+                    ev.AddMember(v.Move(), value.GetDouble(), allocator);
                 }
                 else if(value.IsString())
                 {
-                    ev.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value.GetString()), allocator);
+                    rapidjson::Value v(key, allocator);
+                    rapidjson::Value v1(value.GetString(), allocator);
+                    ev.AddMember(v.Move(), v1.Move(), allocator);
                 }
             }
 
@@ -731,7 +791,7 @@ namespace gameanalytics
             logging::GALogger::ii("Event added to queue: " + json);
 
             // Add to store
-            std::vector<std::string> parameters = { "new", ev["category"].GetString(), ev["session_id"].GetString(), ev["client_ts"].GetString(), json };
+            std::vector<std::string> parameters = { "new", ev["category"].GetString(), ev["session_id"].GetString(), std::to_string(ev["client_ts"].GetInt64()), json };
             std::string sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
 
             store::GAStore::executeQuerySync(sql, parameters);
@@ -763,15 +823,18 @@ namespace gameanalytics
             // add to dict (if not nil)
             if (!state::GAState::getCurrentCustomDimension01().empty())
             {
-                eventData.AddMember("custom_01", rapidjson::StringRef(state::GAState::getCurrentCustomDimension01().c_str()), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension01().c_str(), allocator);
+                eventData.AddMember("custom_01", v.Move(), allocator);
             }
             if (!state::GAState::getCurrentCustomDimension02().empty())
             {
-                eventData.AddMember("custom_02", rapidjson::StringRef(state::GAState::getCurrentCustomDimension02().c_str()), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension02().c_str(), allocator);
+                eventData.AddMember("custom_02", v.Move(), allocator);
             }
             if (!state::GAState::getCurrentCustomDimension03().empty())
             {
-                eventData.AddMember("custom_03", rapidjson::StringRef(state::GAState::getCurrentCustomDimension03().c_str()), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension03().c_str(), allocator);
+                eventData.AddMember("custom_03", v.Move(), allocator);
             }
         }
 

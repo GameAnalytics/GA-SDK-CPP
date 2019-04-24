@@ -54,7 +54,7 @@ namespace gameanalytics
             return protocol + "://" + hostName + "/" + version;
         }
 
-        void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out)
+        void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out)
         {
             std::string gameKey = state::GAState::getGameKey();
 
@@ -63,7 +63,8 @@ namespace gameanalytics
             url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
             logging::GALogger::d("Sending 'init' URL: " + url);
 
-            rapidjson::Value initAnnotations(rapidjson::kObjectType);
+            rapidjson::Document initAnnotations;
+            initAnnotations.SetObject();
             state::GAState::getInitAnnotations(initAnnotations);
 
             // make JSON string from data
@@ -77,7 +78,8 @@ namespace gameanalytics
             if (JSONstring.empty())
             {
                 response_out = JsonEncodeFailed;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 
             std::string payloadData = createPayloadData(JSONstring, false);
@@ -92,7 +94,8 @@ namespace gameanalytics
             if (conn_err != CONNECTION_ERROR_NONE)
             {
                 response_out = NoResponse;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 #endif
 
@@ -124,7 +127,8 @@ namespace gameanalytics
                 connection_destroy(connection);
 #endif
                 response_out = requestResponseEnum;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 
             if (requestJsonDict.IsNull())
@@ -134,7 +138,8 @@ namespace gameanalytics
                 connection_destroy(connection);
 #endif
                 response_out = JsonDecodeFailed;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 
             // print reason if bad request
@@ -149,20 +154,21 @@ namespace gameanalytics
                 connection_destroy(connection);
 #endif
                 response_out = requestResponseEnum;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 
             // validate Init call values
-            rapidjson::Value validatedInitValues(rapidjson::kObjectType);
-            validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, validatedInitValues);
+            validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, json_out);
 
-            if (validatedInitValues.IsNull())
+            if (json_out.IsNull())
             {
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
                 response_out = BadResponse;
-                json_out = rapidjson::Value();
+                json_out.SetNull();
+                return;
             }
 
 #if USE_TIZEN
@@ -171,7 +177,6 @@ namespace gameanalytics
 
             // all ok
             response_out = Ok;
-            json_out = validatedInitValues;
         }
 
         void GAHTTPApi::sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray)
@@ -277,7 +282,7 @@ namespace gameanalytics
 
             // return response
             response_out = requestResponseEnum;
-            json_out = requestJsonDict.GetObject();
+            json_out.CopyFrom(requestJsonDict, requestJsonDict.GetAllocator());
         }
 
         void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
@@ -305,7 +310,10 @@ namespace gameanalytics
             state::GAState::getSdkErrorEventAnnotations(json);
 
             std::string typeString = sdkErrorTypeToString(type);
-            json.AddMember("type", rapidjson::StringRef(typeString.c_str()), json.GetAllocator());
+            {
+                rapidjson::Value v(typeString.c_str(), json.GetAllocator());
+                json.AddMember("type", v.Move(), json.GetAllocator());
+            }
 
             rapidjson::Document eventArray;
             eventArray.SetArray();
@@ -376,7 +384,7 @@ namespace gameanalytics
 
                 std::string body = os.str();
                 // process the response
-                logging::GALogger::d("init request content : " + body);
+                logging::GALogger::d("sdk error content : " + body);
 
                 long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
 

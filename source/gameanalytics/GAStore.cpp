@@ -122,13 +122,23 @@ namespace gameanalytics
                         switch (sqlite3_column_type(statement, i))
                         {
                         case SQLITE_INTEGER:
-                            row.AddMember(rapidjson::StringRef(column), utilities::GAUtilities::parseString<int>(value), allocator);
+                        {
+                            rapidjson::Value v(column, allocator);
+                            row.AddMember(v.Move(), utilities::GAUtilities::parseString<int>(value), allocator);
                             break;
+                        }
                         case SQLITE_FLOAT:
-                            row.AddMember(rapidjson::StringRef(column), utilities::GAUtilities::parseString<double>(value), allocator);
+                        {
+                            rapidjson::Value v(column, allocator);
+                            row.AddMember(v.Move(), utilities::GAUtilities::parseString<double>(value), allocator);
                             break;
+                        }
                         default:
-                            row.AddMember(rapidjson::StringRef(column), rapidjson::StringRef(value), allocator);
+                        {
+                            rapidjson::Value v(column, allocator);
+                            rapidjson::Value v1(value, allocator);
+                            row.AddMember(v.Move(), v1.Move(), allocator);
+                        }
                         }
 
                         //row[column] = value;

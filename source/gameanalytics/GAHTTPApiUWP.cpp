@@ -261,7 +261,10 @@ namespace gameanalytics
             state::GAState::getSdkErrorEventAnnotations(json);
 
             std::string typeString = sdkErrorTypeToString(type);
-            json.AddMember("type", rapidjson::StringRef(typeString.c_str()), json.GetAllocator())
+            {
+                rapidjson::Value v(typeString.c_str(), allocator);
+                json.AddMember("type", v.Move(), json.GetAllocator());
+            }
 
             std::vector<Json::Value> eventArray;
             eventArray.push_back(json);
