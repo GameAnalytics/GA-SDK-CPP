@@ -95,19 +95,45 @@ namespace gameanalytics
             virtual void onCommandCenterUpdated() = 0;
     };
 
+    struct CharArray
+    {
+    public:
+        char array[65] = "";
+    };
+
+    struct StringVector
+    {
+    public:
+        StringVector& add(const char* s)
+        {
+            CharArray entry;
+            snprintf(entry.array, sizeof(entry.array), "%s", s);
+            v.push_back(entry);
+            return *this;
+        }
+
+        const std::vector<CharArray>& getVector() const
+        {
+            return v;
+        }
+
+    private:
+        std::vector<CharArray> v;
+    };
+
     class GameAnalytics
     {
      public:
         // configure calls should be used before initialize
-        static void configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions);
+        static void configureAvailableCustomDimensions01(const StringVector& customDimensions);
         static void configureAvailableCustomDimensions01(STRING customDimensions);
-        static void configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions);
+        static void configureAvailableCustomDimensions02(const StringVector& customDimensions);
         static void configureAvailableCustomDimensions02(STRING customDimensions);
-        static void configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions);
+        static void configureAvailableCustomDimensions03(const StringVector& customDimensions);
         static void configureAvailableCustomDimensions03(STRING customDimensions);
-        static void configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies);
+        static void configureAvailableResourceCurrencies(const StringVector& resourceCurrencies);
         static void configureAvailableResourceCurrencies(STRING resourceCurrencies);
-        static void configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes);
+        static void configureAvailableResourceItemTypes(const StringVector& resourceItemTypes);
         static void configureAvailableResourceItemTypes(STRING resourceItemTypes);
         static void configureBuild(STRING build);
         static void configureWritablePath(STRING writablePath);
@@ -129,7 +155,7 @@ namespace gameanalytics
         // add events
         static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType);
 
-        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03);
 
@@ -215,7 +241,7 @@ namespace gameanalytics
         static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
 #endif
         static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
-        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
         static void addDesignEvent(STRING eventId, STRING fields);

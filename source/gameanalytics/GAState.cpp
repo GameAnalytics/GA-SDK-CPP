@@ -89,7 +89,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_currentCustomDimension03;
         }
 
-        void GAState::setAvailableCustomDimensions01(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions01(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -104,7 +104,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableCustomDimensions02(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions02(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -119,7 +119,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom02 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableCustomDimensions03(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions03(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -134,7 +134,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available custom03 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
         }
 
-        void GAState::setAvailableResourceCurrencies(const std::vector<std::string>& availableResourceCurrencies)
+        void GAState::setAvailableResourceCurrencies(const StringVector& availableResourceCurrencies)
         {
             // Validate
             if (!validators::GAValidator::validateResourceCurrencies(availableResourceCurrencies)) {
@@ -145,7 +145,7 @@ namespace gameanalytics
             logging::GALogger::i("Set available resource currencies: (" + utilities::GAUtilities::joinStringArray(availableResourceCurrencies) + ")");
         }
 
-        void GAState::setAvailableResourceItemTypes(const std::vector<std::string>& availableResourceItemTypes)
+        void GAState::setAvailableResourceItemTypes(const StringVector& availableResourceItemTypes)
         {
             // Validate
             if (!validators::GAValidator::validateResourceItemTypes(availableResourceItemTypes)) {
@@ -310,27 +310,27 @@ namespace gameanalytics
             store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms);
         }
 
-        bool GAState::hasAvailableCustomDimensions01(const std::string& dimension1)
+        bool GAState::hasAvailableCustomDimensions01(const char* dimension1)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions01, dimension1);
         }
 
-        bool GAState::hasAvailableCustomDimensions02(const std::string& dimension2)
+        bool GAState::hasAvailableCustomDimensions02(const char* dimension2)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions02, dimension2);
         }
 
-        bool GAState::hasAvailableCustomDimensions03(const std::string& dimension3)
+        bool GAState::hasAvailableCustomDimensions03(const char* dimension3)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions03, dimension3);
         }
 
-        bool GAState::hasAvailableResourceCurrency(const std::string& currency)
+        bool GAState::hasAvailableResourceCurrency(const char* currency)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceCurrencies, currency);
         }
 
-        bool GAState::hasAvailableResourceItemType(const std::string& itemType)
+        bool GAState::hasAvailableResourceItemType(const char* itemType)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceItemTypes, itemType);
         }

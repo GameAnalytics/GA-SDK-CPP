@@ -6,6 +6,7 @@
 //#include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
+#include <string.h>
 #include <algorithm>
 #if USE_LINUX
 #include <regex.h>
@@ -345,14 +346,22 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        bool GAUtilities::stringVectorContainsString(std::vector<std::string> vector, std::string search)
+        bool GAUtilities::stringVectorContainsString(const StringVector& vector, const char* search)
         {
-            if (vector.size() == 0) {
+            if (vector.getVector().size() == 0)
+            {
                 return false;
             }
 
-            std::vector<std::string>::iterator it = std::find(vector.begin(), vector.end(), search);
-            return it != vector.end();
+            for (CharArray entry : vector.getVector())
+            {
+                if(strcmp(entry.array, search) == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // using std::chrono to get time
@@ -377,11 +386,35 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::joinStringArray(const std::vector<std::string>& v, const std::string& delimiter)
+        void GAUtilities::joinStringArray(const StringVector& v, char* out, const char* delimiter)
         {
-            std::stringstream s;
-            copy(v.begin(), v.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
-            return s.str();
+            int size = strlen(delimiter) * std::max(v.getVector().size() - 1, 0);
+
+            for (CharArray entry : v.getVector())
+            {
+                size += strlen(entry.array);
+            }
+
+            char result[size + 1];
+            int count = 0;
+            for (CharArray entry : v.getVector())
+            {
+                size = strlen(result) + strlen(delimiter) + strlen(entry.array);
+                char tmp[size + 1];
+                if(count < v.getVector().size() - 1)
+                {
+                    snprintf(tmp, sizeof(tmp), "%s%s%s", result, delimiter, entry.array);
+                }
+                else
+                {
+                    snprintf(tmp, sizeof(tmp), "%s%s", result entry.array);
+                }
+
+                snprintf(result, sizeof(result), "%s", tmp);
+                ++count;
+            }
+
+            snprintf(out, 1025, "%s", result);
         }
 
         void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const char* newValue)

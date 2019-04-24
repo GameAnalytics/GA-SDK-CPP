@@ -201,7 +201,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const rapidjson::Value& fields)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const char* currency, double amount, const char* itemType, const char* itemId, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -253,7 +253,10 @@ namespace gameanalytics
             }
 
             // Log
-            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + std::string(buffer.GetString()) + "}");
+            int size = strlen(currency) + strlen(itemType) + strlen(itemId) + strlen(buffer.GetString()) + 129;
+            char s[size];
+            snprintf(s, sizeof(s), "Add RESOURCE event: {currency:%s, amount: %d, itemType:%s, itemId:%s, fields:%s}", currency, amount, itemType, itemId, buffer.GetString());
+            logging::GALogger::i(s);
 
             // Send to store
             addEventToStore(eventDict);

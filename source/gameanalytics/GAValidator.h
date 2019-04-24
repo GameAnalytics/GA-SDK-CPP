@@ -31,10 +31,10 @@ namespace gameanalytics
 
             static bool validateResourceEvent(
                 EGAResourceFlowType flowType,
-                const std::string& currency,
+                const char* currency,
                 double amount,
-                const std::string& itemType,
-                const std::string& itemId
+                const char* itemType,
+                const char* itemId
                 );
 
 
@@ -79,11 +79,11 @@ namespace gameanalytics
             static bool validateConnectionType(const std::string& connectionType);
 
             // dimensions
-            static bool validateCustomDimensions(const std::vector<std::string>& customDimensions);
+            static bool validateCustomDimensions(const StringVector& customDimensions);
 
             // resource
-            static bool validateResourceCurrencies(const std::vector<std::string>& resourceCurrencies);
-            static bool validateResourceItemTypes(const std::vector<std::string>& resourceItemTypes);
+            static bool validateResourceCurrencies(const StringVector& resourceCurrencies);
+            static bool validateResourceItemTypes(const StringVector& resourceItemTypes);
 
             //static  bool validateCustomDimensionsWithDimension01:const std::string& dimension01 andDimension02:const std::string& dimension02 andDimension03:const std::string& dimension03 andEventTag:const std::string& eventTag;
             static bool validateDimension01(const std::string& dimension01);
@@ -94,7 +94,7 @@ namespace gameanalytics
 
             // array of strings
             static bool validateArrayOfStrings(
-                const std::vector<std::string>& arrayOfStrings,
+                const StringVector& arrayOfStrings,
                 unsigned long maxCount,
                 unsigned long maxStringLength,
                 bool allowNoValues,

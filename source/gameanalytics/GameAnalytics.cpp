@@ -29,7 +29,7 @@ namespace gameanalytics
 
     // ----------------------- CONFIGURE ---------------------- //
 
-    void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions01(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -51,17 +51,17 @@ namespace gameanalytics
     {
         rapidjson::Document json;
         json.Parse(customDimensionsJson.c_str());
-        std::vector<std::string> list;
+        StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back((*itr).GetString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions01(list);
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions02(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -83,17 +83,17 @@ namespace gameanalytics
     {
         rapidjson::Document json;
         json.Parse(customDimensionsJson.c_str());
-        std::vector<std::string> list;
+        StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back((*itr).GetString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions02(list);
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions03(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -115,17 +115,17 @@ namespace gameanalytics
     {
         rapidjson::Document json;
         json.Parse(customDimensionsJson.c_str());
-        std::vector<std::string> list;
+        StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back((*itr).GetString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions03(list);
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+    void GameAnalytics::configureAvailableResourceCurrencies(const StringVector& resourceCurrencies)
     {
         if(_endThread)
         {
@@ -147,17 +147,17 @@ namespace gameanalytics
     {
         rapidjson::Document json;
         json.Parse(resourceCurrenciesJson.c_str());
-        std::vector<std::string> list;
+        StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back((*itr).GetString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableResourceCurrencies(list);
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+    void GameAnalytics::configureAvailableResourceItemTypes(const StringVector& resourceItemTypes)
     {
         if(_endThread)
         {
@@ -179,11 +179,11 @@ namespace gameanalytics
     {
         rapidjson::Document json;
         json.Parse(resourceItemTypesJson.c_str());
-        std::vector<std::string> list;
+        StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back((*itr).GetString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableResourceItemTypes(list);
@@ -442,22 +442,26 @@ namespace gameanalytics
     }
 
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId)
     {
         addResourceEvent(flowType, currency, amount, itemType, itemId, "");
     }
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency_, float amount, STRING itemType_, STRING itemId_, STRING fields_)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency_, float amount, const char* itemType_, const char* itemId_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string currency(currency_);
-        std::string itemType(itemType_);
-        std::string itemId(itemId_);
-        std::string fields(fields_);
+        char currency[65] = "";
+        snprintf(currency, sizeof(currency), "%s", currency_);
+        char itemType[65] = "";
+        snprintf(itemType, sizeof(itemType), "%s", itemType_);
+        char itemId[65] = "";
+        snprintf(itemId, sizeof(itemId), "%s", itemId_);
+        char fields[65] = "";
+        snprintf(fields, sizeof(fields), "%s", fields_);
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add resource event"))
@@ -466,7 +470,7 @@ namespace gameanalytics
             }
 
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields.c_str());
+            fieldsJson.Parse(fields);
             events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, fieldsJson);
         });
     }

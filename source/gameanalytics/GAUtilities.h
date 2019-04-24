@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include "rapidjson/document.h"
+#include "GameAnalytics.h"
 #if USE_UWP
 #include <locale>
 #include <codecvt>
@@ -30,9 +31,9 @@ namespace gameanalytics
             // added for C++ port
             static std::string uppercaseString(std::string s);
             static std::string lowercaseString(std::string s);
-            static bool stringVectorContainsString(std::vector<std::string> vector, std::string search);
+            static bool stringVectorContainsString(const StringVector& vector, const char* search);
             static int64_t timeIntervalSince1970();
-            static std::string joinStringArray(const std::vector<std::string>& v, const std::string& delimiter = ", ");
+            static void joinStringArray(const StringVector& v, char* out, const char* delimiter = ", ");
             static void setJsonKeyValue(rapidjson::Document& json, const char* key, const char* newValue);
 #if !USE_UWP
             static int base64_needed_encoded_length(int length_of_data);

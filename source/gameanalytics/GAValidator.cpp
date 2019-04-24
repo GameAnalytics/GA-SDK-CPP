@@ -9,6 +9,7 @@
 #include "GAState.h"
 #include "GALogger.h"
 #include "GAHTTPApi.h"
+#include <string.h>
 
 #include <map>
 
@@ -75,10 +76,10 @@ namespace gameanalytics
 
         bool GAValidator::validateResourceEvent(
             EGAResourceFlowType flowType,
-            const std::string& currency,
+            const char* currency,
             double amount,
-            const std::string& itemType,
-            const std::string& itemId
+            const char* itemType,
+            const char* itemId
             )
         {
             if (events::GAEvents::resourceFlowTypeString(flowType).empty())
@@ -86,14 +87,17 @@ namespace gameanalytics
                 logging::GALogger::w("Validation fail - resource event - flowType: Invalid flow type.");
                 return false;
             }
-            if (currency.empty())
+            if (strlen(currency) == 0)
             {
                 logging::GALogger::w("Validation fail - resource event - currency: Cannot be (null)");
                 return false;
             }
             if (!state::GAState::hasAvailableResourceCurrency(currency))
             {
-                logging::GALogger::w("Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: " + currency);
+                int size = strlen(currency) + 129;
+                char s[size];
+                snprintf(s, sizeof(s), "Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: %s", currency);
+                logging::GALogger::w(s);
                 return false;
             }
             if (!(amount > 0))
@@ -101,7 +105,7 @@ namespace gameanalytics
                 logging::GALogger::w("Validation fail - resource event - amount: Float amount cannot be 0 or negative. Value: " + std::to_string(amount));
                 return false;
             }
-            if (itemType.empty())
+            if (strlen(itemType) == 0)
             {
                 logging::GALogger::w("Validation fail - resource event - itemType: Cannot be (null)");
                 return false;
@@ -421,13 +425,13 @@ namespace gameanalytics
         }
 
         // dimensions
-        bool GAValidator::validateCustomDimensions(const std::vector<std::string>& customDimensions)
+        bool GAValidator::validateCustomDimensions(const StringVector& customDimensions)
         {
             return GAValidator::validateArrayOfStrings(customDimensions, 20, 32, false, "custom dimensions");
 
         }
 
-        bool GAValidator::validateResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+        bool GAValidator::validateResourceCurrencies(const StringVector& resourceCurrencies)
         {
             if (!GAValidator::validateArrayOfStrings(resourceCurrencies, 20, 64, false, "resource currencies"))
             {
@@ -435,7 +439,7 @@ namespace gameanalytics
             }
 
             // validate each string for regex
-            for (std::string resourceCurrency : resourceCurrencies)
+            for (CharArray resourceCurrency : resourceCurrencies.getVector())
             {
                 if (!utilities::GAUtilities::stringMatch(resourceCurrency, "^[A-Za-z]+$"))
                 {
@@ -446,7 +450,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+        bool GAValidator::validateResourceItemTypes(const StringVector& resourceItemTypes)
         {
             if (!GAValidator::validateArrayOfStrings(resourceItemTypes, 20, 32, false, "resource item types"))
             {
@@ -509,7 +513,7 @@ namespace gameanalytics
         }
 
         bool GAValidator::validateArrayOfStrings(
-            const std::vector<std::string>& arrayOfStrings,
+            const StringVector& arrayOfStrings,
             unsigned long maxCount,
             unsigned long maxStringLength,
             bool allowNoValues,
