@@ -574,8 +574,9 @@ namespace gameanalytics
                 const char* eventDict = (*itr).HasMember("event") ? (*itr)["event"].GetString() : "";
                 if (strlen(eventDict) > 0)
                 {
-                    rapidjson::Value v(eventDict, allocator);
-                    payloadArray.PushBack(v.Move(), allocator);
+                    rapidjson::Document d;
+                    d.Parse(eventDict);
+                    payloadArray.PushBack(d.Move(), allocator);
                 }
             }
 
@@ -689,7 +690,6 @@ namespace gameanalytics
                     session.Accept(writer);
                 }
                 rapidjson::Document sessionEndEvent;
-                logging::GALogger::d("Add missing session_end events: " + std::string(buffer.GetString()));
                 sessionEndEvent.Parse(buffer.GetString());
                 rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
                 int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
