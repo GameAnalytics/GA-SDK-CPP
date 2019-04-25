@@ -376,7 +376,7 @@ namespace gameanalytics
 
         bool GAUtilities::isStringNullOrEmpty(const char* s)
         {
-            return !s || strlen(s) == 0
+            return !s || strlen(s) == 0;
         }
 
         // TODO(nikolaj): explain function

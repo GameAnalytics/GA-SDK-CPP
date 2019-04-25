@@ -370,7 +370,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const rapidjson::Value& fields)
+        void GAEvents::addDesignEvent(const char* eventId, double value, bool sendValue, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -395,7 +395,7 @@ namespace gameanalytics
                 eventData.AddMember("category", v.Move(), allocator);
             }
             {
-                rapidjson::Value v(eventId.c_str(), allocator);
+                rapidjson::Value v(eventId, allocator);
                 eventData.AddMember("event_id", v.Move(), allocator);
             }
 
@@ -419,7 +419,11 @@ namespace gameanalytics
             }
 
             // Log
-            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + std::string(buffer.GetString()) + "}");
+            {
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Add DESIGN event: {eventId:%s, value:%f, fields:%s}", eventId, value, buffer.GetString());
+                logging::GALogger::i(s);
+            }
 
             // Send to store
             addEventToStore(eventData);

@@ -143,9 +143,9 @@ namespace gameanalytics
         // the version of SDK code used in an engine. Used for sdk_version field.
         // !! if set then it will override the SdkWrapperVersion.
         // example "unity 4.6.9"
-        static void configureSdkGameEngineVersion(STRING sdkGameEngineVersion);
+        static void configureSdkGameEngineVersion(const char* sdkGameEngineVersion);
         // the version of the game engine (if used and version is available)
-        static void configureGameEngineVersion(STRING engineVersion);
+        static void configureGameEngineVersion(const char* engineVersion);
 
         static void configureUserId(const char* uId);
 
@@ -161,9 +161,9 @@ namespace gameanalytics
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score);
 
-        static void addDesignEvent(STRING eventId);
+        static void addDesignEvent(const char* eventId);
 
-        static void addDesignEvent(STRING eventId, double value);
+        static void addDesignEvent(const char* eventId, double value);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message);
 
         // set calls can be changed at any time (pre- and post-initialize)
@@ -244,8 +244,8 @@ namespace gameanalytics
         static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, const char* fields);
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* fields);
-        static void addDesignEvent(STRING eventId, STRING fields);
-        static void addDesignEvent(STRING eventId, double value, STRING fields);
+        static void addDesignEvent(const char* eventId, const char* fields);
+        static void addDesignEvent(const char* eventId, double value, const char* fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
 
         static bool isSdkReady(bool needsInitialized);

@@ -283,14 +283,15 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureSdkGameEngineVersion(STRING sdkGameEngineVersion_)
+    void GameAnalytics::configureSdkGameEngineVersion(const char* sdkGameEngineVersion_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string sdkGameEngineVersion(sdkGameEngineVersion_);
+        char sdkGameEngineVersion[65] = "";
+        snprintf(sdkGameEngineVersion, sizeof(sdkGameEngineVersion), "%s", sdkGameEngineVersion_ ? sdkGameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
             if (isSdkReady(true, false))
@@ -299,21 +300,24 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion))
             {
-                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: " + sdkGameEngineVersion);
+                char s[65] = "";
+                snprintf(s, sizeof(s), "Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion);
+                logging::GALogger::i(s);
                 return;
             }
-            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion.c_str());
+            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion);
         });
     }
 
-    void GameAnalytics::configureGameEngineVersion(STRING gameEngineVersion_)
+    void GameAnalytics::configureGameEngineVersion(const char* gameEngineVersion_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string gameEngineVersion(gameEngineVersion_);
+        char gameEngineVersion[65] = "";
+        snprintf(gameEngineVersion, sizeof(gameEngineVersion), "%s", gameEngineVersion_ ? gameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
             if (isSdkReady(true, false))
@@ -322,10 +326,12 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateEngineVersion(gameEngineVersion))
             {
-                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: " + gameEngineVersion);
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion);
+                logging::GALogger::i(s);
                 return;
             }
-            device::GADevice::setGameEngineVersion(gameEngineVersion.c_str());
+            device::GADevice::setGameEngineVersion(gameEngineVersion);
         });
     }
 
@@ -337,7 +343,7 @@ namespace gameanalytics
         }
 
         char uId[129] = "";
-        snprintf(uId, sizeof(uId), "%s", uId_ ? : uId_ : "");
+        snprintf(uId, sizeof(uId), "%s", uId_ ? uId_ : "");
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
             if (isSdkReady(true, false))
@@ -555,20 +561,22 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId)
+    void GameAnalytics::addDesignEvent(const char* eventId)
     {
         addDesignEvent(eventId, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, STRING fields_)
+    void GameAnalytics::addDesignEvent(const char* eventId_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string eventId(eventId_);
-        std::string fields(fields_);
+        char eventId[400] = "";
+        snprintf(eventId, sizeof(eventId), "%s", eventId_ ? eventId_ : "");
+        char fields[65] = "";
+        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
@@ -576,25 +584,27 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields.c_str());
+            fieldsJson.Parse(fields);
             events::GAEvents::addDesignEvent(eventId, 0, false, fieldsJson);
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId, double value)
+    void GameAnalytics::addDesignEvent(const char* eventId, double value)
     {
         addDesignEvent(eventId, value, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, double value, STRING fields_)
+    void GameAnalytics::addDesignEvent(const char* eventId_, double value, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string eventId(eventId_);
-        std::string fields(fields_);
+        char eventId[400] = "";
+        snprintf(eventId, sizeof(eventId), "%s", eventId_ ? eventId_ : "");
+        char fields[65] = "";
+        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
@@ -602,7 +612,7 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields.c_str());
+            fieldsJson.Parse(fields);
             events::GAEvents::addDesignEvent(eventId, value, true, fieldsJson);
         });
     }

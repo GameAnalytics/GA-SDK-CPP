@@ -72,11 +72,11 @@ namespace gameanalytics
             static bool validateLongString(const std::string& longString, bool canBeEmpty);
 
             // validate wrapper version, build, engine version, store
-            static bool validateSdkWrapperVersion(const std::string& wrapperVersion);
+            static bool validateSdkWrapperVersion(const char* wrapperVersion);
             static bool validateBuild(const std::string& build);
-            static bool validateEngineVersion(const std::string& engineVersion);
-            static bool validateStore(const std::string& store);
-            static bool validateConnectionType(const std::string& connectionType);
+            static bool validateEngineVersion(const char* engineVersion);
+            static bool validateStore(const char* store);
+            static bool validateConnectionType(const char* connectionType);
 
             // dimensions
             static bool validateCustomDimensions(const StringVector& customDimensions);
@@ -86,9 +86,9 @@ namespace gameanalytics
             static bool validateResourceItemTypes(const StringVector& resourceItemTypes);
 
             //static  bool validateCustomDimensionsWithDimension01:const std::string& dimension01 andDimension02:const std::string& dimension02 andDimension03:const std::string& dimension03 andEventTag:const std::string& eventTag;
-            static bool validateDimension01(const std::string& dimension01);
-            static bool validateDimension02(const std::string& dimension02);
-            static bool validateDimension03(const std::string& dimension03);
+            static bool validateDimension01(const char* dimension01);
+            static bool validateDimension02(const char* dimension02);
+            static bool validateDimension03(const char* dimension03);
 
             static void validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out);
 
@@ -98,7 +98,7 @@ namespace gameanalytics
                 unsigned long maxCount,
                 unsigned long maxStringLength,
                 bool allowNoValues,
-                const std::string& arrayTag
+                const char* arrayTag
                 );
             // facebook id, gender, birthyear
             static bool validateFacebookId(const std::string& facebookId);

@@ -474,10 +474,10 @@ namespace gameanalytics
             out.AddMember("session_num", getSessionNum(), allocator);
 
             // type of connection the user is currently on (add if valid)
-            std::string connection_type = device::GADevice::getConnectionType();
+            const char* connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                rapidjson::Value v(connection_type.c_str(), allocator);
+                rapidjson::Value v(connection_type, allocator);
                 out.AddMember("connection_type", v.Move(), allocator);
             }
 
@@ -575,10 +575,10 @@ namespace gameanalytics
             }
 
             // type of connection the user is currently on (add if valid)
-            std::string connection_type = device::GADevice::getConnectionType();
+            const char* connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                rapidjson::Value v(connection_type.c_str(), allocator);
+                rapidjson::Value v(connection_type, allocator);
                 out.AddMember("connection_type", v.Move(), allocator);
             }
 

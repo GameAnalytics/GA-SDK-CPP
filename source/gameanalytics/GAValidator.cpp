@@ -255,14 +255,14 @@ namespace gameanalytics
         {
             if (!GAValidator::validateEventIdLength(eventId))
             {
-                char s[257] = "";
+                char s[513] = "";
                 snprintf(s, sizeof(s), "Validation fail - design event - eventId: Cannot be (null) or empty. Only 5 event parts allowed seperated by :. Each part need to be 32 characters or less. String: %s", eventId);
                 logging::GALogger::w(s);
                 return false;
             }
             if (!GAValidator::validateEventIdCharacters(eventId))
             {
-                char s[257] = "";
+                char s[513] = "";
                 snprintf(s, sizeof(s), "Validation fail - design event - eventId: Non valid characters. Only allowed A-z, 0-9, -_., ()!?. String: %s", eventId);
                 logging::GALogger::w(s);
                 return false;
@@ -432,7 +432,7 @@ namespace gameanalytics
         }
 
         // validate wrapper version, build, engine version, store
-        bool GAValidator::validateSdkWrapperVersion(const std::string& wrapperVersion)
+        bool GAValidator::validateSdkWrapperVersion(const char* wrapperVersion)
         {
             if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -450,7 +450,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEngineVersion(const std::string& engineVersion)
+        bool GAValidator::validateEngineVersion(const char* engineVersion)
         {
             if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -459,12 +459,12 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateStore(const std::string& store)
+        bool GAValidator::validateStore(const char* store)
         {
             return utilities::GAUtilities::stringMatch(store, "^(apple|google_play)$");
         }
 
-        bool GAValidator::validateConnectionType(const std::string& connectionType)
+        bool GAValidator::validateConnectionType(const char* connectionType)
         {
             return utilities::GAUtilities::stringMatch(connectionType, "^(wwan|wifi|lan|offline)$");
         }
@@ -486,9 +486,11 @@ namespace gameanalytics
             // validate each string for regex
             for (CharArray resourceCurrency : resourceCurrencies.getVector())
             {
-                if (!utilities::GAUtilities::stringMatch(resourceCurrency, "^[A-Za-z]+$"))
+                if (!utilities::GAUtilities::stringMatch(resourceCurrency.array, "^[A-Za-z]+$"))
                 {
-                    logging::GALogger::w("resource currencies validation failed: a resource currency can only be A-Z, a-z. String was: " + resourceCurrency);
+                    char s[257] = "";
+                    snprintf(s, sizeof(s), "resource currencies validation failed: a resource currency can only be A-Z, a-z. String was: %s", resourceCurrency.array);
+                    logging::GALogger::w(s);
                     return false;
                 }
             }
@@ -503,11 +505,13 @@ namespace gameanalytics
             }
 
             // validate each resourceItemType for eventpart validation
-            for (std::string resourceItemType : resourceItemTypes)
+            for (CharArray resourceItemType : resourceItemTypes.getVector())
             {
-                if (!GAValidator::validateEventPartCharacters(resourceItemType))
+                if (!GAValidator::validateEventPartCharacters(resourceItemType.array))
                 {
-                    logging::GALogger::w("resource item types validation failed: a resource item type cannot contain other characters than A-z, 0-9, -_., ()!?. String was: " + resourceItemType);
+                    char s[257] = "";
+                    snprintf(s, sizeof(s), "resource item types validation failed: a resource item type cannot contain other characters than A-z, 0-9, -_., ()!?. String was: %s", resourceItemType.array);
+                    logging::GALogger::w(s);
                     return false;
                 }
             }
@@ -515,10 +519,10 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateDimension01(const std::string& dimension01)
+        bool GAValidator::validateDimension01(const char* dimension01)
         {
             // allow nil
-            if (dimension01.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension01))
             {
                 return true;
             }
@@ -529,10 +533,10 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension02(const std::string& dimension02)
+        bool GAValidator::validateDimension02(const char* dimension02)
         {
             // allow nil
-            if (dimension02.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension02))
             {
                 return true;
             }
@@ -543,10 +547,10 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension03(const std::string& dimension03)
+        bool GAValidator::validateDimension03(const char* dimension03)
         {
             // allow nil
-            if (dimension03.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension03))
             {
                 return true;
             }
@@ -562,46 +566,55 @@ namespace gameanalytics
             unsigned long maxCount,
             unsigned long maxStringLength,
             bool allowNoValues,
-            const std::string& logTag
+            const char* logTag
             )
         {
-            std::string arrayTag = logTag;
+            char arrayTag[33] = "";
+            snprintf(arrayTag, sizeof(arrayTag), "%s", logTag);
 
             // use arrayTag to annotate warning log
-            if (arrayTag.empty())
+            if (strlen(arrayTag) == 0)
             {
-                arrayTag = "Array";
+                snprintf(arrayTag, sizeof(arrayTag), "%s", "Array");
             }
 
             // check if empty
-            if (allowNoValues == false && arrayOfStrings.size() == 0)
+            if (allowNoValues == false && arrayOfStrings.getVector().size() == 0)
             {
-                logging::GALogger::w(arrayTag + " validation failed: array cannot be empty. ");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s validation failed: array cannot be empty.", arrayTag);
+                logging::GALogger::w(s);
                 return false;
             }
 
             // check if exceeding max count
-            if (maxCount && maxCount > static_cast<int>(0) && arrayOfStrings.size() > maxCount)
+            if (maxCount && maxCount > static_cast<int>(0) && arrayOfStrings.getVector().size() > maxCount)
             {
-                logging::GALogger::w(arrayTag + " validation failed: array cannot exceed " + std::to_string(maxCount) + " values. It has " + std::to_string(arrayOfStrings.size()) + " values.");
+                char s[257] = "";
+                snprintf(s, sizeof(s), "%s alidation failed: array cannot exceed %lu values. It has %lu values.", arrayTag, maxCount, arrayOfStrings.getVector().size());
+                logging::GALogger::w(s);
                 return false;
             }
 
             // validate each string
-            for (std::string arrayString : arrayOfStrings)
+            for (CharArray arrayString : arrayOfStrings.getVector())
             {
-                auto stringLength = arrayString.length();
+                int stringLength = strlen(arrayString.array);
                 // check if empty (not allowed)
                 if (stringLength == 0)
                 {
-                    logging::GALogger::w(arrayTag + " validation failed: contained an empty string.");
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "%s validation failed: contained an empty string.", arrayTag);
+                    logging::GALogger::w(s);
                     return false;
                 }
 
                 // check if exceeding max length
                 if (maxStringLength && maxStringLength > static_cast<int>(0) && stringLength > maxStringLength)
                 {
-                    logging::GALogger::w(arrayTag + " validation failed: a string exceeded max allowed length (which is: " + std::to_string(maxStringLength) + "). String was: " + arrayString);
+                    char s[257] = "";
+                    snprintf(s, sizeof(s), "%s validation failed: a string exceeded max allowed length (which is: %lu). String was: %s", arrayTag, maxStringLength, arrayString.array);
+                    logging::GALogger::w(s);
                     return false;
                 }
             }
