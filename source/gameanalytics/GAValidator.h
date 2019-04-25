@@ -52,7 +52,7 @@ namespace gameanalytics
 
             static bool validateErrorEvent(
                 EGAErrorSeverity severity,
-                const std::string& message
+                const char* message
                 );
 
             static bool validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type);
@@ -101,12 +101,12 @@ namespace gameanalytics
                 const char* arrayTag
                 );
             // facebook id, gender, birthyear
-            static bool validateFacebookId(const std::string& facebookId);
+            static bool validateFacebookId(const char* facebookId);
             static bool validateGender(EGAGender gender);
             static bool validateBirthyear(int64_t birthYear);
             static bool validateClientTs(int64_t clientTs);
 
-            static bool validateUserId(const std::string& uId);
+            static bool validateUserId(const char* uId);
         };
     }
 }

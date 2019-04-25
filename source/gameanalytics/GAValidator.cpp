@@ -95,7 +95,9 @@ namespace gameanalytics
             const char* itemId
             )
         {
-            if (events::GAEvents::resourceFlowTypeString(flowType).empty())
+            char resourceFlowTypeString[10] = "";
+            events::GAEvents::resourceFlowTypeString(flowType, resourceFlowTypeString);
+            if (strlen(resourceFlowTypeString) == 0)
             {
                 logging::GALogger::w("Validation fail - resource event - flowType: Invalid flow type.");
                 return false;
@@ -173,7 +175,9 @@ namespace gameanalytics
             const char* progression03
             )
         {
-            if (events::GAEvents::progressionStatusString(progressionStatus).empty())
+            char progressionStatusString[10] = "";
+            events::GAEvents::progressionStatusString(progressionStatus, progressionStatusString);
+            if (strlen(progressionStatusString) == 0)
             {
                 logging::GALogger::w("Validation fail - progression event: Invalid progression status.");
                 return false;
@@ -272,16 +276,20 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const std::string& message)
+        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const char* message)
         {
-            if (events::GAEvents::errorSeverityString(severity).empty())
+            char errorSeverityString[10] = "";
+            events::GAEvents::errorSeverityString(severity, errorSeverityString);
+            if (strlen(errorSeverityString) == 0)
             {
                 logging::GALogger::w("Validation fail - error event - severity: Severity was unsupported value.");
                 return false;
             }
             if (!GAValidator::validateLongString(message, true))
             {
-                logging::GALogger::w("Validation fail - error event - message: Message cannot be above 8192 characters. message=" + message);
+                char s[8500] = "";
+                snprintf(s, sizeof(s), "Validation fail - error event - message: Message cannot be above 8192 characters. message=%s", message);
+                logging::GALogger::w(s);
                 return false;
             }
             return true;
@@ -621,7 +629,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateFacebookId(const std::string& facebookId)
+        bool GAValidator::validateFacebookId(const char* facebookId)
         {
             if (!GAValidator::validateString(facebookId))
             {
@@ -664,9 +672,9 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateUserId(const std::string& uId)
+        bool GAValidator::validateUserId(const char* uId)
         {
-            if (uId.empty())
+            if (strlen(uId) == 0)
             {
                 logging::GALogger::w("Validation fail - user id cannot be empty.");
                 return false;

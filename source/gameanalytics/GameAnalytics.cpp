@@ -617,20 +617,22 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message)
     {
         addErrorEvent(severity, message, "");
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message_, STRING fields_)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string message(message_);
-        std::string fields(fields_);
+        char message[8200] = "";
+        snprintf(message, sizeof(message), "%s", message_ ? message_ : "");
+        char fields[65] = "";
+        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
             if (!isSdkReady(true, true, "Could not add error event"))
@@ -638,7 +640,7 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields.c_str());
+            fieldsJson.Parse(fields);
             events::GAEvents::addErrorEvent(severity, message, fieldsJson);
         });
     }

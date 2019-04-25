@@ -237,9 +237,12 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // insert event specific values
-            std::string flowTypeString = resourceFlowTypeString(flowType);
+            char flowTypeString[10] = "";
+            resourceFlowTypeString(flowType, flowTypeString);
             {
-                rapidjson::Value v((flowTypeString + ":" + currency + ":" + itemType + ":" + itemId).c_str(), allocator);
+                char s[257] = "";
+                snprintf(s, sizeof(s), "%s:%s:%s:%s", flowTypeString, currency, itemType, itemId);
+                rapidjson::Value v(s, allocator);
                 eventDict.AddMember("event_id", v.Move(), allocator);
             }
             {
@@ -279,7 +282,8 @@ namespace gameanalytics
                 return;
             }
 
-            std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
+            char statusString[10] = "";
+            progressionStatusString(progressionStatus, statusString);
 
             // Validate event params
             if (!validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03))
@@ -315,7 +319,9 @@ namespace gameanalytics
                 eventDict.AddMember("category", v.Move(), allocator);
             }
             {
-                rapidjson::Value v((progressionStatusString + ":" + progressionIdentifier).c_str(), allocator);
+                char s[513] = "";
+                snprintf(s, sizeof(s), "%s:%s", statusString, progressionIdentifier);
+                rapidjson::Value v(s, allocator);
                 eventDict.AddMember("event_id", v.Move(), allocator);
             }
 
@@ -364,7 +370,12 @@ namespace gameanalytics
             }
 
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + std::string(buffer.GetString()) + "}");
+            {
+                char s[1025] = "";
+                snprintf(s, sizeof(s), "Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%f, attempt:%f, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
+                logging::GALogger::i(s);
+            }
+
 
             // Send to store
             addEventToStore(eventDict);
@@ -429,14 +440,15 @@ namespace gameanalytics
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const rapidjson::Value& fields)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
                 return;
             }
 
-            std::string severityString = errorSeverityString(severity);
+            char severityString[10] = "";
+            errorSeverityString(severity, severityString);
 
             // Validate
             if (!validators::GAValidator::validateErrorEvent(severity, message))
@@ -456,11 +468,11 @@ namespace gameanalytics
                 eventData.AddMember("category", v.Move(), allocator);
             }
             {
-                rapidjson::Value v(severityString.c_str(), allocator);
+                rapidjson::Value v(severityString, allocator);
                 eventData.AddMember("severity", v.Move(), allocator);
             }
             {
-                rapidjson::Value v(message.c_str(), allocator);
+                rapidjson::Value v(message, allocator);
                 eventData.AddMember("message", v.Move(), allocator);
             }
 
@@ -479,7 +491,11 @@ namespace gameanalytics
             }
 
             // Log
-            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + std::string(buffer.GetString()) + "}");
+            {
+                char s[8500] = "";
+                snprintf(s, sizeof(s), "Add ERROR event: {severity:%s, message:%s, fields:%s}", severityString, message, buffer.GetString());
+                logging::GALogger::i(s);
+            }
 
             // Send to store
             addEventToStore(eventData);
@@ -882,51 +898,64 @@ namespace gameanalytics
             }
         }
 
-        const std::string GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus)
+        void GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus, char* out)
         {
             switch (progressionStatus) {
             case Start:
-                return "Start";
+                snprintf(out, 10, "%s", "Start");
+                return;
             case Complete:
-                return "Complete";
+                snprintf(out, 10, "%s", "Complete");
+                return;
             case Fail:
-                return "Fail";
+                snprintf(out, 10, "%s", "Complete");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
 
-        const std::string GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity)
+        void GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity, char* out)
         {
             switch (errorSeverity) {
             case Info:
-                return "info";
+                snprintf(out, 10, "%s", "info");
+                return;
             case Debug:
-                return "debug";
+                snprintf(out, 10, "%s", "debug");
+                return;
             case Warning:
-                return "warning";
+                snprintf(out, 10, "%s", "warning");
+                return;
             case Error:
-                return "error";
+                snprintf(out, 10, "%s", "error");
+                return;
             case Critical:
-                return "critical";
+                snprintf(out, 10, "%s", "critical");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
 
-        const std::string GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType)
+        void GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType, char* out)
         {
             switch (flowType) {
             case Source:
-                return "Source";
+                snprintf(out, 10, "%s", "Source");
+                return;
             case Sink:
-                return "Sink";
+                snprintf(out, 10, "%s", "Sink");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
     }
 }

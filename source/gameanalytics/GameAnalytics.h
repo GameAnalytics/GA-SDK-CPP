@@ -164,7 +164,7 @@ namespace gameanalytics
         static void addDesignEvent(const char* eventId);
 
         static void addDesignEvent(const char* eventId, double value);
-        static void addErrorEvent(EGAErrorSeverity severity, STRING message);
+        static void addErrorEvent(EGAErrorSeverity severity, const char* message);
 
         // set calls can be changed at any time (pre- and post-initialize)
         // some calls only work after a configure is called (setCustomDimension)
@@ -246,7 +246,7 @@ namespace gameanalytics
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* fields);
         static void addDesignEvent(const char* eventId, const char* fields);
         static void addDesignEvent(const char* eventId, double value, const char* fields);
-        static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
+        static void addErrorEvent(EGAErrorSeverity severity, const char* message, const char* fields);
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);

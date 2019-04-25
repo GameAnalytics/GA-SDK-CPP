@@ -8,6 +8,7 @@
 #include "GAEvents.h"
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <stacktrace/call_stack.hpp>
 #if defined(_WIN32)
 #include <stdlib.h>
@@ -116,7 +117,7 @@ namespace gameanalytics
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
                 errorCount = errorCount + 1;
-                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str(), {});
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str().c_str(), {});
                 events::GAEvents::processEvents("error", false);
             }
 
@@ -167,7 +168,7 @@ namespace gameanalytics
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
                 errorCount = errorCount + 1;
-                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str(), {});
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str().c_str(), {});
                 events::GAEvents::processEvents("error", false);
             }
 
