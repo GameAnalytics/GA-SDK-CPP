@@ -292,8 +292,8 @@ namespace gameanalytics
                 return;
             }
 
-            std::string gameKey = state::GAState::getGameKey();
-            std::string secretKey = state::GAState::getGameSecret();
+            const char* gameKey = state::GAState::getGameKey();
+            const char* secretKey = state::GAState::getGameSecret();
 
             // Validate
             if (!validators::GAValidator::validateSdkErrorEvent(gameKey, secretKey, type))

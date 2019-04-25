@@ -147,19 +147,19 @@ namespace gameanalytics
         // the version of the game engine (if used and version is available)
         static void configureGameEngineVersion(STRING engineVersion);
 
-        static void configureUserId(STRING uId);
+        static void configureUserId(const char* uId);
 
         // initialize - starting SDK (need configuration before starting)
         static void initialize(const char* gameKey, const char* gameSecret);
 
         // add events
-        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType);
+        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType);
 
         static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score);
 
         static void addDesignEvent(STRING eventId);
 
@@ -173,10 +173,10 @@ namespace gameanalytics
         static void setEnabledManualSessionHandling(bool flag);
         static void setEnabledErrorReporting(bool flag);
         static void setEnabledEventSubmission(bool flag);
-        static void setCustomDimension01(STRING dimension01);
-        static void setCustomDimension02(STRING dimension02);
-        static void setCustomDimension03(STRING dimension03);
-        static void setFacebookId(STRING facebookId);
+        static void setCustomDimension01(const char* dimension01);
+        static void setCustomDimension02(const char* dimension02);
+        static void setCustomDimension03(const char* dimension03);
+        static void setFacebookId(const char* facebookId);
         static void setGender(EGAGender gender);
         static void setBirthYear(int birthYear);
 
@@ -240,10 +240,10 @@ namespace gameanalytics
         static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
         static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
 #endif
-        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
+        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const char* fields);
         static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, const char* fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* fields);
         static void addDesignEvent(STRING eventId, STRING fields);
         static void addDesignEvent(STRING eventId, double value, STRING fields);
         static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);

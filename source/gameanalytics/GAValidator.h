@@ -22,11 +22,11 @@ namespace gameanalytics
 
             // user created events
             static bool validateBusinessEvent(
-                const std::string& currency,
+                const char* currency,
                 long amount,
-                const std::string& cartType,
-                const std::string& itemType,
-                const std::string& itemId
+                const char* cartType,
+                const char* itemType,
+                const char* itemId
                 );
 
             static bool validateResourceEvent(
@@ -40,13 +40,13 @@ namespace gameanalytics
 
             static bool validateProgressionEvent(
                 EGAProgressionStatus progressionStatus,
-                const std::string& progression01,
-                const std::string& progression02,
-                const std::string& progression03
+                const char* progression01,
+                const char* progression02,
+                const char* progression03
                 );
 
             static bool validateDesignEvent(
-                const std::string& eventId,
+                const char* eventId,
                 double value
                 );
 
@@ -62,11 +62,11 @@ namespace gameanalytics
 
             // event params
             static bool validateKeys(const char* gameKey, const char* gameSecret);
-            static bool validateCurrency(const std::string& currency);
-            static bool validateEventPartLength(const std::string& eventPart, bool allowNull);
-            static bool validateEventPartCharacters(const std::string& eventPart);
-            static bool validateEventIdLength(const std::string& eventId);
-            static bool validateEventIdCharacters(const std::string& eventId);
+            static bool validateCurrency(const char* currency);
+            static bool validateEventPartLength(const char* eventPart, bool allowNull);
+            static bool validateEventPartCharacters(const char* eventPart);
+            static bool validateEventIdLength(const char* eventId);
+            static bool validateEventIdCharacters(const char* eventId);
             static bool validateShortString(const std::string& shortString, bool canBeEmpty);
             static bool validateString(const std::string& string, bool canBeEmpty);
             static bool validateLongString(const std::string& longString, bool canBeEmpty);

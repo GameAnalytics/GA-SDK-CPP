@@ -29,8 +29,9 @@ namespace gameanalytics
             static std::string gzipCompress(const std::string& data);
 
             // added for C++ port
+            static bool isStringNullOrEmpty(const char* s);
             static void uppercaseString(char* s);
-            static std::string lowercaseString(std::string s);
+            static void lowercaseString(char* s);
             static bool stringVectorContainsString(const StringVector& vector, const char* search);
             static int64_t timeIntervalSince1970();
             static void printJoinStringArray(const StringVector& v, const char* format, const char* delimiter = ", ");

@@ -70,7 +70,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_transactionNum;
         }
 
-        const std::string GAState::getSessionId()
+        const char* GAState::getSessionId()
         {
             return sharedInstance()->_sessionId;
         }
@@ -353,18 +353,18 @@ namespace gameanalytics
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceItemTypes, itemType);
         }
 
-        void GAState::setKeys(const std::string& gameKey, const std::string& gameSecret)
+        void GAState::setKeys(const char* gameKey, const char* gameSecret)
         {
-            GAState::sharedInstance()->_gameKey = gameKey;
-            GAState::sharedInstance()->_gameSecret = gameSecret;
+            snprintf(sharedInstance()->_gameKey, sizeof(sharedInstance()->_gameKey), "%s", gameKey);
+            snprintf(sharedInstance()->_gameSecret, sizeof(sharedInstance()->_gameSecret), "%s", gameSecret);
         }
 
-        const std::string GAState::getGameKey()
+        const char* GAState::getGameKey()
         {
             return sharedInstance()->_gameKey;
         }
 
-        const std::string GAState::getGameSecret()
+        const char* GAState::getGameSecret()
         {
             return sharedInstance()->_gameSecret;
         }
@@ -467,7 +467,7 @@ namespace gameanalytics
             }
             // Session identifier
             {
-                rapidjson::Value v(sharedInstance()->_sessionId.c_str(), allocator);
+                rapidjson::Value v(sharedInstance()->_sessionId, allocator);
                 out.AddMember("session_id", v.Move(), allocator);
             }
             // Session number
@@ -958,11 +958,12 @@ namespace gameanalytics
             }
 
             // generate the new session
-            std::string newSessionId = utilities::GAUtilities::generateUUID();
-            std::string newSessionIdLowercase = utilities::GAUtilities::lowercaseString(newSessionId);
+            char newSessionId[65] = "";
+            utilities::GAUtilities::generateUUID(newSessionId);
+            utilities::GAUtilities::lowercaseString(newSessionId);
 
             // Set session id
-            GAState::sharedInstance()->_sessionId = newSessionIdLowercase;
+            snprintf(sharedInstance()->_sessionId, sizeof(sharedInstance()->_sessionId), "%s", newSessionId);
 
             // Set session start
             GAState::sharedInstance()->_sessionStart = getClientTsAdjusted();
@@ -976,19 +977,25 @@ namespace gameanalytics
             // validate that there are no current dimension01 not in list
             if (!validators::GAValidator::validateDimension01(sharedInstance()->_currentCustomDimension01))
             {
-                logging::GALogger::d("Invalid dimension01 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension01);
+                char s[151] = "";
+                snprintf(s, sizeof(s), "Invalid dimension01 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension01);
+                logging::GALogger::d(s);
                 setCustomDimension01("");
             }
             // validate that there are no current dimension02 not in list
             if (!validators::GAValidator::validateDimension02(sharedInstance()->_currentCustomDimension02))
             {
-                logging::GALogger::d("Invalid dimension02 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension02);
+                char s[151] = "";
+                snprintf(s, sizeof(s), "Invalid dimension02 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension02);
+                logging::GALogger::d(s);
                 setCustomDimension02("");
             }
             // validate that there are no current dimension03 not in list
             if (!validators::GAValidator::validateDimension03(sharedInstance()->_currentCustomDimension03))
             {
-                logging::GALogger::d("Invalid dimension03 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension03);
+                char s[151] = "";
+                snprintf(s, sizeof(s), "Invalid dimension03 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension03);
+                logging::GALogger::d(s);
                 setCustomDimension03("");
             }
         }

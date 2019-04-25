@@ -7,6 +7,7 @@
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <string.h>
+#include <stdio.h>
 #include <cmath>
 #if USE_LINUX
 #include <regex.h>
@@ -373,20 +374,27 @@ namespace gameanalytics
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
 
+        bool GAUtilities::isStringNullOrEmpty(const char* s)
+        {
+            return !s || strlen(s) == 0
+        }
+
         // TODO(nikolaj): explain function
         void GAUtilities::uppercaseString(char* s)
         {
-            while (*beg = std::toupper(*beg))
+            while ((*s = std::toupper(*s)))
             {
-                ++beg;
+                ++s;
             }
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::lowercaseString(std::string s)
+        void GAUtilities::lowercaseString(char* s)
         {
-            std::transform(s.begin(), s.end(), s.begin(), tolower);
-            return s;
+            while ((*s = std::tolower(*s)))
+            {
+                ++s;
+            }
         }
 
         // TODO(nikolaj): explain function
@@ -411,7 +419,7 @@ namespace gameanalytics
                 }
                 else
                 {
-                    snprintf(tmp, sizeof(tmp), "%s%s", result entry.array);
+                    snprintf(tmp, sizeof(tmp), "%s%s", result, entry.array);
                 }
 
                 snprintf(result, sizeof(result), "%s", tmp);
