@@ -12,6 +12,7 @@
 #include "GAThreading.h"
 #include "GAValidator.h"
 #include <string.h>
+#include <stdio.h>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
@@ -72,10 +73,10 @@ namespace gameanalytics
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
-            std::vector<std::string> parameters;
-            parameters.push_back("session_num");
-            parameters.push_back(std::to_string(state::GAState::getSessionNum()));
-            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameters);
+            char sessionNum[11] = "";
+            snprintf(sessionNum, sizeof(sessionNum), "%d", state::GAState::getSessionNum());
+            const char* parameters[2] = {"session_num", sessionNum}
+            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameters, 2);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);

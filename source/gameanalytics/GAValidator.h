@@ -55,13 +55,13 @@ namespace gameanalytics
                 const std::string& message
                 );
 
-            static bool validateSdkErrorEvent(const std::string& gameKey, const std::string& gameSecret, http::EGASdkErrorType type);
+            static bool validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type);
 
 
             // -------------------- HELPERS --------------------- //
 
             // event params
-            static bool validateKeys(const std::string& gameKey, const std::string& gameSecret);
+            static bool validateKeys(const char* gameKey, const char* gameSecret);
             static bool validateCurrency(const std::string& currency);
             static bool validateEventPartLength(const std::string& eventPart, bool allowNull);
             static bool validateEventPartCharacters(const std::string& eventPart);

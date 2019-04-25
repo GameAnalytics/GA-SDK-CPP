@@ -96,7 +96,7 @@ namespace gameanalytics
             {
                 int size = strlen(currency) + 129;
                 char s[size];
-                snprintf(s, sizeof(s), "Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: %s", currency);
+                snprintf(s, size, "Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: %s", currency);
                 logging::GALogger::w(s);
                 return false;
             }
@@ -112,27 +112,42 @@ namespace gameanalytics
             }
             if (!GAValidator::validateEventPartLength(itemType, false))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Cannot be (null), empty or above 64 characters. String: " + itemType);
+                int size = strlen(itemType) + 129;
+                char s[size];
+                snprintf(s, size, "Validation fail - resource event - itemType: Cannot be (null), empty or above 64 characters. String: %s", itemType);
+                logging::GALogger::w(s);
                 return false;
             }
             if (!GAValidator::validateEventPartCharacters(itemType))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemType);
+                int size = strlen(itemType) + 129;
+                char s[size];
+                snprintf(s, size, "Validation fail - resource event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemType);
+                logging::GALogger::w(s);
                 return false;
             }
             if (!state::GAState::hasAvailableResourceItemType(itemType))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Not found in list of pre-defined available resource itemTypes. String: " + itemType);
+                int size = strlen(itemType) + 129;
+                char s[size];
+                snprintf(s, size, "Validation fail - resource event - itemType: Not found in list of pre-defined available resource itemTypes. String: %s", itemType);
+                logging::GALogger::w(s);
                 return false;
             }
             if (!GAValidator::validateEventPartLength(itemId, false))
             {
-                logging::GALogger::w("Validation fail - resource event - itemId: Cannot be (null), empty or above 64 characters. String: " + itemId);
+                int size = strlen(itemId) + 129;
+                char s[size];
+                snprintf(s, size, "Validation fail - resource event - itemId: Cannot be (null), empty or above 64 characters. String: %s", itemId);
+                logging::GALogger::w(s);
                 return false;
             }
             if (!GAValidator::validateEventPartCharacters(itemId))
             {
-                logging::GALogger::w("Validation fail - resource event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemId);
+                int size = strlen(itemId) + 129;
+                char s[size];
+                snprintf(s, size, "Validation fail - resource event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemId);
+                logging::GALogger::w(s);
                 return false;
             }
             return true;
@@ -243,7 +258,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateSdkErrorEvent(const std::string& gameKey, const std::string& gameSecret, http::EGASdkErrorType type)
+        bool GAValidator::validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type)
         {
             if(!validateKeys(gameKey, gameSecret))
             {
@@ -260,7 +275,7 @@ namespace gameanalytics
 
 
         // event params
-        bool GAValidator::validateKeys(const std::string& gameKey, const std::string& gameSecret)
+        bool GAValidator::validateKeys(const char* gameKey, const char* gameSecret)
         {
             if (utilities::GAUtilities::stringMatch(gameKey, "^[A-z0-9]{32}$"))
             {

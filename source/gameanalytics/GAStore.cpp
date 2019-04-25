@@ -9,6 +9,7 @@
 #include "GALogger.h"
 #include "GAUtilities.h"
 #include <fstream>
+#include <string.h>
 #if USE_UWP
 #elif USE_TIZEN
 #elif _WIN32
@@ -30,40 +31,44 @@ namespace gameanalytics
         {
         }
 
-        bool GAStore::executeQuerySync(const std::string& sql)
+        bool GAStore::executeQuerySync(const char* sql)
         {
             rapidjson::Value v(rapidjson::kObjectType);
             executeQuerySync(sql, v);
             return !v.IsNull();
         }
 
-        void GAStore::executeQuerySync(const std::string& sql, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, rapidjson::Value& out)
         {
-            executeQuerySync(sql, {}, out);
+            executeQuerySync(sql, {}, 0, out);
         }
 
 
-        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size)
         {
             rapidjson::Value v;
-            executeQuerySync(sql, parameters, false, v);
+            executeQuerySync(sql, parameters, size, false, v);
         }
 
-        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, rapidjson::Value& out)
         {
-            executeQuerySync(sql, parameters, false, out);
+            executeQuerySync(sql, parameters, size, false, out);
         }
 
-        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction)
         {
             rapidjson::Value v(rapidjson::kObjectType);
-            executeQuerySync(sql, parameters, useTransaction, v);
+            executeQuerySync(sql, parameters, size, useTransaction, v);
         }
 
-        void GAStore::executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Value& out)
         {
             // Force transaction if it is an update, insert or delete.
-            if (utilities::GAUtilities::stringMatch(utilities::GAUtilities::uppercaseString(sql), "^(UPDATE|INSERT|DELETE)"))
+            int arraySize = strlen(sql) + 1;
+            char sqlUpper[arraySize];
+            snprintf(sqlUpper, arraySize, "%s", sql);
+            utilities::GAUtilities::uppercaseString(sqlUpper);
+            if (utilities::GAUtilities::stringMatch(sqlUpper, "^(UPDATE|INSERT|DELETE)"))
             {
                 useTransaction = true;
             }
@@ -90,15 +95,14 @@ namespace gameanalytics
             sqlite3_stmt *statement;
 
             // Prepare statement
-            if (sqlite3_prepare_v2(sqlDatabasePtr, sql.c_str(), -1, &statement, nullptr) == SQLITE_OK)
+            if (sqlite3_prepare_v2(sqlDatabasePtr, sql, -1, &statement, nullptr) == SQLITE_OK)
             {
                 // Bind parameters
-                if (!parameters.empty())
+                if (size > 0)
                 {
-                    size_t parametersCount = parameters.size();
-                    for (size_t index = 0; index < parametersCount; index++)
+                    for (size_t index = 0; index < size; index++)
                     {
-                        sqlite3_bind_text(statement, static_cast<int>(index + 1), parameters[index].c_str(), -1, 0);
+                        sqlite3_bind_text(statement, static_cast<int>(index + 1), parameters[index], -1, 0);
                     }
                 }
 
@@ -319,20 +323,17 @@ namespace gameanalytics
             return true;
         }
 
-        void GAStore::setState(const std::string& key, const std::string& value)
+        void GAStore::setState(const char* key, const char* value)
         {
-            if (value.empty())
+            if (strlen(value) == 0)
             {
-                std::vector<std::string> parameterArray;
-                parameterArray.push_back(key);
-                executeQuerySync("DELETE FROM ga_state WHERE key = ?;", parameterArray);
+                const char* parameterArray[1] = {key};
+                executeQuerySync("DELETE FROM ga_state WHERE key = ?;", parameterArray, 1);
             }
             else
             {
-                std::vector<std::string> parameterArray;
-                parameterArray.push_back(key);
-                parameterArray.push_back(value);
-                executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameterArray, true);
+                const char* parameterArray[2] = {key, value};
+                executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameterArray, 2, true);
             }
         }
 
@@ -363,21 +364,29 @@ namespace gameanalytics
 
                 if(resultSessionArray.Size() > 0)
                 {
-                    std::string sessionDeleteString = "";
+                    char sessionDeleteString[257] = "";
 
                     unsigned int i = 0;
                     for (rapidjson::Value::ConstValueIterator itr = resultSessionArray.Begin(); itr != resultSessionArray.End(); ++itr)
                     {
                         const rapidjson::Value& result = *itr;
-                        sessionDeleteString += result.GetString();
+                        const char* session_id = result.GetString();
+                        char tmp[257] = "";
+
                         if(i < resultSessionArray.Size() - 1)
                         {
-                            sessionDeleteString += ",";
+                            snprintf(tmp, 257, "%s%s%s", sessionDeleteString, session_id, ",");
                         }
+                        else
+                        {
+                            snprintf(tmp, 257, "%s%s", sessionDeleteString, session_id);
+                        }
+                        snprintf(sessionDeleteString, 257, "%s", tmp);
                         ++i;
                     }
 
-                    std::string deleteOldSessionsSql = "DELETE FROM ga_events WHERE session_id IN (\"" + sessionDeleteString + "\");";
+                    char deleteOldSessionsSql[513] = "";
+                    snprintf(deleteOldSessionsSql, 513, "DELETE FROM ga_events WHERE session_id IN (\"%s\");", sessionDeleteString);
                     logging::GALogger::w("Database too large when initializing. Deleting the oldest 3 sessions.");
                     executeQuerySync(deleteOldSessionsSql);
                     executeQuerySync("VACUUM");

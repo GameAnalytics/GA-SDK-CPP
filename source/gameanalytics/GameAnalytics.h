@@ -150,7 +150,7 @@ namespace gameanalytics
         static void configureUserId(STRING uId);
 
         // initialize - starting SDK (need configuration before starting)
-        static void initialize(STRING gameKey, STRING gameSecret);
+        static void initialize(const char* gameKey, const char* gameSecret);
 
         // add events
         static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType);

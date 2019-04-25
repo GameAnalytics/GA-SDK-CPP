@@ -7,7 +7,7 @@
 #include "GAUtilities.h"
 #include "GALogger.h"
 #include <string.h>
-#include <algorithm>
+#include <cmath>
 #if USE_LINUX
 #include <regex.h>
 #include <iterator>
@@ -236,7 +236,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::generateUUID()
+        void GAUtilities::generateUUID(char* out)
         {
 #if USE_UWP
             GUID result;
@@ -259,7 +259,7 @@ namespace gameanalytics
             auto myGuid = generator.newGuid();
             std::stringstream stream;
             stream << myGuid;
-            return stream.str();
+            snprintf(out, 129, "%s", stream.str().c_str());
 #endif
         }
 
@@ -307,7 +307,7 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        bool GAUtilities::stringMatch(const std::string& string, const std::string& pattern)
+        bool GAUtilities::stringMatch(const char* string, const char* pattern)
         {
 
 #if USE_LINUX
@@ -324,12 +324,15 @@ namespace gameanalytics
 #else
             try
             {
-		std::regex expression(pattern);
+                std::regex expression(pattern);
                 return std::regex_match(string, expression);
             }
             catch (const std::regex_error& e)
             {
-                logging::GALogger::e("failed to parse regular expression '" + pattern + "', code: " + std::to_string(e.code()) + ", what: " + e.what());
+                int size = strlen(pattern) + strlen(e.what()) + 129;
+                char s[size];
+                snprintf(s, sizeof(s), "failed to parse regular expression '%s', code: %d, what: %s", pattern, e.code(), e.what());
+                logging::GALogger::e(s);
                 logging::GALogger::e("Please note, that the gnustl might not have regex support yet: https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html");
                 #if _DEBUG
                 throw;
@@ -371,12 +374,13 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::uppercaseString(std::string s)
+        void GAUtilities::uppercaseString(char* s)
         {
-            std::transform(s.begin(), s.end(), s.begin(), toupper);
-            return s;
+            while (*beg = std::toupper(*beg))
+            {
+                ++beg;
+            }
         }
-
 
         // TODO(nikolaj): explain function
         std::string GAUtilities::lowercaseString(std::string s)
@@ -386,9 +390,9 @@ namespace gameanalytics
         }
 
         // TODO(nikolaj): explain function
-        void GAUtilities::joinStringArray(const StringVector& v, char* out, const char* delimiter)
+        void GAUtilities::printJoinStringArray(const StringVector& v, const char* format, const char* delimiter)
         {
-            int size = strlen(delimiter) * std::max(v.getVector().size() - 1, 0);
+            int size = strlen(delimiter) * fmax(v.getVector().size() - 1, 0);
 
             for (CharArray entry : v.getVector())
             {
@@ -414,7 +418,9 @@ namespace gameanalytics
                 ++count;
             }
 
-            snprintf(out, 1025, "%s", result);
+            char s[1025];
+            snprintf(s, sizeof(s), format, result);
+            logging::GALogger::i(s);
         }
 
         void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const char* newValue)

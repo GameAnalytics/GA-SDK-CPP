@@ -356,15 +356,17 @@ namespace gameanalytics
 
     // ----------------------- INITIALIZE ---------------------- //
 
-    void GameAnalytics::initialize(STRING gameKey_, STRING gameSecret_)
+    void GameAnalytics::initialize(const char* gameKey_, const char* gameSecret_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string gameKey(gameKey_);
-        std::string gameSecret(gameSecret_);
+        char gameKey[65] = "";
+        snprintf(gameKey, sizeof(gameKey), "%s", gameKey_);
+        char gameSecret[65] = "";
+        snprintf(gameSecret, sizeof(gameSecret), "%s", gameSecret_);
 #if USE_UWP
         Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
         Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);

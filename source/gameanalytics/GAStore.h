@@ -10,6 +10,7 @@
 #include <vector>
 #include "rapidjson/document.h"
 #include "Foundation/GASingleton.h"
+#include "GameAnalytics.h"
 
 namespace gameanalytics
 {
@@ -24,16 +25,16 @@ namespace gameanalytics
 
             static bool ensureDatabase(bool dropDatabase, const std::string& key = "");
 
-            static void setState(const std::string& key, const std::string& value);
+            static void setState(const char* key, const char* value);
 
-            static bool executeQuerySync(const std::string& sql);
-            static void executeQuerySync(const std::string& sql, rapidjson::Value& out);
+            static bool executeQuerySync(const char* sql);
+            static void executeQuerySync(const char* sql, rapidjson::Value& out);
 
-            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
-            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, rapidjson::Value& out);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, rapidjson::Value& out);
 
-            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
-            static void executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction, rapidjson::Value& out);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Value& out);
 
             static long long getDbSizeBytes();
 

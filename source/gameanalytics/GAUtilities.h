@@ -23,17 +23,17 @@ namespace gameanalytics
         {
          public:
             static std::string getPathSeparator();
-            static std::string generateUUID();
+            static void generateUUID(char* out);
             static std::string hmacWithKey(const std::string& key, const std::string& data);
-            static bool stringMatch(const std::string& string, const std::string& pattern);
+            static bool stringMatch(const char* string, const char* pattern);
             static std::string gzipCompress(const std::string& data);
 
             // added for C++ port
-            static std::string uppercaseString(std::string s);
+            static void uppercaseString(char* s);
             static std::string lowercaseString(std::string s);
             static bool stringVectorContainsString(const StringVector& vector, const char* search);
             static int64_t timeIntervalSince1970();
-            static void joinStringArray(const StringVector& v, char* out, const char* delimiter = ", ");
+            static void printJoinStringArray(const StringVector& v, const char* format, const char* delimiter = ", ");
             static void setJsonKeyValue(rapidjson::Document& json, const char* key, const char* newValue);
 #if !USE_UWP
             static int base64_needed_encoded_length(int length_of_data);

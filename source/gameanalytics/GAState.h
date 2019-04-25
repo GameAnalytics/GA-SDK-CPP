@@ -27,7 +27,7 @@ namespace gameanalytics
             GAState();
             ~GAState();
 
-            static void setUserId(const std::string& id);
+            static void setUserId(const char* id);
             static const std::string getIdentifier();
             static bool isInitialized();
             static int64_t getSessionStart();
@@ -46,17 +46,17 @@ namespace gameanalytics
             static void setAvailableResourceItemTypes(const StringVector& availableResourceItemTypes);
             static void setBuild(const std::string& build);
             static bool isEnabled();
-            static void setCustomDimension01(const std::string& dimension);
-            static void setCustomDimension02(const std::string& dimension);
-            static void setCustomDimension03(const std::string& dimension);
-            static void setFacebookId(const std::string& facebookId);
+            static void setCustomDimension01(const char* dimension);
+            static void setCustomDimension02(const char* dimension);
+            static void setCustomDimension03(const char* dimension);
+            static void setFacebookId(const char* facebookId);
             static void setGender(EGAGender gender);
             static void setBirthYear(int birthYear);
             static void incrementSessionNum();
             static void incrementTransactionNum();
-            static void incrementProgressionTries(const std::string& progression);
+            static void incrementProgressionTries(const char* progression);
             static int getProgressionTries(const std::string& progression);
-            static void clearProgressionTries(const std::string& progression);
+            static void clearProgressionTries(const char* progression);
             static bool hasAvailableCustomDimensions01(const char* dimension1);
             static bool hasAvailableCustomDimensions02(const char* dimension2);
             static bool hasAvailableCustomDimensions03(const char* dimension3);
@@ -85,7 +85,7 @@ namespace gameanalytics
             static std::string getConfigurationsContentAsString();
 
          private:
-            static void setDefaultUserId(const std::string& id);
+            static void setDefaultUserId(const char* id);
             static void getSdkConfig(rapidjson::Value& out);
             static void cacheIdentifier();
             static void ensurePersistedStates();
@@ -98,16 +98,16 @@ namespace gameanalytics
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
 
-            std::string _userId;
+            char _userId[129] = "";
             std::string _identifier;
             bool _initialized = false;
             int64_t _sessionStart = 0;
             int _sessionNum = 0;
             int _transactionNum = 0;
             std::string _sessionId;
-            std::string _currentCustomDimension01;
-            std::string _currentCustomDimension02;
-            std::string _currentCustomDimension03;
+            char _currentCustomDimension01[65] = "";
+            char _currentCustomDimension02[65] = "";
+            char _currentCustomDimension03[65] = "";
             std::string _gameKey;
             std::string _gameSecret;
             StringVector _availableCustomDimensions01;
@@ -116,13 +116,13 @@ namespace gameanalytics
             StringVector _availableResourceCurrencies;
             StringVector _availableResourceItemTypes;
             std::string _build;
-            std::string _facebookId;
-            std::string _gender;
+            char _facebookId[65] = "";
+            char _gender[9] = "";
             int _birthYear = 0;
             bool _initAuthorized = false;
             bool _enabled = false;
             int64_t _clientServerTimeOffset = 0;
-            std::string _defaultUserId;
+            char _defaultUserId[129] = "";
             std::map<std::string, int> _progressionTries;
             rapidjson::Value _sdkConfigDefault;
             rapidjson::Value _sdkConfig;

@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <climits>
 #include <string.h>
+#include <stdio.h>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 
@@ -38,9 +39,9 @@ namespace gameanalytics
             state::GAState::endSessionAndStopQueue(false);
         }
 
-        void GAState::setUserId(const std::string& id)
+        void GAState::setUserId(const char* id)
         {
-            sharedInstance()->_userId = id;
+            snprintf(sharedInstance()->_userId, sizeof(sharedInstance()->_userId), "%s", id);
             cacheIdentifier();
         }
 
@@ -101,7 +102,9 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+
+
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom01 dimension values: (%s)");
         }
 
         void GAState::setAvailableCustomDimensions02(const StringVector& availableCustomDimensions)
@@ -116,7 +119,7 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom02 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom02 dimension values: (%s)");
         }
 
         void GAState::setAvailableCustomDimensions03(const StringVector& availableCustomDimensions)
@@ -131,7 +134,7 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom03 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom03 dimension values: (%s)");
         }
 
         void GAState::setAvailableResourceCurrencies(const StringVector& availableResourceCurrencies)
@@ -142,7 +145,7 @@ namespace gameanalytics
             }
             sharedInstance()->_availableResourceCurrencies = availableResourceCurrencies;
 
-            logging::GALogger::i("Set available resource currencies: (" + utilities::GAUtilities::joinStringArray(availableResourceCurrencies) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableResourceCurrencies, "Set available resource currencies: (%s)");
         }
 
         void GAState::setAvailableResourceItemTypes(const StringVector& availableResourceItemTypes)
@@ -153,7 +156,7 @@ namespace gameanalytics
             }
             sharedInstance()->_availableResourceItemTypes = availableResourceItemTypes;
 
-            logging::GALogger::i("Set available resource item types: (" + utilities::GAUtilities::joinStringArray(availableResourceItemTypes) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableResourceItemTypes, "Set available resource item types: (%s)");
         }
 
         void GAState::setBuild(const std::string& build)
@@ -163,9 +166,9 @@ namespace gameanalytics
             logging::GALogger::i("Set build: " + build);
         }
 
-        void GAState::setDefaultUserId(const std::string& id)
+        void GAState::setDefaultUserId(const char* id)
         {
-            sharedInstance()->_defaultUserId = id;
+            snprintf(sharedInstance()->_defaultUserId, sizeof(sharedInstance()->_defaultUserId), "%s", id);
             cacheIdentifier();
         }
 
@@ -193,60 +196,72 @@ namespace gameanalytics
             return GAState::sharedInstance()->_enabled;
         }
 
-        void GAState::setCustomDimension01(const std::string& dimension)
+        void GAState::setCustomDimension01(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension01 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension01, sizeof(sharedInstance()->_currentCustomDimension01), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension01", dimension);
             }
-            logging::GALogger::i("Set custom01 dimension value: " + dimension);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set custom01 dimension value: %s", dimension);
+            logging::GALogger::i(s);
         }
 
-        void GAState::setCustomDimension02(const std::string& dimension)
+        void GAState::setCustomDimension02(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension02 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension02, sizeof(sharedInstance()->_currentCustomDimension02), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension02", dimension);
             }
-            logging::GALogger::i("Set custom02 dimension value: " + dimension);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set custom02 dimension value: %s", dimension);
+            logging::GALogger::i(s);
         }
 
-        void GAState::setCustomDimension03(const std::string& dimension)
+        void GAState::setCustomDimension03(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension03 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension03, sizeof(sharedInstance()->_currentCustomDimension03), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension03", dimension);
             }
-            logging::GALogger::i("Set custom03 dimension value: " + dimension);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set custom03 dimension value: %s", dimension);
+            logging::GALogger::i(s);
         }
 
-        void GAState::setFacebookId(const std::string& facebookId)
+        void GAState::setFacebookId(const char* facebookId)
         {
-            sharedInstance()->_facebookId = facebookId;
+            snprintf(sharedInstance()->_facebookId, sizeof(sharedInstance()->_facebookId), "%s", facebookId);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("facebook_id", facebookId);
             }
-            logging::GALogger::i("Set facebook id: " + facebookId);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set facebook id: %s", facebookId);
+            logging::GALogger::i(s);
         }
 
         void GAState::setGender(EGAGender gender)
         {
             switch (gender) {
             case Male:
-                sharedInstance()->_gender = "male";
+                snprintf(sharedInstance()->_gender, sizeof(sharedInstance()->_gender), "%s", "male");
+                break;
             case Female:
-                sharedInstance()->_gender = "female";
+                snprintf(sharedInstance()->_gender, sizeof(sharedInstance()->_gender), "%s", "female");
+                break;
             }
 
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("gender", sharedInstance()->_gender);
             }
-            logging::GALogger::i("Set gender: " + sharedInstance()->_gender);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set gender: %s", sharedInstance()->_gender);
+            logging::GALogger::i(s);
         }
 
         void GAState::setBirthYear(int birthYear)
@@ -254,9 +269,13 @@ namespace gameanalytics
             sharedInstance()->_birthYear = birthYear;
             if (store::GAStore::sharedInstance()->getTableReady())
             {
-                store::GAStore::setState("birth_year", std::to_string(birthYear));
+                char s[11] = "";
+                snprintf(s, sizeof(s), "%d", birthYear);
+                store::GAStore::setState("birth_year", s);
             }
-            logging::GALogger::i("Set birth year: " + std::to_string(birthYear));
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set birth year: %d", birthYear);
+            logging::GALogger::i(s);
         }
 
         void GAState::incrementSessionNum()
@@ -271,16 +290,16 @@ namespace gameanalytics
             GAState::sharedInstance()->_transactionNum = transactionNumInt;
         }
 
-        void GAState::incrementProgressionTries(const std::string& progression)
+        void GAState::incrementProgressionTries(const char* progression)
         {
             auto tries = static_cast<int>(getProgressionTries(progression) + 1);
             GAState::sharedInstance()->_progressionTries[progression] = tries;
 
             // Persist
-            std::vector<std::string> parms;
-            parms.push_back(progression);
-            parms.push_back(std::to_string(tries));
-            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms);
+            char triesString[11] = "";
+            snprintf(triesString, sizeof(triesString), "%d", tries);
+            const char* parms[2] = {progression, triesString};
+            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms, 2);
         }
 
         int GAState::getProgressionTries(const std::string& progression)
@@ -295,7 +314,7 @@ namespace gameanalytics
             }
         }
 
-        void GAState::clearProgressionTries(const std::string& progression)
+        void GAState::clearProgressionTries(const char* progression)
         {
             auto progressionTries = GAState::sharedInstance()->_progressionTries;
             auto searchResult = progressionTries.find(progression);
@@ -305,9 +324,8 @@ namespace gameanalytics
             }
 
             // Delete
-            std::vector<std::string> parms;
-            parms.push_back(progression);
-            store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms);
+            const char* parms[1] = {progression};
+            store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms, 1);
         }
 
         bool GAState::hasAvailableCustomDimensions01(const char* dimension1)
@@ -600,7 +618,7 @@ namespace gameanalytics
 
         void GAState::cacheIdentifier()
         {
-            if (!GAState::sharedInstance()->_userId.empty())
+            if (strlen(GAState::sharedInstance()->_userId) > 0)
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_userId;
             }
@@ -619,7 +637,7 @@ namespace gameanalytics
                 GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
             }
 #endif
-            else if (!GAState::sharedInstance()->_defaultUserId.empty())
+            else if (strlen(GAState::sharedInstance()->_defaultUserId) > 0)
             {
                 GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_defaultUserId;
             }
@@ -652,10 +670,12 @@ namespace gameanalytics
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 
-            std::string defaultId = state_dict.HasMember("default_user_id") ? state_dict["default_user_id"].GetString() : "";
-            if(defaultId.empty())
+            const char* defaultId = state_dict.HasMember("default_user_id") ? state_dict["default_user_id"].GetString() : "";
+            if(strlen(defaultId) == 0)
             {
-                instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
+                char id[129] = "";
+                utilities::GAUtilities::generateUUID(id);
+                instance->setDefaultUserId(id);
             }
             else
             {
@@ -667,76 +687,96 @@ namespace gameanalytics
             instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0");
 
             // restore cross session user values
-            if (!instance->_facebookId.empty())
+            if (strlen(instance->_facebookId) > 0)
             {
                 store::GAStore::setState("facebook_id", instance->_facebookId);
             }
             else
             {
-                instance->_facebookId = state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "";
-                if (!instance->_facebookId.empty()) {
-                    logging::GALogger::d("facebookid found in DB: " + instance->_facebookId);
+                snprintf(instance->_facebookId, sizeof(instance->_facebookId), "%s", state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "");
+                if (strlen(instance->_facebookId) > 0)
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "facebookid found in DB: %s", instance->_facebookId);
+                    logging::GALogger::d(s);
                 }
             }
 
-            if (!instance->_gender.empty())
+            if (strlen(instance->_gender) > 0)
             {
                 store::GAStore::setState("gender", instance->_gender);
             }
             else
             {
-                instance->_gender = state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "";
-                if (!instance->_gender.empty()) {
-                    logging::GALogger::d("gender found in DB: " + instance->_gender);
+                snprintf(instance->_gender, sizeof(instance->_gender), "%s", state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "");
+                if (strlen(instance->_gender) > 0)
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "gender found in DB: %s", instance->_gender);
+                    logging::GALogger::d(s);
                 }
             }
 
             if (instance->_birthYear != 0)
             {
-                store::GAStore::setState("birth_year", std::to_string(instance->_birthYear));
+                char s[11] = "";
+                snprintf(s, sizeof(s), "%d", instance->_birthYear);
+                store::GAStore::setState("birth_year", s);
             }
             else
             {
                 instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0");
-                if (instance->_birthYear != 0) {
-                    logging::GALogger::d("birthYear found in DB: " + std::to_string(instance->_birthYear));
+                if (instance->_birthYear != 0)
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "birthYear found in DB: %d", instance->_birthYear);
+                    logging::GALogger::d(s);
                 }
             }
 
             // restore dimension settings
-            if (!instance->_currentCustomDimension01.empty())
+            if (strlen(instance->_currentCustomDimension01) > 0)
             {
                 store::GAStore::setState("dimension01", instance->_currentCustomDimension01);
             }
             else
             {
-                instance->_currentCustomDimension01 = state_dict.HasMember("dimension01") ? state_dict["dimension01"].GetString() : "";
-                if (!instance->_currentCustomDimension01.empty()) {
-                    logging::GALogger::d("Dimension01 found in cache: " + instance->_currentCustomDimension01);
+                snprintf(instance->_currentCustomDimension01, sizeof(instance->_currentCustomDimension01), "%s", state_dict.HasMember("dimension01") ? state_dict["dimension01"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension01))
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "Dimension01 found in cache: %s", instance->_currentCustomDimension01);
+                    logging::GALogger::d(s);
                 }
             }
 
-            if (!instance->_currentCustomDimension02.empty())
+            if (strlen(instance->_currentCustomDimension02) > 0)
             {
                 store::GAStore::setState("dimension02", instance->_currentCustomDimension02);
             }
             else
             {
-                instance->_currentCustomDimension02 = state_dict.HasMember("dimension02") ? state_dict["dimension02"].GetString() : "";
-                if (!instance->_currentCustomDimension02.empty()) {
-                    logging::GALogger::d("Dimension02 found cache: " + instance->_currentCustomDimension02);
+                snprintf(instance->_currentCustomDimension02, sizeof(instance->_currentCustomDimension02), "%s", state_dict.HasMember("dimension02") ? state_dict["dimension02"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension02) > 0)
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "Dimension02 found in cache: %s", instance->_currentCustomDimension02);
+                    logging::GALogger::d(s);
                 }
             }
 
-            if (!instance->_currentCustomDimension03.empty())
+            if (strlen(instance->_currentCustomDimension03) > 0)
             {
                 store::GAStore::setState("dimension03", instance->_currentCustomDimension03);
             }
             else
             {
-                instance->_currentCustomDimension03 = state_dict.HasMember("dimension03") ? state_dict["dimension03"].GetString() : "";
-                if (!instance->_currentCustomDimension03.empty()) {
-                    logging::GALogger::d("Dimension03 found in cache: " + instance->_currentCustomDimension03);
+                snprintf(instance->_currentCustomDimension03, sizeof(instance->_currentCustomDimension03), "%s", state_dict.HasMember("dimension03") ? state_dict["dimension03"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension03) > 0)
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "Dimension03 found in cache: %s", instance->_currentCustomDimension03);
+                    logging::GALogger::d(s);
                 }
             }
 
@@ -1071,7 +1111,9 @@ namespace gameanalytics
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
-                        if(utilities::GAUtilities::stringMatch(key, "^[a-zA-Z0-9_]{1," + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + "}$"))
+                        char pattern[65] = "";
+                        snprintf(pattern, sizeof(pattern), "^[a-zA-Z0-9_]{1,%d}$", MAX_CUSTOM_FIELDS_KEY_LENGTH);
+                        if(utilities::GAUtilities::stringMatch(key, pattern))
                         {
                             const rapidjson::Value& value = fields[key];
 
