@@ -809,7 +809,6 @@ namespace gameanalytics
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                 results_ga_progression.Accept(writer);
             }
-            logging::GALogger::d(buffer.GetString());
 
             if (!results_ga_progression.IsNull() && !results_ga_progression.Empty())
             {

@@ -12,8 +12,7 @@
 #if USE_UWP
 #include <ppltasks.h>
 #else
-#include "curl_easy.h"
-#include "curl_header.h"
+#include <curl/curl.h>
 #endif
 
 namespace gameanalytics
@@ -42,16 +41,17 @@ namespace gameanalytics
             Rejected = 1
         };
 
-        struct CurlFetchStruct
+        struct ResponseData
         {
-            char *payload;
-            size_t size;
+            char *ptr;
+            size_t len;
         };
 
         class GAHTTPApi : public GASingleton<GAHTTPApi>
         {
         public:
             GAHTTPApi();
+            ~GAHTTPApi();
 
 #if USE_UWP
             concurrency::task<Void> requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
@@ -82,8 +82,8 @@ namespace gameanalytics
             EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
             concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> createStream(std::string data);
 #else
-            const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const char* url, const char* payloadData, bool gzip);
-            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const char* body, const char* requestId);
+            const std::string createRequest(CURL *curl, const char* url, const char* payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(long statusCode, const char* body, const char* requestId);
 #endif
 
             static void initBaseUrl();

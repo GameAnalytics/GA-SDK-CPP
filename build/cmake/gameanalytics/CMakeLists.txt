@@ -199,8 +199,6 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
         "${DEPENDENCIES_DIR}/spdlog/include/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
@@ -214,7 +212,6 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 elseif("${LINUX_ALL}")
     # traverse all the subdirectories of the matched directory
@@ -233,8 +230,6 @@ elseif("${LINUX_ALL}")
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
         "${DEPENDENCIES_DIR}/spdlog/include/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
@@ -248,7 +243,6 @@ elseif("${LINUX_ALL}")
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 else()
     # traverse all the subdirectories of the matched directory
@@ -268,8 +262,6 @@ else()
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
         "${DEPENDENCIES_DIR}/spdlog/include/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
@@ -284,7 +276,6 @@ else()
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 endif("${UWP_ALL}")
 
