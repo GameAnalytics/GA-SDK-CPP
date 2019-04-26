@@ -255,18 +255,21 @@ namespace gameanalytics
 #elif IS_LINUX
             struct utsname info;
             uname(&info);
-            std::string v(info.release);
 
             std::size_t i;
-            for(i = 0; i < v.size(); ++i)
+            char v[65] = "";
+            snprintf(v, sizeof(v), "%s", info.release);
+
+            for(i = 0; i < strlen(info.release); ++i)
             {
                 if(!isdigit(v[i]) && v[i] != '.')
                 {
-                    v = v.substr(0, i);
+                    snprintf(v, i, "%s", info.release);
                     break;
                 }
             }
-            return GADevice::getBuildPlatform() + " " + v;
+
+            snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), v);
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
@@ -592,12 +595,10 @@ namespace gameanalytics
             return app_get_data_path();
 #else
 #ifdef _WIN32
-
-            std::string result = std::getenv("LOCALAPPDATA") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
-            _mkdir(result.c_str());
-            return result;
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("LOCALAPPDATA"), utilities::GAUtilities::getPathSeparator());
+            _mkdir(GADevice::_writablepath);
 #else
-            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("HOME"), utilities::GAUtilities::getPathSeparator().c_str());
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("HOME"), utilities::GAUtilities::getPathSeparator());
             mode_t nMode = 0733;
             mkdir(GADevice::_writablepath, nMode);
 #endif

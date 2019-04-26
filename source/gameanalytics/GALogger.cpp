@@ -68,7 +68,7 @@ namespace gameanalytics
 
             if(!ga->logInitialized)
             {
-                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+                std::string p(device::GADevice::getWritablePath() + std::string(utilities::GAUtilities::getPathSeparator()) + "ga_log.txt");
                 std::vector<spdlog::sink_ptr> sinks;
                 sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
                 sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
@@ -98,7 +98,7 @@ namespace gameanalytics
             GALogger *ga = GALogger::sharedInstance();
 
             spdlog::drop("gameanalytics");
-            std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+            std::string p(device::GADevice::getWritablePath() + std::string(utilities::GAUtilities::getPathSeparator()) + "ga_log.txt");
             std::vector<spdlog::sink_ptr> sinks;
             sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
             sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));

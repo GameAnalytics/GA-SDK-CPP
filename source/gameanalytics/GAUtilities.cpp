@@ -32,6 +32,12 @@ namespace gameanalytics
 {
     namespace utilities
     {
+#ifdef _WIN32
+        char GAUtilities::pathSeparator[2] = "\\";
+#else
+        char GAUtilities::pathSeparator[2] = "/";
+#endif
+
         // Compress a STL string using zlib with given compression level and return the binary data.
         // Note: the zlib header is supressed
         static std::string deflate_string(const std::string& str,
@@ -227,13 +233,9 @@ namespace gameanalytics
             return ss.str();
         }
 
-        std::string GAUtilities::getPathSeparator()
+        const char* GAUtilities::getPathSeparator()
         {
-#ifdef _WIN32
-            return "\\";
-#else
-            return "/";
-#endif
+            return pathSeparator;
         }
 
         // TODO(nikolaj): explain function

@@ -17,6 +17,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include <string.h>
+#include <stdio.h>
 #if USE_TIZEN
 #include <net_connection.h>
 #endif
@@ -26,21 +27,22 @@ namespace gameanalytics
     namespace http
     {
         // base url settings
-        std::string GAHTTPApi::protocol = "https";
-        const std::string GAHTTPApi::hostName = "api.gameanalytics.com";
+        char GAHTTPApi::protocol[6] = "https";
+        char GAHTTPApi::hostName[22] = "api.gameanalytics.com";
 
-        const std::string GAHTTPApi::version = "v2";
+        char GAHTTPApi::version[3] = "v2";
 
         // create base url
-        std::string GAHTTPApi::baseUrl = getBaseUrl();
+        char GAHTTPApi::baseUrl[257] = "";
 
         // route paths
-        const std::string GAHTTPApi::initializeUrlPath = "init";
-        const std::string GAHTTPApi::eventsUrlPath = "events";
+        char GAHTTPApi::initializeUrlPath[5] = "init";
+        char GAHTTPApi::eventsUrlPath[7] = "events";
 
         // Constructor - setup the basic information for HTTP
         GAHTTPApi::GAHTTPApi()
         {
+            initBaseUrl();
             // use gzip compression on JSON body
 #if defined(_DEBUG)
             useGzip = false;
@@ -49,19 +51,25 @@ namespace gameanalytics
 #endif
         }
 
-        const std::string GAHTTPApi::getBaseUrl()
+        void GAHTTPApi::initBaseUrl()
         {
-            return protocol + "://" + hostName + "/" + version;
+            snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
         }
 
         void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out)
         {
-            std::string gameKey = state::GAState::getGameKey();
+            const char* gameKey = state::GAState::getGameKey();
 
             // Generate URL
-            std::string url = baseUrl + "/" + gameKey + "/" + initializeUrlPath;
-            url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
-            logging::GALogger::d("Sending 'init' URL: " + url);
+            char url[513] = "";
+            snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, initializeUrlPath);
+            snprintf(url, sizeof(url), "https://rubick.gameanalytics.com/v2/command_center?game_key=%s&interval_seconds=1000000", gameKey);
+
+            {
+                char s[513] = "";
+                snprintf(s, sizeof(s), "Sending 'init' URL: %s", url);
+                logging::GALogger::d(s);
+            }
 
             rapidjson::Document initAnnotations;
             initAnnotations.SetObject();
@@ -73,9 +81,9 @@ namespace gameanalytics
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                 initAnnotations.Accept(writer);
             }
-            std::string JSONstring = buffer.GetString();
+            const char* JSONstring = buffer.GetString();
 
-            if (JSONstring.empty())
+            if (strlen(JSONstring) == 0)
             {
                 response_out = JsonEncodeFailed;
                 json_out.SetNull();
@@ -122,7 +130,9 @@ namespace gameanalytics
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
-                logging::GALogger::d("Failed Init Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
+                char s[1025] = "";
+                snprintf(s, sizeof(s), "Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
+                logging::GALogger::d(s);
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
@@ -189,8 +199,15 @@ namespace gameanalytics
             auto gameKey = state::GAState::getGameKey();
 
             // Generate URL
-            auto url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
-            logging::GALogger::d("Sending 'events' URL: " + url);
+            char url[513] = "";
+            snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, eventsUrlPath);
+
+            {
+                char s[513] = "";
+                snprintf(url, sizeof(url), "Sending 'events' URL: %s", url);
+                logging::GALogger::d(s);
+            }
+
 
             // make JSON string from data
             rapidjson::StringBuffer buffer;
@@ -246,7 +263,10 @@ namespace gameanalytics
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
-                logging::GALogger::d("Failed Events Call. URL: " + url + ", JSONString: " + JSONstring + ", Authorization: " + authorization);
+                int ss = strlen(url) + strlen(JSONstring) + strlen(authorization.c_str()) + 70;
+                char s[ss];
+                snprintf(s, ss, "Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
+                logging::GALogger::d(s);
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
@@ -302,16 +322,24 @@ namespace gameanalytics
             }
 
             // Generate URL
-            std::string url = baseUrl + "/" + gameKey + "/" + eventsUrlPath;
-            logging::GALogger::d("Sending 'events' URL: " + url);
+
+            char url[257] = "";
+            snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, eventsUrlPath);
+
+            {
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Sending 'events' URL: %s", url);
+                logging::GALogger::d(s);
+            }
 
             rapidjson::Document json;
             json.SetObject();
             state::GAState::getSdkErrorEventAnnotations(json);
 
-            std::string typeString = sdkErrorTypeToString(type);
+            char typeString[10] = "";
+            sdkErrorTypeToString(type, typeString);
             {
-                rapidjson::Value v(typeString.c_str(), json.GetAllocator());
+                rapidjson::Value v(typeString, json.GetAllocator());
                 json.AddMember("type", v.Move(), json.GetAllocator());
             }
 
@@ -437,7 +465,7 @@ namespace gameanalytics
             }
 
             // create authorization hash
-            std::string key = state::GAState::getGameSecret();
+            const char* key = state::GAState::getGameSecret();
 
             std::string authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
             header.add(std::string("Authorization: " + authorization));

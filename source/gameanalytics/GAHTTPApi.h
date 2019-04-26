@@ -63,15 +63,16 @@ namespace gameanalytics
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);
 
-            static const std::string sdkErrorTypeToString(EGASdkErrorType value)
+            static void sdkErrorTypeToString(EGASdkErrorType value, char* out)
             {
                 switch (value) {
                 case Rejected:
-                    return "rejected";
+                    snprintf(out, 9, "%s", "rejected");
+                    return;
                 default:
                     break;
                 }
-                return{};
+                snprintf(out, 9, "%s", "");
             }
 
          private:
@@ -86,14 +87,14 @@ namespace gameanalytics
             EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
 #endif
 
-            static const std::string getBaseUrl();
+            static void initBaseUrl();
 
-            static std::string protocol;
-            static const std::string hostName;
-            static const std::string version;
-            static std::string baseUrl;
-            static const std::string initializeUrlPath;
-            static const std::string eventsUrlPath;
+            static char protocol[];
+            static char hostName[];
+            static char version[];
+            static char baseUrl[];
+            static char initializeUrlPath[];
+            static char eventsUrlPath[];
             bool useGzip;
             static const int MaxCount;
             static std::map<EGASdkErrorType, int> countMap;

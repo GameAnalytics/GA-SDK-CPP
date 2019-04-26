@@ -47,10 +47,10 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions01(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions01(const char* customDimensionsJson)
     {
         rapidjson::Document json;
-        json.Parse(customDimensionsJson.c_str());
+        json.Parse(customDimensionsJson);
         StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
@@ -79,10 +79,10 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions02(const char* customDimensionsJson)
     {
         rapidjson::Document json;
-        json.Parse(customDimensionsJson.c_str());
+        json.Parse(customDimensionsJson);
         StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
@@ -111,10 +111,10 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions03(const char* customDimensionsJson)
     {
         rapidjson::Document json;
-        json.Parse(customDimensionsJson.c_str());
+        json.Parse(customDimensionsJson);
         StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
@@ -143,10 +143,10 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(STRING resourceCurrenciesJson)
+    void GameAnalytics::configureAvailableResourceCurrencies(const char* resourceCurrenciesJson)
     {
         rapidjson::Document json;
-        json.Parse(resourceCurrenciesJson.c_str());
+        json.Parse(resourceCurrenciesJson);
         StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
@@ -175,10 +175,10 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(STRING resourceItemTypesJson)
+    void GameAnalytics::configureAvailableResourceItemTypes(const char* resourceItemTypesJson)
     {
         rapidjson::Document json;
-        json.Parse(resourceItemTypesJson.c_str());
+        json.Parse(resourceItemTypesJson);
         StringVector list;
 
         for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
@@ -189,14 +189,15 @@ namespace gameanalytics
         configureAvailableResourceItemTypes(list);
     }
 
-    void GameAnalytics::configureBuild(STRING build_)
+    void GameAnalytics::configureBuild(const char* build_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string build(build_);
+        char build[65] = "";
+        snprintf(build, sizeof(build), "%s", build_ ? build_ : "");
         threading::GAThreading::performTaskOnGAThread([build]()
         {
             if (isSdkReady(true, false))
@@ -206,21 +207,24 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateBuild(build))
             {
-                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: " + build);
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build);
+                logging::GALogger::i(s);
                 return;
             }
             state::GAState::setBuild(build);
         });
     }
 
-    void GameAnalytics::configureWritablePath(STRING writablePath_)
+    void GameAnalytics::configureWritablePath(const char* writablePath_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string writablePath(writablePath_);
+        char writablePath[65] = "";
+        snprintf(writablePath, sizeof(writablePath), "%s", writablePath_ ? writablePath_ : "");
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
             if (isSdkReady(true, false))
@@ -228,21 +232,22 @@ namespace gameanalytics
                 logging::GALogger::w("Writable path must be set before SDK is initialized.");
                 return;
             }
-            device::GADevice::setWritablePath(writablePath.c_str());
+            device::GADevice::setWritablePath(writablePath);
 #if !USE_UWP && !USE_TIZEN
             logging::GALogger::customInitializeLog();
 #endif
         });
     }
 
-    void GameAnalytics::configureDeviceModel(STRING deviceModel_)
+    void GameAnalytics::configureDeviceModel(const char* deviceModel_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string deviceModel(deviceModel_);
+        char deviceModel[65] = "";
+        snprintf(deviceModel, sizeof(deviceModel), "%s", deviceModel_ ? deviceModel_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
             if (isSdkReady(true, false))
@@ -252,21 +257,24 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateString(deviceModel, true))
             {
-                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: " + deviceModel);
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel);
+                logging::GALogger::i(s);
                 return;
             }
-            device::GADevice::setDeviceModel(deviceModel.c_str());
+            device::GADevice::setDeviceModel(deviceModel);
         });
     }
 
-    void GameAnalytics::configureDeviceManufacturer(STRING deviceManufacturer_)
+    void GameAnalytics::configureDeviceManufacturer(const char* deviceManufacturer_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string deviceManufacturer(deviceManufacturer_);
+        char deviceManufacturer[65] = "";
+        snprintf(deviceManufacturer, sizeof(deviceManufacturer), "%s", deviceManufacturer_ ? deviceManufacturer_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
             if (isSdkReady(true, false))
@@ -276,10 +284,12 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateString(deviceManufacturer, true))
             {
-                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: " + deviceManufacturer);
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer);
+                logging::GALogger::i(s);
                 return;
             }
-            device::GADevice::setDeviceManufacturer(deviceManufacturer.c_str());
+            device::GADevice::setDeviceManufacturer(deviceManufacturer);
         });
     }
 
@@ -300,7 +310,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion))
             {
-                char s[65] = "";
+                char s[257] = "";
                 snprintf(s, sizeof(s), "Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion);
                 logging::GALogger::i(s);
                 return;
@@ -375,7 +385,7 @@ namespace gameanalytics
         char gameKey[65] = "";
         snprintf(gameKey, sizeof(gameKey), "%s", gameKey_ ? gameKey_ : "");
         char gameSecret[65] = "";
-        snprintf(gameSecret, sizeof(gameSecret), "%s", gameSecret_ ? : "");
+        snprintf(gameSecret, sizeof(gameSecret), "%s", gameSecret_ ? gameSecret_ : "");
 #if USE_UWP
         Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
         Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);
@@ -403,7 +413,9 @@ namespace gameanalytics
 
             if (!store::GAStore::ensureDatabase(false, gameKey))
             {
-                logging::GALogger::w("Could not ensure/validate local event database: " + std::string(device::GADevice::getWritablePath()));
+                char s[513] = "";
+                snprintf(s, sizeof(s), "Could not ensure/validate local event database: %s", device::GADevice::getWritablePath());
+                logging::GALogger::w(s);
             }
 
             state::GAState::internalInitialize();
@@ -752,7 +764,9 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension01(dimension))
             {
-                logging::GALogger::w("Could not set custom01 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension);
+                logging::GALogger::w(s);
                 return;
             }
             state::GAState::setCustomDimension01(dimension);
@@ -772,7 +786,9 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension02(dimension))
             {
-                logging::GALogger::w("Could not set custom02 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
+                logging::GALogger::w(s);
                 return;
             }
             state::GAState::setCustomDimension02(dimension);
@@ -792,7 +808,9 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension03(dimension))
             {
-                logging::GALogger::w("Could not set custom03 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
+                logging::GALogger::w(s);
                 return;
             }
             state::GAState::setCustomDimension03(dimension);
@@ -849,18 +867,14 @@ namespace gameanalytics
         });
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key)
+    const char* GameAnalytics::getCommandCenterValueAsString(const char* key)
     {
         return getCommandCenterValueAsString(key, "");
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
+    const char* GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue)
     {
-#if USE_LINUX
-        return state::GAState::getConfigurationStringValue(key, defaultValue).c_str();
-#else
         return state::GAState::getConfigurationStringValue(key, defaultValue);
-#endif
     }
 
     bool GameAnalytics::isCommandCenterReady()
@@ -878,13 +892,9 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
-    RETURN_STRING GameAnalytics::getConfigurationsContentAsString()
+    void GameAnalytics::getConfigurationsContentAsString(char* out)
     {
-#if USE_LINUX
-        return state::GAState::getConfigurationsContentAsString().c_str();
-#else
-        return state::GAState::getConfigurationsContentAsString();
-#endif
+        state::GAState::getConfigurationsContentAsString(out);
     }
 
     void GameAnalytics::startSession()
@@ -1192,11 +1202,12 @@ namespace gameanalytics
         return isSdkReady(needsInitialized, warn, "");
     }
 
-    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, std::string message)
+    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, const char* message)
     {
-        if (!message.empty())
+        char m[33] = "";
+        if (strlen(message) > 0)
         {
-            message = message + ": ";
+            snprintf(m, sizeof(m), "%s: ", message);
         }
 
         // Make sure database is ready
@@ -1204,7 +1215,9 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "Datastore not initialized");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%sDatastore not initialized", m);
+                logging::GALogger::w(s);
             }
             return false;
         }
@@ -1213,7 +1226,9 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "SDK is not initialized");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%sSDK is not initialized", m);
+                logging::GALogger::w(s);
             }
             return false;
         }
@@ -1222,7 +1237,9 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "SDK is disabled");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%sSDK is disabled", m);
+                logging::GALogger::w(s);
             }
             return false;
         }
@@ -1232,7 +1249,9 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "Session has not started yet");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%sSession has not started yet", m);
+                logging::GALogger::w(s);
             }
             return false;
         }

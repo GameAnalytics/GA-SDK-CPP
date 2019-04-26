@@ -302,7 +302,9 @@ namespace gameanalytics
                 return false;
             }
 
-            if (http::GAHTTPApi::sdkErrorTypeToString(type).empty())
+            char s[9] = "";
+            http::GAHTTPApi::sdkErrorTypeToString(type, s);
+            if (strlen(s) == 0)
             {
                 logging::GALogger::w("Validation fail - sdk error event - type: Type was unsupported value.");
                 return false;

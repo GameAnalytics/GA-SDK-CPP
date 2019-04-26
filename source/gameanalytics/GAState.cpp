@@ -28,7 +28,7 @@ namespace gameanalytics
 {
     namespace state
     {
-        const std::string GAState::CategorySdkError = "sdk_error";
+        const char* GAState::CategorySdkError = "sdk_error";
 
         GAState::GAState()
         {
@@ -45,7 +45,7 @@ namespace gameanalytics
             cacheIdentifier();
         }
 
-        const std::string GAState::getIdentifier()
+        const char* GAState::getIdentifier()
         {
             return GAState::sharedInstance()->_identifier;
         }
@@ -75,17 +75,17 @@ namespace gameanalytics
             return sharedInstance()->_sessionId;
         }
 
-        const std::string GAState::getCurrentCustomDimension01()
+        const char* GAState::getCurrentCustomDimension01()
         {
             return GAState::sharedInstance()->_currentCustomDimension01;
         }
 
-        const std::string GAState::getCurrentCustomDimension02()
+        const char* GAState::getCurrentCustomDimension02()
         {
             return GAState::sharedInstance()->_currentCustomDimension02;
         }
 
-        const std::string GAState::getCurrentCustomDimension03()
+        const char* GAState::getCurrentCustomDimension03()
         {
             return GAState::sharedInstance()->_currentCustomDimension03;
         }
@@ -159,11 +159,13 @@ namespace gameanalytics
             utilities::GAUtilities::printJoinStringArray(availableResourceItemTypes, "Set available resource item types: (%s)");
         }
 
-        void GAState::setBuild(const std::string& build)
+        void GAState::setBuild(const char* build)
         {
-            sharedInstance()->_build = build;
+            snprintf(sharedInstance()->_build, sizeof(sharedInstance()->_build), "%s", build);
 
-            logging::GALogger::i("Set build: " + build);
+            char s[129] = "";
+            snprintf(s, sizeof(s), "Set build: %s", build);
+            logging::GALogger::i(s);
         }
 
         void GAState::setDefaultUserId(const char* id)
@@ -293,7 +295,9 @@ namespace gameanalytics
         void GAState::incrementProgressionTries(const char* progression)
         {
             auto tries = static_cast<int>(getProgressionTries(progression) + 1);
-            GAState::sharedInstance()->_progressionTries[progression] = tries;
+            char key[257] = "";
+            snprintf(key, sizeof(key), "%s", progression);
+            GAState::sharedInstance()->_progressionTries[key] = tries;
 
             // Persist
             char triesString[11] = "";
@@ -302,7 +306,7 @@ namespace gameanalytics
             store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms, 2);
         }
 
-        int GAState::getProgressionTries(const std::string& progression)
+        int GAState::getProgressionTries(const char* progression)
         {
             if (sharedInstance()->_progressionTries.find(progression) != sharedInstance()->_progressionTries.end())
             {
@@ -435,7 +439,7 @@ namespace gameanalytics
             // User identifier
 
             {
-                rapidjson::Value v(getIdentifier().c_str(), allocator);
+                rapidjson::Value v(getIdentifier(), allocator);
                 out.AddMember("user_id", v.Move(), allocator);
             }
             // Client Timestamp (the adjusted timestamp)
@@ -506,24 +510,24 @@ namespace gameanalytics
             // ---- CONDITIONAL ---- //
 
             // App build version (use if not nil)
-            if (!getBuild().empty())
+            if (strlen(getBuild()) > 0)
             {
-                rapidjson::Value v(getBuild().c_str(), allocator);
+                rapidjson::Value v(getBuild(), allocator);
                 out.AddMember("build", v.Move(), allocator);
             }
 
             // ---- OPTIONAL cross-session ---- //
 
             // facebook id (optional)
-            if (!getFacebookId().empty())
+            if (strlen(getFacebookId()) > 0)
             {
-                rapidjson::Value v(getFacebookId().c_str(), allocator);
+                rapidjson::Value v(getFacebookId(), allocator);
                 out.AddMember("facebook_id", v.Move(), allocator);
             }
             // gender (optional)
-            if (!getGender().empty())
+            if (strlen(getGender()) > 0)
             {
-                rapidjson::Value v(getGender().c_str(), allocator);
+                rapidjson::Value v(getGender(), allocator);
                 out.AddMember("gender", v.Move(), allocator);
             }
             // birth_year (optional)
@@ -545,7 +549,7 @@ namespace gameanalytics
 
             // Category
             {
-                rapidjson::Value v(GAState::CategorySdkError.c_str(), allocator);
+                rapidjson::Value v(GAState::CategorySdkError, allocator);
                 out.AddMember("category", v.Move(), allocator);
             }
             // SDK version
@@ -595,7 +599,7 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             {
-                rapidjson::Value v(getIdentifier().c_str(), allocator);
+                rapidjson::Value v(getIdentifier(), allocator);
                 out.AddMember("user_id", v.Move(), allocator);
             }
             // SDK version
@@ -620,7 +624,7 @@ namespace gameanalytics
         {
             if (strlen(GAState::sharedInstance()->_userId) > 0)
             {
-                GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_userId;
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", sharedInstance()->_userId);
             }
 #if USE_UWP
             else if (!device::GADevice::getAdvertisingId().empty())
@@ -639,10 +643,14 @@ namespace gameanalytics
 #endif
             else if (strlen(GAState::sharedInstance()->_defaultUserId) > 0)
             {
-                GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_defaultUserId;
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", GAState::sharedInstance()->_defaultUserId);
             }
 
-            logging::GALogger::d("identifier, {clean:" + GAState::sharedInstance()->_identifier + "}");
+            {
+                char s[257] = "";
+                snprintf(s, sizeof(s), "identifier, {clean:%s}", sharedInstance()->_identifier);
+                logging::GALogger::d(s);
+            }
         }
 
         void GAState::ensurePersistedStates()
@@ -1005,10 +1013,10 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart != 0;
         }
 
-        std::string GAState::getConfigurationStringValue(const std::string& key, const std::string& defaultValue)
+        const char* GAState::getConfigurationStringValue(const char* key, const char* defaultValue)
         {
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
-            return GAState::sharedInstance()->_configurations.HasMember(key.c_str()) ? GAState::sharedInstance()->_configurations[key.c_str()].GetString() : defaultValue;
+            return GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
         }
 
         bool GAState::isCommandCenterReady()
@@ -1036,12 +1044,13 @@ namespace gameanalytics
             }
         }
 
-        std::string GAState::getConfigurationsContentAsString()
+        void GAState::getConfigurationsContentAsString(char* out)
         {
             rapidjson::StringBuffer buffer;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
             GAState::sharedInstance()->_configurations.Accept(writer);
-            return buffer.GetString();
+            int s = strlen(buffer.GetString());
+            snprintf(out, s + 1, "%s", buffer.GetString());
         }
 
         void GAState::populateConfigurations(rapidjson::Value& sdkConfig)
@@ -1185,17 +1194,17 @@ namespace gameanalytics
             }
         }
 
-        const std::string GAState::getBuild()
+        const char* GAState::getBuild()
         {
             return GAState::sharedInstance()->_build;
         }
 
-        const std::string GAState::getFacebookId()
+        const char* GAState::getFacebookId()
         {
             return sharedInstance()->_facebookId;
         }
 
-        const std::string GAState::getGender()
+        const char* GAState::getGender()
         {
             return sharedInstance()->_gender;
         }

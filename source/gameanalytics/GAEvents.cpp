@@ -866,19 +866,19 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // add to dict (if not nil)
-            if (!state::GAState::getCurrentCustomDimension01().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension01()) > 0)
             {
-                rapidjson::Value v(state::GAState::getCurrentCustomDimension01().c_str(), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension01(), allocator);
                 eventData.AddMember("custom_01", v.Move(), allocator);
             }
-            if (!state::GAState::getCurrentCustomDimension02().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension02()) > 0)
             {
-                rapidjson::Value v(state::GAState::getCurrentCustomDimension02().c_str(), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension02(), allocator);
                 eventData.AddMember("custom_02", v.Move(), allocator);
             }
-            if (!state::GAState::getCurrentCustomDimension03().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension03()) > 0)
             {
-                rapidjson::Value v(state::GAState::getCurrentCustomDimension03().c_str(), allocator);
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension03(), allocator);
                 eventData.AddMember("custom_03", v.Move(), allocator);
             }
         }

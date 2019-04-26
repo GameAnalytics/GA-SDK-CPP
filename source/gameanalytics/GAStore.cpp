@@ -195,7 +195,7 @@ namespace gameanalytics
             return sqlDatabase;
         }
 
-        bool GAStore::ensureDatabase(bool dropDatabase, const std::string& key)
+        bool GAStore::ensureDatabase(bool dropDatabase, const char* key)
         {
             // lazy creation of db path
             if(sharedInstance()->dbPath.empty())
@@ -204,10 +204,10 @@ namespace gameanalytics
                 std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #elif USE_TIZEN
-                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga.sqlite3");
+                std::string p(device::GADevice::getWritablePath() + std::string(utilities::GAUtilities::getPathSeparator()) + "ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #else
-                std::string d(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + key);
+                std::string d(device::GADevice::getWritablePath() + std::string(utilities::GAUtilities::getPathSeparator()) + key);
 #ifdef _WIN32
                 _mkdir(d.c_str());
 #else

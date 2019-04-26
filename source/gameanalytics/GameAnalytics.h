@@ -20,14 +20,6 @@
 #include <ostream>
 #endif
 
-#if USE_LINUX
-using STRING = const char*;
-using RETURN_STRING = const char*;
-#else
-using STRING = const std::string&;
-using RETURN_STRING = std::string;
-#endif
-
 namespace gameanalytics
 {
 
@@ -126,19 +118,19 @@ namespace gameanalytics
      public:
         // configure calls should be used before initialize
         static void configureAvailableCustomDimensions01(const StringVector& customDimensions);
-        static void configureAvailableCustomDimensions01(STRING customDimensions);
+        static void configureAvailableCustomDimensions01(const char* customDimensions);
         static void configureAvailableCustomDimensions02(const StringVector& customDimensions);
-        static void configureAvailableCustomDimensions02(STRING customDimensions);
+        static void configureAvailableCustomDimensions02(const char* customDimensions);
         static void configureAvailableCustomDimensions03(const StringVector& customDimensions);
-        static void configureAvailableCustomDimensions03(STRING customDimensions);
+        static void configureAvailableCustomDimensions03(const char* customDimensions);
         static void configureAvailableResourceCurrencies(const StringVector& resourceCurrencies);
-        static void configureAvailableResourceCurrencies(STRING resourceCurrencies);
+        static void configureAvailableResourceCurrencies(const char* resourceCurrencies);
         static void configureAvailableResourceItemTypes(const StringVector& resourceItemTypes);
-        static void configureAvailableResourceItemTypes(STRING resourceItemTypes);
-        static void configureBuild(STRING build);
-        static void configureWritablePath(STRING writablePath);
-        static void configureDeviceModel(STRING deviceModel);
-        static void configureDeviceManufacturer(STRING deviceManufacturer);
+        static void configureAvailableResourceItemTypes(const char* resourceItemTypes);
+        static void configureBuild(const char* build);
+        static void configureWritablePath(const char* writablePath);
+        static void configureDeviceModel(const char* deviceModel);
+        static void configureDeviceManufacturer(const char* deviceManufacturer);
 
         // the version of SDK code used in an engine. Used for sdk_version field.
         // !! if set then it will override the SdkWrapperVersion.
@@ -183,12 +175,12 @@ namespace gameanalytics
         static void startSession();
         static void endSession();
 
-        static RETURN_STRING getCommandCenterValueAsString(STRING key);
-        static RETURN_STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static const char* getCommandCenterValueAsString(const char* key);
+        static const char* getCommandCenterValueAsString(const char* key, const char* defaultValue);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static RETURN_STRING getConfigurationsContentAsString();
+        static void getConfigurationsContentAsString(char* out);
 
         // game state changes
         // will affect how session is started / ended
@@ -250,7 +242,7 @@ namespace gameanalytics
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
-        static bool isSdkReady(bool needsInitialized, bool warn, std::string message);
+        static bool isSdkReady(bool needsInitialized, bool warn, const char* message);
 #if USE_UWP
         static void OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e);
         static void OnAppResuming(Platform::Object ^sender, Platform::Object ^args);

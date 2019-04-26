@@ -21,6 +21,14 @@ namespace gameanalytics
         // TODO(nikolaj): needed? remove.. if not
         // typedef void(*Callback) ();
 
+        struct CStringCmp
+        {
+            bool operator()(const char* first, const char* second) const
+            {
+                return strcmp(first, second) < 0;
+            }
+        };
+
         class GAState : public GASingleton<GAState>
         {
          public:
@@ -28,15 +36,15 @@ namespace gameanalytics
             ~GAState();
 
             static void setUserId(const char* id);
-            static const std::string getIdentifier();
+            static const char* getIdentifier();
             static bool isInitialized();
             static int64_t getSessionStart();
             static int getSessionNum();
             static int getTransactionNum();
             static const char* getSessionId();
-            static const std::string getCurrentCustomDimension01();
-            static const std::string getCurrentCustomDimension02();
-            static const std::string getCurrentCustomDimension03();
+            static const char* getCurrentCustomDimension01();
+            static const char* getCurrentCustomDimension02();
+            static const char* getCurrentCustomDimension03();
             static const char* getGameKey();
             static const char* getGameSecret();
             static void setAvailableCustomDimensions01(const StringVector& dimensions);
@@ -44,7 +52,7 @@ namespace gameanalytics
             static void setAvailableCustomDimensions03(const StringVector& dimensions);
             static void setAvailableResourceCurrencies(const StringVector& availableResourceCurrencies);
             static void setAvailableResourceItemTypes(const StringVector& availableResourceItemTypes);
-            static void setBuild(const std::string& build);
+            static void setBuild(const char* build);
             static bool isEnabled();
             static void setCustomDimension01(const char* dimension);
             static void setCustomDimension02(const char* dimension);
@@ -55,7 +63,7 @@ namespace gameanalytics
             static void incrementSessionNum();
             static void incrementTransactionNum();
             static void incrementProgressionTries(const char* progression);
-            static int getProgressionTries(const std::string& progression);
+            static int getProgressionTries(const char* progression);
             static void clearProgressionTries(const char* progression);
             static bool hasAvailableCustomDimensions01(const char* dimension1);
             static bool hasAvailableCustomDimensions02(const char* dimension2);
@@ -78,11 +86,11 @@ namespace gameanalytics
             static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
             static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
-            static std::string getConfigurationStringValue(const std::string& key, const std::string& defaultValue);
+            static const char* getConfigurationStringValue(const char* key, const char* defaultValue);
             static bool isCommandCenterReady();
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-            static std::string getConfigurationsContentAsString();
+            static void getConfigurationsContentAsString(char* out);
 
          private:
             static void setDefaultUserId(const char* id);
@@ -91,15 +99,15 @@ namespace gameanalytics
             static void ensurePersistedStates();
             static void startNewSession();
             static void validateAndFixCurrentDimensions();
-            static const std::string getBuild();
-            static const std::string getFacebookId();
-            static const std::string getGender();
+            static const char* getBuild();
+            static const char* getFacebookId();
+            static const char* getGender();
             static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
 
             char _userId[129] = "";
-            std::string _identifier;
+            char _identifier[129] = "";
             bool _initialized = false;
             int64_t _sessionStart = 0;
             int _sessionNum = 0;
@@ -115,7 +123,7 @@ namespace gameanalytics
             StringVector _availableCustomDimensions03;
             StringVector _availableResourceCurrencies;
             StringVector _availableResourceItemTypes;
-            std::string _build;
+            char _build[65] = "";
             char _facebookId[65] = "";
             char _gender[9] = "";
             int _birthYear = 0;
@@ -123,11 +131,11 @@ namespace gameanalytics
             bool _enabled = false;
             int64_t _clientServerTimeOffset = 0;
             char _defaultUserId[129] = "";
-            std::map<std::string, int> _progressionTries;
+            std::map<const char*, int, CStringCmp> _progressionTries;
             rapidjson::Value _sdkConfigDefault;
             rapidjson::Value _sdkConfig;
             rapidjson::Value _sdkConfigCached;
-            static const std::string CategorySdkError;
+            static const char* CategorySdkError;
             bool _useManualSessionHandling = false;
             bool _enableErrorReporting = true;
             bool _enableEventSubmission = true;
