@@ -97,9 +97,8 @@ namespace gameanalytics
     public:
         StringVector& add(const char* s)
         {
-            CharArray entry;
-            snprintf(entry.array, sizeof(entry.array), "%s", s);
-            v.push_back(entry);
+            v.push_back(CharArray());
+            snprintf(v[v.size() - 1].array, sizeof(v[v.size() - 1].array), "%s", s);
             return *this;
         }
 

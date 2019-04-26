@@ -8,7 +8,6 @@
 #include "GALogger.h"
 #include <string.h>
 #include <stdio.h>
-#include <cmath>
 #if USE_LINUX
 #include <regex.h>
 #include <iterator>
@@ -402,34 +401,31 @@ namespace gameanalytics
         // TODO(nikolaj): explain function
         void GAUtilities::printJoinStringArray(const StringVector& v, const char* format, const char* delimiter)
         {
-            int size = strlen(delimiter) * fmax(v.getVector().size() - 1, 0);
+            size_t delimiterSize = strlen(delimiter);
+            size_t vectorSize = v.getVector().size();
+            size_t totalSize = (vectorSize - 1) * delimiterSize + 1;
+            size_t lengths[vectorSize];
 
-            for (CharArray entry : v.getVector())
+            for (size_t i = 0; i < vectorSize; ++i)
             {
-                size += strlen(entry.array);
+                lengths[i] = strlen(v.getVector()[i].array);
+                totalSize += lengths[i];
             }
 
-            char result[size + 1];
-            int count = 0;
-            for (CharArray entry : v.getVector())
+            char result[totalSize];
+            snprintf(result, totalSize, "");
+            for (size_t i = 0; i < vectorSize; ++i)
             {
-                size = strlen(result) + strlen(delimiter) + strlen(entry.array);
-                char tmp[size + 1];
-                if(count < v.getVector().size() - 1)
+                strcat(result, v.getVector()[i].array);
+                if(i < vectorSize - 1)
                 {
-                    snprintf(tmp, sizeof(tmp), "%s%s%s", result, delimiter, entry.array);
+                    strcat(result, delimiter);
                 }
-                else
-                {
-                    snprintf(tmp, sizeof(tmp), "%s%s", result, entry.array);
-                }
-
-                snprintf(result, sizeof(result), "%s", tmp);
-                ++count;
             }
 
-            char s[1025];
-            snprintf(s, sizeof(s), format, result);
+            int ss = strlen(format) + strlen(result) + 1;
+            char s[ss];
+            snprintf(s, ss, format, result);
             logging::GALogger::i(s);
         }
 
