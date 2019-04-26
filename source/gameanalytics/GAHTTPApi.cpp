@@ -107,7 +107,7 @@ namespace gameanalytics
             }
 #endif
 
-            std::string authorization = createRequest(curl, header, url, payloadData, useGzip);
+            std::string authorization = createRequest(curl, header, url, payloadData.c_str(), useGzip);
 
             try
             {
@@ -121,11 +121,16 @@ namespace gameanalytics
 
             std::string body = os.str();
             // process the response
-            logging::GALogger::d("init request content : " + body);
+            {
+                int ss = strlen(body.c_str()) + 30;
+                char s[ss];
+                snprintf(s, ss, "init request content: %s", body.c_str());
+                logging::GALogger::d(s);
+            }
 
             rapidjson::Document requestJsonDict;
             requestJsonDict.Parse(body.c_str());
-            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Init");
+            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body.c_str(), "Init");
 
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
@@ -158,7 +163,12 @@ namespace gameanalytics
                 rapidjson::StringBuffer buffer;
                 rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                 requestJsonDict.Accept(writer);
-                logging::GALogger::d("Failed Init Call. Bad request. Response: " + std::string(buffer.GetString()));
+                {
+                    int ss = strlen(buffer.GetString()) + 50;
+                    char s[ss];
+                    snprintf(s, ss, "Failed Init Call. Bad request. Response: %s", buffer.GetString());
+                    logging::GALogger::d(s);
+                }
                 // return bad request result
 #if USE_TIZEN
                 connection_destroy(connection);
@@ -240,7 +250,7 @@ namespace gameanalytics
                 json_out = rapidjson::Value();
             }
 #endif
-            std::string  authorization = createRequest(curl, header, url, payloadData, useGzip);
+            std::string  authorization = createRequest(curl, header, url, payloadData.c_str(), useGzip);
 
             try
             {
@@ -250,15 +260,23 @@ namespace gameanalytics
             {
                 auto errors = error.get_traceback();
                 logging::GALogger::d(error.what());
-                std::for_each(errors.begin(), errors.end(),[](const curl::curlcpp_traceback_object &value) {
-                    logging::GALogger::d("ERROR: " + value.first + " ::::: FUNCTION: " + value.second);
+                std::for_each(errors.begin(), errors.end(),[](const curl::curlcpp_traceback_object &value)
+                {
+                    char s[256] = "";
+                    snprintf(s, sizeof(s), "ERROR: %s ::::: FUNCTION: %s", value.first.c_str(), value.second.c_str());
+                    logging::GALogger::d(s);
                 });
             }
 
             std::string body = os.str();
-            logging::GALogger::d("body: " + body);
+            {
+                int ss = strlen(body.c_str()) + 10;
+                char s[ss];
+                snprintf(s, ss, "body: %s", body.c_str());
+                logging::GALogger::d(s);
+            }
 
-            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body, "Events");
+            EGAHTTPApiResponse requestResponseEnum = processRequestResponse(curl, body.c_str(), "Events");
 
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
@@ -293,7 +311,11 @@ namespace gameanalytics
                 rapidjson::StringBuffer buffer;
                 rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                 requestJsonDict.Accept(writer);
-                logging::GALogger::d("Failed Events Call. Bad request. Response: " + std::string(buffer.GetString()));
+
+                int ss = strlen(buffer.GetString()) + 50;
+                char s[ss];
+                snprintf(s, ss, "Failed Events Call. Bad request. Response: %s", buffer.GetString());
+                logging::GALogger::d(s);
             }
 
 #if USE_TIZEN
@@ -352,27 +374,20 @@ namespace gameanalytics
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                 eventArray.Accept(writer);
             }
-            std::string payloadJSONString = buffer.GetString();
+            const char* payloadJSONString = buffer.GetString();
 
-            if(payloadJSONString.empty())
+            if(strlen(payloadJSONString) == 0)
             {
                 logging::GALogger::w("sendSdkErrorEvent: JSON encoding failed.");
                 return;
             }
 
-            logging::GALogger::d("sendSdkErrorEvent json: " + payloadJSONString);
-            // TODO: add async call
-            /*byte[] payloadData = Encoding.UTF8.GetBytes(payloadJSONString);
-            SdkErrorTask sdkErrorTask = new SdkErrorTask(type, payloadData, secretKey);
-            sdkErrorTask.Execute(url);*/
-
-            if (payloadJSONString.empty())
             {
-                logging::GALogger::w("sendSdkErrorEvent: JSON encoding failed.");
-                return;
+                int ss = strlen(payloadJSONString) + 30;
+                char s[ss];
+                snprintf(s, ss, "sendSdkErrorEvent json: %s", payloadJSONString);
+                logging::GALogger::d(s);
             }
-
-            logging::GALogger::d("sendSdkErrorEvent json: " + payloadJSONString);
 
             if (countMap[type] >= MaxCount)
             {
@@ -398,7 +413,7 @@ namespace gameanalytics
                     return;
                 }
 #endif
-                std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, header, url, payloadData, useGzip);
+                std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, header, url, payloadData.c_str(), useGzip);
 
                 try
                 {
@@ -412,14 +427,21 @@ namespace gameanalytics
 
                 std::string body = os.str();
                 // process the response
-                logging::GALogger::d("sdk error content : " + body);
+                {
+                    int ss = strlen(body.c_str()) + 30;
+                    char s[ss];
+                    snprintf(s, ss, "sdk error content : %s", body.c_str());
+                    logging::GALogger::d(s);
+                }
 
                 long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
 
                 // if not 200 result
                 if (statusCode != 200)
                 {
-                    logging::GALogger::d("sdk error failed. response code not 200. status code: " + std::to_string(statusCode));
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "sdk error failed. response code not 200. status code: %ld", statusCode);
+                    logging::GALogger::d(s);
 #if USE_TIZEN
                     connection_destroy(connection);
 #endif
@@ -445,7 +467,10 @@ namespace gameanalytics
             if (gzip)
             {
                 payloadData = utilities::GAUtilities::gzipCompress(payload);
-                logging::GALogger::d("Gzip stats. Size: " + std::to_string(payload.size()) + ", Compressed: " + std::to_string(payloadData.size()));
+
+                char s[400] = "";
+                snprintf(s, sizeof(s), "Gzip stats. Size: %lu, Compressed: %lu", payload.size(), payloadData.size());
+                logging::GALogger::d(s);
             }
             else
             {
@@ -455,9 +480,9 @@ namespace gameanalytics
             return payloadData;
         }
 
-        const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip)
+        const std::string GAHTTPApi::createRequest(curl::curl_easy& curl, curl::curl_header& header, const char* url, const char* payloadData, bool gzip)
         {
-            curl.add<CURLOPT_URL>(url.c_str());
+            curl.add<CURLOPT_URL>(url);
 
             if (gzip)
             {
@@ -474,21 +499,23 @@ namespace gameanalytics
             header.add("Content-Type: application/json");
 
             curl.add<CURLOPT_HTTPHEADER>(header.get());
-            curl.add<CURLOPT_POSTFIELDS>(payloadData.c_str());
+            curl.add<CURLOPT_POSTFIELDS>(payloadData);
             curl.add<CURLOPT_SSL_VERIFYPEER>(false);
-            curl.add<CURLOPT_POSTFIELDSIZE>(payloadData.size());
+            curl.add<CURLOPT_POSTFIELDSIZE>(strlen(payloadData) == 0);
 
             return authorization;
         }
 
-        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId)
+        EGAHTTPApiResponse GAHTTPApi::processRequestResponse(curl::curl_easy& curl, const char* body, const char* requestId)
         {
             long statusCode = curl.get_info<CURLINFO_RESPONSE_CODE>().get();
 
             // if no result - often no connection
-            if (body.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(body))
             {
-                logging::GALogger::d(requestId + " request. failed. Might be no connection. Status code: " + std::to_string(statusCode));
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s request. failed. Might be no connection. Status code: %ld", requestId, statusCode);
+                logging::GALogger::d(s);
                 return NoResponse;
             }
 
@@ -501,19 +528,25 @@ namespace gameanalytics
             // 401 can return 0 status
             if (statusCode == 0 || statusCode == 401)
             {
-                logging::GALogger::d(requestId + " request. 401 - Unauthorized.");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s request. 401 - Unauthorized.", requestId);
+                logging::GALogger::d(s);
                 return Unauthorized;
             }
 
             if (statusCode == 400)
             {
-                logging::GALogger::d(requestId + " request. 400 - Bad Request.");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s request. 400 - Bad Request.", requestId);
+                logging::GALogger::d(s);
                 return BadRequest;
             }
 
             if (statusCode == 500)
             {
-                logging::GALogger::d(requestId + " request. 500 - Internal Server Error.");
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s request. 500 - Internal Server Error.", requestId);
+                logging::GALogger::d(s);
                 return InternalServerError;
             }
             return UnknownResponseCode;

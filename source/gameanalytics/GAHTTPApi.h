@@ -6,7 +6,6 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include <map>
 #include "Foundation/GASingleton.h"
 #include "rapidjson/document.h"
@@ -83,8 +82,8 @@ namespace gameanalytics
             EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
             concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> createStream(std::string data);
 #else
-            const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip);
-            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
+            const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const char* url, const char* payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const char* body, const char* requestId);
 #endif
 
             static void initBaseUrl();

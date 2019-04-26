@@ -67,13 +67,13 @@ namespace gameanalytics
             static bool validateEventPartCharacters(const char* eventPart);
             static bool validateEventIdLength(const char* eventId);
             static bool validateEventIdCharacters(const char* eventId);
-            static bool validateShortString(const std::string& shortString, bool canBeEmpty);
-            static bool validateString(const std::string& string, bool canBeEmpty);
-            static bool validateLongString(const std::string& longString, bool canBeEmpty);
+            static bool validateShortString(const char* shortString, bool canBeEmpty);
+            static bool validateString(const char* string, bool canBeEmpty);
+            static bool validateLongString(const char* longString, bool canBeEmpty);
 
             // validate wrapper version, build, engine version, store
             static bool validateSdkWrapperVersion(const char* wrapperVersion);
-            static bool validateBuild(const std::string& build);
+            static bool validateBuild(const char* build);
             static bool validateEngineVersion(const char* engineVersion);
             static bool validateStore(const char* store);
             static bool validateConnectionType(const char* connectionType);
@@ -85,7 +85,6 @@ namespace gameanalytics
             static bool validateResourceCurrencies(const StringVector& resourceCurrencies);
             static bool validateResourceItemTypes(const StringVector& resourceItemTypes);
 
-            //static  bool validateCustomDimensionsWithDimension01:const std::string& dimension01 andDimension02:const std::string& dimension02 andDimension03:const std::string& dimension03 andEventTag:const std::string& eventTag;
             static bool validateDimension01(const char* dimension01);
             static bool validateDimension02(const char* dimension02);
             static bool validateDimension03(const char* dimension03);

@@ -36,7 +36,9 @@ namespace gameanalytics
 
             if (amount < 0)
             {
-                logging::GALogger::w("Validation fail - business event - amount. Cannot be less than 0. String: " + std::to_string(amount));
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - business event - amount. Cannot be less than 0. String: %ld", amount);
+                logging::GALogger::w(s);
                 return false;
             }
 
@@ -117,7 +119,9 @@ namespace gameanalytics
             }
             if (!(amount > 0))
             {
-                logging::GALogger::w("Validation fail - resource event - amount: Float amount cannot be 0 or negative. Value: " + std::to_string(amount));
+                char s[257] = "";
+                snprintf(s, sizeof(s), "Validation fail - resource event - amount: Float amount cannot be 0 or negative. Value: %f", amount);
+                logging::GALogger::w(s);
                 return false;
             }
             if (utilities::GAUtilities::isStringNullOrEmpty(itemType))
@@ -396,45 +400,48 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateShortString(const std::string& shortString, bool canBeEmpty = false)
+        bool GAValidator::validateShortString(const char* shortString, bool canBeEmpty = false)
         {
+            int size = strlen(shortString);
             // String is allowed to be empty or nil
-            if (canBeEmpty && shortString.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (shortString.empty() || shortString.length() > 32)
+            if (size == 0 || size > 32)
             {
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateString(const std::string& string, bool canBeEmpty = false)
+        bool GAValidator::validateString(const char* string, bool canBeEmpty = false)
         {
+            int size = strlen(string);
             // String is allowed to be empty or nil
-            if (canBeEmpty && string.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (string.empty() || string.length() > 64)
+            if (size == 0 || size > 64)
             {
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateLongString(const std::string& longString, bool canBeEmpty = false)
+        bool GAValidator::validateLongString(const char* longString, bool canBeEmpty = false)
         {
+            int size = strlen(longString);
             // String is allowed to be empty
-            if (canBeEmpty && longString.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (longString.empty() || longString.length() > 8192)
+            if (size == 0 || size > 8192)
             {
                 return false;
             }
@@ -451,7 +458,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateBuild(const std::string& build)
+        bool GAValidator::validateBuild(const char* build)
         {
             if (!GAValidator::validateShortString(build))
             {

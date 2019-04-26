@@ -27,7 +27,7 @@ namespace gameanalytics
 {
     namespace logging
     {
-        const std::string GALogger::tag = "GameAnalytics";
+        const char* GALogger::tag = "GameAnalytics";
 
         GALogger::GALogger()
         {
@@ -89,7 +89,11 @@ namespace gameanalytics
 
                 ga->logInitialized = true;
 
-                GALogger::i("Log file added under: " + std::string(device::GADevice::getWritablePath()));
+                {
+                    char s[400] = "";
+                    snprintf(s, sizeof(s), "Log file added under: %s", device::GADevice::getWritablePath());
+                    GALogger::i(s);
+                }
             }
         }
 
@@ -119,7 +123,11 @@ namespace gameanalytics
 
             ga->logInitialized = true;
 
-            GALogger::i("Log file added under: " + std::string(device::GADevice::getWritablePath()));
+            {
+                char s[400] = "";
+                snprintf(s, sizeof(s), "Log file added under: %s", device::GADevice::getWritablePath());
+                GALogger::i(s);
+            }
         }
 
         void GALogger::addCustomLogStream(std::ostream& os)
@@ -142,7 +150,7 @@ namespace gameanalytics
         // - non-errors
         // - initializing, adding event, sending events etc.
         // - generally small text
-        void GALogger::i(const std::string& format)
+        void GALogger::i(const char* format)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -151,7 +159,9 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Info/" + ga->tag + ": " + format;
+            int s = strlen(format) + 50;
+            char message[s];
+            snprintf(message, s, "Info/%s: %s", ga->tag, format);
             ga->sendNotificationMessage(message, Info);
         }
 
@@ -162,11 +172,13 @@ namespace gameanalytics
         // - validation errors
         // - trying to initialize with wrong keys
         // - other non-critical
-        void GALogger::w(const std::string& format)
+        void GALogger::w(const char* format)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            std::string message = "Warning/" + ga->tag + ": " + format;
+            int s = strlen(format) + 50;
+            char message[s];
+            snprintf(message, s, "Warning/%s: %s", ga->tag, format);
             ga->sendNotificationMessage(message, Warning);
         }
 
@@ -178,11 +190,13 @@ namespace gameanalytics
         // - JSON decoding/encoding errors
         // - unexpected exceptions
         // - errors that never should happen
-        void GALogger::e(const std::string& format)
+        void GALogger::e(const char* format)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            std::string message = "Error/" + ga->tag + ": " + format;
+            int s = strlen(format) + 50;
+            char message[s];
+            snprintf(message, s, "Error/%s: %s", ga->tag, format);
             ga->sendNotificationMessage(message, Error);
         }
 
@@ -192,7 +206,7 @@ namespace gameanalytics
         // used for:
         // - development only
         // - use large debug text like HTTP payload etc.
-        void GALogger::d(const std::string& format)
+        void GALogger::d(const char* format)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -201,7 +215,9 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Debug/" + ga->tag + ": " + format;
+            int s = strlen(format) + 50;
+            char message[s];
+            snprintf(message, s, "Debug/%s: %s", ga->tag, format);
             ga->sendNotificationMessage(message, Debug);
         }
 
@@ -210,7 +226,7 @@ namespace gameanalytics
         //
         // used for:
         // - Large logs
-        void GALogger::ii(const std::string& format)
+        void GALogger::ii(const char* format)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -219,11 +235,13 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Verbose/" + ga->tag + ": " + format;
+            int s = strlen(format) + 50;
+            char message[s];
+            snprintf(message, s, "Verbose/%s: %s", ga->tag, format);
             ga->sendNotificationMessage(message, Info);
         }
 
-        void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
+        void GALogger::sendNotificationMessage(const char* message, EGALoggerMessageType type)
         {
             if(GameAnalytics::isThreadEnding())
             {
@@ -254,14 +272,14 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_ERROR, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_ERROR, GALogger::tag, message);
 #else
                     try
                     {
-                        logger->error(message.c_str());
+                        logger->error(message);
                         if(custom_logger)
                         {
-                            custom_logger->error(message.c_str());
+                            custom_logger->error(message);
                         }
                     }
                     catch (const std::exception&)
@@ -281,14 +299,14 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_WARN, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_WARN, GALogger::tag, message);
 #else
                     try
                     {
-                        logger->warn(message.c_str());
+                        logger->warn(message);
                         if(custom_logger)
                         {
-                            custom_logger->warn(message.c_str());
+                            custom_logger->warn(message);
                         }
                     }
                     catch (const std::exception&)
@@ -308,14 +326,14 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_DEBUG, GALogger::tag, message);
 #else
                     try
                     {
-                        logger->info(message.c_str());
+                        logger->info(message);
                         if(custom_logger)
                         {
-                            custom_logger->info(message.c_str());
+                            custom_logger->info(message);
                         }
                     }
                     catch (const std::exception&)
@@ -335,14 +353,14 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_INFO, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_INFO, GALogger::tag, message);
 #else
                     try
                     {
-                        logger->info(message.c_str());
+                        logger->info(message);
                         if(custom_logger)
                         {
-                            custom_logger->info(message.c_str());
+                            custom_logger->info(message);
                         }
                     }
                     catch (const std::exception&)

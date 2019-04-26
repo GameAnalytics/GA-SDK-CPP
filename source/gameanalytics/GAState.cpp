@@ -1092,7 +1092,13 @@ namespace gameanalytics
                             rapidjson::StringBuffer buffer;
                             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                             configuration.Accept(writer);
-                            logging::GALogger::d("configuration added: " + std::string(buffer.GetString()));
+
+                            {
+                                int ss = strlen(buffer.GetString()) + 50;
+                                char s[ss];
+                                snprintf(s, ss, "configuration added: %s", buffer.GetString());
+                                logging::GALogger::d(s);
+                            }
                         }
                     }
                 }
@@ -1122,8 +1128,9 @@ namespace gameanalytics
                     const char* key = itr->name.GetString();
                     if(fields[key].IsNull())
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
-                            " has been omitted because its key or value is null");
+                        char s[257] = "";
+                        snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key or value is null", key, fields[key].GetString());
+                        logging::GALogger::w(s);
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
@@ -1152,26 +1159,30 @@ namespace gameanalytics
                                 }
                                 else
                                 {
-                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
-                                        " has been omitted because its value is an empty string or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH) + ")");
+                                    char s[400] = "";
+                                    snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
+                                    logging::GALogger::w(s);
                                 }
                             }
                             else
                             {
-                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
-                                    " has been omitted because its value is not a string or number");
+                                char s[400] = "";
+                                snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is not a string or number", key, fields[key].GetString());
+                                logging::GALogger::w(s);
                             }
                         }
                         else
                         {
-                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
-                                " has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + ")");
+                            char s[400] = "";
+                            snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
+                            logging::GALogger::w(s);
                         }
                     }
                     else
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + std::string(key) + ", value=" + std::string(fields[key].GetString()) +
-                            " has been omitted because it exceeds the max number of custom fields (" + std::to_string(MAX_CUSTOM_FIELDS_COUNT) + ")");
+                        char s[400] = "";
+                        snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because it exceeds the max number of custom fields (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_COUNT);
+                        logging::GALogger::w(s);
                     }
                 }
             }

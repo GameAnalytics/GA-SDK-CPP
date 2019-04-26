@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <string>
 #include "Foundation/GASingleton.h"
 #include "GameAnalytics.h"
 #include "rapidjson/document.h"

@@ -646,7 +646,10 @@ namespace gameanalytics
             {
                 // Delete events
                 store::GAStore::executeQuerySync(deleteSql);
-                logging::GALogger::i("Event queue: " + std::to_string(events.Size()) + " events sent.");
+
+                char s[65] = "";
+                snprintf(s, sizeof(s), "Event queue: %d events sent.", events.Size());
+                logging::GALogger::i(s);
             }
             else
             {
@@ -661,7 +664,9 @@ namespace gameanalytics
                 {
                     if (responseEnum == http::BadRequest && dataDict.IsArray())
                     {
-                        logging::GALogger::w("Event queue: " + std::to_string(events.Size()) + " events sent. " + std::to_string(dataDict.Size()) + " events failed GA server validation.");
+                        char s[129] = "";
+                        snprintf(s, sizeof(s), "Event queue: %d events sent. %d events failed GA server validation.", events.Size(), dataDict.Size());
+                        logging::GALogger::w(s);
                     }
                     else
                     {
@@ -718,7 +723,11 @@ namespace gameanalytics
                 return;
             }
 
-            logging::GALogger::i(std::to_string(sessions.Size()) + " session(s) located with missing session_end event.");
+            {
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%d session(s) located with missing session_end event.", sessions.Size());
+                logging::GALogger::i(s);
+            }
 
             // Add missing session_end events
             for (rapidjson::Value::ConstValueIterator itr = sessions.Begin(); itr != sessions.End(); ++itr)
@@ -737,7 +746,11 @@ namespace gameanalytics
 
                 int64_t length = event_ts - start_ts;
 
-                logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
+                {
+                    char s[129] = "";
+                    snprintf(s, sizeof(s), "fixMissingSessionEndEvents length calculated: %lld", length);
+                    logging::GALogger::d(s);
+                }
 
                 {
                     rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);

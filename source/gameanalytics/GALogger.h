@@ -34,13 +34,13 @@ namespace gameanalytics
             static void setVerboseInfoLog(bool enabled);
 
             // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
-            static void  w(const std::string& format);//const char* format, ...);
-            static void  e(const std::string& format);//const char* format, ...);
-            static void  d(const std::string& format);//const char* format, ...);
-            static void  i(const std::string& format);//const char* format, ...);
-            static void ii(const std::string& format);//const char* format, ...);
+            static void  w(const char* format);//const char* format, ...);
+            static void  e(const char* format);//const char* format, ...);
+            static void  d(const char* format);//const char* format, ...);
+            static void  i(const char* format);//const char* format, ...);
+            static void ii(const char* format);//const char* format, ...);
 
-            void sendNotificationMessage(const std::string& message, EGALoggerMessageType type);
+            void sendNotificationMessage(const char* message, EGALoggerMessageType type);
 
 #if !USE_UWP && !USE_TIZEN
             static void customInitializeLog();
@@ -54,7 +54,7 @@ namespace gameanalytics
             bool infoLogEnabled;
             bool infoLogVerboseEnabled;
             bool debugEnabled;
-            static const std::string tag;
+            static const char* tag;
 #if USE_UWP
             static void LogMessageToConsole(Platform::Object^ parameter);
             Windows::Storage::StorageFile^ file;
