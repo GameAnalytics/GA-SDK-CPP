@@ -33,11 +33,11 @@ namespace gameanalytics
             static void setVerboseInfoLog(bool enabled);
 
             // Debug (w/e always shows, d only shows during SDK development, i shows when client has set debugEnabled to YES)
-            static void  w(const char* format);//const char* format, ...);
-            static void  e(const char* format);//const char* format, ...);
-            static void  d(const char* format);//const char* format, ...);
-            static void  i(const char* format);//const char* format, ...);
-            static void ii(const char* format);//const char* format, ...);
+            static void  w(const char* format, ...);
+            static void  e(const char* format, ...);
+            static void  d(const char* format, ...);
+            static void  i(const char* format, ...);
+            static void ii(const char* format, ...);
 
             void sendNotificationMessage(const char* message, EGALoggerMessageType type);
 

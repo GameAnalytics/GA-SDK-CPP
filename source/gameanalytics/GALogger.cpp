@@ -2,6 +2,7 @@
 #include "GameAnalytics.h"
 #include <iostream>
 #include "GADevice.h"
+#include <cstdio>
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>
@@ -89,11 +90,7 @@ namespace gameanalytics
 
                 ga->logInitialized = true;
 
-                {
-                    char s[400] = "";
-                    snprintf(s, sizeof(s), "Log file added under: %s", device::GADevice::getWritablePath());
-                    GALogger::i(s);
-                }
+                GALogger::i("Log file added under: %s", device::GADevice::getWritablePath());
             }
         }
 
@@ -123,11 +120,7 @@ namespace gameanalytics
 
             ga->logInitialized = true;
 
-            {
-                char s[400] = "";
-                snprintf(s, sizeof(s), "Log file added under: %s", device::GADevice::getWritablePath());
-                GALogger::i(s);
-            }
+            GALogger::i("Log file added under: %s", device::GADevice::getWritablePath());
         }
 
         void GALogger::addCustomLogStream(std::ostream& os)
@@ -150,7 +143,7 @@ namespace gameanalytics
         // - non-errors
         // - initializing, adding event, sending events etc.
         // - generally small text
-        void GALogger::i(const char* format)
+        void GALogger::i(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -159,9 +152,18 @@ namespace gameanalytics
                 return;
             }
 
-            int s = strlen(format) + 50;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char formatted[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 11 + strlen(ga->tag);
             char message[s];
-            snprintf(message, s, "Info/%s: %s", ga->tag, format);
+            snprintf(message, s, "Info/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
         }
 
@@ -172,13 +174,22 @@ namespace gameanalytics
         // - validation errors
         // - trying to initialize with wrong keys
         // - other non-critical
-        void GALogger::w(const char* format)
+        void GALogger::w(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            int s = strlen(format) + 50;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char formatted[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 14 + strlen(ga->tag);
             char message[s];
-            snprintf(message, s, "Warning/%s: %s", ga->tag, format);
+            snprintf(message, s, "Warning/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Warning);
         }
 
@@ -190,13 +201,22 @@ namespace gameanalytics
         // - JSON decoding/encoding errors
         // - unexpected exceptions
         // - errors that never should happen
-        void GALogger::e(const char* format)
+        void GALogger::e(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            int s = strlen(format) + 50;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char formatted[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 12 + strlen(ga->tag);
             char message[s];
-            snprintf(message, s, "Error/%s: %s", ga->tag, format);
+            snprintf(message, s, "Error/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Error);
         }
 
@@ -206,7 +226,7 @@ namespace gameanalytics
         // used for:
         // - development only
         // - use large debug text like HTTP payload etc.
-        void GALogger::d(const char* format)
+        void GALogger::d(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -215,9 +235,18 @@ namespace gameanalytics
                 return;
             }
 
-            int s = strlen(format) + 50;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char formatted[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            int s = len + 1 + 12 + strlen(ga->tag);
             char message[s];
-            snprintf(message, s, "Debug/%s: %s", ga->tag, format);
+            snprintf(message, s, "Debug/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Debug);
         }
 
@@ -226,7 +255,7 @@ namespace gameanalytics
         //
         // used for:
         // - Large logs
-        void GALogger::ii(const char* format)
+        void GALogger::ii(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -235,9 +264,18 @@ namespace gameanalytics
                 return;
             }
 
-            int s = strlen(format) + 50;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char formatted[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            int s = len + 1 + 14 + strlen(ga->tag);
             char message[s];
-            snprintf(message, s, "Verbose/%s: %s", ga->tag, format);
+            snprintf(message, s, "Verbose/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
         }
 

@@ -202,11 +202,7 @@ namespace gameanalytics
             }
 
             // Log
-            {
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Add BUSINESS event: {currency:%s, amount:%d, itemType:%s, itemId:%s, cartType:%s, fields:%s}", currency, amount, itemType, itemId, cartType, buffer.GetString());
-                logging::GALogger::i(s);
-            }
+            logging::GALogger::i("Add BUSINESS event: {currency:%s, amount:%d, itemType:%s, itemId:%s, cartType:%s, fields:%s}", currency, amount, itemType, itemId, cartType, buffer.GetString());
 
             // Send to store
             addEventToStore(eventDict);
@@ -267,10 +263,7 @@ namespace gameanalytics
             }
 
             // Log
-            int size = strlen(currency) + strlen(itemType) + strlen(itemId) + strlen(buffer.GetString()) + 129;
-            char s[size];
-            snprintf(s, sizeof(s), "Add RESOURCE event: {currency:%s, amount: %f, itemType:%s, itemId:%s, fields:%s}", currency, amount, itemType, itemId, buffer.GetString());
-            logging::GALogger::i(s);
+            logging::GALogger::i("Add RESOURCE event: {currency:%s, amount: %f, itemType:%s, itemId:%s, fields:%s}", currency, amount, itemType, itemId, buffer.GetString());
 
             // Send to store
             addEventToStore(eventDict);
@@ -371,11 +364,7 @@ namespace gameanalytics
             }
 
             // Log
-            {
-                char s[1025] = "";
-                snprintf(s, sizeof(s), "Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%f, attempt:%f, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
-                logging::GALogger::i(s);
-            }
+            logging::GALogger::i("Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%f, attempt:%f, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
 
 
             // Send to store
@@ -431,11 +420,7 @@ namespace gameanalytics
             }
 
             // Log
-            {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Add DESIGN event: {eventId:%s, value:%f, fields:%s}", eventId, value, buffer.GetString());
-                logging::GALogger::i(s);
-            }
+            logging::GALogger::i("Add DESIGN event: {eventId:%s, value:%f, fields:%s}", eventId, value, buffer.GetString());
 
             // Send to store
             addEventToStore(eventData);
@@ -492,11 +477,7 @@ namespace gameanalytics
             }
 
             // Log
-            {
-                char s[8500] = "";
-                snprintf(s, sizeof(s), "Add ERROR event: {severity:%s, message:%s, fields:%s}", severityString, message, buffer.GetString());
-                logging::GALogger::i(s);
-            }
+            logging::GALogger::i("Add ERROR event: {severity:%s, message:%s, fields:%s}", severityString, message, buffer.GetString());
 
             // Send to store
             addEventToStore(eventData);
@@ -591,9 +572,7 @@ namespace gameanalytics
 
 
             // Log
-            char s[65] = "";
-            snprintf(s, sizeof(s), "Event queue: Sending %d events.", events.Size());
-            logging::GALogger::i(s);
+            logging::GALogger::i("Event queue: Sending %d events.", events.Size());
 
             // Set status of events to 'sending' (also check for error)
             rapidjson::Value updateResult(rapidjson::kObjectType);
@@ -648,9 +627,7 @@ namespace gameanalytics
                 // Delete events
                 store::GAStore::executeQuerySync(deleteSql);
 
-                char s[65] = "";
-                snprintf(s, sizeof(s), "Event queue: %d events sent.", events.Size());
-                logging::GALogger::i(s);
+                logging::GALogger::i("Event queue: %d events sent.", events.Size());
             }
             else
             {
@@ -665,9 +642,7 @@ namespace gameanalytics
                 {
                     if (responseEnum == http::BadRequest && dataDict.IsArray())
                     {
-                        char s[129] = "";
-                        snprintf(s, sizeof(s), "Event queue: %d events sent. %d events failed GA server validation.", events.Size(), dataDict.Size());
-                        logging::GALogger::w(s);
+                        logging::GALogger::w("Event queue: %d events sent. %d events failed GA server validation.", events.Size(), dataDict.Size());
                     }
                     else
                     {
@@ -724,11 +699,7 @@ namespace gameanalytics
                 return;
             }
 
-            {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%d session(s) located with missing session_end event.", sessions.Size());
-                logging::GALogger::i(s);
-            }
+            logging::GALogger::i("%d session(s) located with missing session_end event.", sessions.Size());
 
             // Add missing session_end events
             for (rapidjson::Value::ConstValueIterator itr = sessions.Begin(); itr != sessions.End(); ++itr)
@@ -748,11 +719,7 @@ namespace gameanalytics
                 int64_t length = event_ts - start_ts;
                 length = fmax(length, 0);
 
-                {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "fixMissingSessionEndEvents length calculated: %lld", length);
-                    logging::GALogger::d(s);
-                }
+                logging::GALogger::d("fixMissingSessionEndEvents length calculated: %lld", length);
 
                 {
                     rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);
@@ -840,13 +807,7 @@ namespace gameanalytics
             const char* json = evBuffer.GetString();
 
             // output if VERBOSE LOG enabled
-            {
-                int log_size = strlen(json) +  25;
-                char s[log_size];
-                snprintf(s, log_size, "Event added to queue: %s", json);
-                logging::GALogger::ii(s);
-            }
-
+            logging::GALogger::ii("Event added to queue: %s", json);
 
             // Add to store
             char client_ts[21] = "";

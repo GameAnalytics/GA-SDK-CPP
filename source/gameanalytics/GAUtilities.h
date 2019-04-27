@@ -6,11 +6,11 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include <sstream>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
 #if USE_UWP
+#include <string>
 #include <locale>
 #include <codecvt>
 #endif

@@ -23,7 +23,7 @@ namespace gameanalytics
             static void signalHandler(int sig);
 #else
             static void signalHandler(int sig, siginfo_t *info, void *context);
-            static const std::string format(const std::string& format, ...);
+            static const std::string format(const char* format, ...);
 #endif
             static void setupUncaughtSignals();
             static void terminateHandler();

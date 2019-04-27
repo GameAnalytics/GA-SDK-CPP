@@ -207,9 +207,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateBuild(build))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build);
                 return;
             }
             state::GAState::setBuild(build);
@@ -257,9 +255,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateString(deviceModel, true))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel);
                 return;
             }
             device::GADevice::setDeviceModel(deviceModel);
@@ -284,9 +280,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateString(deviceManufacturer, true))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer);
                 return;
             }
             device::GADevice::setDeviceManufacturer(deviceManufacturer);
@@ -310,9 +304,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion);
                 return;
             }
             device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion);
@@ -336,9 +328,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateEngineVersion(gameEngineVersion))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion);
                 return;
             }
             device::GADevice::setGameEngineVersion(gameEngineVersion);
@@ -363,9 +353,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateUserId(uId))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: %s", uId);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: %s", uId);
                 return;
             }
 
@@ -403,9 +391,7 @@ namespace gameanalytics
 
             if (!validators::GAValidator::validateKeys(gameKey, gameSecret))
             {
-                char s[321] = "";
-                snprintf(s, sizeof(s), "SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: %s, secretKey: %s", gameKey, gameSecret);
-                logging::GALogger::w(s);
+                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: %s, secretKey: %s", gameKey, gameSecret);
                 return;
             }
 
@@ -413,9 +399,7 @@ namespace gameanalytics
 
             if (!store::GAStore::ensureDatabase(false, gameKey))
             {
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Could not ensure/validate local event database: %s", device::GADevice::getWritablePath());
-                logging::GALogger::w(s);
+                logging::GALogger::w("Could not ensure/validate local event database: %s", device::GADevice::getWritablePath());
             }
 
             state::GAState::internalInitialize();
@@ -764,9 +748,7 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension01(dimension))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension);
-                logging::GALogger::w(s);
+                logging::GALogger::w("Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension);
                 return;
             }
             state::GAState::setCustomDimension01(dimension);
@@ -786,9 +768,7 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension02(dimension))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
-                logging::GALogger::w(s);
+                logging::GALogger::w("Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
                 return;
             }
             state::GAState::setCustomDimension02(dimension);
@@ -808,9 +788,7 @@ namespace gameanalytics
         {
             if (!validators::GAValidator::validateDimension03(dimension))
             {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
-                logging::GALogger::w(s);
+                logging::GALogger::w("Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
                 return;
             }
             state::GAState::setCustomDimension03(dimension);
@@ -1215,9 +1193,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%sDatastore not initialized", m);
-                logging::GALogger::w(s);
+                logging::GALogger::w("%sDatastore not initialized", m);
             }
             return false;
         }
@@ -1226,9 +1202,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%sSDK is not initialized", m);
-                logging::GALogger::w(s);
+                logging::GALogger::w("%sSDK is not initialized", m);
             }
             return false;
         }
@@ -1237,9 +1211,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%sSDK is disabled", m);
-                logging::GALogger::w(s);
+                logging::GALogger::w("%sSDK is disabled", m);
             }
             return false;
         }
@@ -1249,9 +1221,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%sSession has not started yet", m);
-                logging::GALogger::w(s);
+                logging::GALogger::w("%sSession has not started yet", m);
             }
             return false;
         }

@@ -331,10 +331,7 @@ namespace gameanalytics
             }
             catch (const std::regex_error& e)
             {
-                int size = strlen(pattern) + strlen(e.what()) + 129;
-                char s[size];
-                snprintf(s, sizeof(s), "failed to parse regular expression '%s', code: %d, what: %s", pattern, e.code(), e.what());
-                logging::GALogger::e(s);
+                logging::GALogger::e("failed to parse regular expression '%s', code: %d, what: %s", pattern, e.code(), e.what());
                 logging::GALogger::e("Please note, that the gnustl might not have regex support yet: https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html");
                 #if _DEBUG
                 throw;
@@ -423,10 +420,7 @@ namespace gameanalytics
                 }
             }
 
-            int ss = strlen(format) + strlen(result) + 1;
-            char s[ss];
-            snprintf(s, ss, format, result);
-            logging::GALogger::i(s);
+            logging::GALogger::i(format, result);
         }
 
         void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const char* newValue)

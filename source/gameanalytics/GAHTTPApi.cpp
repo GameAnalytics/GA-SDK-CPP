@@ -95,11 +95,7 @@ namespace gameanalytics
             snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, initializeUrlPath);
             snprintf(url, sizeof(url), "https://rubick.gameanalytics.com/v2/command_center?game_key=%s&interval_seconds=1000000", gameKey);
 
-            {
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Sending 'init' URL: %s", url);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("Sending 'init' URL: %s", url);
 
             rapidjson::Document initAnnotations;
             initAnnotations.SetObject();
@@ -170,12 +166,7 @@ namespace gameanalytics
             curl_easy_cleanup(curl);
 
             // process the response
-            {
-                int ss = strlen(body) + 30;
-                char s[ss];
-                snprintf(s, ss, "init request content: %s", body);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("init request content: %s", body);
 
             rapidjson::Document requestJsonDict;
             requestJsonDict.Parse(body);
@@ -184,9 +175,7 @@ namespace gameanalytics
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
-                char s[1025] = "";
-                snprintf(s, sizeof(s), "Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
-                logging::GALogger::d(s);
+                logging::GALogger::d("Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
@@ -212,12 +201,7 @@ namespace gameanalytics
                 rapidjson::StringBuffer buffer;
                 rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                 requestJsonDict.Accept(writer);
-                {
-                    int ss = strlen(buffer.GetString()) + 50;
-                    char s[ss];
-                    snprintf(s, ss, "Failed Init Call. Bad request. Response: %s", buffer.GetString());
-                    logging::GALogger::d(s);
-                }
+                logging::GALogger::d("Failed Init Call. Bad request. Response: %s", buffer.GetString());
                 // return bad request result
 #if USE_TIZEN
                 connection_destroy(connection);
@@ -262,12 +246,7 @@ namespace gameanalytics
             char url[513] = "";
             snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, eventsUrlPath);
 
-            {
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Sending 'events' URL: %s", url);
-                logging::GALogger::d(s);
-            }
-
+            logging::GALogger::d("Sending 'events' URL: %s", url);
 
             // make JSON string from data
             rapidjson::StringBuffer buffer;
@@ -326,22 +305,6 @@ namespace gameanalytics
                 return;
             }
 
-            /*try
-            {
-                curl.perform();
-            }
-            catch (curl::curl_easy_exception error)
-            {
-                auto errors = error.get_traceback();
-                logging::GALogger::d(error.what());
-                std::for_each(errors.begin(), errors.end(),[](const curl::curlcpp_traceback_object &value)
-                {
-                    char s[256] = "";
-                    snprintf(s, sizeof(s), "ERROR: %s ::::: FUNCTION: %s", value.first.c_str(), value.second.c_str());
-                    logging::GALogger::d(s);
-                });
-            }*/
-
             char body[strlen(s.ptr) + 1];
             snprintf(body, strlen(s.ptr) + 1, "%s", s.ptr);
             free(s.ptr);
@@ -349,22 +312,14 @@ namespace gameanalytics
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
             curl_easy_cleanup(curl);
 
-            {
-                int ss = strlen(body) + 10;
-                char s[ss];
-                snprintf(s, ss, "body: %s", body);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("body: %s", body);
 
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response_code, body, "Events");
 
             // if not 200 result
             if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
             {
-                int ss = strlen(url) + strlen(JSONstring) + strlen(authorization.c_str()) + 70;
-                char s[ss];
-                snprintf(s, ss, "Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
-                logging::GALogger::d(s);
+                logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
 #if USE_TIZEN
                 connection_destroy(connection);
 #endif
@@ -392,10 +347,7 @@ namespace gameanalytics
                 rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                 requestJsonDict.Accept(writer);
 
-                int ss = strlen(buffer.GetString()) + 50;
-                char s[ss];
-                snprintf(s, ss, "Failed Events Call. Bad request. Response: %s", buffer.GetString());
-                logging::GALogger::d(s);
+                logging::GALogger::d("Failed Events Call. Bad request. Response: %s", buffer.GetString());
             }
 
 #if USE_TIZEN
@@ -428,11 +380,7 @@ namespace gameanalytics
             char url[257] = "";
             snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, eventsUrlPath);
 
-            {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "Sending 'events' URL: %s", url);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("Sending 'events' URL: %s", url);
 
             rapidjson::Document json;
             json.SetObject();
@@ -462,12 +410,7 @@ namespace gameanalytics
                 return;
             }
 
-            {
-                int ss = strlen(payloadJSONString) + 30;
-                char s[ss];
-                snprintf(s, ss, "sendSdkErrorEvent json: %s", payloadJSONString);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("sendSdkErrorEvent json: %s", payloadJSONString);
 
             if (countMap[type] >= MaxCount)
             {
@@ -522,19 +465,12 @@ namespace gameanalytics
                 curl_easy_cleanup(curl);
 
                 // process the response
-                {
-                    int ss = strlen(body) + 30;
-                    char s[ss];
-                    snprintf(s, ss, "sdk error content : %s", body);
-                    logging::GALogger::d(s);
-                }
+                logging::GALogger::d("sdk error content : %s", body);
 
                 // if not 200 result
                 if (statusCode != 200)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "sdk error failed. response code not 200. status code: %u", CURLE_OK);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("sdk error failed. response code not 200. status code: %u", CURLE_OK);
 #if USE_TIZEN
                     connection_destroy(connection);
 #endif
@@ -561,9 +497,7 @@ namespace gameanalytics
             {
                 payloadData = utilities::GAUtilities::gzipCompress(payload);
 
-                char s[400] = "";
-                snprintf(s, sizeof(s), "Gzip stats. Size: %lu, Compressed: %lu", payload.size(), payloadData.size());
-                logging::GALogger::d(s);
+                logging::GALogger::d("Gzip stats. Size: %lu, Compressed: %lu", payload.size(), payloadData.size());
             }
             else
             {
@@ -608,9 +542,7 @@ namespace gameanalytics
             // if no result - often no connection
             if (utilities::GAUtilities::isStringNullOrEmpty(body))
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%s request. failed. Might be no connection. Status code: %ld", requestId, statusCode);
-                logging::GALogger::d(s);
+                logging::GALogger::d("%s request. failed. Might be no connection. Status code: %ld", requestId, statusCode);
                 return NoResponse;
             }
 
@@ -623,25 +555,19 @@ namespace gameanalytics
             // 401 can return 0 status
             if (statusCode == 0 || statusCode == 401)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%s request. 401 - Unauthorized.", requestId);
-                logging::GALogger::d(s);
+                logging::GALogger::d("%s request. 401 - Unauthorized.", requestId);
                 return Unauthorized;
             }
 
             if (statusCode == 400)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%s request. 400 - Bad Request.", requestId);
-                logging::GALogger::d(s);
+                logging::GALogger::d("%s request. 400 - Bad Request.", requestId);
                 return BadRequest;
             }
 
             if (statusCode == 500)
             {
-                char s[129] = "";
-                snprintf(s, sizeof(s), "%s request. 500 - Internal Server Error.", requestId);
-                logging::GALogger::d(s);
+                logging::GALogger::d("%s request. 500 - Internal Server Error.", requestId);
                 return InternalServerError;
             }
             return UnknownResponseCode;

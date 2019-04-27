@@ -85,9 +85,7 @@ namespace gameanalytics
             {
                 if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK)
                 {
-                    char s[400] = "";
-                    snprintf(s, sizeof(s), "SQLITE3 BEGIN ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                    logging::GALogger::e(s);
+                    logging::GALogger::e("SQLITE3 BEGIN ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
                     out = rapidjson::Value();
                     return;
                 }
@@ -155,9 +153,7 @@ namespace gameanalytics
             else
             {
                 // TODO(nikolaj): Should we do a db validation to see if the db is corrupt here?
-                char s[400] = "";
-                snprintf(s, sizeof(s), "SQLITE3 PREPARE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                logging::GALogger::e(s);
+                logging::GALogger::e("SQLITE3 PREPARE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
                 out = rapidjson::Value();
                 return;
             }
@@ -169,9 +165,7 @@ namespace gameanalytics
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "COMMIT", 0, 0, 0) != SQLITE_OK)
                     {
-                        char s[400] = "";
-                        snprintf(s, sizeof(s), "SQLITE3 COMMIT ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                        logging::GALogger::e(s);
+                        logging::GALogger::e("SQLITE3 COMMIT ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
                         out = rapidjson::Value();
                         return;
                     }
@@ -179,20 +173,14 @@ namespace gameanalytics
             }
             else
             {
-                {
-                    char s[400] = "";
-                    snprintf(s, sizeof(s), "SQLITE3 FINALIZE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                    logging::GALogger::d(s);
-                }
+                logging::GALogger::d("SQLITE3 FINALIZE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
 
                 results.Clear();
                 if (useTransaction)
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "ROLLBACK", 0, 0, 0) != SQLITE_OK)
                     {
-                        char s[400] = "";
-                        snprintf(s, sizeof(s), "SQLITE3 ROLLBACK ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                        logging::GALogger::e(s);
+                        logging::GALogger::e("SQLITE3 ROLLBACK ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
                     }
                 }
                 out = rapidjson::Value();
@@ -236,17 +224,13 @@ namespace gameanalytics
             if (sqlite3_open(sharedInstance()->dbPath, &sharedInstance()->sqlDatabase) != SQLITE_OK)
             {
                 sharedInstance()->dbReady = false;
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Could not open database: %s", sharedInstance()->dbPath);
-                logging::GALogger::w(s);
+                logging::GALogger::w("Could not open database: %s", sharedInstance()->dbPath);
                 return false;
             }
             else
             {
                 sharedInstance()->dbReady = true;
-                char s[513] = "";
-                snprintf(s, sizeof(s), "Database opened: %s", sharedInstance()->dbPath);
-                logging::GALogger::i(s);
+                logging::GALogger::i("Database opened: %s", sharedInstance()->dbPath);
             }
 
             if (dropDatabase)
@@ -267,9 +251,7 @@ namespace gameanalytics
 
             if (!GAStore::executeQuerySync(sql_ga_events))
             {
-                char s[400] = "";
-                snprintf(s, sizeof(s), "ensureDatabase failed: %s", sql_ga_events);
-                logging::GALogger::d(s);
+                logging::GALogger::d("ensureDatabase failed: %s", sql_ga_events);
                 return false;
             }
 

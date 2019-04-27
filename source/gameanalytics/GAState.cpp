@@ -163,9 +163,7 @@ namespace gameanalytics
         {
             snprintf(sharedInstance()->_build, sizeof(sharedInstance()->_build), "%s", build);
 
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set build: %s", build);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set build: %s", build);
         }
 
         void GAState::setDefaultUserId(const char* id)
@@ -205,9 +203,7 @@ namespace gameanalytics
             {
                 store::GAStore::setState("dimension01", dimension);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set custom01 dimension value: %s", dimension);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set custom01 dimension value: %s", dimension);
         }
 
         void GAState::setCustomDimension02(const char* dimension)
@@ -217,9 +213,7 @@ namespace gameanalytics
             {
                 store::GAStore::setState("dimension02", dimension);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set custom02 dimension value: %s", dimension);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set custom02 dimension value: %s", dimension);
         }
 
         void GAState::setCustomDimension03(const char* dimension)
@@ -229,9 +223,7 @@ namespace gameanalytics
             {
                 store::GAStore::setState("dimension03", dimension);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set custom03 dimension value: %s", dimension);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set custom03 dimension value: %s", dimension);
         }
 
         void GAState::setFacebookId(const char* facebookId)
@@ -241,9 +233,7 @@ namespace gameanalytics
             {
                 store::GAStore::setState("facebook_id", facebookId);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set facebook id: %s", facebookId);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set facebook id: %s", facebookId);
         }
 
         void GAState::setGender(EGAGender gender)
@@ -261,9 +251,7 @@ namespace gameanalytics
             {
                 store::GAStore::setState("gender", sharedInstance()->_gender);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set gender: %s", sharedInstance()->_gender);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set gender: %s", sharedInstance()->_gender);
         }
 
         void GAState::setBirthYear(int birthYear)
@@ -275,9 +263,7 @@ namespace gameanalytics
                 snprintf(s, sizeof(s), "%d", birthYear);
                 store::GAStore::setState("birth_year", s);
             }
-            char s[129] = "";
-            snprintf(s, sizeof(s), "Set birth year: %d", birthYear);
-            logging::GALogger::i(s);
+            logging::GALogger::i("Set birth year: %d", birthYear);
         }
 
         void GAState::incrementSessionNum()
@@ -646,11 +632,7 @@ namespace gameanalytics
                 snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", GAState::sharedInstance()->_defaultUserId);
             }
 
-            {
-                char s[257] = "";
-                snprintf(s, sizeof(s), "identifier, {clean:%s}", sharedInstance()->_identifier);
-                logging::GALogger::d(s);
-            }
+            logging::GALogger::d("identifier, {clean:%s}", sharedInstance()->_identifier);
         }
 
         void GAState::ensurePersistedStates()
@@ -704,9 +686,7 @@ namespace gameanalytics
                 snprintf(instance->_facebookId, sizeof(instance->_facebookId), "%s", state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "");
                 if (strlen(instance->_facebookId) > 0)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "facebookid found in DB: %s", instance->_facebookId);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("facebookid found in DB: %s", instance->_facebookId);
                 }
             }
 
@@ -719,9 +699,7 @@ namespace gameanalytics
                 snprintf(instance->_gender, sizeof(instance->_gender), "%s", state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "");
                 if (strlen(instance->_gender) > 0)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "gender found in DB: %s", instance->_gender);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("gender found in DB: %s", instance->_gender);
                 }
             }
 
@@ -736,9 +714,7 @@ namespace gameanalytics
                 instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0");
                 if (instance->_birthYear != 0)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "birthYear found in DB: %d", instance->_birthYear);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("birthYear found in DB: %d", instance->_birthYear);
                 }
             }
 
@@ -752,9 +728,7 @@ namespace gameanalytics
                 snprintf(instance->_currentCustomDimension01, sizeof(instance->_currentCustomDimension01), "%s", state_dict.HasMember("dimension01") ? state_dict["dimension01"].GetString() : "");
                 if (strlen(instance->_currentCustomDimension01))
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "Dimension01 found in cache: %s", instance->_currentCustomDimension01);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("Dimension01 found in cache: %s", instance->_currentCustomDimension01);
                 }
             }
 
@@ -767,9 +741,7 @@ namespace gameanalytics
                 snprintf(instance->_currentCustomDimension02, sizeof(instance->_currentCustomDimension02), "%s", state_dict.HasMember("dimension02") ? state_dict["dimension02"].GetString() : "");
                 if (strlen(instance->_currentCustomDimension02) > 0)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "Dimension02 found in cache: %s", instance->_currentCustomDimension02);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("Dimension02 found in cache: %s", instance->_currentCustomDimension02);
                 }
             }
 
@@ -782,9 +754,7 @@ namespace gameanalytics
                 snprintf(instance->_currentCustomDimension03, sizeof(instance->_currentCustomDimension03), "%s", state_dict.HasMember("dimension03") ? state_dict["dimension03"].GetString() : "");
                 if (strlen(instance->_currentCustomDimension03) > 0)
                 {
-                    char s[129] = "";
-                    snprintf(s, sizeof(s), "Dimension03 found in cache: %s", instance->_currentCustomDimension03);
-                    logging::GALogger::d(s);
+                    logging::GALogger::d("Dimension03 found in cache: %s", instance->_currentCustomDimension03);
                 }
             }
 
@@ -984,25 +954,19 @@ namespace gameanalytics
             // validate that there are no current dimension01 not in list
             if (!validators::GAValidator::validateDimension01(sharedInstance()->_currentCustomDimension01))
             {
-                char s[151] = "";
-                snprintf(s, sizeof(s), "Invalid dimension01 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension01);
-                logging::GALogger::d(s);
+                logging::GALogger::d("Invalid dimension01 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension01);
                 setCustomDimension01("");
             }
             // validate that there are no current dimension02 not in list
             if (!validators::GAValidator::validateDimension02(sharedInstance()->_currentCustomDimension02))
             {
-                char s[151] = "";
-                snprintf(s, sizeof(s), "Invalid dimension02 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension02);
-                logging::GALogger::d(s);
+                logging::GALogger::d("Invalid dimension02 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension02);
                 setCustomDimension02("");
             }
             // validate that there are no current dimension03 not in list
             if (!validators::GAValidator::validateDimension03(sharedInstance()->_currentCustomDimension03))
             {
-                char s[151] = "";
-                snprintf(s, sizeof(s), "Invalid dimension03 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension03);
-                logging::GALogger::d(s);
+                logging::GALogger::d("Invalid dimension03 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension03);
                 setCustomDimension03("");
             }
         }
@@ -1092,12 +1056,7 @@ namespace gameanalytics
                             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
                             configuration.Accept(writer);
 
-                            {
-                                int ss = strlen(buffer.GetString()) + 50;
-                                char s[ss];
-                                snprintf(s, ss, "configuration added: %s", buffer.GetString());
-                                logging::GALogger::d(s);
-                            }
+                            logging::GALogger::d("configuration added: %s", buffer.GetString());
                         }
                     }
                 }
@@ -1127,9 +1086,7 @@ namespace gameanalytics
                     const char* key = itr->name.GetString();
                     if(fields[key].IsNull())
                     {
-                        char s[257] = "";
-                        snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key or value is null", key, fields[key].GetString());
-                        logging::GALogger::w(s);
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key or value is null", key, fields[key].GetString());
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
@@ -1158,30 +1115,22 @@ namespace gameanalytics
                                 }
                                 else
                                 {
-                                    char s[400] = "";
-                                    snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
-                                    logging::GALogger::w(s);
+                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
                                 }
                             }
                             else
                             {
-                                char s[400] = "";
-                                snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is not a string or number", key, fields[key].GetString());
-                                logging::GALogger::w(s);
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is not a string or number", key, fields[key].GetString());
                             }
                         }
                         else
                         {
-                            char s[400] = "";
-                            snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
-                            logging::GALogger::w(s);
+                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
                         }
                     }
                     else
                     {
-                        char s[400] = "";
-                        snprintf(s, sizeof(s), "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because it exceeds the max number of custom fields (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_COUNT);
-                        logging::GALogger::w(s);
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because it exceeds the max number of custom fields (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_COUNT);
                     }
                 }
             }

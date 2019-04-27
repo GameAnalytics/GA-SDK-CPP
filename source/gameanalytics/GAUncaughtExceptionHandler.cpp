@@ -100,8 +100,10 @@ namespace gameanalytics
              */
 
             std::stringstream ss;
+            char buffer[8200] = "";
+            strcat(buffer, "Uncaught Signal\n");
+            strcat(buffer, "Uncaught Signal\n");
 
-            ss << "Uncaught Signal" << std::endl;
             ss << format("si_signo    %d", info->si_signo) << std::endl;
             ss << format("si_code     %d", info->si_code) << std::endl;
             ss << format("si_value    %d", info->si_value) << std::endl;
@@ -129,15 +131,15 @@ namespace gameanalytics
             std::_Exit( EXIT_FAILURE );
         }
 
-        const std::string GAUncaughtExceptionHandler::format(const std::string& format, ...)
+        const std::string GAUncaughtExceptionHandler::format(const char* format, ...)
         {
             va_list args;
             va_start (args, format);
-            size_t len = std::vsnprintf(NULL, 0, format.c_str(), args);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
             std::vector<char> vec(len + 1);
             va_start (args, format);
-            std::vsnprintf(&vec[0], len + 1, format.c_str(), args);
+            std::vsnprintf(&vec[0], len + 1, format, args);
             va_end (args);
             return &vec[0];
         }
