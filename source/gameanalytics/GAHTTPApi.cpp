@@ -253,6 +253,7 @@ namespace gameanalytics
             if (eventArray.Empty())
             {
                 logging::GALogger::d("sendEventsInArray called with missing eventArray");
+                return;
             }
 
             auto gameKey = state::GAState::getGameKey();
@@ -263,7 +264,7 @@ namespace gameanalytics
 
             {
                 char s[513] = "";
-                snprintf(url, sizeof(url), "Sending 'events' URL: %s", url);
+                snprintf(s, sizeof(s), "Sending 'events' URL: %s", url);
                 logging::GALogger::d(s);
             }
 

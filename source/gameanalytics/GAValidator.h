@@ -6,7 +6,6 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
 #include "GAHTTPApi.h"

@@ -6,67 +6,27 @@
 
 void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 {
-    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    std::vector<std::string> list;
-
-    for (unsigned int index = 0; index < json.size(); ++index)
-    {
-        list.push_back(json[index].asString().c_str());
-    }
-
-    gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(list);
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(customDimensionsJson);
 }
 
 void configureAvailableCustomDimensions02(const char *customDimensionsJson)
 {
-    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    std::vector<std::string> list;
-
-    for (unsigned int index = 0; index < json.size(); ++index)
-    {
-        list.push_back(json[index].asString().c_str());
-    }
-
-    gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(list);
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(customDimensionsJson);
 }
 
 void configureAvailableCustomDimensions03(const char *customDimensionsJson)
 {
-    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-    std::vector<std::string> list;
-
-    for (unsigned int index = 0; index < json.size(); ++index)
-    {
-        list.push_back(json[index].asString().c_str());
-    }
-
-    gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(list);
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(customDimensionsJson);
 }
 
 void configureAvailableResourceCurrencies(const char *resourceCurrenciesJson)
 {
-    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
-    std::vector<std::string> list;
-
-    for (unsigned int index = 0; index < json.size(); ++index)
-    {
-        list.push_back(json[index].asString().c_str());
-    }
-
-    gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(list);
+    gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(resourceCurrenciesJson);
 }
 
 void configureAvailableResourceItemTypes(const char *resourceItemTypesJson)
 {
-    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
-    std::vector<std::string> list;
-
-    for (unsigned int index = 0; index < json.size(); ++index )
-    {
-        list.push_back(json[index].asString().c_str());
-    }
-
-    gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(list);
+    gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(resourceItemTypesJson);
 }
 
 void configureBuild(const char *build)

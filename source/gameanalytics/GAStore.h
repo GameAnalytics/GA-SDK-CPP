@@ -6,7 +6,6 @@
 #pragma once
 
 #include <sqlite3.h>
-#include <string>
 #include <vector>
 #include "rapidjson/document.h"
 #include "Foundation/GASingleton.h"

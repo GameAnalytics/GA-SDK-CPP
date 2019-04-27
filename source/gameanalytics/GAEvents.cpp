@@ -13,6 +13,7 @@
 #include "GAValidator.h"
 #include <string.h>
 #include <stdio.h>
+#include <cmath>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
@@ -745,6 +746,7 @@ namespace gameanalytics
                 int64_t start_ts = utilities::GAUtilities::parseString<int64_t>(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0");
 
                 int64_t length = event_ts - start_ts;
+                length = fmax(length, 0);
 
                 {
                     char s[129] = "";

@@ -789,12 +789,12 @@ namespace gameanalytics
             }
 
             // get cached init call values
-            std::string sdkConfigCachedString = state_dict.HasMember("sdk_config_cached") ? state_dict["sdk_config_cached"].GetString() : "";
-            if (!sdkConfigCachedString.empty())
+            const char* sdkConfigCachedString = state_dict.HasMember("sdk_config_cached") ? state_dict["sdk_config_cached"].GetString() : "";
+            if (strlen(sdkConfigCachedString) > 0)
             {
                 // decode JSON
                 rapidjson::Document d;
-                d.Parse(sdkConfigCachedString.c_str());
+                d.Parse(sdkConfigCachedString);
                 if (!d.IsNull())
                 {
                     instance->_sdkConfigCached = d.GetObject();

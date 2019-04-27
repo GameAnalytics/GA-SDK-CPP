@@ -6,7 +6,6 @@
 #pragma once
 
 #include <Foundation/GASingleton.h>
-#include <string>
 #include <memory>
 #if !USE_UWP && !USE_TIZEN
 #include <spdlog/spdlog.h>
