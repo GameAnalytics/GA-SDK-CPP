@@ -40,9 +40,9 @@ call_stack::call_stack (const size_t num_discard /*= 0*/) {
         // store entry to stack
         if (dlinfo.dli_fname && symname) {
             entry e;
-            e.file     = dlinfo.dli_fname;
+            snprintf(e.file, sizeof(e.file), "%s", dlinfo.dli_fname);
             e.line     = 0; // unsupported
-            e.function = symname;
+            snprintf(e.function, sizeof(e.function), "%s", symname);
             stack.push_back(e);
         } else {
             break; // skip last entries below main

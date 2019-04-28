@@ -714,10 +714,10 @@ namespace gameanalytics
                 sessionEndEvent.Parse(buffer.GetString());
                 rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
                 int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
-                int64_t start_ts = utilities::GAUtilities::parseString<int64_t>(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0");
+                int64_t start_ts = (int64_t)strtol(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0", NULL, 10);
 
                 int64_t length = event_ts - start_ts;
-                length = fmax(length, 0);
+                length = static_cast<int64_t>(fmax(length, 0));
 
                 logging::GALogger::d("fixMissingSessionEndEvents length calculated: %lld", length);
 
@@ -788,7 +788,19 @@ namespace gameanalytics
                 if(value.IsNumber())
                 {
                     rapidjson::Value v(key, allocator);
-                    ev.AddMember(v.Move(), value.GetDouble(), allocator);
+
+                    if(value.IsInt64())
+                    {
+                        ev.AddMember(v.Move(), value.GetInt64(), allocator);
+                    }
+                    else if(value.IsInt())
+                    {
+                        ev.AddMember(v.Move(), value.GetInt(), allocator);
+                    }
+                    else if(value.IsDouble())
+                    {
+                        ev.AddMember(v.Move(), value.GetDouble(), allocator);
+                    }
                 }
                 else if(value.IsString())
                 {

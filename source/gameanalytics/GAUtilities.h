@@ -6,7 +6,6 @@
 #pragma once
 
 #include <vector>
-#include <sstream>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
 #if USE_UWP
@@ -24,7 +23,7 @@ namespace gameanalytics
          public:
             static const char* getPathSeparator();
             static void generateUUID(char* out);
-            static std::string hmacWithKey(const std::string& key, const std::string& data);
+            static void hmacWithKey(const char* key, const char* data, char* out);
             static bool stringMatch(const char* string, const char* pattern);
             static std::string gzipCompress(const std::string& data);
 
@@ -52,16 +51,6 @@ namespace gameanalytics
                 return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
             }
 #endif
-
-            // tries to convert s into T
-            template <typename T>
-            static T parseString(const std::string& s)
-            {
-                std::istringstream i(s);
-                T parsed_value;
-                i >> parsed_value;
-                return parsed_value;
-            }
         private:
             static char pathSeparator[];
         };

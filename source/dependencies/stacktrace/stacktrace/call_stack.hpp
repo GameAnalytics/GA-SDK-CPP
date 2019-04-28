@@ -2,7 +2,6 @@
    License: BSD licence (http://www.opensource.org/licenses/bsd-license.php) */
 
 #pragma once
-#include <string>
 #include <vector>
 #include <sstream>
 
@@ -14,15 +13,16 @@ struct entry {
     entry () : line(0) {
     }
 
-    std::string file;     ///< filename
+    char file[513];     ///< filename
     size_t      line;     ///< line number
-    std::string function; ///< name of function or method
+    char function[513]; ///< name of function or method
 
     /** Serialize entry into a text string. */
-    std::string to_string () const {
-        std::ostringstream os;
-        os << file << " (" << line << "): " << function;
-        return os.str();
+    void to_string (char* out) const
+    {
+        char s[1100] = "";
+        snprintf(s, 1100, "%s (%zu): %s", file, line, function);
+        strcat(out, s);
     }
 };
 
@@ -36,11 +36,28 @@ public:
     virtual ~call_stack () throw();
 
     /** Serializes the entire call-stack into a text string. */
-    std::string to_string () const {
-        std::ostringstream os;
+    void to_string (char* out) const
+    {
+        char s[1100 * stack.size()];
+        snprintf(s, 1100 * stack.size(), "");
         for (size_t i = 0; i < stack.size(); i++)
-            os << stack[i].to_string() << std::endl;
-        return os.str();
+        {
+            stack[i].to_string(s);
+            strcat(s, "\n");
+        }
+        strcat(out, s);
+    }
+
+    size_t to_string_size() const
+    {
+        char s[1100 * stack.size()];
+        snprintf(s, 1100 * stack.size(), "");
+        for (size_t i = 0; i < stack.size(); i++)
+        {
+            stack[i].to_string(s);
+            strcat(s, "\n");
+        }
+        return strlen(s);
     }
 
     /** Call stack. */

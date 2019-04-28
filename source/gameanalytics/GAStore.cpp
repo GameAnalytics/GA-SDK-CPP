@@ -10,12 +10,12 @@
 #include "GAUtilities.h"
 #include <fstream>
 #include <string.h>
+#include <cstdlib>
 #if USE_UWP
 #elif USE_TIZEN
 #elif _WIN32
 #include <direct.h>
 #else
-#include <cstdlib>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
@@ -128,13 +128,15 @@ namespace gameanalytics
                         case SQLITE_INTEGER:
                         {
                             rapidjson::Value v(column, allocator);
-                            row.AddMember(v.Move(), utilities::GAUtilities::parseString<int>(value), allocator);
+                            row.AddMember(v.Move(), (int)strtol(value, NULL, 10), allocator);
                             break;
                         }
                         case SQLITE_FLOAT:
                         {
                             rapidjson::Value v(column, allocator);
-                            row.AddMember(v.Move(), utilities::GAUtilities::parseString<double>(value), allocator);
+                            double d;
+                            sscanf(value, "%lf", &d);
+                            row.AddMember(v.Move(), d, allocator);
                             break;
                         }
                         default:

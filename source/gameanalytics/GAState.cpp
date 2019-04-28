@@ -17,6 +17,7 @@
 #include <climits>
 #include <string.h>
 #include <stdio.h>
+#include <cstdlib>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 
@@ -672,9 +673,9 @@ namespace gameanalytics
                 instance->setDefaultUserId(defaultId);
             }
 
-            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.HasMember("session_num") ? state_dict["session_num"].GetString() : "0");
+            instance->_sessionNum = (int)strtol(state_dict.HasMember("session_num") ? state_dict["session_num"].GetString() : "0", NULL, 10);
 
-            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0");
+            instance->_transactionNum = (int)strtol(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0", NULL, 10);
 
             // restore cross session user values
             if (strlen(instance->_facebookId) > 0)
@@ -711,7 +712,7 @@ namespace gameanalytics
             }
             else
             {
-                instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0");
+                instance->_birthYear = (int)strtol(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0", NULL, 10);
                 if (instance->_birthYear != 0)
                 {
                     logging::GALogger::d("birthYear found in DB: %d", instance->_birthYear);
@@ -784,7 +785,7 @@ namespace gameanalytics
             {
                 for (rapidjson::Value::ConstValueIterator itr = results_ga_progression.Begin(); itr != results_ga_progression.End(); ++itr)
                 {
-                    sharedInstance()->_progressionTries[(*itr)["progression"].GetString()] = utilities::GAUtilities::parseString<int>((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0");
+                    sharedInstance()->_progressionTries[(*itr)["progression"].GetString()] = (int)strtol((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0", NULL, 10);
                 }
             }
 
@@ -915,7 +916,7 @@ namespace gameanalytics
 
             // set offset in state (memory) from current config (config could be from cache etc.)
 
-            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<int64_t>(currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetString() : "0.0");
+            GAState::sharedInstance()->_clientServerTimeOffset = (int64_t)strtol(currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetString() : "0", NULL, 10);
 
             // populate configurations
             populateConfigurations(currentSdkConfig);
@@ -1049,7 +1050,19 @@ namespace gameanalytics
                             else if(configuration["value"].IsNumber())
                             {
                                 rapidjson::Value v(key.c_str(), allocator);
-                                GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetDouble(), allocator);
+
+                                if(configuration["value"].IsInt64())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetInt64(), allocator);
+                                }
+                                else if(configuration["value"].IsInt())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetInt(), allocator);
+                                }
+                                else if(configuration["value"].IsDouble())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetDouble(), allocator);
+                                }
                             }
 
                             rapidjson::StringBuffer buffer;

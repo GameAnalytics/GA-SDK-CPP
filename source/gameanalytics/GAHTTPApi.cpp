@@ -521,9 +521,10 @@ namespace gameanalytics
             // create authorization hash
             const char* key = state::GAState::getGameSecret();
 
-            std::string authorization = utilities::GAUtilities::hmacWithKey(key, payloadData);
+            char authorization[257] = "";
+            utilities::GAUtilities::hmacWithKey(key, payloadData, authorization);
             char auth[129] = "";
-            snprintf(auth, sizeof(auth), "Authorization: %s", authorization.c_str());
+            snprintf(auth, sizeof(auth), "Authorization: %s", authorization);
             header = curl_slist_append(header, auth);
 
             // always JSON

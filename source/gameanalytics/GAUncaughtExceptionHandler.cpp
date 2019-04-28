@@ -6,16 +6,15 @@
 #include "GAUncaughtExceptionHandler.h"
 #include "GAState.h"
 #include "GAEvents.h"
-#include <iostream>
-#include <sstream>
-#include <string>
 #include <stacktrace/call_stack.hpp>
+#include <string.h>
+#include <stdio.h>
+#include <cstdarg>
 #if defined(_WIN32)
 #include <stdlib.h>
 #include <tchar.h>
 #else
 #include <execinfo.h>
-#include <cstdarg>
 #include <cstring>
 #include <cstdlib>
 #endif
@@ -32,9 +31,10 @@ namespace gameanalytics
         void GAUncaughtExceptionHandler::signalHandler(int sig)
         {
             stacktrace::call_stack st;
-            std::stringstream ss;
+            size_t totalSize = 0;
+            totalSize += formatSize("Uncaught Signal (%d)\n", sig);
+            totalSize += strlen("Stack trace:\n");
 
-            ss << "Uncaught Signal (" << sig << ")" << std::endl;
             ss << "Stack trace:" << std::endl;
             ss << st.to_string() << std::endl;
 
@@ -98,28 +98,40 @@ namespace gameanalytics
             /*
              *    Now format into a message for sending to the user
              */
-
-            std::stringstream ss;
-            char buffer[8200] = "";
-            strcat(buffer, "Uncaught Signal\n");
-            strcat(buffer, "Uncaught Signal\n");
-
-            ss << format("si_signo    %d", info->si_signo) << std::endl;
-            ss << format("si_code     %d", info->si_code) << std::endl;
-            ss << format("si_value    %d", info->si_value) << std::endl;
-            ss << format("si_errno    %d", info->si_errno) << std::endl;
-            ss << format("si_addr     0x%08lX", info->si_addr) << std::endl;
-            ss << format("si_status   %d", info->si_status) << std::endl;
-            ss << "Stack trace:" << std::endl;
+            size_t totalSize = 0;
+            totalSize += strlen("Uncaught Signal\n");
+            totalSize += formatSize("si_signo    %d\n", info->si_signo);
+            totalSize += formatSize("si_code     %d\n", info->si_code);
+            totalSize += formatSize("si_value    %d\n", info->si_value);
+            totalSize += formatSize("si_errno    %d\n", info->si_errno);
+            totalSize += formatSize("si_addr     0x%08lX\n", info->si_addr);
+            totalSize += formatSize("si_status   %d\n", info->si_status);
+            totalSize += strlen("Stack trace:\n");
             for (i = 0; i < len; ++i)
             {
-                ss << format("%4d - %s", i, symbols[i]) << std::endl;
+                totalSize += formatSize("%4d - %s\n", i, symbols[i]);
+            }
+
+            char buffer[totalSize + 1];
+            snprintf(buffer, totalSize, "");
+            strcat(buffer, "Uncaught Signal\n");
+
+            formatConcat(buffer, "si_signo    %d\n", info->si_signo);
+            formatConcat(buffer, "si_code     %d\n", info->si_code);
+            formatConcat(buffer, "si_value    %d\n", info->si_value);
+            formatConcat(buffer, "si_errno    %d\n", info->si_errno);
+            formatConcat(buffer, "si_addr     0x%08lX\n", info->si_addr);
+            formatConcat(buffer, "si_status   %d\n", info->si_status);
+            strcat(buffer, "Stack trace:\n");
+            for (i = 0; i < len; ++i)
+            {
+                formatConcat(buffer, "%4d - %s\n", i, symbols[i]);
             }
 
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
                 errorCount = errorCount + 1;
-                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str().c_str(), {});
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
                 events::GAEvents::processEvents("error", false);
             }
 
@@ -130,20 +142,28 @@ namespace gameanalytics
 
             std::_Exit( EXIT_FAILURE );
         }
-
-        const std::string GAUncaughtExceptionHandler::format(const char* format, ...)
+#endif
+        void GAUncaughtExceptionHandler::formatConcat(char* buffer, const char* format, ...)
         {
             va_list args;
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            std::vector<char> vec(len + 1);
+            char formatted[len + 1];
             va_start (args, format);
-            std::vsnprintf(&vec[0], len + 1, format, args);
+            std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
-            return &vec[0];
+            strcat(buffer, formatted);
         }
-#endif
+
+        size_t GAUncaughtExceptionHandler::formatSize(const char* format, ...)
+        {
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            return len;
+        }
 
         /*    terminateHandler
          *
@@ -162,15 +182,22 @@ namespace gameanalytics
              *    Now format into a message for sending to the user
              */
 
-            std::stringstream ss;
-            ss << "Uncaught C++ Exception" << std::endl;
-            ss << "Stack trace:" << std::endl;
-            ss << st.to_string() << std::endl;
+            size_t totalSize = 0;
+            totalSize += strlen("Uncaught C++ Exception\n");
+            totalSize += strlen("Stack trace:\n");
+            totalSize += st.to_string_size() + strlen("\n");
+            char buffer[totalSize + 1];
+
+            strcat(buffer, "Uncaught C++ Exception\n");
+            strcat(buffer, "Stack trace:\n");
+            strcat(buffer, "Stack trace:\n");
+            st.to_string(buffer);
+            strcat(buffer, "\n");
 
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
                 errorCount = errorCount + 1;
-                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str().c_str(), {});
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
                 events::GAEvents::processEvents("error", false);
             }
 
