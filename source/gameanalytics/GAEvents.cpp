@@ -16,6 +16,7 @@
 #include <cmath>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/error/en.h"
 
 namespace gameanalytics
 {
@@ -705,30 +706,33 @@ namespace gameanalytics
             for (rapidjson::Value::ConstValueIterator itr = sessions.Begin(); itr != sessions.End(); ++itr)
             {
                 const rapidjson::Value& session = *itr;
-                rapidjson::StringBuffer buffer;
+                if(session.HasMember("event"))
                 {
-                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                    session.Accept(writer);
+                    rapidjson::Document sessionEndEvent;
+                    rapidjson::ParseResult ok = sessionEndEvent.Parse(session["event"].GetString());
+                    if(!ok)
+                    {
+                        logging::GALogger::d("JSON parse error: %s (%u)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+                    }
+
+                    rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
+                    int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
+                    int64_t start_ts = (int64_t)strtol(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0", NULL, 10);
+
+                    int64_t length = event_ts - start_ts;
+                    length = static_cast<int64_t>(fmax(length, 0));
+
+                    logging::GALogger::d("fixMissingSessionEndEvents length calculated: %lld", length);
+
+                    {
+                        rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);
+                        sessionEndEvent.AddMember("category", v.Move(), allocator);
+                    }
+                    sessionEndEvent.AddMember("length", length, allocator);
+
+                    // Add to store
+                    addEventToStore(sessionEndEvent);
                 }
-                rapidjson::Document sessionEndEvent;
-                sessionEndEvent.Parse(buffer.GetString());
-                rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
-                int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
-                int64_t start_ts = (int64_t)strtol(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0", NULL, 10);
-
-                int64_t length = event_ts - start_ts;
-                length = static_cast<int64_t>(fmax(length, 0));
-
-                logging::GALogger::d("fixMissingSessionEndEvents length calculated: %lld", length);
-
-                {
-                    rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);
-                    sessionEndEvent.AddMember("category", v.Move(), allocator);
-                }
-                sessionEndEvent.AddMember("length", length, allocator);
-
-                // Add to store
-                addEventToStore(sessionEndEvent);
             }
         }
 
@@ -785,29 +789,7 @@ namespace gameanalytics
                 const char* key = itr->name.GetString();
                 const rapidjson::Value& value = eventData[key];
 
-                if(value.IsNumber())
-                {
-                    rapidjson::Value v(key, allocator);
-
-                    if(value.IsInt64())
-                    {
-                        ev.AddMember(v.Move(), value.GetInt64(), allocator);
-                    }
-                    else if(value.IsInt())
-                    {
-                        ev.AddMember(v.Move(), value.GetInt(), allocator);
-                    }
-                    else if(value.IsDouble())
-                    {
-                        ev.AddMember(v.Move(), value.GetDouble(), allocator);
-                    }
-                }
-                else if(value.IsString())
-                {
-                    rapidjson::Value v(key, allocator);
-                    rapidjson::Value v1(value.GetString(), allocator);
-                    ev.AddMember(v.Move(), v1.Move(), allocator);
-                }
+                utilities::GAUtilities::setJsonKeyValue(ev, key, value);
             }
 
             // Create json string representation
@@ -830,10 +812,11 @@ namespace gameanalytics
             store::GAStore::executeQuerySync(sql, parameters, 5);
 
             // Add to session store if not last
-            if (eventData["category"].GetString() == GAEvents::CategorySessionEnd)
+            if (strcmp(eventData["category"].GetString(), GAEvents::CategorySessionEnd) == 0)
             {
                 const char* params[] = { ev["session_id"].GetString() };
                 store::GAStore::executeQuerySync("DELETE FROM ga_session WHERE session_id = ?;", params, 1);
+                logging::GALogger::d("DELETE FROM ga_session WHERE session_id = %s;", ev["session_id"].GetString());
             }
             else
             {

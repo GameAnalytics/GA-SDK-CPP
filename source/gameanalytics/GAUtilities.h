@@ -34,7 +34,7 @@ namespace gameanalytics
             static bool stringVectorContainsString(const StringVector& vector, const char* search);
             static int64_t timeIntervalSince1970();
             static void printJoinStringArray(const StringVector& v, const char* format, const char* delimiter = ", ");
-            static void setJsonKeyValue(rapidjson::Document& json, const char* key, const char* newValue);
+            static void setJsonKeyValue(rapidjson::Document& json, const char* key, const rapidjson::Value& value);
 #if !USE_UWP
             static int base64_needed_encoded_length(int length_of_data);
             static void base64_encode(const unsigned char * src, int src_len, unsigned char *buf_);

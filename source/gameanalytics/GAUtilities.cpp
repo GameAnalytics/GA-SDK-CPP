@@ -420,19 +420,61 @@ namespace gameanalytics
             logging::GALogger::i(format, result);
         }
 
-        void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const char* newValue)
+        void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const rapidjson::Value& value)
         {
+            rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
             rapidjson::Value::MemberIterator iter = d.FindMember(key);
             if (iter == d.MemberEnd())
             {
-                rapidjson::Value v(key, d.GetAllocator());
-                rapidjson::Value v1(newValue, d.GetAllocator());
-                d.AddMember(v.Move(), v1.Move(), d.GetAllocator());
+                if(value.IsNumber())
+                {
+                    rapidjson::Value v(key, allocator);
+
+                    if(value.IsInt64())
+                    {
+                        d.AddMember(v.Move(), value.GetInt64(), allocator);
+                    }
+                    else if(value.IsInt())
+                    {
+                        d.AddMember(v.Move(), value.GetInt(), allocator);
+                    }
+                    else if(value.IsDouble())
+                    {
+                        d.AddMember(v.Move(), value.GetDouble(), allocator);
+                    }
+                }
+                else if(value.IsString())
+                {
+                    rapidjson::Value v(key, allocator);
+                    rapidjson::Value v1(value.GetString(), allocator);
+                    d.AddMember(v.Move(), v1.Move(), allocator);
+                }
             }
             else
             {
-                rapidjson::Value v(newValue, d.GetAllocator());
-                iter->value = v.Move();
+                if(value.IsNumber())
+                {
+                    if(value.IsInt64())
+                    {
+                        rapidjson::Value v(value.GetInt64());
+                        iter->value = v.Move();
+                    }
+                    else if(value.IsInt())
+                    {
+                        rapidjson::Value v(value.GetInt());
+                        iter->value = v.Move();
+                    }
+                    else if(value.IsDouble())
+                    {
+                        rapidjson::Value v(value.GetDouble());
+                        iter->value = v.Move();
+                    }
+                }
+                else if(value.IsString())
+                {
+                    rapidjson::Value v(value.GetString(), allocator);
+                    iter->value = v.Move();
+                }
             }
         }
     }
