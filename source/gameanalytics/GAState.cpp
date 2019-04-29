@@ -977,10 +977,12 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart != 0;
         }
 
-        const char* GAState::getConfigurationStringValue(const char* key, const char* defaultValue)
+        void GAState::getConfigurationStringValue(const char* key, const char* defaultValue, char* out)
         {
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
-            return GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
+            const char* result = GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
+
+            snprintf(out, 256, "%s", result);
         }
 
         bool GAState::isCommandCenterReady()

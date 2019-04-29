@@ -197,7 +197,8 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
     )
 
@@ -207,7 +208,7 @@ elseif("${OSX_ALL}")
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
@@ -228,7 +229,8 @@ elseif("${LINUX_ALL}")
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
     )
 
@@ -238,7 +240,7 @@ elseif("${LINUX_ALL}")
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
@@ -260,7 +262,8 @@ else()
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
     )
 
@@ -271,7 +274,7 @@ else()
         "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/stackwalker"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"

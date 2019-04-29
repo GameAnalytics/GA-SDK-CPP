@@ -845,14 +845,14 @@ namespace gameanalytics
         });
     }
 
-    const char* GameAnalytics::getCommandCenterValueAsString(const char* key)
+    void GameAnalytics::getCommandCenterValueAsString(const char* key, char* out)
     {
-        return getCommandCenterValueAsString(key, "");
+        getCommandCenterValueAsString(key, "", out);
     }
 
-    const char* GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue)
+    void GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue, char* out)
     {
-        return state::GAState::getConfigurationStringValue(key, defaultValue);
+        state::GAState::getConfigurationStringValue(key, defaultValue, out);
     }
 
     bool GameAnalytics::isCommandCenterReady()
@@ -978,13 +978,6 @@ namespace gameanalytics
     {
         return _endThread || threading::GAThreading::isThreadEnding();
     }
-
-#if !USE_UWP && !USE_TIZEN
-    void GameAnalytics::addCustomLogStream(std::ostream& os)
-    {
-        logging::GALogger::addCustomLogStream(os);
-    }
-#endif
 
 #if USE_UWP
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions)

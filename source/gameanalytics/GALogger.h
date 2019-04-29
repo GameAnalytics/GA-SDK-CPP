@@ -7,8 +7,10 @@
 
 #include <Foundation/GASingleton.h>
 #include <memory>
+#include <cstdio>
 #if !USE_UWP && !USE_TIZEN
-#include <spdlog/spdlog.h>
+#define ZF_LOG_SRCLOC ZF_LOG_SRCLOC_NONE
+#include "zf_log.h"
 #endif
 
 namespace gameanalytics
@@ -27,6 +29,7 @@ namespace gameanalytics
         {
          public:
             GALogger();
+            ~GALogger();
 
             // set debug enabled (client)
             static void setInfoLog(bool enabled);
@@ -43,7 +46,6 @@ namespace gameanalytics
 
 #if !USE_UWP && !USE_TIZEN
             static void customInitializeLog();
-            static void addCustomLogStream(std::ostream& os);
 #endif
          private:
 #if !USE_UWP && !USE_TIZEN
@@ -59,9 +61,9 @@ namespace gameanalytics
             Windows::Storage::StorageFile^ file;
 #endif
 #if !USE_UWP && !USE_TIZEN
-            std::shared_ptr<spdlog::logger> logger;
+            static void file_output_callback(const zf_log_message *msg, void *arg);
             bool logInitialized;
-            std::shared_ptr<spdlog::logger> custom_logger;
+            FILE *log_file;
 #endif
         };
     }

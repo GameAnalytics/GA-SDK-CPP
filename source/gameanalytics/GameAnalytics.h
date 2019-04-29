@@ -173,8 +173,8 @@ namespace gameanalytics
         static void startSession();
         static void endSession();
 
-        static const char* getCommandCenterValueAsString(const char* key);
-        static const char* getCommandCenterValueAsString(const char* key, const char* defaultValue);
+        static void getCommandCenterValueAsString(const char* key, char* out);
+        static void getCommandCenterValueAsString(const char* key, const char* defaultValue, char* out);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
@@ -187,10 +187,6 @@ namespace gameanalytics
         static void onQuit();
 
         static bool isThreadEnding();
-
-#if !USE_UWP && !USE_TIZEN
-        static void addCustomLogStream(std::ostream& os);
-#endif
 
 #if USE_UWP
         static void configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions);
