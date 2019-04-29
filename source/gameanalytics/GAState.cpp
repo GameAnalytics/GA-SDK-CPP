@@ -1090,7 +1090,7 @@ namespace gameanalytics
             result.SetObject();
             rapidjson::Document::AllocatorType& allocator = result.GetAllocator();
 
-            if (fields.IsObject() && !fields.Empty())
+            if (fields.IsObject() && fields.MemberCount() > 0)
             {
                 int count = 0;
 
@@ -1099,7 +1099,7 @@ namespace gameanalytics
                     const char* key = itr->name.GetString();
                     if(fields[key].IsNull())
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key or value is null", key, fields[key].GetString());
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=null has been omitted because its key or value is null", key);
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
@@ -1133,7 +1133,7 @@ namespace gameanalytics
                             }
                             else
                             {
-                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is not a string or number", key, fields[key].GetString());
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because its value is not a string or number", key);
                             }
                         }
                         else
@@ -1143,7 +1143,7 @@ namespace gameanalytics
                     }
                     else
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because it exceeds the max number of custom fields (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_COUNT);
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because it exceeds the max number of custom fields (%d)", key, MAX_CUSTOM_FIELDS_COUNT);
                     }
                 }
             }

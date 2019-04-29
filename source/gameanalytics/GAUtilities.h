@@ -23,9 +23,9 @@ namespace gameanalytics
          public:
             static const char* getPathSeparator();
             static void generateUUID(char* out);
-            static void hmacWithKey(const char* key, const char* data, char* out);
+            static void hmacWithKey(const char* key, const std::vector<char>& data, char* out);
             static bool stringMatch(const char* string, const char* pattern);
-            static std::string gzipCompress(const std::string& data);
+            static std::vector<char> gzipCompress(const char* data);
 
             // added for C++ port
             static bool isStringNullOrEmpty(const char* s);

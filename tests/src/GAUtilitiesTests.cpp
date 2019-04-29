@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <string>
 #include <vector>
 
 #include <GAUtilities.h>
@@ -13,63 +12,116 @@
 
 // test helpers
 #include "helpers/GATestHelpers.h"
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 TEST(GAUtilities, testHmacWithKey)
 {
-    ASSERT_STREQ(gameanalytics::utilities::GAUtilities::hmacWithKey("test1", "test2").c_str(), "E+sBF4BA9mLvVlfwHx53G2poUPwEUZ1f37oVrgHhOFQ=");
+    {
+        char mac[257] = "";
+        gameanalytics::utilities::GAUtilities::hmacWithKey("test1", {'t','e','s','t','2'}, mac);
+        ASSERT_STREQ(mac, "E+sBF4BA9mLvVlfwHx53G2poUPwEUZ1f37oVrgHhOFQ=");
+    }
 
-    Json::Value jsonObject1;
-    jsonObject1["v"] = 2;
-    jsonObject1["user_id"] = "test";
 
-    Json::Value jsonObject2;
-    jsonObject2["v"] = 3;
-    jsonObject2["user_id"] = "test2";
+    rapidjson::Document d;
+    d.SetArray();
+    rapidjson::Document::AllocatorType& a = d.GetAllocator();
 
-    std::vector<Json::Value> eventArray;
-    eventArray.push_back(jsonObject1);
-    eventArray.push_back(jsonObject2);
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 2, a);
+        v.AddMember("user_id", "test", a);
+        d.PushBack(v, a);
+    }
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 3, a);
+        v.AddMember("user_id", "test2", a);
+        d.PushBack(v, a);
+    }
 
-    std::string JSONstring = gameanalytics::utilities::GAUtilities::arrayOfObjectsToJsonString(eventArray);
+    rapidjson::StringBuffer buffer;
+    {
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+    }
 
-    ASSERT_STREQ(gameanalytics::utilities::GAUtilities::hmacWithKey("test1", JSONstring).c_str(), "DIsYMFmB6RUdQVCYPNWn/oSKIbtFMr2aMfQbwgVjE9I=");
+    const char* JSONstring = buffer.GetString();
+
+    std::vector<char> payloadData;
+    size_t size = strlen(JSONstring);
+
+    for(size_t i = 0; i < size; ++i)
+    {
+        payloadData.push_back(JSONstring[i]);
+    }
+    payloadData.push_back('\0');
+
+    {
+        char mac[257] = "";
+        gameanalytics::utilities::GAUtilities::hmacWithKey("test1", payloadData, mac);
+        ASSERT_STREQ(mac, "DaiXv2Qe+20P0FoYYghca4glPJQTahtDS5VGQzIvjTQ=");
+    }
 }
 
 TEST(GAUtilities, testGenerateUUID)
 {
-    ASSERT_EQ(gameanalytics::utilities::GAUtilities::generateUUID().size(), 36);
+    char guid[65] = "";
+    gameanalytics::utilities::GAUtilities::generateUUID(guid);
+    ASSERT_EQ(strlen(guid), 36);
 }
 
 TEST(GAUtilities, testJsonToString)
 {
-    Json::Value jsonObject;
-    jsonObject["user_id"] = "test";
-    jsonObject["v"] = 2;
+    rapidjson::Document jsonObject;
+    jsonObject.SetObject();
+    rapidjson::Document::AllocatorType& a = jsonObject.GetAllocator();
+    jsonObject.AddMember("user_id", "test", a);
+    jsonObject.AddMember("v", 2, a);
 
-    ASSERT_STREQ(gameanalytics::utilities::GAUtilities::jsonToString(jsonObject).c_str(), "{\"user_id\":\"test\",\"v\":2}\n");
+    rapidjson::StringBuffer buffer;
+    {
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        jsonObject.Accept(writer);
+    }
+
+    ASSERT_STREQ(buffer.GetString(), "{\"user_id\":\"test\",\"v\":2}");
 }
 
 TEST(GAUtilities, testArrayOfJsonToString)
 {
-    Json::Value jsonObject1;
-    jsonObject1["v"] = 2;
-    jsonObject1["user_id"] = "test";
+    rapidjson::Document d;
+    d.SetArray();
+    rapidjson::Document::AllocatorType& a = d.GetAllocator();
 
-    Json::Value jsonObject2;
-    jsonObject2["v"] = 3;
-    jsonObject2["user_id"] = "test2";
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 2, a);
+        v.AddMember("user_id", "test", a);
+        d.PushBack(v, a);
+    }
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 3, a);
+        v.AddMember("user_id", "test2", a);
+        d.PushBack(v, a);
+    }
 
-    std::vector<Json::Value> payloadArray;
-    payloadArray.push_back(jsonObject1);
-    payloadArray.push_back(jsonObject2);
+    rapidjson::StringBuffer buffer;
+    {
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+    }
 
-    ASSERT_STREQ(gameanalytics::utilities::GAUtilities::arrayOfObjectsToJsonString(payloadArray).c_str(), "[{\"user_id\":\"test\",\"v\":2},{\"user_id\":\"test2\",\"v\":3}]\n");
+    ASSERT_STREQ(buffer.GetString(), "[{\"v\":2,\"user_id\":\"test\"},{\"v\":3,\"user_id\":\"test2\"}]");
 }
 
 TEST(GAUtilities, testStringMatch)
 {
-    std::string regex1 = "^[A-z0-9]{40}$";
-    std::string regex2 = "^[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}(:[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}){0,4}$";
+    const char* regex1 = "^[A-z0-9]{40}$";
+    const char* regex2 = "^[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}(:[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}){0,4}$";
 
     ASSERT_TRUE(gameanalytics::utilities::GAUtilities::stringMatch("Assdadskfdstdfgdfrtmddrhbgfdtytytt4kjkk3", regex1));
 

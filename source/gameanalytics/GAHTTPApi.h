@@ -75,14 +75,14 @@ namespace gameanalytics
             }
 
          private:
-            const std::string createPayloadData(const std::string& payload, bool gzip);
+            std::vector<char> createPayloadData(const char* payload, bool gzip);
 
 #if USE_UWP
             const std::string createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::string& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
             concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> createStream(std::string data);
 #else
-            const std::string createRequest(CURL *curl, const char* url, const char* payloadData, bool gzip);
+            const std::string createRequest(CURL *curl, const char* url, const std::vector<char>& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(long statusCode, const char* body, const char* requestId);
 #endif
 

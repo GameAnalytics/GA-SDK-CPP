@@ -116,7 +116,7 @@ namespace gameanalytics
                 return;
             }
 
-            std::string payloadData = createPayloadData(JSONstring, false);
+            std::vector<char> payloadData = createPayloadData(JSONstring, false);
 
             CURL *curl;
             CURLcode res;
@@ -147,7 +147,7 @@ namespace gameanalytics
             }
 #endif
 
-            std::string authorization = createRequest(curl, url, payloadData.c_str(), useGzip);
+            std::string authorization = createRequest(curl, url, payloadData, useGzip);
 
             res = curl_easy_perform(curl);
             if(res != CURLE_OK)
@@ -264,7 +264,7 @@ namespace gameanalytics
                 json_out = rapidjson::Value();
             }
 
-            std::string payloadData = createPayloadData(JSONstring, useGzip);
+            std::vector<char> payloadData = createPayloadData(JSONstring, useGzip);
 
             CURL *curl;
             CURLcode res;
@@ -294,7 +294,7 @@ namespace gameanalytics
                 return;
             }
 #endif
-            std::string  authorization = createRequest(curl, url, payloadData.c_str(), useGzip);
+            std::string  authorization = createRequest(curl, url, payloadData, useGzip);
 
             res = curl_easy_perform(curl);
             if(res != CURLE_OK)
@@ -422,7 +422,7 @@ namespace gameanalytics
 
             std::async(std::launch::async, [url, payloadJSONString, useGzip, type]() -> void
             {
-                std::string payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString, useGzip);
+                std::vector<char> payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString, useGzip);
 
                 CURL *curl;
                 CURLcode res;
@@ -448,7 +448,7 @@ namespace gameanalytics
                     return;
                 }
 #endif
-                std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, url, payloadData.c_str(), useGzip);
+                std::string authorization = GAHTTPApi::sharedInstance()->createRequest(curl, url, payloadData, useGzip);
 
                 res = curl_easy_perform(curl);
                 if(res != CURLE_OK)
@@ -489,25 +489,31 @@ namespace gameanalytics
         const int GAHTTPApi::MaxCount = 10;
         std::map<EGASdkErrorType, int> GAHTTPApi::countMap = std::map<EGASdkErrorType, int>();
 
-        const std::string GAHTTPApi::createPayloadData(const std::string& payload, bool gzip)
+        std::vector<char> GAHTTPApi::createPayloadData(const char* payload, bool gzip)
         {
-            std::string payloadData;
+            std::vector<char> payloadData;
 
             if (gzip)
             {
                 payloadData = utilities::GAUtilities::gzipCompress(payload);
 
-                logging::GALogger::d("Gzip stats. Size: %lu, Compressed: %lu", payload.size(), payloadData.size());
+                logging::GALogger::d("Gzip stats. Size: %lu, Compressed: %lu", strlen(payload), payloadData.size());
             }
             else
             {
-                payloadData = payload;
+                size_t s = strlen(payload);
+
+                for(size_t i = 0; i < s; ++i)
+                {
+                    payloadData.push_back(payload[i]);
+                }
+                payloadData.push_back('\0');
             }
 
             return payloadData;
         }
 
-        const std::string GAHTTPApi::createRequest(CURL *curl, const char* url, const char* payloadData, bool gzip)
+        const std::string GAHTTPApi::createRequest(CURL *curl, const char* url, const std::vector<char>& payloadData, bool gzip)
         {
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -531,9 +537,9 @@ namespace gameanalytics
             header = curl_slist_append(header, "Content-Type: application/json");
 
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payloadData);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payloadData.data());
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(payloadData));
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, payloadData.size());
 
             return authorization;
         }

@@ -570,8 +570,6 @@ namespace gameanalytics
                 snprintf(updateSql, sizeof(updateSql), "UPDATE ga_events SET status='%s' WHERE status='new' %s AND client_ts<='%s';", requestIdentifier, andCategory, lastTimestamp);
             }
 
-
-
             // Log
             logging::GALogger::i("Event queue: Sending %d events.", events.Size());
 
@@ -769,7 +767,6 @@ namespace gameanalytics
             // Get default annotations
             rapidjson::Document ev;
             ev.SetObject();
-            rapidjson::Document::AllocatorType& allocator = ev.GetAllocator();
             state::GAState::getEventAnnotations(ev);
 
             // Create json with only default annotations
@@ -816,7 +813,6 @@ namespace gameanalytics
             {
                 const char* params[] = { ev["session_id"].GetString() };
                 store::GAStore::executeQuerySync("DELETE FROM ga_session WHERE session_id = ?;", params, 1);
-                logging::GALogger::d("DELETE FROM ga_session WHERE session_id = %s;", ev["session_id"].GetString());
             }
             else
             {

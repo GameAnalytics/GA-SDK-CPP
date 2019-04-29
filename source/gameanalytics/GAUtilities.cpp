@@ -20,7 +20,6 @@
 #else
 #include <hmac_sha2.h>
 #include <guid.h>
-#include <sstream>
 #endif
 
 // From crypto
@@ -39,8 +38,7 @@ namespace gameanalytics
 
         // Compress a STL string using zlib with given compression level and return the binary data.
         // Note: the zlib header is supressed
-        static std::string deflate_string(const std::string& str,
-            int compressionlevel = Z_BEST_COMPRESSION)
+        static std::vector<char> deflate_string(const char* str, int compressionlevel = Z_BEST_COMPRESSION)
         {
             // z_stream is zlib's control structure
             z_stream zs;
@@ -52,14 +50,14 @@ namespace gameanalytics
                 throw(std::runtime_error("deflateInit failed while compressing."));
             }
 
-            zs.next_in = (Bytef*)str.data();
+            zs.next_in = (Bytef*)str;
             //zs.next_in = reinterpret_cast<Bytef*>(str.data());
 
             // set the z_stream's input
-            zs.avail_in = static_cast<unsigned int>(str.size());
+            zs.avail_in = static_cast<unsigned int>(strlen(str));
             int ret;
             static char outbuffer[32768];
-            std::string outstring;
+            std::vector<char> outstring;
 
             // retrieve the compressed bytes blockwise
             do
@@ -72,18 +70,20 @@ namespace gameanalytics
                 if (outstring.size() < zs.total_out)
                 {
                     // append the block to the output string
-                    outstring.append(outbuffer,
-                        zs.total_out - outstring.size());
+                    for(int i = 0; i < zs.total_out - outstring.size(); ++i)
+                    {
+                        outstring.push_back(outbuffer[i]);
+                    }
                 }
             } while (ret == Z_OK);
 
             deflateEnd(&zs);
 
-            if (ret != Z_STREAM_END) {
+            if (ret != Z_STREAM_END)
+            {
                 // an error occurred that was not EOF
-                std::ostringstream oss;
-                oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-                throw(std::runtime_error(oss.str()));
+                logging::GALogger::e("Exception during zlib compression: (%d) %s", ret, zs.msg);
+                outstring.clear();
             }
             return outstring;
         }
@@ -207,12 +207,10 @@ namespace gameanalytics
 #endif
 
         // gzip compresses a string
-        static std::string compress_string_gzip(const std::string& str,
-            int compressionlevel = Z_BEST_COMPRESSION)
+        static std::vector<char> compress_string_gzip(const char* str, int compressionlevel = Z_BEST_COMPRESSION)
         {
             // https://tools.ietf.org/html/rfc1952
-            std::stringstream ss;
-            std::string deflated = deflate_string(str, compressionlevel);
+            std::vector<char> deflated = deflate_string(str, compressionlevel);
 
             static const char gzip_header[10] =
             { '\037', '\213', Z_DEFLATED, 0,
@@ -221,15 +219,26 @@ namespace gameanalytics
             };
 
             // Note: apparently, the crc is never validated on ther server side. So I'm not sure, if I have to convert it to little endian.
-            uint32_t crc = to_little_endian(crc32(0, (unsigned char*)str.data(), str.size()));
-            uint32 size  = to_little_endian(static_cast<unsigned int>(str.size()));
+            uint32_t crc = to_little_endian(crc32(0, (unsigned char*)str, strlen(str)));
+            uint32 size  = to_little_endian(static_cast<unsigned int>(strlen(str)));
 
-            ss.write(gzip_header, sizeof(gzip_header));
-            ss.write(deflated.data(), deflated.size());
-            ss.write((const char*)&crc, 4);
-            ss.write((const char*)&size, 4);
+            size_t totalSize = sizeof(gzip_header);
+            totalSize += deflated.size();
+            totalSize += 8;
+            char resultArray[totalSize];
+            strncpy(resultArray, gzip_header, sizeof(gzip_header));
+            strncpy(resultArray, deflated.data(), deflated.size());
+            strncpy(resultArray, (const char*)&crc, 4);
+            strncpy(resultArray, (const char*)&size, 4);
 
-            return ss.str();
+            std::vector<char> result;
+
+            for(int i = 0; i < totalSize; ++i)
+            {
+                result.push_back(resultArray[i]);
+            }
+
+            return result;
         }
 
         const char* GAUtilities::getPathSeparator()
@@ -259,14 +268,12 @@ namespace gameanalytics
 #else
             GuidGenerator generator;
             auto myGuid = generator.newGuid();
-            std::stringstream stream;
-            stream << myGuid;
-            snprintf(out, 129, "%s", stream.str().c_str());
+            myGuid.to_string(out);
 #endif
         }
 
         // TODO(nikolaj): explain function
-        void GAUtilities::hmacWithKey(const char* key, const char* data, char* out)
+        void GAUtilities::hmacWithKey(const char* key, const std::vector<char>& data, char* out)
         {
 #if USE_UWP
             using namespace Platform;
@@ -292,8 +299,8 @@ namespace gameanalytics
             hmac_sha256_2(
                 (unsigned char*)key,
                 strlen(key),
-                (unsigned char*)data,
-                strlen(data),
+                (unsigned char*)data.data(),
+                data.size(),
                 mac,
                 SHA256_DIGEST_SIZE
             );
@@ -339,7 +346,7 @@ namespace gameanalytics
 #endif
         }
 
-        std::string GAUtilities::gzipCompress(const std::string& data)
+        std::vector<char> GAUtilities::gzipCompress(const char* data)
         {
             return compress_string_gzip(data);
         }
