@@ -51,7 +51,7 @@ target_include_directories(
     PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
     "${DEPENDENCIES_DIR}/rapidjson/"
-    "${DEPENDENCIES_DIR}/spdlog/include"
+    "${DEPENDENCIES_DIR}/zf_log"
     "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
 )
 
