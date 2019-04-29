@@ -536,7 +536,7 @@ namespace gameanalytics
             store::GAStore::executeQuerySync(selectSql, events);
 
             // Check for errors or empty
-            if (events.IsNull())
+            if (events.IsNull() || events.Size() == 0)
             {
                 logging::GALogger::i("Event queue: No events to send");
                 GAEvents::updateSessionTime();

@@ -507,7 +507,6 @@ namespace gameanalytics
                 {
                     payloadData.push_back(payload[i]);
                 }
-                payloadData.push_back('\0');
             }
 
             return payloadData;

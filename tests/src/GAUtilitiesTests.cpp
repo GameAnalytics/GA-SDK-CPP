@@ -57,13 +57,51 @@ TEST(GAUtilities, testHmacWithKey)
     {
         payloadData.push_back(JSONstring[i]);
     }
-    payloadData.push_back('\0');
 
     {
         char mac[257] = "";
         gameanalytics::utilities::GAUtilities::hmacWithKey("test1", payloadData, mac);
-        ASSERT_STREQ(mac, "DaiXv2Qe+20P0FoYYghca4glPJQTahtDS5VGQzIvjTQ=");
+        ASSERT_STREQ(mac, "nibGyLotL7q+YIpUQydHZQsnhRX7RkXgxkJ67hSlDps=");
     }
+}
+
+TEST(GAUtilities, testGzip)
+{
+    rapidjson::Document d;
+    d.SetArray();
+    rapidjson::Document::AllocatorType& a = d.GetAllocator();
+
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 2, a);
+        v.AddMember("user_id", "test", a);
+        d.PushBack(v, a);
+    }
+    {
+        rapidjson::Value v(rapidjson::kObjectType);
+        v.AddMember("v", 3, a);
+        v.AddMember("user_id", "test2", a);
+        d.PushBack(v, a);
+    }
+
+    rapidjson::StringBuffer buffer;
+    {
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+    }
+
+    const char* JSONstring = buffer.GetString();
+
+    std::vector<char> compressed = gameanalytics::utilities::GAUtilities::gzipCompress(JSONstring);
+    char result[compressed.size() + 1];
+
+    for(size_t i = 0; i < compressed.size(); ++i)
+    {
+        result[i] = compressed[i];
+    }
+    result[compressed.size()] = '\0';
+
+    ASSERT_EQ(compressed.size(), 10);
 }
 
 TEST(GAUtilities, testGenerateUUID)
