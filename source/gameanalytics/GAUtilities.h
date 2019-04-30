@@ -8,7 +8,6 @@
 #include <vector>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
-#include <string>
 #if USE_UWP
 #include <string>
 #include <locale>

@@ -1036,7 +1036,7 @@ namespace gameanalytics
 
                     if(!configuration.IsNull())
                     {
-                        std::string key = (configuration.HasMember("key") && configuration["key"].IsString()) ? configuration["key"].GetString() : "";
+                        const char* key = (configuration.HasMember("key") && configuration["key"].IsString()) ? configuration["key"].GetString() : "";
                         int64_t start_ts = (configuration.HasMember("start") && configuration["start"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MIN;
                         int64_t end_ts = (configuration.HasMember("end") && configuration["end"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MAX;
                         int64_t client_ts_adjusted = getClientTsAdjusted();

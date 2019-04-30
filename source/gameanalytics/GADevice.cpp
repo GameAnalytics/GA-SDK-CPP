@@ -478,9 +478,9 @@ namespace gameanalytics
             snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", model);
             free(model);
 #elif IS_LINUX
-            return "unknown";
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
 #else
-            return "unknown";
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
 #endif
 #endif
         }
@@ -575,13 +575,13 @@ namespace gameanalytics
             return result;
 #else
 #if IS_MAC
-            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "%s", "mac_osx");
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "mac_osx");
 #elif defined(_WIN32)
-            return "windows";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "windows");
 #elif IS_LINUX
-            return "linux";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "linux");
 #else
-            return "unknown";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "unknown");
 #endif
 #endif
         }
