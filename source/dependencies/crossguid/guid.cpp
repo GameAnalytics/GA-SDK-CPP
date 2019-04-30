@@ -27,8 +27,7 @@ THE SOFTWARE.
 #include <stdio.h>
 
 #ifdef GUID_LIBUUID
-#include "kashmir/uuid.h"
-#include "kashmir/devrand.h"
+#include <uuid/uuid.h>
 #endif
 
 #ifdef GUID_CFUUID
@@ -179,15 +178,11 @@ void Guid::to_string(char* out)
 #ifdef GUID_LIBUUID
 Guid GuidGenerator::newGuid()
 {
-    using kashmir::uuid_t;
-    using kashmir::system::DevRand;
-
-    DevRand devrandom;
-    char result[65] = {'\0'};
-
     uuid_t uuid;
-    devrandom >> uuid;
-    kashmir::uuid_unparse_lower(uuid, result);
+    uuid_generate(uuid);
+
+    char result[37];
+    uuid_unparse_lower(uuid, result);
 
     return result;
 }

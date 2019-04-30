@@ -3,7 +3,7 @@
 
 #pragma once
 #include <vector>
-#include <sstream>
+#include <cstring>
 
 namespace stacktrace {
 

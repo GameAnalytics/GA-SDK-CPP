@@ -838,7 +838,8 @@ static const char *funcname(const char *func)
 static const char *filename(const char *file)
 {
 	const char *f = file;
-	for (const char *p = file; 0 != *p; ++p)
+        const char *p;
+	for (p = file; 0 != *p; ++p)
 	{
 		if ('/' == *p || '\\' == *p)
 		{
@@ -872,7 +873,8 @@ static INLINE void put_nprintf(zf_log_message *const msg, const int n)
 static INLINE char *put_padding_r(const unsigned w, const char wc,
 								  char *p, char *e)
 {
-	for (char *const b = e - w; b < p; *--p = wc) {}
+        char *const b = e - w;
+	for (; b < p; *--p = wc) {}
 	return p;
 }
 
@@ -938,14 +940,16 @@ static INLINE char *put_uint(unsigned v, const unsigned w, const char wc,
 
 #define PUT_CSTR_R(p, STR) \
 	do { \
-		for (unsigned i = sizeof(STR) - 1; 0 < i--;) { \
+                unsigned i; \
+		for (i = sizeof(STR) - 1; 0 < i--;) { \
 			*--(p) = (STR)[i]; \
 		} \
 	} _ZF_LOG_ONCE
 
 #define PUT_CSTR_CHECKED(p, e, STR) \
 	do { \
-		for (unsigned i = 0; (e) > (p) && (sizeof(STR) - 1) > i; ++i) { \
+                unsigned i; \
+		for (i = 0; (e) > (p) && (sizeof(STR) - 1) > i; ++i) { \
 			*(p)++ = (STR)[i]; \
 		} \
 	} _ZF_LOG_ONCE
