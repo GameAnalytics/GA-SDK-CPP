@@ -70,7 +70,8 @@ namespace gameanalytics
             initBaseUrl();
             // use gzip compression on JSON body
 #if defined(_DEBUG)
-            useGzip = false;
+            //useGzip = false;
+            useGzip = true;
 #else
             useGzip = true;
 #endif

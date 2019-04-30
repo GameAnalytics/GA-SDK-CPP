@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <vector>
+#include <string>
+#include <sstream>
 
 #include <GAUtilities.h>
 #include <random>
@@ -93,15 +95,15 @@ TEST(GAUtilities, testGzip)
     const char* JSONstring = buffer.GetString();
 
     std::vector<char> compressed = gameanalytics::utilities::GAUtilities::gzipCompress(JSONstring);
-    char result[compressed.size() + 1];
+
+    std::vector<int> compressedData{31,-117,8,0,0,0,0,0,0,3,93,-55,33,14,0,32,8,5,-48,-69,-4,76,-62,-58,85,-100,-77,72,-80,10,90,28,119,119,51,-110,95,-67,56,16,38,108,-45,-43,-25,-128,-64,-43,28,65,31,74,6,70,-76,7,75,115,-48,-50,52,0,0,0};
+
+    ASSERT_EQ(compressed.size(), compressedData.size());
 
     for(size_t i = 0; i < compressed.size(); ++i)
     {
-        result[i] = compressed[i];
+        ASSERT_EQ((int)compressed[i], compressedData[i]);
     }
-    result[compressed.size()] = '\0';
-
-    ASSERT_EQ(compressed.size(), 10);
 }
 
 TEST(GAUtilities, testGenerateUUID)

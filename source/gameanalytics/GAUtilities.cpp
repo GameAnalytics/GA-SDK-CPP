@@ -8,6 +8,7 @@
 #include "GALogger.h"
 #include <string.h>
 #include <stdio.h>
+#include <sstream>
 #if USE_LINUX
 #include <regex.h>
 #include <iterator>
@@ -69,8 +70,9 @@ namespace gameanalytics
 
                 if (outstring.size() < zs.total_out)
                 {
+                    size_t s = zs.total_out - outstring.size();
                     // append the block to the output string
-                    for(int i = 0; i < zs.total_out - outstring.size(); ++i)
+                    for(size_t i = 0; i < s; ++i)
                     {
                         outstring.push_back(outbuffer[i]);
                     }
@@ -85,6 +87,7 @@ namespace gameanalytics
                 logging::GALogger::e("Exception during zlib compression: (%d) %s", ret, zs.msg);
                 outstring.clear();
             }
+
             return outstring;
         }
 
@@ -205,7 +208,6 @@ namespace gameanalytics
             *buf++ = '\0';
         }
 #endif
-
         // gzip compresses a string
         static std::vector<char> compress_string_gzip(const char* str, int compressionlevel = Z_BEST_COMPRESSION)
         {
@@ -226,14 +228,24 @@ namespace gameanalytics
             totalSize += deflated.size();
             totalSize += 8;
             char resultArray[totalSize];
-            strncpy(resultArray, gzip_header, sizeof(gzip_header));
-            strncpy(resultArray, deflated.data(), deflated.size());
-            strncpy(resultArray, (const char*)&crc, 4);
-            strncpy(resultArray, (const char*)&size, 4);
+            size_t current = 0;
+            for(size_t i = 0; i < sizeof(gzip_header); ++i)
+            {
+                resultArray[i] = gzip_header[i];
+            }
+            current += sizeof(gzip_header);
+            for(size_t i = 0; i < deflated.size(); ++i)
+            {
+                resultArray[i + current] = deflated[i];
+            }
+            current += deflated.size();
+            strncpy(resultArray + current, (const char*)&crc, 4);
+            current += 4;
+            strncpy(resultArray + current, (const char*)&size, 4);
 
             std::vector<char> result;
 
-            for(int i = 0; i < totalSize; ++i)
+            for(size_t i = 0; i < totalSize; ++i)
             {
                 result.push_back(resultArray[i]);
             }

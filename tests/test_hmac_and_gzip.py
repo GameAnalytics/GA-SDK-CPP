@@ -22,7 +22,11 @@ def get_gzip_string(string_for_gzip):
 
 def run():
     print hmac_hash_with_secret("test1", "[{\"v\":2,\"user_id\":\"test\"},{\"v\":3,\"user_id\":\"test2\"}]")
-    print get_gzip_string("[{\"v\":2,\"user_id\":\"test\"},{\"v\":3,\"user_id\":\"test2\"}]")
+    compressed = get_gzip_string("[{\"v\":2,\"user_id\":\"test\"},{\"v\":3,\"user_id\":\"test2\"}]")
+    s = ""
+    for c in compressed:
+        s += str(ord(c)) + ","
+    print s
 
     sys.exit()
 

@@ -8,6 +8,7 @@
 #include <vector>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
+#include <string>
 #if USE_UWP
 #include <string>
 #include <locale>
@@ -20,7 +21,7 @@ namespace gameanalytics
     {
         class GAUtilities
         {
-         public:
+        public:
             static const char* getPathSeparator();
             static void generateUUID(char* out);
             static void hmacWithKey(const char* key, const std::vector<char>& data, char* out);
