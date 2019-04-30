@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include <stdio.h>
 
 #ifdef GUID_LIBUUID
-#include <uuid/uuid.h>
+#include <cstdlib>
 #endif
 
 #ifdef GUID_CFUUID
@@ -182,7 +182,14 @@ Guid GuidGenerator::newGuid()
     uuid_generate(uuid);
 
     char result[37];
-    uuid_unparse_lower(uuid, result);
+    srand(time(NULL));
+
+    sprintf(result, "%x%x-%x-%x-%x-%x%x%x",
+        rand(), rand(),                 // Generates a 64-bit Hex number
+        rand(),                         // Generates a 32-bit Hex number
+        ((rand() & 0x0fff) | 0x4000),   // Generates a 32-bit Hex number of the form 4xxx (4 indicates the UUID version)
+        rand() % 0x3fff + 0x8000,       // Generates a 32-bit Hex number in the range [0x8000, 0xbfff]
+        rand(), rand(), rand());        // Generates a 96-bit Hex number
 
     return result;
 }
