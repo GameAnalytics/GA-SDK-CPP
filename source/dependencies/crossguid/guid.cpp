@@ -178,9 +178,6 @@ void Guid::to_string(char* out)
 #ifdef GUID_LIBUUID
 Guid GuidGenerator::newGuid()
 {
-    uuid_t uuid;
-    uuid_generate(uuid);
-
     char result[37];
     srand(time(NULL));
 
