@@ -113,7 +113,7 @@ namespace gameanalytics
             }
 
             char buffer[totalSize + 1];
-            snprintf(buffer, totalSize, "");
+            buffer[0] = 0;
             strcat(buffer, "Uncaught Signal\n");
 
             formatConcat(buffer, "si_signo    %d\n", info->si_signo);

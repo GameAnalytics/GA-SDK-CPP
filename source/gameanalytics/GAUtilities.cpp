@@ -331,12 +331,12 @@ namespace gameanalytics
 #if USE_LINUX
            int status;
            regex_t re;
-           if(regcomp(&re, pattern.c_str(), REG_EXTENDED|REG_NOSUB) != 0)
+           if(regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
            {
                return true;
            }
 
-           status = regexec(&re, string.c_str(), (size_t)0, NULL, 0);
+           status = regexec(&re, string, (size_t)0, NULL, 0);
            regfree(&re);
            return status == 0;
 #else
@@ -426,7 +426,7 @@ namespace gameanalytics
             }
 
             char result[totalSize];
-            snprintf(result, totalSize, "");
+            result[0] = 0;
             for (size_t i = 0; i < vectorSize; ++i)
             {
                 strcat(result, v.getVector()[i].array);

@@ -183,13 +183,13 @@ Guid GuidGenerator::newGuid()
     using kashmir::system::DevRand;
 
     DevRand devrandom;
-    std::stringstream ss;
+    char result[65] = {'\0'};
 
     uuid_t uuid;
     devrandom >> uuid;
-    ss << uuid;
+    kashmir::uuid_unparse_lower(uuid, result);
 
-    return ss.str();
+    return result;
 }
 #endif
 

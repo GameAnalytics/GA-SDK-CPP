@@ -46,7 +46,7 @@ namespace gameanalytics
 
             // set when calling "ensureDatabase"
             // using a "writablePath" that needs to be set into the C++ component before
-            char dbPath[513] = "";
+            char dbPath[513] = {'\0'};
 
             // local pointer to database
             sqlite3* sqlDatabase = nullptr;

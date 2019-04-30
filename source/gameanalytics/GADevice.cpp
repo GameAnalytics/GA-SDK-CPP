@@ -369,9 +369,9 @@ namespace gameanalytics
 #elif IS_MAC
             snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "Apple");
 #elif IS_LINUX
-            return "unknown";
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "unknown");
 #else
-            return "unknown";
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "unknown");
 #endif
 #endif
         }

@@ -17,6 +17,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
+#include <inttypes.h>
 
 namespace gameanalytics
 {
@@ -668,7 +669,7 @@ namespace gameanalytics
                 const char* jsonDefaults = buffer.GetString();
                 const char* sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
                 char sessionStart[21] = "";
-                snprintf(sessionStart, sizeof(sessionStart), "%lld", state::GAState::sharedInstance()->getSessionStart());
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
                 const char* parameters[3] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
                 store::GAStore::executeQuerySync(sql, parameters, 3);
             }
@@ -802,7 +803,7 @@ namespace gameanalytics
 
             // Add to store
             char client_ts[21] = "";
-            snprintf(client_ts, sizeof(client_ts), "%lld", ev["client_ts"].GetInt64());
+            snprintf(client_ts, sizeof(client_ts), "%" PRId64, ev["client_ts"].GetInt64());
             const char* parameters[] = { "new", ev["category"].GetString(), ev["session_id"].GetString(), client_ts, json };
             const char* sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
 
@@ -817,7 +818,7 @@ namespace gameanalytics
             else
             {
                 char sessionStart[21] = "";
-                snprintf(sessionStart, sizeof(sessionStart), "%lld", state::GAState::sharedInstance()->getSessionStart());
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
                 const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaultsArray};
                 store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);", params, 3);
             }

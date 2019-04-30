@@ -2,6 +2,7 @@
 #include "GameAnalytics.h"
 #include <iostream>
 #include "GADevice.h"
+#include <cstdarg>
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>

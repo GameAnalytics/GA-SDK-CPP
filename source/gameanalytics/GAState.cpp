@@ -1041,17 +1041,17 @@ namespace gameanalytics
                         int64_t end_ts = (configuration.HasMember("end") && configuration["end"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MAX;
                         int64_t client_ts_adjusted = getClientTsAdjusted();
 
-                        if(!key.empty() && configuration.HasMember("value") && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
+                        if(strlen(key) > 0 && configuration.HasMember("value") && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
                         {
                             if(configuration["value"].IsString())
                             {
-                                rapidjson::Value v(key.c_str(), allocator);
+                                rapidjson::Value v(key, allocator);
                                 rapidjson::Value v1(configuration["value"].GetString(), allocator);
                                 GAState::sharedInstance()->_configurations.AddMember(v.Move(), v1.Move(), allocator);
                             }
                             else if(configuration["value"].IsNumber())
                             {
-                                rapidjson::Value v(key.c_str(), allocator);
+                                rapidjson::Value v(key, allocator);
 
                                 if(configuration["value"].IsInt64())
                                 {
