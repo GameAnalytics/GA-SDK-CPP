@@ -3,6 +3,7 @@
 #include "GameAnalytics.h"
 #include "GAUtilities.h"
 #include "rapidjson/document.h"
+#include <vector>
 
 void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 {
@@ -262,14 +263,18 @@ void onQuit()
     gameanalytics::GameAnalytics::onQuit();
 }
 
-void getCommandCenterValueAsString(const char *key, char* out)
+const char* getCommandCenterValueAsString(const char *key)
 {
-    gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, out);
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
+    char* result = new char[returnValue.size()];
+    snprintf(result, returnValue.size(), "%s", returnValue.data());
 }
 
-void getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue, char* out)
+const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
 {
-    gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue, out);
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
+    char* result = new char[returnValue.size()];
+    snprintf(result, returnValue.size(), "%s", returnValue.data());
 }
 
 double isCommandCenterReady()
@@ -277,9 +282,11 @@ double isCommandCenterReady()
     return gameanalytics::GameAnalytics::isCommandCenterReady() ? 1 : 0;
 }
 
-void getConfigurationsContentAsString(char* out)
+const char* getConfigurationsContentAsString()
 {
-    gameanalytics::GameAnalytics::getConfigurationsContentAsString(out);
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getConfigurationsContentAsString();
+    char* result = new char[returnValue.size()];
+    snprintf(result, returnValue.size(), "%s", returnValue.data());
 }
 
 #endif

@@ -845,14 +845,14 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::getCommandCenterValueAsString(const char* key, char* out)
+    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key)
     {
-        getCommandCenterValueAsString(key, "", out);
+        return getCommandCenterValueAsString(key, "");
     }
 
-    void GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue, char* out)
+    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue)
     {
-        state::GAState::getConfigurationStringValue(key, defaultValue, out);
+        return state::GAState::getConfigurationStringValue(key, defaultValue);
     }
 
     bool GameAnalytics::isCommandCenterReady()
@@ -870,9 +870,9 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
-    void GameAnalytics::getConfigurationsContentAsString(char* out)
+    std::vector<char> GameAnalytics::getConfigurationsContentAsString()
     {
-        state::GAState::getConfigurationsContentAsString(out);
+        return state::GAState::getConfigurationsContentAsString();
     }
 
     void GameAnalytics::startSession()

@@ -85,11 +85,11 @@ namespace gameanalytics
             static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
             static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
-            static void getConfigurationStringValue(const char* key, const char* defaultValue, char* out);
+            static std::vector<char> getConfigurationStringValue(const char* key, const char* defaultValue);
             static bool isCommandCenterReady();
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-            static void getConfigurationsContentAsString(char* out);
+            static std::vector<char> getConfigurationsContentAsString();
 
          private:
             static void setDefaultUserId(const char* id);

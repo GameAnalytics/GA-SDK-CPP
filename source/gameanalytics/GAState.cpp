@@ -977,12 +977,20 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart != 0;
         }
 
-        void GAState::getConfigurationStringValue(const char* key, const char* defaultValue, char* out)
+        std::vector<char> GAState::getConfigurationStringValue(const char* key, const char* defaultValue)
         {
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
-            const char* result = GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
+            const char* returnValue = GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
 
-            snprintf(out, 257, "%s", result);
+            std::vector<char> result;
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
         }
 
         bool GAState::isCommandCenterReady()
@@ -1010,14 +1018,22 @@ namespace gameanalytics
             }
         }
 
-        void GAState::getConfigurationsContentAsString(char* out)
+        std::vector<char> GAState::getConfigurationsContentAsString()
         {
             rapidjson::StringBuffer buffer;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
             GAState::sharedInstance()->_configurations.Accept(writer);
-            int s = strlen(buffer.GetString()) + 1;
-            out = new char[s];
-            snprintf(out, s, "%s", buffer.GetString());
+            const char* returnValue = buffer.GetString();
+
+            std::vector<char> result;
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
         }
 
         void GAState::populateConfigurations(rapidjson::Value& sdkConfig)

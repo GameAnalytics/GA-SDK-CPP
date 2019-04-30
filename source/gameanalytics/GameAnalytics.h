@@ -173,12 +173,12 @@ namespace gameanalytics
         static void startSession();
         static void endSession();
 
-        static void getCommandCenterValueAsString(const char* key, char* out);
-        static void getCommandCenterValueAsString(const char* key, const char* defaultValue, char* out);
+        static std::vector<char> getCommandCenterValueAsString(const char* key);
+        static std::vector<char> getCommandCenterValueAsString(const char* key, const char* defaultValue);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static void getConfigurationsContentAsString(char* out);
+        static std::vector<char> getConfigurationsContentAsString();
 
         // game state changes
         // will affect how session is started / ended

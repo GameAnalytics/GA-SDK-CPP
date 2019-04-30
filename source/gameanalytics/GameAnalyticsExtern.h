@@ -78,10 +78,10 @@ EXPORT void onResume();
 EXPORT void onSuspend();
 EXPORT void onQuit();
 
-EXPORT void getCommandCenterValueAsString(const char *key, char* out);
-EXPORT void getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue, char* out);
+EXPORT const char* getCommandCenterValueAsString(const char *key);
+EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
 EXPORT double isCommandCenterReady();
-EXPORT void getConfigurationsContentAsString(char* out);
+EXPORT const char* getConfigurationsContentAsString();
 
 #ifdef __cplusplus
 }
