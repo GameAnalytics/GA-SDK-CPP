@@ -982,7 +982,7 @@ namespace gameanalytics
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
             const char* result = GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
 
-            snprintf(out, 256, "%s", result);
+            snprintf(out, 257, "%s", result);
         }
 
         bool GAState::isCommandCenterReady()
@@ -1015,8 +1015,9 @@ namespace gameanalytics
             rapidjson::StringBuffer buffer;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
             GAState::sharedInstance()->_configurations.Accept(writer);
-            int s = strlen(buffer.GetString());
-            snprintf(out, s + 1, "%s", buffer.GetString());
+            int s = strlen(buffer.GetString()) + 1;
+            out = new char[s];
+            snprintf(out, s, "%s", buffer.GetString());
         }
 
         void GAState::populateConfigurations(rapidjson::Value& sdkConfig)
