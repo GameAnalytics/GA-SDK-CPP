@@ -822,7 +822,7 @@ namespace gameanalytics
             rapidjson::Document d;
             if(pair.second.size() > 0)
             {
-                initResponseDict.Parse(pair.second);
+                initResponseDict.Parse(pair.second.c_str());
             }
 #else
             httpApi->requestInitReturningDict(initResponse, initResponseDict);

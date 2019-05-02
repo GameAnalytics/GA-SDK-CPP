@@ -85,9 +85,6 @@ namespace gameanalytics
             std::vector<char> createRequest(CURL *curl, const char* url, const std::vector<char>& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(long statusCode, const char* body, const char* requestId);
 #endif
-
-            static void initBaseUrl();
-
             static char protocol[];
             static char hostName[];
             static char version[];

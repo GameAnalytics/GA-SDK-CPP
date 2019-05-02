@@ -275,7 +275,8 @@ namespace gameanalytics
 
                 // Remove curly brackets.
                 auto sessionId = guidString.substr(1, guidString.length() - 2);
-                return ws2s(sessionId);
+                std::string result = ws2s(sessionId);
+                snprintf(out, result.size() + 1, "%s", result.c_str());
             }
 
             throw Platform::Exception::CreateException(hr);
@@ -307,7 +308,7 @@ namespace gameanalytics
 
             auto hashedJsonBuffer = CryptographicEngine::Sign(hmacKey, dataBuffer);
             auto hashedJsonBase64 = CryptographicBuffer::EncodeToBase64String(hashedJsonBuffer);
-            return utilities::GAUtilities::ws2s(hashedJsonBase64->Data());
+            snprintf(out, 129, "%s", utilities::GAUtilities::ws2s(hashedJsonBase64->Data()).c_str());
 #else
             unsigned char mac[SHA256_DIGEST_SIZE];
             hmac_sha256_2(

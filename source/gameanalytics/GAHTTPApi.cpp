@@ -68,7 +68,7 @@ namespace gameanalytics
         {
             curl_global_init(CURL_GLOBAL_DEFAULT);
 
-            initBaseUrl();
+            snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
             // use gzip compression on JSON body
 #if defined(_DEBUG)
             //useGzip = false;
@@ -81,11 +81,6 @@ namespace gameanalytics
         GAHTTPApi::~GAHTTPApi()
         {
             curl_global_cleanup();
-        }
-
-        void GAHTTPApi::initBaseUrl()
-        {
-            snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
         }
 
         void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out)
@@ -337,6 +332,7 @@ namespace gameanalytics
 #endif
                 response_out = JsonDecodeFailed;
                 json_out = rapidjson::Value();
+                return;
             }
 
             // print reason if bad request
@@ -347,6 +343,10 @@ namespace gameanalytics
                 requestJsonDict.Accept(writer);
 
                 logging::GALogger::d("Failed Events Call. Bad request. Response: %s", buffer.GetString());
+
+                response_out = requestResponseEnum;
+                json_out = rapidjson::Value();
+                return;
             }
 
 #if USE_TIZEN

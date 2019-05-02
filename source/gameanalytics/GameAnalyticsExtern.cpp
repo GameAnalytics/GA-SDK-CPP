@@ -268,6 +268,7 @@ const char* getCommandCenterValueAsString(const char *key)
     std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
+    return result;
 }
 
 const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
@@ -275,6 +276,7 @@ const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const
     std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
+    return result;
 }
 
 double isCommandCenterReady()
@@ -287,6 +289,7 @@ const char* getConfigurationsContentAsString()
     std::vector<char> returnValue = gameanalytics::GameAnalytics::getConfigurationsContentAsString();
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
+    return result;
 }
 
 #endif

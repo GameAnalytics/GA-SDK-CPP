@@ -622,7 +622,7 @@ namespace gameanalytics
             rapidjson::Document d;
             if(pair.second.size() > 0)
             {
-                d.Parse(pair.second);
+                d.Parse(pair.second.c_str());
                 dataDict.CopyFrom(d, d.GetAllocator());
             }
 #else

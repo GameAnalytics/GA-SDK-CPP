@@ -205,7 +205,7 @@ namespace gameanalytics
             unsigned long long build = (version & 0x00000000FFFF0000L) >> 16;
             std::ostringstream stream;
             stream << getBuildPlatform() << " " << major << "." << minor << "." << build;
-            return stream.str();
+            snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s", stream.str().c_str());
 #elif USE_TIZEN
             char *value;
             int ret;
@@ -281,7 +281,7 @@ namespace gameanalytics
         {
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
-            return utilities::GAUtilities::ws2s(info->SystemManufacturer->Data());
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", utilities::GAUtilities::ws2s(info->SystemManufacturer->Data()).c_str());
 #elif USE_TIZEN
             char *value;
             int ret;
@@ -382,7 +382,7 @@ namespace gameanalytics
         {
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
-            return utilities::GAUtilities::ws2s(info->SystemProductName->Data());
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", utilities::GAUtilities::ws2s(info->SystemProductName->Data()).c_str());
 #elif USE_TIZEN
             char *value;
             int ret;
@@ -489,14 +489,14 @@ namespace gameanalytics
         }
 
 #if USE_UWP
-        const std::string GADevice::getDeviceId()
+        const const char* GADevice::getDeviceId()
         {
-            return GADevice::_deviceId;
+            return GADevice::_deviceId.c_str();
         }
 
-        const std::string GADevice::getAdvertisingId()
+        const const char* GADevice::getAdvertisingId()
         {
-            return GADevice::_advertisingId;
+            return GADevice::_advertisingId.c_str();
         }
 
         const std::string GADevice::deviceId()
@@ -547,27 +547,27 @@ namespace gameanalytics
 
             if (deviceFamily == "Windows.Mobile")
             {
-                return "uwp_mobile";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_mobile");
             }
             else if (deviceFamily == "Windows.Desktop")
             {
-                return "uwp_desktop";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_desktop");
             }
             else if (deviceFamily == "Windows.Universal")
             {
-                return "uwp_iot";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_iot");
             }
             else if (deviceFamily == "Windows.Xbox")
             {
-                return "uwp_console";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_console");
             }
             else if (deviceFamily == "Windows.Team")
             {
-                return "uwp_surfacehub";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_surfacehub");
             }
             else
             {
-                return utilities::GAUtilities::ws2s(deviceFamily->Data());
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "%s", utilities::GAUtilities::ws2s(deviceFamily->Data()).c_str());
             }
 #elif USE_TIZEN
             std::string result = "tizen";
@@ -600,7 +600,7 @@ namespace gameanalytics
         {
 #if USE_UWP
             std::string result = utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
-            return s.c_str();
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", result.c_str());
 #elif USE_TIZEN
             snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", app_get_data_path());
 #else
