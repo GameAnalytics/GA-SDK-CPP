@@ -50,9 +50,9 @@ namespace gameanalytics
             static const std::string _advertisingId;
             static const std::string _deviceId;
 #elif USE_TIZEN
-            static const std::string deviceId();
+            static void initDeviceId();
 
-            static const std::string _deviceId;
+            static char _deviceId[];
 #endif
 
             static char _buildPlatform[];

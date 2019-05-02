@@ -488,9 +488,10 @@ namespace gameanalytics
                 out.AddMember("uwp_id", device::GADevice::getDeviceId(), allocator);
             }
 #elif USE_TIZEN
-            if (!device::GADevice::getDeviceId().empty())
+            if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                out.AddMember("tizen_id", device::GADevice::getDeviceId(), allocator);
+                rapidjson::Value v(device::GADevice::getDeviceId(), allocator);
+                out.AddMember("tizen_id", v.Move(), allocator);
             }
 #endif
 
@@ -623,9 +624,9 @@ namespace gameanalytics
                 GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
             }
 #elif USE_TIZEN
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getDeviceId());
             }
 #endif
             else if (strlen(GAState::sharedInstance()->_defaultUserId) > 0)

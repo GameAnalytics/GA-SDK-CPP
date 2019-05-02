@@ -64,7 +64,7 @@ namespace gameanalytics
         const std::string GADevice::_advertisingId = utilities::GAUtilities::ws2s(Windows::System::UserProfile::AdvertisingManager::AdvertisingId->Data());
         const std::string GADevice::_deviceId = GADevice::deviceId();
 #elif USE_TIZEN
-        const std::string GADevice::_deviceId = GADevice::deviceId();
+        char GADevice::_deviceId[129] = "GADevice::deviceId()";
 #endif
         char GADevice::_deviceManufacturer[129] = "";
         char GADevice::_sdkGameEngineVersion[33] = "";
@@ -207,16 +207,17 @@ namespace gameanalytics
             stream << getBuildPlatform() << " " << major << "." << minor << "." << build;
             return stream.str();
 #elif USE_TIZEN
-            std::string version = "0.0.0";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/feature/platform.version", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                version = value;
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), value);
             }
-
-            return GADevice::getBuildPlatform() + " " + version;
+            else
+            {
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 0.0.0", GADevice::getBuildPlatform());
+            }
 #else
 #ifdef _WIN32
 #if (_MSC_VER == 1900)
@@ -282,16 +283,17 @@ namespace gameanalytics
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             return utilities::GAUtilities::ws2s(info->SystemManufacturer->Data());
 #elif USE_TIZEN
-            std::string result = "unknown";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/manufacturer", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "unknown");
+            }
 #else
 #if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
@@ -382,16 +384,17 @@ namespace gameanalytics
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             return utilities::GAUtilities::ws2s(info->SystemProductName->Data());
 #elif USE_TIZEN
-            std::string result = "unknown";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/model_name", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
+            }
 #else
 #if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
@@ -511,12 +514,16 @@ namespace gameanalytics
             return result;
         }
 #elif USE_TIZEN
-        const std::string GADevice::getDeviceId()
+        const char* GADevice::getDeviceId()
         {
+            if(strlen(GADevice::_deviceId) == 0)
+            {
+                initDeviceId();
+            }
             return GADevice::_deviceId;
         }
 
-        const std::string GADevice::deviceId()
+        void GADevice::initDeviceId()
         {
             std::string result = "";
             char *value;
@@ -524,10 +531,12 @@ namespace gameanalytics
             ret = system_info_get_platform_string("http://tizen.org/system/tizenid", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceId, sizeof(GADevice::_deviceId), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceId, sizeof(GADevice::_deviceId), "%s", "unknown");
+            }
         }
 #endif
 
@@ -567,12 +576,13 @@ namespace gameanalytics
             ret = system_info_get_platform_string("http://tizen.org/system/platform.name", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                utilities::GAUtilities::lowercaseString(value);
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), value);
             }
-
-            std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "tizen");
+            }
 #else
 #if IS_MAC
             snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "mac_osx");
@@ -592,7 +602,7 @@ namespace gameanalytics
             std::string result = utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
             return s.c_str();
 #elif USE_TIZEN
-            return app_get_data_path();
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", app_get_data_path());
 #else
 #ifdef _WIN32
             snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("LOCALAPPDATA"), utilities::GAUtilities::getPathSeparator());

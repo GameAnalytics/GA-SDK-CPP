@@ -207,8 +207,7 @@ namespace gameanalytics
                 std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
                 sharedInstance()->dbPath = p;
 #elif USE_TIZEN
-                std::string p(device::GADevice::getWritablePath() + std::string(utilities::GAUtilities::getPathSeparator()) + "ga.sqlite3");
-                sharedInstance()->dbPath = p;
+                snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s%sga.sqlite3", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
 #else
                 char d[513] = "";
                 snprintf(d, sizeof(d), "%s%s%s", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator(), key);
