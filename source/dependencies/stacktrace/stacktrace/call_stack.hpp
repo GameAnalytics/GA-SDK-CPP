@@ -38,7 +38,7 @@ public:
     /** Serializes the entire call-stack into a text string. */
     void to_string (char* out) const
     {
-        char s[1100 * stack.size()];
+        char* s = new char[1100 * stack.size()];
         s[0] = 0;
         for (size_t i = 0; i < stack.size(); i++)
         {
@@ -46,18 +46,21 @@ public:
             strcat(s, "\n");
         }
         strcat(out, s);
+        delete[] s;
     }
 
     size_t to_string_size() const
     {
-        char s[1100 * stack.size()];
+        char* s = new char[1100 * stack.size()];
         s[0] = 0;
         for (size_t i = 0; i < stack.size(); i++)
         {
             stack[i].to_string(s);
             strcat(s, "\n");
         }
-        return strlen(s);
+        size_t result = strlen(s);
+        delete[] s;
+        return result;
     }
 
     /** Call stack. */

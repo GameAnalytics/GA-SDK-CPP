@@ -149,15 +149,17 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
             size_t s = len + 1 + 11 + strlen(ga->tag);
-            char message[s];
+            char* message = new char[s];
             snprintf(message, s, "Info/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -175,15 +177,17 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
             size_t s = len + 1 + 14 + strlen(ga->tag);
-            char message[s];
+            char* message = new char[s];
             snprintf(message, s, "Warning/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Warning);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -202,15 +206,17 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
             size_t s = len + 1 + 12 + strlen(ga->tag);
-            char message[s];
+            char* message = new char[s];
             snprintf(message, s, "Error/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Error);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -232,15 +238,17 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
             int s = len + 1 + 12 + strlen(ga->tag);
-            char message[s];
+            char* message = new char[s];
             snprintf(message, s, "Debug/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Debug);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -261,15 +269,17 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
             int s = len + 1 + 14 + strlen(ga->tag);
-            char message[s];
+            char* message = new char[s];
             snprintf(message, s, "Verbose/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
+            delete[] message;
+            delete[] formatted;
         }
 
         void GALogger::sendNotificationMessage(const char* message, EGALoggerMessageType type)

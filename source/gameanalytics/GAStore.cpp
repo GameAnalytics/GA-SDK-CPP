@@ -64,9 +64,8 @@ namespace gameanalytics
         void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Value& out)
         {
             // Force transaction if it is an update, insert or delete.
-            int arraySize = strlen(sql) + 1;
-            char sqlUpper[arraySize];
-            snprintf(sqlUpper, arraySize, "%s", sql);
+            char sqlUpper[1025];
+            snprintf(sqlUpper, sizeof(sqlUpper), "%s", sql);
             utilities::GAUtilities::uppercaseString(sqlUpper);
             if (utilities::GAUtilities::stringMatch(sqlUpper, "^(UPDATE|INSERT|DELETE)"))
             {
@@ -212,7 +211,7 @@ namespace gameanalytics
                 char d[513] = "";
                 snprintf(d, sizeof(d), "%s%s%s", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator(), key);
 #ifdef _WIN32
-                _mkdir(d.c_str());
+                _mkdir(d);
 #else
                 mode_t nMode = 0733;
                 mkdir(d,nMode);

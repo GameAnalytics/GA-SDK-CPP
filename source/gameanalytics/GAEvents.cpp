@@ -777,9 +777,6 @@ namespace gameanalytics
                 ev.Accept(writer);
             }
             const char* jsonDefaults = defaultEvbuffer.GetString();
-            int defaultSize = strlen(jsonDefaults) + 1;
-            char jsonDefaultsArray[defaultSize];
-            snprintf(jsonDefaultsArray, defaultSize, "%s", jsonDefaults);
 
             // Merge with eventData
             for (rapidjson::Value::ConstMemberIterator itr = eventData.MemberBegin(); itr != eventData.MemberEnd(); ++itr)
@@ -819,7 +816,7 @@ namespace gameanalytics
             {
                 char sessionStart[21] = "";
                 snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
-                const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaultsArray};
+                const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
                 store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);", params, 3);
             }
         }

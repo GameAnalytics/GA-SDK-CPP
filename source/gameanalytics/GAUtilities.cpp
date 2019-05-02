@@ -22,6 +22,7 @@
 #include <hmac_sha2.h>
 #include <guid.h>
 #endif
+#include <cctype>
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -227,7 +228,7 @@ namespace gameanalytics
             size_t totalSize = sizeof(gzip_header);
             totalSize += deflated.size();
             totalSize += 8;
-            char resultArray[totalSize];
+            char* resultArray = new char[totalSize];
             size_t current = 0;
             for(size_t i = 0; i < sizeof(gzip_header); ++i)
             {
@@ -249,6 +250,7 @@ namespace gameanalytics
             {
                 result.push_back(resultArray[i]);
             }
+            delete[] resultArray;
 
             return result;
         }
@@ -317,10 +319,11 @@ namespace gameanalytics
                 SHA256_DIGEST_SIZE
             );
             int output_size = base64_needed_encoded_length(SHA256_DIGEST_SIZE);
-            unsigned char ret[output_size];
+            unsigned char* ret = new unsigned char[output_size];
             GAUtilities::base64_encode(mac, SHA256_DIGEST_SIZE, ret);
 
             snprintf(out, output_size, "%s", ret);
+            delete[] ret;
 #endif
         }
 
@@ -417,15 +420,13 @@ namespace gameanalytics
             size_t delimiterSize = strlen(delimiter);
             size_t vectorSize = v.getVector().size();
             size_t totalSize = (vectorSize - 1) * delimiterSize + 1;
-            size_t lengths[vectorSize];
 
             for (size_t i = 0; i < vectorSize; ++i)
             {
-                lengths[i] = strlen(v.getVector()[i].array);
-                totalSize += lengths[i];
+                totalSize += strlen(v.getVector()[i].array);
             }
 
-            char result[totalSize];
+            char* result = new char[totalSize];
             result[0] = 0;
             for (size_t i = 0; i < vectorSize; ++i)
             {
@@ -437,6 +438,7 @@ namespace gameanalytics
             }
 
             logging::GALogger::i(format, result);
+            delete[] result;
         }
 
         void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const rapidjson::Value& value)

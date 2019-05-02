@@ -223,33 +223,33 @@ namespace gameanalytics
 #if (_MSC_VER == 1900)
             if (IsWindows10OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 10.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 10.0", GADevice::getBuildPlatform());
             }
             else
 #endif
-                if (IsWindows8Point1OrGreater())
+            if (IsWindows8Point1OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.3";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.3", GADevice::getBuildPlatform());
             }
             else if (IsWindows8OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.2";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.2", GADevice::getBuildPlatform());
             }
             else if (IsWindows7OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.1";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.1", GADevice::getBuildPlatform());
             }
             else if (IsWindowsVistaOrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.1", GADevice::getBuildPlatform());
             }
             else if (IsWindowsXPOrGreater())
             {
-                return GADevice::getBuildPlatform() + " 5.1";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 5.1", GADevice::getBuildPlatform());
             }
             else
             {
-                return GADevice::getBuildPlatform() + " 0.0.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 0.0.0", GADevice::getBuildPlatform());
             }
 #elif IS_MAC
             snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), getOSXVersion());
@@ -301,7 +301,7 @@ namespace gameanalytics
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
             if (FAILED(hResult))
             {
-                return "unknown";
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "unknown");
             }
             hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
 
@@ -367,7 +367,7 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            return std::string(_com_util::ConvertBSTRToString(manufacturer));
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", _com_util::ConvertBSTRToString(manufacturer));
 #elif IS_MAC
             snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "Apple");
 #elif IS_LINUX
@@ -402,7 +402,7 @@ namespace gameanalytics
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
             if (FAILED(hResult))
             {
-                return "unknown";
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
             }
             hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
 
@@ -468,7 +468,7 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            return std::string(_com_util::ConvertBSTRToString(model));
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", _com_util::ConvertBSTRToString(model));
 #elif IS_MAC
             size_t len = 0;
             sysctlbyname("hw.model", NULL, &len, NULL, 0);

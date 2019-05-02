@@ -769,7 +769,7 @@ namespace gameanalytics
                 d.Parse(sdkConfigCachedString);
                 if (!d.IsNull())
                 {
-                    instance->_sdkConfigCached = d.GetObject();
+                    instance->_sdkConfigCached.CopyFrom(d, d.GetAllocator());
                 }
             }
 

@@ -293,7 +293,7 @@ namespace gameanalytics
 
         bool GAValidator::validateEventPartLength(const char* eventPart, bool allowNull)
         {
-            int size = strlen(eventPart);
+            size_t size = strlen(eventPart);
             if (allowNull == true && size == 0)
             {
                 return true;
@@ -350,7 +350,7 @@ namespace gameanalytics
 
         bool GAValidator::validateShortString(const char* shortString, bool canBeEmpty = false)
         {
-            int size = strlen(shortString);
+            size_t size = strlen(shortString);
             // String is allowed to be empty or nil
             if (canBeEmpty && size == 0)
             {
@@ -366,7 +366,7 @@ namespace gameanalytics
 
         bool GAValidator::validateString(const char* string, bool canBeEmpty = false)
         {
-            int size = strlen(string);
+            size_t size = strlen(string);
             // String is allowed to be empty or nil
             if (canBeEmpty && size == 0)
             {
@@ -382,7 +382,7 @@ namespace gameanalytics
 
         bool GAValidator::validateLongString(const char* longString, bool canBeEmpty = false)
         {
-            int size = strlen(longString);
+            size_t size = strlen(longString);
             // String is allowed to be empty
             if (canBeEmpty && size == 0)
             {
@@ -524,8 +524,8 @@ namespace gameanalytics
 
         bool GAValidator::validateArrayOfStrings(
             const StringVector& arrayOfStrings,
-            unsigned long maxCount,
-            unsigned long maxStringLength,
+            size_t maxCount,
+            size_t maxStringLength,
             bool allowNoValues,
             const char* logTag
             )
@@ -547,7 +547,7 @@ namespace gameanalytics
             }
 
             // check if exceeding max count
-            if (maxCount && maxCount > static_cast<int>(0) && arrayOfStrings.getVector().size() > maxCount)
+            if (maxCount && maxCount > static_cast<size_t>(0) && arrayOfStrings.getVector().size() > maxCount)
             {
                 logging::GALogger::w("%s alidation failed: array cannot exceed %lu values. It has %lu values.", arrayTag, maxCount, arrayOfStrings.getVector().size());
                 return false;
@@ -556,7 +556,7 @@ namespace gameanalytics
             // validate each string
             for (CharArray arrayString : arrayOfStrings.getVector())
             {
-                int stringLength = strlen(arrayString.array);
+                size_t stringLength = strlen(arrayString.array);
                 // check if empty (not allowed)
                 if (stringLength == 0)
                 {
@@ -565,7 +565,7 @@ namespace gameanalytics
                 }
 
                 // check if exceeding max length
-                if (maxStringLength && maxStringLength > static_cast<int>(0) && stringLength > maxStringLength)
+                if (maxStringLength && maxStringLength > static_cast<size_t>(0) && stringLength > maxStringLength)
                 {
                     logging::GALogger::w("%s validation failed: a string exceeded max allowed length (which is: %lu). String was: %s", arrayTag, maxStringLength, arrayString.array);
                     return false;

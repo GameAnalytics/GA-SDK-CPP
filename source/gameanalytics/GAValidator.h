@@ -93,8 +93,8 @@ namespace gameanalytics
             // array of strings
             static bool validateArrayOfStrings(
                 const StringVector& arrayOfStrings,
-                unsigned long maxCount,
-                unsigned long maxStringLength,
+                size_t maxCount,
+                size_t maxStringLength,
                 bool allowNoValues,
                 const char* arrayTag
                 );

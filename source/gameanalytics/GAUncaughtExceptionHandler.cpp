@@ -30,19 +30,25 @@ namespace gameanalytics
 #if defined(_WIN32)
         void GAUncaughtExceptionHandler::signalHandler(int sig)
         {
-            stacktrace::call_stack st;
-            size_t totalSize = 0;
-            totalSize += formatSize("Uncaught Signal (%d)\n", sig);
-            totalSize += strlen("Stack trace:\n");
-
-            ss << "Stack trace:" << std::endl;
-            ss << st.to_string() << std::endl;
-
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
+                stacktrace::call_stack st;
+                size_t totalSize = 0;
+                totalSize += formatSize("Uncaught Signal (%d)\n", sig);
+                totalSize += strlen("Stack trace:\n");
+                totalSize += st.to_string_size() + strlen("\n");
+                char* buffer = new char[totalSize + 1];
+                buffer[0] = 0;
+
+                formatConcat(buffer, "Uncaught Signal (%d)\n", sig);
+                strcat(buffer, "Stack trace:\n");
+                st.to_string(buffer);
+                strcat(buffer, "\n");
+
                 errorCount = errorCount + 1;
-                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, ss.str(), {});
+                events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
                 events::GAEvents::processEvents("error", false);
+                delete[] buffer;
             }
 
             std::_Exit( EXIT_FAILURE );
@@ -149,11 +155,12 @@ namespace gameanalytics
             va_start (args, format);
             size_t len = std::vsnprintf(NULL, 0, format, args);
             va_end (args);
-            char formatted[len + 1];
+            char* formatted = new char[len + 1];
             va_start (args, format);
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
             strcat(buffer, formatted);
+            delete[] formatted;
         }
 
         size_t GAUncaughtExceptionHandler::formatSize(const char* format, ...)
@@ -176,29 +183,28 @@ namespace gameanalytics
                 return;
             }
 
-            stacktrace::call_stack st;
-
             /*
              *    Now format into a message for sending to the user
              */
 
-            size_t totalSize = 0;
-            totalSize += strlen("Uncaught C++ Exception\n");
-            totalSize += strlen("Stack trace:\n");
-            totalSize += st.to_string_size() + strlen("\n");
-            char buffer[totalSize + 1];
-
-            strcat(buffer, "Uncaught C++ Exception\n");
-            strcat(buffer, "Stack trace:\n");
-            strcat(buffer, "Stack trace:\n");
-            st.to_string(buffer);
-            strcat(buffer, "\n");
-
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
+                stacktrace::call_stack st;
+                size_t totalSize = 0;
+                totalSize += strlen("Uncaught C++ Exception\n");
+                totalSize += strlen("Stack trace:\n");
+                totalSize += st.to_string_size() + strlen("\n");
+                char* buffer = new char[totalSize + 1];
+
+                strcat(buffer, "Uncaught C++ Exception\n");
+                strcat(buffer, "Stack trace:\n");
+                st.to_string(buffer);
+                strcat(buffer, "\n");
+
                 errorCount = errorCount + 1;
                 events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
                 events::GAEvents::processEvents("error", false);
+                delete[] buffer;
             }
 
             if(previousTerminateHandler != NULL)

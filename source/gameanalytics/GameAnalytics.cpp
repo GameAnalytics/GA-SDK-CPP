@@ -22,6 +22,7 @@
 #if USE_UWP
 #include <thread>
 #endif
+#include <array>
 
 namespace gameanalytics
 {
@@ -196,8 +197,8 @@ namespace gameanalytics
             return;
         }
 
-        char build[65] = "";
-        snprintf(build, sizeof(build), "%s", build_ ? build_ : "");
+        std::array<char, 65> build = {'\0'};
+        snprintf(build.data(), build.size(), "%s", build_ ? build_ : "");
         threading::GAThreading::performTaskOnGAThread([build]()
         {
             if (isSdkReady(true, false))
@@ -205,12 +206,12 @@ namespace gameanalytics
                 logging::GALogger::w("Build version must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateBuild(build))
+            if (!validators::GAValidator::validateBuild(build.data()))
             {
-                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build);
+                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build.data());
                 return;
             }
-            state::GAState::setBuild(build);
+            state::GAState::setBuild(build.data());
         });
     }
 
@@ -221,8 +222,8 @@ namespace gameanalytics
             return;
         }
 
-        char writablePath[65] = "";
-        snprintf(writablePath, sizeof(writablePath), "%s", writablePath_ ? writablePath_ : "");
+        std::array<char, 65> writablePath = {'\0'};
+        snprintf(writablePath.data(), writablePath.size(), "%s", writablePath_ ? writablePath_ : "");
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
             if (isSdkReady(true, false))
@@ -230,7 +231,7 @@ namespace gameanalytics
                 logging::GALogger::w("Writable path must be set before SDK is initialized.");
                 return;
             }
-            device::GADevice::setWritablePath(writablePath);
+            device::GADevice::setWritablePath(writablePath.data());
 #if !USE_UWP && !USE_TIZEN
             logging::GALogger::customInitializeLog();
 #endif
@@ -244,8 +245,8 @@ namespace gameanalytics
             return;
         }
 
-        char deviceModel[65] = "";
-        snprintf(deviceModel, sizeof(deviceModel), "%s", deviceModel_ ? deviceModel_ : "");
+        std::array<char, 65> deviceModel = {'\0'};
+        snprintf(deviceModel.data(), deviceModel.size(), "%s", deviceModel_ ? deviceModel_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
             if (isSdkReady(true, false))
@@ -253,12 +254,12 @@ namespace gameanalytics
                 logging::GALogger::w("Device model must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateString(deviceModel, true))
+            if (!validators::GAValidator::validateString(deviceModel.data(), true))
             {
-                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel);
+                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel.data());
                 return;
             }
-            device::GADevice::setDeviceModel(deviceModel);
+            device::GADevice::setDeviceModel(deviceModel.data());
         });
     }
 
@@ -269,8 +270,8 @@ namespace gameanalytics
             return;
         }
 
-        char deviceManufacturer[65] = "";
-        snprintf(deviceManufacturer, sizeof(deviceManufacturer), "%s", deviceManufacturer_ ? deviceManufacturer_ : "");
+        std::array<char, 65> deviceManufacturer = {'\0'};
+        snprintf(deviceManufacturer.data(), deviceManufacturer.size(), "%s", deviceManufacturer_ ? deviceManufacturer_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
             if (isSdkReady(true, false))
@@ -278,12 +279,12 @@ namespace gameanalytics
                 logging::GALogger::w("Device manufacturer must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateString(deviceManufacturer, true))
+            if (!validators::GAValidator::validateString(deviceManufacturer.data(), true))
             {
-                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer);
+                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer.data());
                 return;
             }
-            device::GADevice::setDeviceManufacturer(deviceManufacturer);
+            device::GADevice::setDeviceManufacturer(deviceManufacturer.data());
         });
     }
 
@@ -294,20 +295,20 @@ namespace gameanalytics
             return;
         }
 
-        char sdkGameEngineVersion[65] = "";
-        snprintf(sdkGameEngineVersion, sizeof(sdkGameEngineVersion), "%s", sdkGameEngineVersion_ ? sdkGameEngineVersion_ : "");
+        std::array<char, 65> sdkGameEngineVersion = {'\0'};
+        snprintf(sdkGameEngineVersion.data(), sdkGameEngineVersion.size(), "%s", sdkGameEngineVersion_ ? sdkGameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
             if (isSdkReady(true, false))
             {
                 return;
             }
-            if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion))
+            if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion.data()))
             {
-                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion);
+                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion.data());
                 return;
             }
-            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion);
+            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion.data());
         });
     }
 
@@ -318,20 +319,20 @@ namespace gameanalytics
             return;
         }
 
-        char gameEngineVersion[65] = "";
-        snprintf(gameEngineVersion, sizeof(gameEngineVersion), "%s", gameEngineVersion_ ? gameEngineVersion_ : "");
+        std::array<char, 65> gameEngineVersion = {'\0'};
+        snprintf(gameEngineVersion.data(), gameEngineVersion.size(), "%s", gameEngineVersion_ ? gameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
             if (isSdkReady(true, false))
             {
                 return;
             }
-            if (!validators::GAValidator::validateEngineVersion(gameEngineVersion))
+            if (!validators::GAValidator::validateEngineVersion(gameEngineVersion.data()))
             {
-                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion);
+                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion.data());
                 return;
             }
-            device::GADevice::setGameEngineVersion(gameEngineVersion);
+            device::GADevice::setGameEngineVersion(gameEngineVersion.data());
         });
     }
 
@@ -342,8 +343,8 @@ namespace gameanalytics
             return;
         }
 
-        char uId[129] = "";
-        snprintf(uId, sizeof(uId), "%s", uId_ ? uId_ : "");
+        std::array<char, 129> uId = {'\0'};
+        snprintf(uId.data(), uId.size(), "%s", uId_ ? uId_ : "");
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
             if (isSdkReady(true, false))
@@ -351,13 +352,13 @@ namespace gameanalytics
                 logging::GALogger::w("A custom user id must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateUserId(uId))
+            if (!validators::GAValidator::validateUserId(uId.data()))
             {
-                logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: %s", uId);
+                logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: %s", uId.data());
                 return;
             }
 
-            state::GAState::setUserId(uId);
+            state::GAState::setUserId(uId.data());
         });
     }
 
@@ -370,10 +371,10 @@ namespace gameanalytics
             return;
         }
 
-        char gameKey[65] = "";
-        snprintf(gameKey, sizeof(gameKey), "%s", gameKey_ ? gameKey_ : "");
-        char gameSecret[65] = "";
-        snprintf(gameSecret, sizeof(gameSecret), "%s", gameSecret_ ? gameSecret_ : "");
+        std::array<char, 65> gameKey = {'\0'};
+        snprintf(gameKey.data(), gameKey.size(), "%s", gameKey_ ? gameKey_ : "");
+        std::array<char, 65> gameSecret = {'\0'};
+        snprintf(gameSecret.data(), gameSecret.size(), "%s", gameSecret_ ? gameSecret_ : "");
 #if USE_UWP
         Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
         Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);
@@ -389,15 +390,15 @@ namespace gameanalytics
             errorreporter::GAUncaughtExceptionHandler::setUncaughtExceptionHandlers();
 #endif
 
-            if (!validators::GAValidator::validateKeys(gameKey, gameSecret))
+            if (!validators::GAValidator::validateKeys(gameKey.data(), gameSecret.data()))
             {
-                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: %s, secretKey: %s", gameKey, gameSecret);
+                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: %s, secretKey: %s", gameKey.data(), gameSecret.data());
                 return;
             }
 
-            state::GAState::setKeys(gameKey, gameSecret);
+            state::GAState::setKeys(gameKey.data(), gameSecret.data());
 
-            if (!store::GAStore::ensureDatabase(false, gameKey))
+            if (!store::GAStore::ensureDatabase(false, gameKey.data()))
             {
                 logging::GALogger::w("Could not ensure/validate local event database: %s", device::GADevice::getWritablePath());
             }
@@ -432,16 +433,16 @@ namespace gameanalytics
             return;
         }
 
-        char currency[65] = "";
-        snprintf(currency, sizeof(currency), "%s", currency_ ? currency_ : "");
-        char itemType[65] = "";
-        snprintf(itemType, sizeof(itemType), "%s", itemType_ ? itemType_ : "");
-        char itemId[65] = "";
-        snprintf(itemId, sizeof(itemId), "%s", itemId_ ? itemId_ : "");
-        char cartType[65] = "";
-        snprintf(cartType, sizeof(cartType), "%s", cartType_ ? cartType_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 65> currency = {'\0'};
+        snprintf(currency.data(), currency.size(), "%s", currency_ ? currency_ : "");
+        std::array<char, 65> itemType = {'\0'};
+        snprintf(itemType.data(), itemType.size(), "%s", itemType_ ? itemType_ : "");
+        std::array<char, 65> itemId = {'\0'};
+        snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
+        std::array<char, 65> cartType = {'\0'};
+        snprintf(cartType.data(), cartType.size(), "%s", cartType_ ? cartType_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
         {
             if (!isSdkReady(true, true, "Could not add business event"))
@@ -450,8 +451,8 @@ namespace gameanalytics
             }
             // Send to events
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addBusinessEvent(currency.data(), amount, itemType.data(), itemId.data(), cartType.data(), fieldsJson);
         });
     }
 
@@ -468,14 +469,14 @@ namespace gameanalytics
             return;
         }
 
-        char currency[65] = "";
-        snprintf(currency, sizeof(currency), "%s", currency_ ? currency_ : "");
-        char itemType[65] = "";
-        snprintf(itemType, sizeof(itemType), "%s", itemType_ ? itemType_ : "");
-        char itemId[65] = "";
-        snprintf(itemId, sizeof(itemId), "%s", itemId_ ? itemId_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 65> currency = {'\0'};
+        snprintf(currency.data(), currency.size(), "%s", currency_ ? currency_ : "");
+        std::array<char, 65> itemType = {'\0'};
+        snprintf(itemType.data(), itemType.size(), "%s", itemType_ ? itemType_ : "");
+        std::array<char, 65> itemId = {'\0'};
+        snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add resource event"))
@@ -484,8 +485,8 @@ namespace gameanalytics
             }
 
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addResourceEvent(flowType, currency.data(), amount, itemType.data(), itemId.data(), fieldsJson);
         });
     }
 
@@ -501,14 +502,14 @@ namespace gameanalytics
             return;
         }
 
-        char progression01[65] = "";
-        snprintf(progression01, sizeof(progression01), "%s", progression01_ ? progression01_ : "");
-        char progression02[65] = "";
-        snprintf(progression02, sizeof(progression02), "%s", progression02_ ? progression02_ : "");
-        char progression03[65] = "";
-        snprintf(progression03, sizeof(progression03), "%s", progression03_ ? progression03_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_);
+        std::array<char, 65> progression01 = {'\0'};
+        snprintf(progression01.data(), progression01.size(), "%s", progression01_ ? progression01_ : "");
+        std::array<char, 65> progression02 = {'\0'};
+        snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
+        std::array<char, 65> progression03 = {'\0'};
+        snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_);
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
@@ -518,8 +519,8 @@ namespace gameanalytics
 
             // Send to events
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0.0, false, fieldsJson);
         });
     }
 
@@ -535,14 +536,14 @@ namespace gameanalytics
             return;
         }
 
-        char progression01[65] = "";
-        snprintf(progression01, sizeof(progression01), "%s", progression01_ ? progression01_ : "");
-        char progression02[65] = "";
-        snprintf(progression02, sizeof(progression02), "%s", progression02_ ? progression02_ : "");
-        char progression03[65] = "";
-        snprintf(progression03, sizeof(progression03), "%s", progression03_ ? progression03_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 65> progression01 = {'\0'};
+        snprintf(progression01.data(), progression01.size(), "%s", progression01_ ? progression01_ : "");
+        std::array<char, 65> progression02 = {'\0'};
+        snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
+        std::array<char, 65> progression03 = {'\0'};
+        snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
@@ -552,8 +553,8 @@ namespace gameanalytics
 
             // Send to events
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), score, true, fieldsJson);
         });
     }
 
@@ -569,10 +570,10 @@ namespace gameanalytics
             return;
         }
 
-        char eventId[400] = "";
-        snprintf(eventId, sizeof(eventId), "%s", eventId_ ? eventId_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 400> eventId = {'\0'};
+        snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
@@ -580,8 +581,8 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addDesignEvent(eventId, 0, false, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addDesignEvent(eventId.data(), 0, false, fieldsJson);
         });
     }
 
@@ -597,10 +598,10 @@ namespace gameanalytics
             return;
         }
 
-        char eventId[400] = "";
-        snprintf(eventId, sizeof(eventId), "%s", eventId_ ? eventId_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 400> eventId = {'\0'};
+        snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
@@ -608,8 +609,8 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addDesignEvent(eventId, value, true, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addDesignEvent(eventId.data(), value, true, fieldsJson);
         });
     }
 
@@ -625,10 +626,10 @@ namespace gameanalytics
             return;
         }
 
-        char message[8200] = "";
-        snprintf(message, sizeof(message), "%s", message_ ? message_ : "");
-        char fields[65] = "";
-        snprintf(fields, sizeof(fields), "%s", fields_ ? fields_ : "");
+        std::array<char, 8200> message = {'\0'};
+        snprintf(message.data(), message.size(), "%s", message_ ? message_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
             if (!isSdkReady(true, true, "Could not add error event"))
@@ -636,8 +637,8 @@ namespace gameanalytics
                 return;
             }
             rapidjson::Document fieldsJson;
-            fieldsJson.Parse(fields);
-            events::GAEvents::addErrorEvent(severity, message, fieldsJson);
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addErrorEvent(severity, message.data(), fieldsJson);
         });
     }
 
@@ -742,16 +743,16 @@ namespace gameanalytics
             return;
         }
 
-        char dimension[65] = "";
-        snprintf(dimension, sizeof(dimension), "%s", dimension_ ? dimension_ : "");
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension01(dimension))
+            if (!validators::GAValidator::validateDimension01(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension);
+                logging::GALogger::w("Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension01(dimension);
+            state::GAState::setCustomDimension01(dimension.data());
         });
     }
 
@@ -762,16 +763,16 @@ namespace gameanalytics
             return;
         }
 
-        char dimension[65] = "";
-        snprintf(dimension, sizeof(dimension), "%s", dimension_ ? dimension_ : "");
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension02(dimension))
+            if (!validators::GAValidator::validateDimension02(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
+                logging::GALogger::w("Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension02(dimension);
+            state::GAState::setCustomDimension02(dimension.data());
         });
     }
 
@@ -782,16 +783,16 @@ namespace gameanalytics
             return;
         }
 
-        char dimension[65] = "";
-        snprintf(dimension, sizeof(dimension), "%s", dimension_ ? dimension_ : "");
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension03(dimension))
+            if (!validators::GAValidator::validateDimension03(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension);
+                logging::GALogger::w("Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension03(dimension);
+            state::GAState::setCustomDimension03(dimension.data());
         });
     }
 
@@ -802,13 +803,13 @@ namespace gameanalytics
             return;
         }
 
-        char facebookId[65] = "";
-        snprintf(facebookId, sizeof(facebookId), "%s", facebookId_ ? facebookId_ : "");
+        std::array<char, 65> facebookId = {'\0'};
+        snprintf(facebookId.data(), facebookId.size(), "%s", facebookId_ ? facebookId_ : "");
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
-            if (validators::GAValidator::validateFacebookId(facebookId))
+            if (validators::GAValidator::validateFacebookId(facebookId.data()))
             {
-                state::GAState::setFacebookId(facebookId);
+                state::GAState::setFacebookId(facebookId.data());
             }
         });
     }
