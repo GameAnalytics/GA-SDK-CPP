@@ -983,92 +983,92 @@ namespace gameanalytics
 #if USE_UWP
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions01(list);
     }
 
     void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions02(list);
     }
 
     void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions03(list);
     }
 
     void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::wstring>& resourceCurrencies)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& currency : resourceCurrencies)
         {
-            list.push_back(utilities::GAUtilities::ws2s(currency));
+            list.add(utilities::GAUtilities::ws2s(currency).c_str());
         }
         configureAvailableResourceCurrencies(list);
     }
 
     void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::wstring>& resourceItemTypes)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& itemType : resourceItemTypes)
         {
-            list.push_back(utilities::GAUtilities::ws2s(itemType));
+            list.add(utilities::GAUtilities::ws2s(itemType).c_str());
         }
         configureAvailableResourceItemTypes(list);
     }
 
     void GameAnalytics::configureBuild(const std::wstring& build)
     {
-        configureBuild(utilities::GAUtilities::ws2s(build));
+        configureBuild(utilities::GAUtilities::ws2s(build).c_str());
     }
 
     void GameAnalytics::configureWritablePath(const std::wstring& writablePath)
     {
-        configureWritablePath(utilities::GAUtilities::ws2s(writablePath));
+        configureWritablePath(utilities::GAUtilities::ws2s(writablePath).c_str());
     }
 
     void GameAnalytics::configureDeviceModel(const std::wstring& deviceModel)
     {
-        configureDeviceModel(utilities::GAUtilities::ws2s(deviceModel));
+        configureDeviceModel(utilities::GAUtilities::ws2s(deviceModel).c_str());
     }
 
     void GameAnalytics::configureDeviceManufacturer(const std::wstring& deviceManufacturer)
     {
-        configureDeviceManufacturer(utilities::GAUtilities::ws2s(deviceManufacturer));
+        configureDeviceManufacturer(utilities::GAUtilities::ws2s(deviceManufacturer).c_str());
     }
 
     void GameAnalytics::configureSdkGameEngineVersion(const std::wstring& sdkGameEngineVersion)
     {
-        configureSdkGameEngineVersion(utilities::GAUtilities::ws2s(sdkGameEngineVersion));
+        configureSdkGameEngineVersion(utilities::GAUtilities::ws2s(sdkGameEngineVersion).c_str());
     }
 
     void GameAnalytics::configureGameEngineVersion(const std::wstring& engineVersion)
     {
-        configureGameEngineVersion(utilities::GAUtilities::ws2s(engineVersion));
+        configureGameEngineVersion(utilities::GAUtilities::ws2s(engineVersion).c_str());
     }
 
     void GameAnalytics::configureUserId(const std::wstring& uId)
     {
-        configureUserId(utilities::GAUtilities::ws2s(uId));
+        configureUserId(utilities::GAUtilities::ws2s(uId).c_str());
     }
 
     void GameAnalytics::initialize(const std::wstring& gameKey, const std::wstring& gameSecret)
     {
-        initialize(utilities::GAUtilities::ws2s(gameKey), utilities::GAUtilities::ws2s(gameSecret));
+        initialize(utilities::GAUtilities::ws2s(gameKey).c_str(), utilities::GAUtilities::ws2s(gameSecret).c_str());
     }
 
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType)
@@ -1078,7 +1078,7 @@ namespace gameanalytics
 
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields)
     {
-        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType), utilities::GAUtilities::ws2s(fields));
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(cartType).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
@@ -1088,7 +1088,7 @@ namespace gameanalytics
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const std::wstring& fields)
     {
-        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(fields));
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
@@ -1098,7 +1098,7 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), utilities::GAUtilities::ws2s(fields));
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
@@ -1108,7 +1108,7 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score, utilities::GAUtilities::ws2s(fields));
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), score, utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId)
@@ -1118,7 +1118,7 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, const std::wstring& fields)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), utilities::GAUtilities::ws2s(fields));
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
@@ -1128,7 +1128,7 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value, utilities::GAUtilities::ws2s(fields));
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), value, utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
@@ -1138,27 +1138,27 @@ namespace gameanalytics
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields)
     {
-        addErrorEvent(severity, utilities::GAUtilities::ws2s(message), utilities::GAUtilities::ws2s(fields));
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)
     {
-        setCustomDimension01(utilities::GAUtilities::ws2s(dimension01));
+        setCustomDimension01(utilities::GAUtilities::ws2s(dimension01).c_str());
     }
 
     void GameAnalytics::setCustomDimension02(const std::wstring& dimension02)
     {
-        setCustomDimension02(utilities::GAUtilities::ws2s(dimension02));
+        setCustomDimension02(utilities::GAUtilities::ws2s(dimension02).c_str());
     }
 
     void GameAnalytics::setCustomDimension03(const std::wstring& dimension03)
     {
-        setCustomDimension03(utilities::GAUtilities::ws2s(dimension03));
+        setCustomDimension03(utilities::GAUtilities::ws2s(dimension03).c_str());
     }
 
     void GameAnalytics::setFacebookId(const std::wstring& facebookId)
     {
-        setFacebookId(utilities::GAUtilities::ws2s(facebookId));
+        setFacebookId(utilities::GAUtilities::ws2s(facebookId).c_str());
     }
 #endif
 

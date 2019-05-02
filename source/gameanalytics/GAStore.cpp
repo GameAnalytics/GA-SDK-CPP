@@ -203,8 +203,7 @@ namespace gameanalytics
             if(strlen(sharedInstance()->dbPath) == 0)
             {
 #if USE_UWP
-                std::string p(device::GADevice::getWritablePath() + "\\ga.sqlite3");
-                sharedInstance()->dbPath = p;
+                snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s\\ga.sqlite3", device::GADevice::getWritablePath());
 #elif USE_TIZEN
                 snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s%sga.sqlite3", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
 #else

@@ -608,7 +608,7 @@ namespace gameanalytics
             rapidjson::Value dataDict(rapidjson::kArrayType);
             http::EGAHTTPApiResponse responseEnum;
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            std::pair<http::EGAHTTPApiResponse, std::string> pair;
 
             try
             {
@@ -616,7 +616,14 @@ namespace gameanalytics
             }
             catch(Platform::COMException^ e)
             {
-                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+                pair = std::pair<http::EGAHTTPApiResponse, std::string>(http::NoResponse, "");
+            }
+            responseEnum = pair.first;
+            rapidjson::Document d;
+            if(pair.second.size() > 0)
+            {
+                d.Parse(pair.second);
+                dataDict.CopyFrom(d, d.GetAllocator());
             }
 #else
             http::GAHTTPApi::sharedInstance()->sendEventsInArray(responseEnum, dataDict, payloadArray);

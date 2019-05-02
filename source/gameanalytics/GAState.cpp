@@ -479,13 +479,15 @@ namespace gameanalytics
             }
 
 #if USE_UWP
-            if (!device::GADevice::getAdvertisingId().empty())
+            if (strlen(device::GADevice::getAdvertisingId()) > 0)
             {
-                out.AddMember("uwp_aid", device::GADevice::getAdvertisingId(), allocator);
+                rapidjson::Value v(device::GADevice::getAdvertisingId(), allocator);
+                out.AddMember("uwp_aid", v.Move(), allocator);
             }
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                out.AddMember("uwp_id", device::GADevice::getDeviceId(), allocator);
+                rapidjson::Value v(device::GADevice::getDeviceId(), allocator);
+                out.AddMember("uwp_id", v.Move(), allocator);
             }
 #elif USE_TIZEN
             if (strlen(device::GADevice::getDeviceId()) > 0)
@@ -615,13 +617,13 @@ namespace gameanalytics
                 snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", sharedInstance()->_userId);
             }
 #if USE_UWP
-            else if (!device::GADevice::getAdvertisingId().empty())
+            else if (strlen(device::GADevice::getAdvertisingId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getAdvertisingId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getAdvertisingId());
             }
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getDeviceId());
             }
 #elif USE_TIZEN
             else if (strlen(device::GADevice::getDeviceId()) > 0)
@@ -807,17 +809,22 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = initResponseDict.GetAllocator();
             http::EGAHTTPApiResponse initResponse;
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            std::pair<http::EGAHTTPApiResponse, std::string> pair;
             try
             {
                 pair = httpApi->requestInitReturningDict().get();
             }
             catch(Platform::COMException^ e)
             {
-                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+                pair = std::pair<http::EGAHTTPApiResponse, std::string>(http::NoResponse, "");
+            }
+            initResponse = pair.first;
+            rapidjson::Document d;
+            if(pair.second.size() > 0)
+            {
+                initResponseDict.Parse(pair.second);
             }
 #else
-
             httpApi->requestInitReturningDict(initResponse, initResponseDict);
 #endif
 

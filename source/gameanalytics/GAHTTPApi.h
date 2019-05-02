@@ -54,8 +54,8 @@ namespace gameanalytics
             ~GAHTTPApi();
 
 #if USE_UWP
-            concurrency::task<Void> requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
-            concurrency::task<Void> sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
+            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> requestInitReturningDict();
+            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> sendEventsInArray(const rapidjson::Value& eventArray);
 #else
             void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
             void sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
@@ -78,7 +78,7 @@ namespace gameanalytics
             std::vector<char> createPayloadData(const char* payload, bool gzip);
 
 #if USE_UWP
-            std::vector<char> createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::string& payloadData, bool gzip);
+            std::vector<char> createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::vector<char>& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
             concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> createStream(std::string data);
 #else

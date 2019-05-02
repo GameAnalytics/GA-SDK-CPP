@@ -261,7 +261,8 @@ namespace gameanalytics
             {
                 logging::GALogger::d("sendEventsInArray JSON encoding failed of eventArray");
                 response_out = JsonEncodeFailed;
-                json_out = rapidjson::Value();
+                json_out.SetNull();;
+                return;
             }
 
             std::vector<char> payloadData = createPayloadData(JSONstring, useGzip);
