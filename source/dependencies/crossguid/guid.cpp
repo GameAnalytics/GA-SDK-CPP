@@ -214,30 +214,7 @@ Guid GuidGenerator::newGuid()
     generate_hex(4, result);
     result.push_back('\0');
 
-    std::cout << result.data() << std::endl;
-
     return result.data();
-
-    /*const unsigned char byteArray[16] =
-    {
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char(),
-        random_char()
-    };
-    return byteArray;*/
 }
 #endif
 

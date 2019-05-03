@@ -595,10 +595,10 @@ available_targets = {
         'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
         'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
         'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
-        'linux-x64-gcc5-static': all_targets['linux-x64-gcc5-static'],
+        #'linux-x64-gcc5-static': all_targets['linux-x64-gcc5-static'],
         'linux-x64-clang-shared': all_targets['linux-x64-clang-shared'],
         'linux-x64-gcc-shared': all_targets['linux-x64-gcc-shared'],
-        'linux-x64-gcc5-shared': all_targets['linux-x64-gcc5-shared'],
+        #'linux-x64-gcc5-shared': all_targets['linux-x64-gcc5-shared'],
     }
 }[platform.system()]
 
