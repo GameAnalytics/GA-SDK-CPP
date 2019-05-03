@@ -271,7 +271,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, double score, bool sendScore, const rapidjson::Value& fields)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, bool sendScore, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -322,7 +322,7 @@ namespace gameanalytics
             }
 
             // Attempt
-            double attempt_num = 0;
+            int attempt_num = 0;
 
             // Add score if specified and status is not start
             if (sendScore && progressionStatus != EGAProgressionStatus::Start)
@@ -366,7 +366,7 @@ namespace gameanalytics
             }
 
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%f, attempt:%f, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
+            logging::GALogger::i("Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%d, attempt:%d, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
 
 
             // Send to store
@@ -533,7 +533,7 @@ namespace gameanalytics
             snprintf(updateSql, sizeof(updateSql), "UPDATE ga_events SET status = '%s' WHERE status = 'new' %s;", requestIdentifier, andCategory);
 
             // Get events to process
-            rapidjson::Value events;
+            rapidjson::Document events;
             store::GAStore::executeQuerySync(selectSql, events);
 
             // Check for errors or empty
@@ -575,7 +575,7 @@ namespace gameanalytics
             logging::GALogger::i("Event queue: Sending %d events.", events.Size());
 
             // Set status of events to 'sending' (also check for error)
-            rapidjson::Value updateResult(rapidjson::kObjectType);
+            rapidjson::Document updateResult;
             store::GAStore::executeQuerySync(updateSql, updateResult);
             if (updateResult.IsNull())
             {
@@ -593,15 +593,25 @@ namespace gameanalytics
                 if (strlen(eventDict) > 0)
                 {
                     rapidjson::Document d;
-                    d.Parse(eventDict);
-                    payloadArray.PushBack(d.Move(), allocator);
+                    rapidjson::ParseResult ok = d.Parse(eventDict);
+                    if(!ok)
+                    {
+                        logging::GALogger::d("processEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                        logging::GALogger::d("%s", eventDict);
+                    }
+                    else
+                    {
+                        rapidjson::Value v;
+                        v.CopyFrom(d, allocator);
+                        payloadArray.PushBack(v.Move(), allocator);
+                    }
                 }
             }
 
             rapidjson::StringBuffer buffer;
             {
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                events.Accept(writer);
+                payloadArray.Accept(writer);
             }
 
             // send events
@@ -622,8 +632,16 @@ namespace gameanalytics
             rapidjson::Document d;
             if(pair.second.size() > 0)
             {
-                d.Parse(pair.second.c_str());
-                dataDict.CopyFrom(d, d.GetAllocator());
+                rapidjson::ParseResult ok = d.Parse(pair.second.c_str());
+                if(!ok)
+                {
+                    logging::GALogger::d("processEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                    logging::GALogger::d("%s", pair.second.c_str());
+                }
+                else
+                {
+                    dataDict.CopyFrom(d, d.GetAllocator());
+                }
             }
 #else
             http::GAHTTPApi::sharedInstance()->sendEventsInArray(responseEnum, dataDict, payloadArray);
@@ -698,10 +716,10 @@ namespace gameanalytics
             const char* parameters[] = { state::GAState::getSessionId() };
 
             const char* sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
-            rapidjson::Value sessions(rapidjson::kArrayType);
+            rapidjson::Document sessions;
             store::GAStore::executeQuerySync(sql, parameters, 1, sessions);
 
-            if (sessions.Empty())
+            if (sessions.IsNull() || sessions.Empty())
             {
                 return;
             }
@@ -716,6 +734,11 @@ namespace gameanalytics
                 {
                     rapidjson::Document sessionEndEvent;
                     rapidjson::ParseResult ok = sessionEndEvent.Parse(session["event"].GetString());
+                    if(!ok)
+                    {
+                        logging::GALogger::d("fixMissingSessionEndEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                        logging::GALogger::d("%s", session["event"].GetString());
+                    }
                     if(!ok)
                     {
                         logging::GALogger::d("JSON parse error: %s (%u)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());

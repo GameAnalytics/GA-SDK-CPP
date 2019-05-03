@@ -13,6 +13,7 @@
 #include <utility>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
+#include "rapidjson/error/en.h"
 #include <string.h>
 #include <stdio.h>
 #if USE_TIZEN
@@ -71,8 +72,7 @@ namespace gameanalytics
             snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
             // use gzip compression on JSON body
 #if defined(_DEBUG)
-            //useGzip = false;
-            useGzip = true;
+            useGzip = false;
 #else
             useGzip = true;
 #endif
@@ -163,7 +163,12 @@ namespace gameanalytics
             logging::GALogger::d("init request content: %s", s.ptr);
 
             rapidjson::Document requestJsonDict;
-            requestJsonDict.Parse(s.ptr);
+            rapidjson::ParseResult ok = requestJsonDict.Parse(s.ptr);
+            if(!ok)
+            {
+                logging::GALogger::d("requestInitReturningDict -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                logging::GALogger::d("%s", s.ptr);
+            }
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response_code, s.ptr, "Init");
             free(s.ptr);
 
@@ -322,7 +327,12 @@ namespace gameanalytics
 
             // decode JSON
             rapidjson::Document requestJsonDict;
-            requestJsonDict.Parse(s.ptr);
+            rapidjson::ParseResult ok = requestJsonDict.Parse(s.ptr);
+            if(!ok)
+            {
+                logging::GALogger::d("sendEventsInArray -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                logging::GALogger::d("%s", s.ptr);
+            }
             free(s.ptr);
 
             if (requestJsonDict.IsNull())

@@ -33,12 +33,12 @@ namespace gameanalytics
 
         bool GAStore::executeQuerySync(const char* sql)
         {
-            rapidjson::Value v(rapidjson::kObjectType);
-            executeQuerySync(sql, v);
-            return !v.IsNull();
+            rapidjson::Document d;
+            executeQuerySync(sql, d);
+            return !d.IsNull();
         }
 
-        void GAStore::executeQuerySync(const char* sql, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, rapidjson::Document& out)
         {
             executeQuerySync(sql, {}, 0, out);
         }
@@ -46,46 +46,47 @@ namespace gameanalytics
 
         void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size)
         {
-            rapidjson::Value v;
-            executeQuerySync(sql, parameters, size, false, v);
+            rapidjson::Document d;
+            executeQuerySync(sql, parameters, size, false, d);
         }
 
-        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, rapidjson::Document& out)
         {
             executeQuerySync(sql, parameters, size, false, out);
         }
 
         void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction)
         {
-            rapidjson::Value v(rapidjson::kObjectType);
-            executeQuerySync(sql, parameters, size, useTransaction, v);
+            rapidjson::Document d;
+            executeQuerySync(sql, parameters, size, useTransaction, d);
         }
 
-        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Value& out)
+        void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Document& out)
         {
             // Force transaction if it is an update, insert or delete.
-            char sqlUpper[1025];
-            snprintf(sqlUpper, sizeof(sqlUpper), "%s", sql);
+            int arraySize = strlen(sql) + 1;
+            char* sqlUpper = new char[arraySize];
+            snprintf(sqlUpper, arraySize, "%s", sql);
             utilities::GAUtilities::uppercaseString(sqlUpper);
             if (utilities::GAUtilities::stringMatch(sqlUpper, "^(UPDATE|INSERT|DELETE)"))
             {
                 useTransaction = true;
             }
+            delete[] sqlUpper;
 
             // Get database connection from singelton sharedInstance
             sqlite3 *sqlDatabasePtr = sharedInstance()->getDatabase();
 
             // Create mutable array for results
-            rapidjson::Document results;
-            results.SetArray();
-            rapidjson::Document::AllocatorType& allocator = results.GetAllocator();
+            out.SetArray();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             if (useTransaction)
             {
                 if (sqlite3_exec(sqlDatabasePtr, "BEGIN;", 0, 0, 0) != SQLITE_OK)
                 {
                     logging::GALogger::e("SQLITE3 BEGIN ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                    out = rapidjson::Value();
+                    out.SetNull();
                     return;
                 }
             }
@@ -124,38 +125,38 @@ namespace gameanalytics
 
                         switch (sqlite3_column_type(statement, i))
                         {
-                        case SQLITE_INTEGER:
-                        {
-                            rapidjson::Value v(column, allocator);
-                            row.AddMember(v.Move(), (int)strtol(value, NULL, 10), allocator);
-                            break;
-                        }
-                        case SQLITE_FLOAT:
-                        {
-                            rapidjson::Value v(column, allocator);
-                            double d;
-                            sscanf(value, "%lf", &d);
-                            row.AddMember(v.Move(), d, allocator);
-                            break;
-                        }
-                        default:
-                        {
-                            rapidjson::Value v(column, allocator);
-                            rapidjson::Value v1(value, allocator);
-                            row.AddMember(v.Move(), v1.Move(), allocator);
-                        }
+                            case SQLITE_INTEGER:
+                            {
+                                rapidjson::Value v(column, allocator);
+                                row.AddMember(v.Move(), (int)strtol(value, NULL, 10), allocator);
+                                break;
+                            }
+                            case SQLITE_FLOAT:
+                            {
+                                rapidjson::Value v(column, allocator);
+                                double d;
+                                sscanf(value, "%lf", &d);
+                                row.AddMember(v.Move(), d, allocator);
+                                break;
+                            }
+                            default:
+                            {
+                                rapidjson::Value v(column, allocator);
+                                rapidjson::Value v1(value, allocator);
+                                row.AddMember(v.Move(), v1.Move(), allocator);
+                            }
                         }
 
                         //row[column] = value;
                     }
-                    results.PushBack(row, allocator);
+                    out.PushBack(row, allocator);
                 }
             }
             else
             {
                 // TODO(nikolaj): Should we do a db validation to see if the db is corrupt here?
                 logging::GALogger::e("SQLITE3 PREPARE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                out = rapidjson::Value();
+                out.SetNull();
                 return;
             }
 
@@ -167,7 +168,7 @@ namespace gameanalytics
                     if (sqlite3_exec(sqlDatabasePtr, "COMMIT", 0, 0, 0) != SQLITE_OK)
                     {
                         logging::GALogger::e("SQLITE3 COMMIT ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
-                        out = rapidjson::Value();
+                        out.SetNull();
                         return;
                     }
                 }
@@ -176,7 +177,7 @@ namespace gameanalytics
             {
                 logging::GALogger::d("SQLITE3 FINALIZE ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
 
-                results.Clear();
+                out.Clear();
                 if (useTransaction)
                 {
                     if (sqlite3_exec(sqlDatabasePtr, "ROLLBACK", 0, 0, 0) != SQLITE_OK)
@@ -184,12 +185,9 @@ namespace gameanalytics
                         logging::GALogger::e("SQLITE3 ROLLBACK ERROR: %s", sqlite3_errmsg(sqlDatabasePtr));
                     }
                 }
-                out = rapidjson::Value();
+                out.SetNull();
                 return;
             }
-
-            // Return results
-            out.CopyFrom(results, allocator);
         }
 
         sqlite3* GAStore::getDatabase()
@@ -357,10 +355,10 @@ namespace gameanalytics
         {
             if(getDbSizeBytes() > MaxDbSizeBytesBeforeTrim)
             {
-                rapidjson::Value resultSessionArray(rapidjson::kArrayType);
+                rapidjson::Document resultSessionArray;
                 executeQuerySync("SELECT session_id, Max(client_ts) FROM ga_events GROUP BY session_id ORDER BY client_ts LIMIT 3", resultSessionArray);
 
-                if(resultSessionArray.Size() > 0)
+                if(!resultSessionArray.IsNull() && resultSessionArray.Size() > 0)
                 {
                     char sessionDeleteString[257] = "";
 

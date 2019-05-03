@@ -645,7 +645,7 @@ namespace gameanalytics
             rapidjson::Document state_dict;
             state_dict.SetObject();
             rapidjson::Document::AllocatorType& allocator = state_dict.GetAllocator();
-            rapidjson::Value results_ga_state(rapidjson::kArrayType);
+            rapidjson::Document results_ga_state;
             store::GAStore::executeQuerySync("SELECT * FROM ga_state;", results_ga_state);
 
             if (!results_ga_state.IsNull() && !results_ga_state.Empty())
@@ -775,14 +775,8 @@ namespace gameanalytics
                 }
             }
 
-            rapidjson::Value results_ga_progression(rapidjson::kArrayType);
+            rapidjson::Document results_ga_progression;
             store::GAStore::executeQuerySync("SELECT * FROM ga_progression;", results_ga_progression);
-
-            rapidjson::StringBuffer buffer;
-            {
-                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                results_ga_progression.Accept(writer);
-            }
 
             if (!results_ga_progression.IsNull() && !results_ga_progression.Empty())
             {
