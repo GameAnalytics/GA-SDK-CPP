@@ -941,6 +941,7 @@ namespace gameanalytics
             char newSessionId[65] = "";
             utilities::GAUtilities::generateUUID(newSessionId);
             utilities::GAUtilities::lowercaseString(newSessionId);
+            logging::GALogger::d("newSessionId: %s", newSessionId);
 
             // Set session id
             snprintf(sharedInstance()->_sessionId, sizeof(sharedInstance()->_sessionId), "%s", newSessionId);

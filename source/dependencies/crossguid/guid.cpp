@@ -28,6 +28,7 @@ THE SOFTWARE.
 
 #ifdef GUID_LIBUUID
 #include <cstdlib>
+#include <random>
 #endif
 
 #ifdef GUID_CFUUID
@@ -41,6 +42,8 @@ THE SOFTWARE.
 #ifdef GUID_ANDROID
 #include <jni.h>
 #endif
+
+#include <iostream>
 
 using namespace std;
 
@@ -166,7 +169,7 @@ bool Guid::operator!=(const Guid &other) const
 
 void Guid::to_string(char* out)
 {
-    snprintf(out, 129, "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+    snprintf(out, 37, "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
         (int)_bytes[0], (int)_bytes[1], (int)_bytes[2], (int)_bytes[3],
         (int)_bytes[4], (int)_bytes[5], (int)_bytes[6], (int)_bytes[7],
         (int)_bytes[8], (int)_bytes[9], (int)_bytes[10], (int)_bytes[11],
@@ -176,19 +179,65 @@ void Guid::to_string(char* out)
 // This is the linux friendly implementation, but it could work on other
 // systems that have libuuid available
 #ifdef GUID_LIBUUID
+unsigned char random_char()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0,255);
+    return static_cast<unsigned char>(dis(gen));
+}
+
+void generate_hex(size_t len, std::vector<char>& out)
+{
+    for(size_t i = 0; i < len; ++i)
+    {
+        const auto rc = random_char();
+        char s[3];
+        snprintf(s, 3, "%02x", int(rc));
+        
+        out.push_back(s[0]);
+        out.push_back(s[1]);
+    }
+}
+
 Guid GuidGenerator::newGuid()
 {
-    char result[37];
-    srand(time(NULL));
+    std::vector<char> result;
+    generate_hex(4, result);
+    result.push_back('-');
+    generate_hex(2, result);
+    result.push_back('-');
+    generate_hex(2, result);
+    result.push_back('-');
+    generate_hex(2, result);
+    result.push_back('-');
+    generate_hex(4, result);
+    result.push_back('\0');
 
-    sprintf(result, "%x%x-%x-%x-%x-%x%x%x",
-        rand(), rand(),                 // Generates a 64-bit Hex number
-        rand(),                         // Generates a 32-bit Hex number
-        ((rand() & 0x0fff) | 0x4000),   // Generates a 32-bit Hex number of the form 4xxx (4 indicates the UUID version)
-        rand() % 0x3fff + 0x8000,       // Generates a 32-bit Hex number in the range [0x8000, 0xbfff]
-        rand(), rand(), rand());        // Generates a 96-bit Hex number
+    std::cout << result.data() << std::endl;
 
-    return result;
+    return result.data();
+
+    /*const unsigned char byteArray[16] =
+    {
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char(),
+        random_char()
+    };
+    return byteArray;*/
 }
 #endif
 
