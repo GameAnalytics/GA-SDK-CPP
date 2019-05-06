@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.3**
+* removed std::string from the SDK
+
 **2.1.2**
 * thread fixes
 * dll freeze bug fix

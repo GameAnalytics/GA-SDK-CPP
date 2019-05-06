@@ -17,11 +17,12 @@
 #if !USE_UWP && !USE_TIZEN
 #include "GAUncaughtExceptionHandler.h"
 #endif
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include <cstdlib>
 #if USE_UWP
 #include <thread>
 #endif
+#include <array>
 
 namespace gameanalytics
 {
@@ -29,7 +30,7 @@ namespace gameanalytics
 
     // ----------------------- CONFIGURE ---------------------- //
 
-    void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions01(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -47,20 +48,21 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions01(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions01(const char* customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-        std::vector<std::string> list;
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson);
+        StringVector list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions01(list);
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions02(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -78,20 +80,21 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions02(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions02(const char* customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-        std::vector<std::string> list;
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson);
+        StringVector list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions02(list);
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions)
+    void GameAnalytics::configureAvailableCustomDimensions03(const StringVector& customDimensions)
     {
         if(_endThread)
         {
@@ -109,20 +112,21 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableCustomDimensions03(STRING customDimensionsJson)
+    void GameAnalytics::configureAvailableCustomDimensions03(const char* customDimensionsJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(customDimensionsJson);
-        std::vector<std::string> list;
+        rapidjson::Document json;
+        json.Parse(customDimensionsJson);
+        StringVector list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableCustomDimensions03(list);
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+    void GameAnalytics::configureAvailableResourceCurrencies(const StringVector& resourceCurrencies)
     {
         if(_endThread)
         {
@@ -140,20 +144,21 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceCurrencies(STRING resourceCurrenciesJson)
+    void GameAnalytics::configureAvailableResourceCurrencies(const char* resourceCurrenciesJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceCurrenciesJson);
-        std::vector<std::string> list;
+        rapidjson::Document json;
+        json.Parse(resourceCurrenciesJson);
+        StringVector list;
 
-        for (unsigned int index = 0; index < json.size(); ++index)
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableResourceCurrencies(list);
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+    void GameAnalytics::configureAvailableResourceItemTypes(const StringVector& resourceItemTypes)
     {
         if(_endThread)
         {
@@ -171,27 +176,29 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::configureAvailableResourceItemTypes(STRING resourceItemTypesJson)
+    void GameAnalytics::configureAvailableResourceItemTypes(const char* resourceItemTypesJson)
     {
-        Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(resourceItemTypesJson);
-        std::vector<std::string> list;
+        rapidjson::Document json;
+        json.Parse(resourceItemTypesJson);
+        StringVector list;
 
-        for (unsigned int index = 0; index < json.size(); ++index )
+        for (rapidjson::Value::ConstValueIterator itr = json.Begin(); itr != json.End(); ++itr)
         {
-            list.push_back(json[index].asString());
+            list.add((*itr).GetString());
         }
 
         configureAvailableResourceItemTypes(list);
     }
 
-    void GameAnalytics::configureBuild(STRING build_)
+    void GameAnalytics::configureBuild(const char* build_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string build(build_);
+        std::array<char, 65> build = {'\0'};
+        snprintf(build.data(), build.size(), "%s", build_ ? build_ : "");
         threading::GAThreading::performTaskOnGAThread([build]()
         {
             if (isSdkReady(true, false))
@@ -199,23 +206,24 @@ namespace gameanalytics
                 logging::GALogger::w("Build version must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateBuild(build))
+            if (!validators::GAValidator::validateBuild(build.data()))
             {
-                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: " + build);
+                logging::GALogger::i("Validation fail - configure build: Cannot be null, empty or above 32 length. String: %s", build.data());
                 return;
             }
-            state::GAState::setBuild(build);
+            state::GAState::setBuild(build.data());
         });
     }
 
-    void GameAnalytics::configureWritablePath(STRING writablePath_)
+    void GameAnalytics::configureWritablePath(const char* writablePath_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string writablePath(writablePath_);
+        std::array<char, 65> writablePath = {'\0'};
+        snprintf(writablePath.data(), writablePath.size(), "%s", writablePath_ ? writablePath_ : "");
         threading::GAThreading::performTaskOnGAThread([writablePath]()
         {
             if (isSdkReady(true, false))
@@ -223,21 +231,22 @@ namespace gameanalytics
                 logging::GALogger::w("Writable path must be set before SDK is initialized.");
                 return;
             }
-            device::GADevice::setWritablePath(writablePath);
+            device::GADevice::setWritablePath(writablePath.data());
 #if !USE_UWP && !USE_TIZEN
             logging::GALogger::customInitializeLog();
 #endif
         });
     }
 
-    void GameAnalytics::configureDeviceModel(STRING deviceModel_)
+    void GameAnalytics::configureDeviceModel(const char* deviceModel_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string deviceModel(deviceModel_);
+        std::array<char, 65> deviceModel = {'\0'};
+        snprintf(deviceModel.data(), deviceModel.size(), "%s", deviceModel_ ? deviceModel_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceModel]()
         {
             if (isSdkReady(true, false))
@@ -245,23 +254,24 @@ namespace gameanalytics
                 logging::GALogger::w("Device model must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateString(deviceModel, true))
+            if (!validators::GAValidator::validateString(deviceModel.data(), true))
             {
-                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: " + deviceModel);
+                logging::GALogger::i("Validation fail - configure device model: Cannot be null, empty or above 64 length. String: %s", deviceModel.data());
                 return;
             }
-            device::GADevice::setDeviceModel(deviceModel);
+            device::GADevice::setDeviceModel(deviceModel.data());
         });
     }
 
-    void GameAnalytics::configureDeviceManufacturer(STRING deviceManufacturer_)
+    void GameAnalytics::configureDeviceManufacturer(const char* deviceManufacturer_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string deviceManufacturer(deviceManufacturer_);
+        std::array<char, 65> deviceManufacturer = {'\0'};
+        snprintf(deviceManufacturer.data(), deviceManufacturer.size(), "%s", deviceManufacturer_ ? deviceManufacturer_ : "");
         threading::GAThreading::performTaskOnGAThread([deviceManufacturer]()
         {
             if (isSdkReady(true, false))
@@ -269,69 +279,72 @@ namespace gameanalytics
                 logging::GALogger::w("Device manufacturer must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateString(deviceManufacturer, true))
+            if (!validators::GAValidator::validateString(deviceManufacturer.data(), true))
             {
-                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: " + deviceManufacturer);
+                logging::GALogger::i("Validation fail - configure device manufacturer: Cannot be null, empty or above 64 length. String: %s", deviceManufacturer.data());
                 return;
             }
-            device::GADevice::setDeviceManufacturer(deviceManufacturer);
+            device::GADevice::setDeviceManufacturer(deviceManufacturer.data());
         });
     }
 
-    void GameAnalytics::configureSdkGameEngineVersion(STRING sdkGameEngineVersion_)
+    void GameAnalytics::configureSdkGameEngineVersion(const char* sdkGameEngineVersion_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string sdkGameEngineVersion(sdkGameEngineVersion_);
+        std::array<char, 65> sdkGameEngineVersion = {'\0'};
+        snprintf(sdkGameEngineVersion.data(), sdkGameEngineVersion.size(), "%s", sdkGameEngineVersion_ ? sdkGameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([sdkGameEngineVersion]()
         {
             if (isSdkReady(true, false))
             {
                 return;
             }
-            if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion))
+            if (!validators::GAValidator::validateSdkWrapperVersion(sdkGameEngineVersion.data()))
             {
-                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: " + sdkGameEngineVersion);
+                logging::GALogger::i("Validation fail - configure sdk version: Sdk version not supported. String: %s", sdkGameEngineVersion.data());
                 return;
             }
-            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion);
+            device::GADevice::setSdkGameEngineVersion(sdkGameEngineVersion.data());
         });
     }
 
-    void GameAnalytics::configureGameEngineVersion(STRING gameEngineVersion_)
+    void GameAnalytics::configureGameEngineVersion(const char* gameEngineVersion_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string gameEngineVersion(gameEngineVersion_);
+        std::array<char, 65> gameEngineVersion = {'\0'};
+        snprintf(gameEngineVersion.data(), gameEngineVersion.size(), "%s", gameEngineVersion_ ? gameEngineVersion_ : "");
         threading::GAThreading::performTaskOnGAThread([gameEngineVersion]()
         {
             if (isSdkReady(true, false))
             {
                 return;
             }
-            if (!validators::GAValidator::validateEngineVersion(gameEngineVersion))
+            if (!validators::GAValidator::validateEngineVersion(gameEngineVersion.data()))
             {
-                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: " + gameEngineVersion);
+                logging::GALogger::i("Validation fail - configure engine: Engine version not supported. String: %s", gameEngineVersion.data());
                 return;
             }
-            device::GADevice::setGameEngineVersion(gameEngineVersion);
+            device::GADevice::setGameEngineVersion(gameEngineVersion.data());
         });
     }
 
-    void GameAnalytics::configureUserId(STRING uId_)
+    void GameAnalytics::configureUserId(const char* uId_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string uId(uId_);
+        std::array<char, 129> uId = {'\0'};
+        snprintf(uId.data(), uId.size(), "%s", uId_ ? uId_ : "");
         threading::GAThreading::performTaskOnGAThread([uId]()
         {
             if (isSdkReady(true, false))
@@ -339,27 +352,29 @@ namespace gameanalytics
                 logging::GALogger::w("A custom user id must be set before SDK is initialized.");
                 return;
             }
-            if (!validators::GAValidator::validateUserId(uId))
+            if (!validators::GAValidator::validateUserId(uId.data()))
             {
-                logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: " + uId);
+                logging::GALogger::i("Validation fail - configure user_id: Cannot be null, empty or above 64 length. Will use default user_id method. Used string: %s", uId.data());
                 return;
             }
 
-            state::GAState::setUserId(uId);
+            state::GAState::setUserId(uId.data());
         });
     }
 
     // ----------------------- INITIALIZE ---------------------- //
 
-    void GameAnalytics::initialize(STRING gameKey_, STRING gameSecret_)
+    void GameAnalytics::initialize(const char* gameKey_, const char* gameSecret_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string gameKey(gameKey_);
-        std::string gameSecret(gameSecret_);
+        std::array<char, 65> gameKey = {'\0'};
+        snprintf(gameKey.data(), gameKey.size(), "%s", gameKey_ ? gameKey_ : "");
+        std::array<char, 65> gameSecret = {'\0'};
+        snprintf(gameSecret.data(), gameSecret.size(), "%s", gameSecret_ ? gameSecret_ : "");
 #if USE_UWP
         Windows::ApplicationModel::Core::CoreApplication::Suspending += ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::SuspendingEventArgs^>(&GameAnalytics::OnAppSuspending);
         Windows::ApplicationModel::Core::CoreApplication::Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(&GameAnalytics::OnAppResuming);
@@ -375,17 +390,17 @@ namespace gameanalytics
             errorreporter::GAUncaughtExceptionHandler::setUncaughtExceptionHandlers();
 #endif
 
-            if (!validators::GAValidator::validateKeys(gameKey, gameSecret))
+            if (!validators::GAValidator::validateKeys(gameKey.data(), gameSecret.data()))
             {
-                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: " + gameKey + ", secretKey: " + gameSecret);
+                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: %s, secretKey: %s", gameKey.data(), gameSecret.data());
                 return;
             }
 
-            state::GAState::setKeys(gameKey, gameSecret);
+            state::GAState::setKeys(gameKey.data(), gameSecret.data());
 
-            if (!store::GAStore::ensureDatabase(false, gameKey))
+            if (!store::GAStore::ensureDatabase(false, gameKey.data()))
             {
-                logging::GALogger::w("Could not ensure/validate local event database: " + device::GADevice::getWritablePath());
+                logging::GALogger::w("Could not ensure/validate local event database: %s", device::GADevice::getWritablePath());
             }
 
             state::GAState::internalInitialize();
@@ -396,33 +411,38 @@ namespace gameanalytics
 
 
     void GameAnalytics::addBusinessEvent(
-        STRING currency,
+        const char* currency,
         int amount,
-        STRING itemType,
-        STRING itemId,
-        STRING cartType)
+        const char* itemType,
+        const char* itemId,
+        const char* cartType)
     {
         addBusinessEvent(currency, amount, itemType, itemId, cartType, "");
     }
 
     void GameAnalytics::addBusinessEvent(
-        STRING currency_,
+        const char* currency_,
         int amount,
-        STRING itemType_,
-        STRING itemId_,
-        STRING cartType_,
-        STRING fields_)
+        const char* itemType_,
+        const char* itemId_,
+        const char* cartType_,
+        const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string currency(currency_);
-        std::string itemType(itemType_);
-        std::string itemId(itemId_);
-        std::string cartType(cartType_);
-        std::string fields(fields_);
+        std::array<char, 65> currency = {'\0'};
+        snprintf(currency.data(), currency.size(), "%s", currency_ ? currency_ : "");
+        std::array<char, 65> itemType = {'\0'};
+        snprintf(itemType.data(), itemType.size(), "%s", itemType_ ? itemType_ : "");
+        std::array<char, 65> itemId = {'\0'};
+        snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
+        std::array<char, 65> cartType = {'\0'};
+        snprintf(cartType.data(), cartType.size(), "%s", cartType_ ? cartType_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
         {
             if (!isSdkReady(true, true, "Could not add business event"))
@@ -430,27 +450,33 @@ namespace gameanalytics
                 return;
             }
             // Send to events
-            events::GAEvents::addBusinessEvent(currency, amount, itemType, itemId, cartType, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addBusinessEvent(currency.data(), amount, itemType.data(), itemId.data(), cartType.data(), fieldsJson);
         });
     }
 
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId)
     {
         addResourceEvent(flowType, currency, amount, itemType, itemId, "");
     }
 
-    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, STRING currency_, float amount, STRING itemType_, STRING itemId_, STRING fields_)
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency_, float amount, const char* itemType_, const char* itemId_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string currency(currency_);
-        std::string itemType(itemType_);
-        std::string itemId(itemId_);
-        std::string fields(fields_);
+        std::array<char, 65> currency = {'\0'};
+        snprintf(currency.data(), currency.size(), "%s", currency_ ? currency_ : "");
+        std::array<char, 65> itemType = {'\0'};
+        snprintf(itemType.data(), itemType.size(), "%s", itemType_ ? itemType_ : "");
+        std::array<char, 65> itemId = {'\0'};
+        snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add resource event"))
@@ -458,26 +484,32 @@ namespace gameanalytics
                 return;
             }
 
-            events::GAEvents::addResourceEvent(flowType, currency, amount, itemType, itemId, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addResourceEvent(flowType, currency.data(), amount, itemType.data(), itemId.data(), fieldsJson);
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03)
     {
         addProgressionEvent(progressionStatus, progression01, progression02, progression03, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, STRING fields_)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string progression01(progression01_);
-        std::string progression02(progression02_);
-        std::string progression03(progression03_);
-        std::string fields(fields_);
+        std::array<char, 65> progression01 = {'\0'};
+        snprintf(progression01.data(), progression01.size(), "%s", progression01_ ? progression01_ : "");
+        std::array<char, 65> progression02 = {'\0'};
+        snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
+        std::array<char, 65> progression03 = {'\0'};
+        snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_);
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
@@ -486,26 +518,32 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, 0.0, false, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0.0, false, fieldsJson);
         });
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score)
     {
         addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, "");
     }
 
-    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01_, STRING progression02_, STRING progression03_, int score, STRING fields_)
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, int score, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string progression01(progression01_);
-        std::string progression02(progression02_);
-        std::string progression03(progression03_);
-        std::string fields(fields_);
+        std::array<char, 65> progression01 = {'\0'};
+        snprintf(progression01.data(), progression01.size(), "%s", progression01_ ? progression01_ : "");
+        std::array<char, 65> progression02 = {'\0'};
+        snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
+        std::array<char, 65> progression03 = {'\0'};
+        snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
@@ -514,79 +552,93 @@ namespace gameanalytics
             }
 
             // Send to events
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, true, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), score, true, fieldsJson);
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId)
+    void GameAnalytics::addDesignEvent(const char* eventId)
     {
         addDesignEvent(eventId, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, STRING fields_)
+    void GameAnalytics::addDesignEvent(const char* eventId_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string eventId(eventId_);
-        std::string fields(fields_);
+        std::array<char, 400> eventId = {'\0'};
+        snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, 0, false, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addDesignEvent(eventId.data(), 0, false, fieldsJson);
         });
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId, double value)
+    void GameAnalytics::addDesignEvent(const char* eventId, double value)
     {
         addDesignEvent(eventId, value, "");
     }
 
-    void GameAnalytics::addDesignEvent(STRING eventId_, double value, STRING fields_)
+    void GameAnalytics::addDesignEvent(const char* eventId_, double value, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string eventId(eventId_);
-        std::string fields(fields_);
+        std::array<char, 400> eventId = {'\0'};
+        snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
                 return;
             }
-            events::GAEvents::addDesignEvent(eventId, value, true, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addDesignEvent(eventId.data(), value, true, fieldsJson);
         });
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message)
     {
         addErrorEvent(severity, message, "");
     }
 
-    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, STRING message_, STRING fields_)
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message_, const char* fields_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string message(message_);
-        std::string fields(fields_);
+        std::array<char, 8200> message = {'\0'};
+        snprintf(message.data(), message.size(), "%s", message_ ? message_ : "");
+        std::array<char, 65> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
             if (!isSdkReady(true, true, "Could not add error event"))
             {
                 return;
             }
-            events::GAEvents::addErrorEvent(severity, message, utilities::GAUtilities::jsonFromString(fields));
+            rapidjson::Document fieldsJson;
+            fieldsJson.Parse(fields.data());
+            events::GAEvents::addErrorEvent(severity, message.data(), fieldsJson);
         });
     }
 
@@ -684,76 +736,80 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setCustomDimension01(STRING dimension_)
+    void GameAnalytics::setCustomDimension01(const char* dimension_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string dimension(dimension_);
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension01(dimension))
+            if (!validators::GAValidator::validateDimension01(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom01 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                logging::GALogger::w("Could not set custom01 dimension value to '%s'. Value not found in available custom01 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension01(dimension);
+            state::GAState::setCustomDimension01(dimension.data());
         });
     }
 
-    void GameAnalytics::setCustomDimension02(STRING dimension_)
+    void GameAnalytics::setCustomDimension02(const char* dimension_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string dimension(dimension_);
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension02(dimension))
+            if (!validators::GAValidator::validateDimension02(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom02 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                logging::GALogger::w("Could not set custom02 dimension value to '%s'. Value not found in available custom02 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension02(dimension);
+            state::GAState::setCustomDimension02(dimension.data());
         });
     }
 
-    void GameAnalytics::setCustomDimension03(STRING dimension_)
+    void GameAnalytics::setCustomDimension03(const char* dimension_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string dimension(dimension_);
+        std::array<char, 65> dimension = {'\0'};
+        snprintf(dimension.data(), dimension.size(), "%s", dimension_ ? dimension_ : "");
         threading::GAThreading::performTaskOnGAThread([dimension]()
         {
-            if (!validators::GAValidator::validateDimension03(dimension))
+            if (!validators::GAValidator::validateDimension03(dimension.data()))
             {
-                logging::GALogger::w("Could not set custom03 dimension value to '" + std::string(dimension) + "'. Value not found in available custom01 dimension values");
+                logging::GALogger::w("Could not set custom03 dimension value to '%s'. Value not found in available custom02 dimension values", dimension.data());
                 return;
             }
-            state::GAState::setCustomDimension03(dimension);
+            state::GAState::setCustomDimension03(dimension.data());
         });
     }
 
-    void GameAnalytics::setFacebookId(STRING facebookId_)
+    void GameAnalytics::setFacebookId(const char* facebookId_)
     {
         if(_endThread)
         {
             return;
         }
 
-        std::string facebookId(facebookId_);
+        std::array<char, 65> facebookId = {'\0'};
+        snprintf(facebookId.data(), facebookId.size(), "%s", facebookId_ ? facebookId_ : "");
         threading::GAThreading::performTaskOnGAThread([facebookId]()
         {
-            if (validators::GAValidator::validateFacebookId(facebookId))
+            if (validators::GAValidator::validateFacebookId(facebookId.data()))
             {
-                state::GAState::setFacebookId(facebookId);
+                state::GAState::setFacebookId(facebookId.data());
             }
         });
     }
@@ -790,18 +846,14 @@ namespace gameanalytics
         });
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key)
+    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key)
     {
         return getCommandCenterValueAsString(key, "");
     }
 
-    RETURN_STRING GameAnalytics::getCommandCenterValueAsString(STRING key, STRING defaultValue)
+    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue)
     {
-#if USE_LINUX
-        return state::GAState::getConfigurationStringValue(key, defaultValue).c_str();
-#else
         return state::GAState::getConfigurationStringValue(key, defaultValue);
-#endif
     }
 
     bool GameAnalytics::isCommandCenterReady()
@@ -819,13 +871,9 @@ namespace gameanalytics
         state::GAState::removeCommandCenterListener(listener);
     }
 
-    RETURN_STRING GameAnalytics::getConfigurationsContentAsString()
+    std::vector<char> GameAnalytics::getConfigurationsContentAsString()
     {
-#if USE_LINUX
-        return state::GAState::getConfigurationsContentAsString().c_str();
-#else
         return state::GAState::getConfigurationsContentAsString();
-#endif
     }
 
     void GameAnalytics::startSession()
@@ -932,102 +980,95 @@ namespace gameanalytics
         return _endThread || threading::GAThreading::isThreadEnding();
     }
 
-#if !USE_UWP && !USE_TIZEN
-    void GameAnalytics::addCustomLogStream(std::ostream& os)
-    {
-        logging::GALogger::addCustomLogStream(os);
-    }
-#endif
-
 #if USE_UWP
     void GameAnalytics::configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions01(list);
     }
 
     void GameAnalytics::configureAvailableCustomDimensions02(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions02(list);
     }
 
     void GameAnalytics::configureAvailableCustomDimensions03(const std::vector<std::wstring>& customDimensions)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& dimension : customDimensions)
         {
-            list.push_back(utilities::GAUtilities::ws2s(dimension));
+            list.add(utilities::GAUtilities::ws2s(dimension).c_str());
         }
         configureAvailableCustomDimensions03(list);
     }
 
     void GameAnalytics::configureAvailableResourceCurrencies(const std::vector<std::wstring>& resourceCurrencies)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& currency : resourceCurrencies)
         {
-            list.push_back(utilities::GAUtilities::ws2s(currency));
+            list.add(utilities::GAUtilities::ws2s(currency).c_str());
         }
         configureAvailableResourceCurrencies(list);
     }
 
     void GameAnalytics::configureAvailableResourceItemTypes(const std::vector<std::wstring>& resourceItemTypes)
     {
-        std::vector<std::string> list;
+        StringVector list;
         for (const std::wstring& itemType : resourceItemTypes)
         {
-            list.push_back(utilities::GAUtilities::ws2s(itemType));
+            list.add(utilities::GAUtilities::ws2s(itemType).c_str());
         }
         configureAvailableResourceItemTypes(list);
     }
 
     void GameAnalytics::configureBuild(const std::wstring& build)
     {
-        configureBuild(utilities::GAUtilities::ws2s(build));
+        configureBuild(utilities::GAUtilities::ws2s(build).c_str());
     }
 
     void GameAnalytics::configureWritablePath(const std::wstring& writablePath)
     {
-        configureWritablePath(utilities::GAUtilities::ws2s(writablePath));
+        configureWritablePath(utilities::GAUtilities::ws2s(writablePath).c_str());
     }
 
     void GameAnalytics::configureDeviceModel(const std::wstring& deviceModel)
     {
-        configureDeviceModel(utilities::GAUtilities::ws2s(deviceModel));
+        configureDeviceModel(utilities::GAUtilities::ws2s(deviceModel).c_str());
     }
 
     void GameAnalytics::configureDeviceManufacturer(const std::wstring& deviceManufacturer)
     {
-        configureDeviceManufacturer(utilities::GAUtilities::ws2s(deviceManufacturer));
+        configureDeviceManufacturer(utilities::GAUtilities::ws2s(deviceManufacturer).c_str());
     }
 
     void GameAnalytics::configureSdkGameEngineVersion(const std::wstring& sdkGameEngineVersion)
     {
-        configureSdkGameEngineVersion(utilities::GAUtilities::ws2s(sdkGameEngineVersion));
+        configureSdkGameEngineVersion(utilities::GAUtilities::ws2s(sdkGameEngineVersion).c_str());
     }
 
     void GameAnalytics::configureGameEngineVersion(const std::wstring& engineVersion)
     {
-        configureGameEngineVersion(utilities::GAUtilities::ws2s(engineVersion));
+        configureGameEngineVersion(utilities::GAUtilities::ws2s(engineVersion).c_str());
     }
 
     void GameAnalytics::configureUserId(const std::wstring& uId)
     {
-        configureUserId(utilities::GAUtilities::ws2s(uId));
+        configureUserId(utilities::GAUtilities::ws2s(uId).c_str());
     }
 
     void GameAnalytics::initialize(const std::wstring& gameKey, const std::wstring& gameSecret)
     {
-        initialize(utilities::GAUtilities::ws2s(gameKey), utilities::GAUtilities::ws2s(gameSecret));
+        initialize(utilities::GAUtilities::ws2s(gameKey).c_str(), utilities::GAUtilities::ws2s(gameSecret).c_str());
     }
 
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType)
@@ -1037,7 +1078,7 @@ namespace gameanalytics
 
     void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields)
     {
-        addBusinessEvent(utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(cartType), utilities::GAUtilities::ws2s(fields));
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(cartType).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
@@ -1047,7 +1088,7 @@ namespace gameanalytics
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const std::wstring& fields)
     {
-        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency), amount, utilities::GAUtilities::ws2s(itemType), utilities::GAUtilities::ws2s(itemId), utilities::GAUtilities::ws2s(fields));
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
@@ -1057,7 +1098,7 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), utilities::GAUtilities::ws2s(fields));
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
@@ -1067,7 +1108,7 @@ namespace gameanalytics
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields)
     {
-        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01), utilities::GAUtilities::ws2s(progression02), utilities::GAUtilities::ws2s(progression03), score, utilities::GAUtilities::ws2s(fields));
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), score, utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId)
@@ -1077,7 +1118,7 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, const std::wstring& fields)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), utilities::GAUtilities::ws2s(fields));
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
@@ -1087,7 +1128,7 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields)
     {
-        addDesignEvent(utilities::GAUtilities::ws2s(eventId), value, utilities::GAUtilities::ws2s(fields));
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), value, utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
@@ -1097,27 +1138,27 @@ namespace gameanalytics
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields)
     {
-        addErrorEvent(severity, utilities::GAUtilities::ws2s(message), utilities::GAUtilities::ws2s(fields));
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
     void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)
     {
-        setCustomDimension01(utilities::GAUtilities::ws2s(dimension01));
+        setCustomDimension01(utilities::GAUtilities::ws2s(dimension01).c_str());
     }
 
     void GameAnalytics::setCustomDimension02(const std::wstring& dimension02)
     {
-        setCustomDimension02(utilities::GAUtilities::ws2s(dimension02));
+        setCustomDimension02(utilities::GAUtilities::ws2s(dimension02).c_str());
     }
 
     void GameAnalytics::setCustomDimension03(const std::wstring& dimension03)
     {
-        setCustomDimension03(utilities::GAUtilities::ws2s(dimension03));
+        setCustomDimension03(utilities::GAUtilities::ws2s(dimension03).c_str());
     }
 
     void GameAnalytics::setFacebookId(const std::wstring& facebookId)
     {
-        setFacebookId(utilities::GAUtilities::ws2s(facebookId));
+        setFacebookId(utilities::GAUtilities::ws2s(facebookId).c_str());
     }
 #endif
 
@@ -1133,11 +1174,12 @@ namespace gameanalytics
         return isSdkReady(needsInitialized, warn, "");
     }
 
-    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, std::string message)
+    bool GameAnalytics::isSdkReady(bool needsInitialized, bool warn, const char* message)
     {
-        if (!message.empty())
+        char m[33] = "";
+        if (strlen(message) > 0)
         {
-            message = message + ": ";
+            snprintf(m, sizeof(m), "%s: ", message);
         }
 
         // Make sure database is ready
@@ -1145,7 +1187,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "Datastore not initialized");
+                logging::GALogger::w("%sDatastore not initialized", m);
             }
             return false;
         }
@@ -1154,7 +1196,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "SDK is not initialized");
+                logging::GALogger::w("%sSDK is not initialized", m);
             }
             return false;
         }
@@ -1163,7 +1205,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "SDK is disabled");
+                logging::GALogger::w("%sSDK is disabled", m);
             }
             return false;
         }
@@ -1173,7 +1215,7 @@ namespace gameanalytics
         {
             if (warn)
             {
-                logging::GALogger::w(message + "Session has not started yet");
+                logging::GALogger::w("%sSession has not started yet", m);
             }
             return false;
         }

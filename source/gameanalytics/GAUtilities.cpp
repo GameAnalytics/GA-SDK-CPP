@@ -6,16 +6,23 @@
 //#include <climits>
 #include "GAUtilities.h"
 #include "GALogger.h"
-#include <algorithm>
+#include <string.h>
+#include <stdio.h>
+#include <sstream>
+#if USE_LINUX
+#include <regex.h>
+#include <iterator>
+#else
 #include <regex>
+#endif
 #include <limits.h>
 #if USE_UWP
 #include <Objbase.h>
 #else
 #include <hmac_sha2.h>
 #include <guid.h>
-#include <sstream>
 #endif
+#include <cctype>
 
 // From crypto
 #define MINIZ_HEADER_FILE_ONLY
@@ -25,10 +32,15 @@ namespace gameanalytics
 {
     namespace utilities
     {
+#ifdef _WIN32
+        char GAUtilities::pathSeparator[2] = "\\";
+#else
+        char GAUtilities::pathSeparator[2] = "/";
+#endif
+
         // Compress a STL string using zlib with given compression level and return the binary data.
         // Note: the zlib header is supressed
-        static std::string deflate_string(const std::string& str,
-            int compressionlevel = Z_BEST_COMPRESSION)
+        static std::vector<char> deflate_string(const char* str, int compressionlevel = Z_BEST_COMPRESSION)
         {
             // z_stream is zlib's control structure
             z_stream zs;
@@ -40,14 +52,14 @@ namespace gameanalytics
                 throw(std::runtime_error("deflateInit failed while compressing."));
             }
 
-            zs.next_in = (Bytef*)str.data();
+            zs.next_in = (Bytef*)str;
             //zs.next_in = reinterpret_cast<Bytef*>(str.data());
 
             // set the z_stream's input
-            zs.avail_in = static_cast<unsigned int>(str.size());
+            zs.avail_in = static_cast<unsigned int>(strlen(str));
             int ret;
             static char outbuffer[32768];
-            std::string outstring;
+            std::vector<char> outstring;
 
             // retrieve the compressed bytes blockwise
             do
@@ -59,20 +71,24 @@ namespace gameanalytics
 
                 if (outstring.size() < zs.total_out)
                 {
+                    size_t s = zs.total_out - outstring.size();
                     // append the block to the output string
-                    outstring.append(outbuffer,
-                        zs.total_out - outstring.size());
+                    for(size_t i = 0; i < s; ++i)
+                    {
+                        outstring.push_back(outbuffer[i]);
+                    }
                 }
             } while (ret == Z_OK);
 
             deflateEnd(&zs);
 
-            if (ret != Z_STREAM_END) {
+            if (ret != Z_STREAM_END)
+            {
                 // an error occurred that was not EOF
-                std::ostringstream oss;
-                oss << "Exception during zlib compression: (" << ret << ") " << zs.msg;
-                throw(std::runtime_error(oss.str()));
+                logging::GALogger::e("Exception during zlib compression: (%d) %s", ret, zs.msg);
+                outstring.clear();
             }
+
             return outstring;
         }
 
@@ -193,14 +209,11 @@ namespace gameanalytics
             *buf++ = '\0';
         }
 #endif
-
         // gzip compresses a string
-        static std::string compress_string_gzip(const std::string& str,
-            int compressionlevel = Z_BEST_COMPRESSION)
+        static std::vector<char> compress_string_gzip(const char* str, int compressionlevel = Z_BEST_COMPRESSION)
         {
             // https://tools.ietf.org/html/rfc1952
-            std::stringstream ss;
-            std::string deflated = deflate_string(str, compressionlevel);
+            std::vector<char> deflated = deflate_string(str, compressionlevel);
 
             static const char gzip_header[10] =
             { '\037', '\213', Z_DEFLATED, 0,
@@ -209,28 +222,46 @@ namespace gameanalytics
             };
 
             // Note: apparently, the crc is never validated on ther server side. So I'm not sure, if I have to convert it to little endian.
-            uint32_t crc = to_little_endian(crc32(0, (unsigned char*)str.data(), str.size()));
-            uint32 size  = to_little_endian(static_cast<unsigned int>(str.size()));
+            uint32_t crc = to_little_endian(crc32(0, (unsigned char*)str, strlen(str)));
+            uint32 size  = to_little_endian(static_cast<unsigned int>(strlen(str)));
 
-            ss.write(gzip_header, sizeof(gzip_header));
-            ss.write(deflated.data(), deflated.size());
-            ss.write((const char*)&crc, 4);
-            ss.write((const char*)&size, 4);
+            size_t totalSize = sizeof(gzip_header);
+            totalSize += deflated.size();
+            totalSize += 8;
+            char* resultArray = new char[totalSize];
+            size_t current = 0;
+            for(size_t i = 0; i < sizeof(gzip_header); ++i)
+            {
+                resultArray[i] = gzip_header[i];
+            }
+            current += sizeof(gzip_header);
+            for(size_t i = 0; i < deflated.size(); ++i)
+            {
+                resultArray[i + current] = deflated[i];
+            }
+            current += deflated.size();
+            strncpy(resultArray + current, (const char*)&crc, 4);
+            current += 4;
+            strncpy(resultArray + current, (const char*)&size, 4);
 
-            return ss.str();
+            std::vector<char> result;
+
+            for(size_t i = 0; i < totalSize; ++i)
+            {
+                result.push_back(resultArray[i]);
+            }
+            delete[] resultArray;
+
+            return result;
         }
 
-        std::string GAUtilities::getPathSeparator()
+        const char* GAUtilities::getPathSeparator()
         {
-#ifdef _WIN32
-            return "\\";
-#else
-            return "/";
-#endif
+            return pathSeparator;
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::generateUUID()
+        void GAUtilities::generateUUID(char* out)
         {
 #if USE_UWP
             GUID result;
@@ -244,21 +275,20 @@ namespace gameanalytics
 
                 // Remove curly brackets.
                 auto sessionId = guidString.substr(1, guidString.length() - 2);
-                return ws2s(sessionId);
+                std::string result = ws2s(sessionId);
+                snprintf(out, result.size() + 1, "%s", result.c_str());
             }
 
             throw Platform::Exception::CreateException(hr);
 #else
             GuidGenerator generator;
             auto myGuid = generator.newGuid();
-            std::stringstream stream;
-            stream << myGuid;
-            return stream.str();
+            myGuid.to_string(out);
 #endif
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::hmacWithKey(const std::string& key, const std::string& data)
+        void GAUtilities::hmacWithKey(const char* key, const std::vector<char>& data, char* out)
         {
 #if USE_UWP
             using namespace Platform;
@@ -278,31 +308,42 @@ namespace gameanalytics
 
             auto hashedJsonBuffer = CryptographicEngine::Sign(hmacKey, dataBuffer);
             auto hashedJsonBase64 = CryptographicBuffer::EncodeToBase64String(hashedJsonBuffer);
-            return utilities::GAUtilities::ws2s(hashedJsonBase64->Data());
+            snprintf(out, 129, "%s", utilities::GAUtilities::ws2s(hashedJsonBase64->Data()).c_str());
 #else
             unsigned char mac[SHA256_DIGEST_SIZE];
             hmac_sha256_2(
-                (unsigned char*)key.data(),
-                key.size(),
+                (unsigned char*)key,
+                strlen(key),
                 (unsigned char*)data.data(),
                 data.size(),
                 mac,
                 SHA256_DIGEST_SIZE
             );
             int output_size = base64_needed_encoded_length(SHA256_DIGEST_SIZE);
-            std::vector<unsigned char> ret(output_size);
-            GAUtilities::base64_encode(mac, SHA256_DIGEST_SIZE, ret.data());
+            unsigned char* ret = new unsigned char[output_size];
+            GAUtilities::base64_encode(mac, SHA256_DIGEST_SIZE, ret);
 
-            return {
-                (char*)ret.data(),
-                (char*)ret.data()+ret.size()
-            };
+            snprintf(out, output_size, "%s", ret);
+            delete[] ret;
 #endif
         }
 
         // TODO(nikolaj): explain function
-        bool GAUtilities::stringMatch(const std::string& string, const std::string& pattern)
+        bool GAUtilities::stringMatch(const char* string, const char* pattern)
         {
+
+#if USE_LINUX
+           int status;
+           regex_t re;
+           if(regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
+           {
+               return true;
+           }
+
+           status = regexec(&re, string, (size_t)0, NULL, 0);
+           regfree(&re);
+           return status == 0;
+#else
             try
             {
                 std::regex expression(pattern);
@@ -310,7 +351,7 @@ namespace gameanalytics
             }
             catch (const std::regex_error& e)
             {
-                logging::GALogger::e("failed to parse regular expression '" + pattern + "', code: " + std::to_string(e.code()) + ", what: " + e.what());
+                logging::GALogger::e("failed to parse regular expression '%s', code: %d, what: %s", pattern, e.code(), e.what());
                 logging::GALogger::e("Please note, that the gnustl might not have regex support yet: https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html");
                 #if _DEBUG
                 throw;
@@ -318,83 +359,145 @@ namespace gameanalytics
                 return true;
                 #endif
             }
+#endif
         }
 
-        std::string GAUtilities::gzipCompress(const std::string& data)
+        std::vector<char> GAUtilities::gzipCompress(const char* data)
         {
             return compress_string_gzip(data);
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::jsonToString(const Json::Value& obj)
+        bool GAUtilities::stringVectorContainsString(const StringVector& vector, const char* search)
         {
-            Json::FastWriter writer;
-            std::string output = writer.write(obj);
-            return output;
-        }
-
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::arrayOfObjectsToJsonString(const std::vector<Json::Value>& arr)
-        {
-            Json::Value json_array(Json::arrayValue);
-            for (const auto& x : arr)
+            if (vector.getVector().size() == 0)
             {
-                json_array.append(x);
-            }
-            return jsonToString(json_array);
-        }
-
-        // TODO(nikolaj): explain function
-        Json::Value GAUtilities::jsonFromString(const std::string& string)
-        {
-            Json::Reader reader;
-            Json::Value parsingResult;
-            bool parsed = reader.parse(string, parsingResult);
-            if (!parsed)
-            {
-                return {};
-            }
-            return parsingResult;
-        }
-
-        // TODO(nikolaj): explain function
-        bool GAUtilities::stringVectorContainsString(std::vector<std::string> vector, std::string search)
-        {
-            if (vector.size() == 0) {
                 return false;
             }
 
-            std::vector<std::string>::iterator it = std::find(vector.begin(), vector.end(), search);
-            return it != vector.end();
+            for (CharArray entry : vector.getVector())
+            {
+                if(strcmp(entry.array, search) == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // using std::chrono to get time
-        Json::Int64 GAUtilities::timeIntervalSince1970()
+        int64_t GAUtilities::timeIntervalSince1970()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         }
 
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::uppercaseString(std::string s)
+        bool GAUtilities::isStringNullOrEmpty(const char* s)
         {
-            std::transform(s.begin(), s.end(), s.begin(), toupper);
-            return s;
-        }
-
-
-        // TODO(nikolaj): explain function
-        std::string GAUtilities::lowercaseString(std::string s)
-        {
-            std::transform(s.begin(), s.end(), s.begin(), tolower);
-            return s;
+            return !s || strlen(s) == 0;
         }
 
         // TODO(nikolaj): explain function
-        std::string GAUtilities::joinStringArray(const std::vector<std::string>& v, const std::string& delimiter)
+        void GAUtilities::uppercaseString(char* s)
         {
-            std::stringstream s;
-            copy(v.begin(), v.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
-            return s.str();
+            while ((*s = std::toupper(*s)))
+            {
+                ++s;
+            }
+        }
+
+        // TODO(nikolaj): explain function
+        void GAUtilities::lowercaseString(char* s)
+        {
+            while ((*s = std::tolower(*s)))
+            {
+                ++s;
+            }
+        }
+
+        // TODO(nikolaj): explain function
+        void GAUtilities::printJoinStringArray(const StringVector& v, const char* format, const char* delimiter)
+        {
+            size_t delimiterSize = strlen(delimiter);
+            size_t vectorSize = v.getVector().size();
+            size_t totalSize = (vectorSize - 1) * delimiterSize + 1;
+
+            for (size_t i = 0; i < vectorSize; ++i)
+            {
+                totalSize += strlen(v.getVector()[i].array);
+            }
+
+            char* result = new char[totalSize];
+            result[0] = 0;
+            for (size_t i = 0; i < vectorSize; ++i)
+            {
+                strcat(result, v.getVector()[i].array);
+                if(i < vectorSize - 1)
+                {
+                    strcat(result, delimiter);
+                }
+            }
+
+            logging::GALogger::i(format, result);
+            delete[] result;
+        }
+
+        void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const rapidjson::Value& value)
+        {
+            rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+            rapidjson::Value::MemberIterator iter = d.FindMember(key);
+            if (iter == d.MemberEnd())
+            {
+                if(value.IsNumber())
+                {
+                    rapidjson::Value v(key, allocator);
+
+                    if(value.IsInt64())
+                    {
+                        d.AddMember(v.Move(), value.GetInt64(), allocator);
+                    }
+                    else if(value.IsInt())
+                    {
+                        d.AddMember(v.Move(), value.GetInt(), allocator);
+                    }
+                    else if(value.IsDouble())
+                    {
+                        d.AddMember(v.Move(), value.GetDouble(), allocator);
+                    }
+                }
+                else if(value.IsString())
+                {
+                    rapidjson::Value v(key, allocator);
+                    rapidjson::Value v1(value.GetString(), allocator);
+                    d.AddMember(v.Move(), v1.Move(), allocator);
+                }
+            }
+            else
+            {
+                if(value.IsNumber())
+                {
+                    if(value.IsInt64())
+                    {
+                        rapidjson::Value v(value.GetInt64());
+                        iter->value = v.Move();
+                    }
+                    else if(value.IsInt())
+                    {
+                        rapidjson::Value v(value.GetInt());
+                        iter->value = v.Move();
+                    }
+                    else if(value.IsDouble())
+                    {
+                        rapidjson::Value v(value.GetDouble());
+                        iter->value = v.Move();
+                    }
+                }
+                else if(value.IsString())
+                {
+                    rapidjson::Value v(value.GetString(), allocator);
+                    iter->value = v.Move();
+                }
+            }
         }
     }
 }

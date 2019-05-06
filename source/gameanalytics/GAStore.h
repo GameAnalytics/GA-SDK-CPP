@@ -6,10 +6,10 @@
 #pragma once
 
 #include <sqlite3.h>
-#include <string>
 #include <vector>
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include "Foundation/GASingleton.h"
+#include "GameAnalytics.h"
 
 namespace gameanalytics
 {
@@ -22,15 +22,18 @@ namespace gameanalytics
 
             sqlite3* getDatabase();
 
-            static bool ensureDatabase(bool dropDatabase, const std::string& key = "");
+            static bool ensureDatabase(bool dropDatabase, const char* key = "");
 
-            static void setState(const std::string& key, const std::string& value);
+            static void setState(const char* key, const char* value);
 
-            static Json::Value executeQuerySync(const std::string& sql);
+            static bool executeQuerySync(const char* sql);
+            static void executeQuerySync(const char* sql, rapidjson::Document& out);
 
-            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, rapidjson::Document& out);
 
-            static Json::Value executeQuerySync(const std::string& sql, const std::vector<std::string>& parameters, bool useTransaction);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction);
+            static void executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Document& out);
 
             static long long getDbSizeBytes();
 
@@ -43,7 +46,7 @@ namespace gameanalytics
 
             // set when calling "ensureDatabase"
             // using a "writablePath" that needs to be set into the C++ component before
-            std::string dbPath;
+            char dbPath[513] = {'\0'};
 
             // local pointer to database
             sqlite3* sqlDatabase = nullptr;

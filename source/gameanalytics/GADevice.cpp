@@ -21,6 +21,8 @@
 
 #include "GADevice.h"
 #include "GAUtilities.h"
+#include <string.h>
+#include <stdio.h>
 #if USE_UWP
 #include <Windows.h>
 #include <sstream>
@@ -54,56 +56,56 @@ namespace gameanalytics
 {
     namespace device
     {
-        std::string GADevice::_writablepath = GADevice::getPersistentPath();
-        const std::string GADevice::_buildPlatform = GADevice::runtimePlatformToString();
-        const std::string GADevice::_osVersion = GADevice::getOSVersionString();
-        std::string GADevice::_deviceModel = GADevice::deviceModel();
+        char GADevice::_writablepath[257] = "";
+        char GADevice::_buildPlatform[32] = "";
+        char GADevice::_osVersion[65] = "";
+        char GADevice::_deviceModel[129] = "";
 #if USE_UWP
         const std::string GADevice::_advertisingId = utilities::GAUtilities::ws2s(Windows::System::UserProfile::AdvertisingManager::AdvertisingId->Data());
         const std::string GADevice::_deviceId = GADevice::deviceId();
 #elif USE_TIZEN
-        const std::string GADevice::_deviceId = GADevice::deviceId();
+        char GADevice::_deviceId[129] = "GADevice::deviceId()";
 #endif
-        std::string GADevice::_deviceManufacturer = GADevice::deviceManufacturer();
-        std::string GADevice::_sdkGameEngineVersion;
-        std::string GADevice::_gameEngineVersion;
-        std::string GADevice::_connectionType = "";
+        char GADevice::_deviceManufacturer[129] = "";
+        char GADevice::_sdkGameEngineVersion[33] = "";
+        char GADevice::_gameEngineVersion[33] = "";
+        char GADevice::_connectionType[33] = "";
 #if USE_UWP
-        const std::string GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.2";
+        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.3";
 #elif USE_TIZEN
-        const std::string GADevice::_sdkWrapperVersion = "tizen 2.1.2";
+        const char* GADevice::_sdkWrapperVersion = "tizen 2.1.3";
 #else
-        const std::string GADevice::_sdkWrapperVersion = "cpp 2.1.2";
+        const char* GADevice::_sdkWrapperVersion = "cpp 2.1.3";
 #endif
 
-        void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
+        void GADevice::setSdkGameEngineVersion(const char* sdkGameEngineVersion)
         {
-            GADevice::_sdkGameEngineVersion = sdkGameEngineVersion;
+            snprintf(GADevice::_sdkGameEngineVersion, sizeof(GADevice::_sdkGameEngineVersion), "%s", sdkGameEngineVersion);
         }
 
-        const std::string GADevice::getGameEngineVersion()
+        const char* GADevice::getGameEngineVersion()
         {
             return GADevice::_gameEngineVersion;
         }
 
-        void GADevice::setGameEngineVersion(const std::string& gameEngineVersion)
+        void GADevice::setGameEngineVersion(const char* gameEngineVersion)
         {
-            GADevice::_gameEngineVersion = gameEngineVersion;
+            snprintf(GADevice::_gameEngineVersion, sizeof(GADevice::_gameEngineVersion), "%s", gameEngineVersion);
         }
 
-        void GADevice::setConnectionType(const std::string& connectionType)
+        void GADevice::setConnectionType(const char* connectionType)
         {
-            GADevice::_connectionType = connectionType;
+            snprintf(GADevice::_connectionType, sizeof(GADevice::_connectionType), "%s", connectionType);
         }
 
-        const std::string GADevice::getConnectionType()
+        const char* GADevice::getConnectionType()
         {
             return GADevice::_connectionType;
         }
 
-        const std::string GADevice::getRelevantSdkVersion()
+        const char* GADevice::getRelevantSdkVersion()
         {
-            if(!GADevice::_sdkGameEngineVersion.empty())
+            if(strlen(GADevice::_sdkGameEngineVersion) > 0)
             {
                 return GADevice::_sdkGameEngineVersion;
             }
@@ -111,52 +113,86 @@ namespace gameanalytics
             return GADevice::_sdkWrapperVersion;
         }
 
-        const std::string GADevice::getBuildPlatform()
+        const char* GADevice::getBuildPlatform()
         {
+            if(strlen(GADevice::_buildPlatform) == 0)
+            {
+                initRuntimePlatform();
+            }
             return GADevice::_buildPlatform;
         }
 
-        const std::string GADevice::getOSVersion()
+        const char* GADevice::getOSVersion()
         {
+            if(strlen(GADevice::_osVersion) == 0)
+            {
+                initOSVersion();
+            }
             return GADevice::_osVersion;
         }
 
-        void GADevice::setDeviceModel(const std::string& deviceModel)
+        void GADevice::setDeviceModel(const char* deviceModel)
         {
-            GADevice::_deviceModel = deviceModel;
+            if(strlen(GADevice::_deviceModel) == 0)
+            {
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", "unknown");
+            }
+            else
+            {
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", deviceModel);
+            }
         }
 
-        const std::string GADevice::getDeviceModel()
+        const char* GADevice::getDeviceModel()
         {
+            if(strlen(GADevice::_deviceModel) == 0)
+            {
+                initDeviceModel();
+            }
             return GADevice::_deviceModel;
         }
 
-        void GADevice::setDeviceManufacturer(const std::string& deviceManufacturer)
+        void GADevice::setDeviceManufacturer(const char* deviceManufacturer)
         {
-            GADevice::_deviceManufacturer = deviceManufacturer;
+            if(strlen(GADevice::_deviceModel) == 0)
+            {
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "unknown");
+            }
+            else
+            {
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", deviceManufacturer);
+            }
         }
 
-        const std::string GADevice::getDeviceManufacturer()
+        const char* GADevice::getDeviceManufacturer()
         {
+            if(strlen(GADevice::_deviceModel) == 0)
+            {
+                initDeviceManufacturer();
+            }
             return GADevice::_deviceManufacturer;
         }
 
-        void GADevice::setWritablePath(const std::string& writablepath)
+        void GADevice::setWritablePath(const char* writablepath)
         {
-            GADevice::_writablepath = writablepath;
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", writablepath);
         }
 
-        const std::string GADevice::getWritablePath()
+        const char* GADevice::getWritablePath()
         {
+            if(strlen(GADevice::_writablepath) == 0)
+            {
+                initPersistentPath();
+            }
             return GADevice::_writablepath;
         }
 
         void GADevice::UpdateConnectionType()
         {
-            GADevice::_connectionType = "lan";
+            snprintf(GADevice::_connectionType, sizeof(GADevice::_connectionType), "%s", "lan");
         }
 
-        const std::string GADevice::getOSVersionString()
+        void GADevice::initOSVersion()
         {
 #if USE_UWP
             auto deviceFamilyVersion = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamilyVersion;
@@ -169,90 +205,95 @@ namespace gameanalytics
             unsigned long long build = (version & 0x00000000FFFF0000L) >> 16;
             std::ostringstream stream;
             stream << getBuildPlatform() << " " << major << "." << minor << "." << build;
-            return stream.str();
+            snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s", stream.str().c_str());
 #elif USE_TIZEN
-            std::string version = "0.0.0";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/feature/platform.version", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                version = value;
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), value);
             }
-
-            return GADevice::getBuildPlatform() + " " + version;
+            else
+            {
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 0.0.0", GADevice::getBuildPlatform());
+            }
 #else
 #ifdef _WIN32
 #if (_MSC_VER == 1900)
             if (IsWindows10OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 10.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 10.0", GADevice::getBuildPlatform());
             }
             else
 #endif
-                if (IsWindows8Point1OrGreater())
+            if (IsWindows8Point1OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.3";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.3", GADevice::getBuildPlatform());
             }
             else if (IsWindows8OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.2";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.2", GADevice::getBuildPlatform());
             }
             else if (IsWindows7OrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.1";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.1", GADevice::getBuildPlatform());
             }
             else if (IsWindowsVistaOrGreater())
             {
-                return GADevice::getBuildPlatform() + " 6.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 6.1", GADevice::getBuildPlatform());
             }
             else if (IsWindowsXPOrGreater())
             {
-                return GADevice::getBuildPlatform() + " 5.1";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 5.1", GADevice::getBuildPlatform());
             }
             else
             {
-                return GADevice::getBuildPlatform() + " 0.0.0";
+                snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s 0.0.0", GADevice::getBuildPlatform());
             }
 #elif IS_MAC
-            return GADevice::getBuildPlatform() + " " + getOSXVersion();
+            snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), getOSXVersion());
 #elif IS_LINUX
             struct utsname info;
             uname(&info);
-            std::string v(info.release);
 
             std::size_t i;
-            for(i = 0; i < v.size(); ++i)
+            char v[65] = "";
+            snprintf(v, sizeof(v), "%s", info.release);
+
+            for(i = 0; i < strlen(info.release); ++i)
             {
                 if(!isdigit(v[i]) && v[i] != '.')
                 {
-                    v = v.substr(0, i);
+                    snprintf(v, i, "%s", info.release);
                     break;
                 }
             }
-            return GADevice::getBuildPlatform() + " " + v;
+
+            snprintf(GADevice::_osVersion, sizeof(GADevice::_osVersion), "%s %s", GADevice::getBuildPlatform(), v);
 #else
             return GADevice::getBuildPlatform() + " 0.0.0";
 #endif
 #endif
         }
 
-        const std::string GADevice::deviceManufacturer()
+        void GADevice::initDeviceManufacturer()
         {
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
-            return utilities::GAUtilities::ws2s(info->SystemManufacturer->Data());
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", utilities::GAUtilities::ws2s(info->SystemManufacturer->Data()).c_str());
 #elif USE_TIZEN
-            std::string result = "unknown";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/manufacturer", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "unknown");
+            }
 #else
 #if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
@@ -260,7 +301,7 @@ namespace gameanalytics
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
             if (FAILED(hResult))
             {
-                return "unknown";
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "unknown");
             }
             hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
 
@@ -326,33 +367,34 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            return std::string(_com_util::ConvertBSTRToString(manufacturer));
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", _com_util::ConvertBSTRToString(manufacturer));
 #elif IS_MAC
-            return "Apple";
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "Apple");
 #elif IS_LINUX
-            return "unknown";
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "unknown");
 #else
-            return "unknown";
+            snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", "unknown");
 #endif
 #endif
         }
 
-        const std::string GADevice::deviceModel()
+        void GADevice::initDeviceModel()
         {
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
-            return utilities::GAUtilities::ws2s(info->SystemProductName->Data());
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", utilities::GAUtilities::ws2s(info->SystemProductName->Data()).c_str());
 #elif USE_TIZEN
-            std::string result = "unknown";
             char *value;
             int ret;
             ret = system_info_get_platform_string("http://tizen.org/system/model_name", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
+            }
 #else
 #if defined(_WIN32) && !GA_SHARED_LIB
             IWbemLocator *locator = nullptr;
@@ -360,7 +402,7 @@ namespace gameanalytics
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
             if (FAILED(hResult))
             {
-                return "unknown";
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
             }
             hResult = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&locator);
 
@@ -426,7 +468,7 @@ namespace gameanalytics
             }
             CoUninitialize();
 
-            return std::string(_com_util::ConvertBSTRToString(model));
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", _com_util::ConvertBSTRToString(model));
 #elif IS_MAC
             size_t len = 0;
             sysctlbyname("hw.model", NULL, &len, NULL, 0);
@@ -435,27 +477,26 @@ namespace gameanalytics
             memset(model, 0, len + 1);
 
             sysctlbyname("hw.model", model, &len, NULL, 0);
-            std::string result(model);
-            free(model);
 
-            return result;
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", model);
+            free(model);
 #elif IS_LINUX
-            return "unknown";
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
 #else
-            return "unknown";
+            snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
 #endif
 #endif
         }
 
 #if USE_UWP
-        const std::string GADevice::getDeviceId()
+        const const char* GADevice::getDeviceId()
         {
-            return GADevice::_deviceId;
+            return GADevice::_deviceId.c_str();
         }
 
-        const std::string GADevice::getAdvertisingId()
+        const const char* GADevice::getAdvertisingId()
         {
-            return GADevice::_advertisingId;
+            return GADevice::_advertisingId.c_str();
         }
 
         const std::string GADevice::deviceId()
@@ -473,12 +514,16 @@ namespace gameanalytics
             return result;
         }
 #elif USE_TIZEN
-        const std::string GADevice::getDeviceId()
+        const char* GADevice::getDeviceId()
         {
+            if(strlen(GADevice::_deviceId) == 0)
+            {
+                initDeviceId();
+            }
             return GADevice::_deviceId;
         }
 
-        const std::string GADevice::deviceId()
+        void GADevice::initDeviceId()
         {
             std::string result = "";
             char *value;
@@ -486,41 +531,43 @@ namespace gameanalytics
             ret = system_info_get_platform_string("http://tizen.org/system/tizenid", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                snprintf(GADevice::_deviceId, sizeof(GADevice::_deviceId), "%s", value);
             }
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_deviceId, sizeof(GADevice::_deviceId), "%s", "unknown");
+            }
         }
 #endif
 
-        const std::string GADevice::runtimePlatformToString()
+        void GADevice::initRuntimePlatform()
         {
 #if USE_UWP
             auto deviceFamily = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamily;
 
             if (deviceFamily == "Windows.Mobile")
             {
-                return "uwp_mobile";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_mobile");
             }
             else if (deviceFamily == "Windows.Desktop")
             {
-                return "uwp_desktop";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_desktop");
             }
             else if (deviceFamily == "Windows.Universal")
             {
-                return "uwp_iot";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_iot");
             }
             else if (deviceFamily == "Windows.Xbox")
             {
-                return "uwp_console";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_console");
             }
             else if (deviceFamily == "Windows.Team")
             {
-                return "uwp_surfacehub";
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "uwp_surfacehub");
             }
             else
             {
-                return utilities::GAUtilities::ws2s(deviceFamily->Data());
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "%s", utilities::GAUtilities::ws2s(deviceFamily->Data()).c_str());
             }
 #elif USE_TIZEN
             std::string result = "tizen";
@@ -529,41 +576,41 @@ namespace gameanalytics
             ret = system_info_get_platform_string("http://tizen.org/system/platform.name", &value);
             if (ret == SYSTEM_INFO_ERROR_NONE)
             {
-                result = value;
+                utilities::GAUtilities::lowercaseString(value);
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), value);
             }
-
-            std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-
-            return result;
+            else
+            {
+                snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "tizen");
+            }
 #else
 #if IS_MAC
-            return "mac_osx";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "mac_osx");
 #elif defined(_WIN32)
-            return "windows";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "windows");
 #elif IS_LINUX
-            return "linux";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "linux");
 #else
-            return "unknown";
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "unknown");
 #endif
 #endif
         }
 
-        const std::string GADevice::getPersistentPath()
+        void GADevice::initPersistentPath()
         {
 #if USE_UWP
-            return utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
+            std::string result = utilities::GAUtilities::ws2s(Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data()) + "\\GameAnalytics";
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", result.c_str());
 #elif USE_TIZEN
-            return app_get_data_path();
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", app_get_data_path());
 #else
 #ifdef _WIN32
-            std::string result = std::getenv("LOCALAPPDATA") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
-            _mkdir(result.c_str());
-            return result;
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("LOCALAPPDATA"), utilities::GAUtilities::getPathSeparator());
+            _mkdir(GADevice::_writablepath);
 #else
-            std::string result = std::getenv("HOME") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
+            snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("HOME"), utilities::GAUtilities::getPathSeparator());
             mode_t nMode = 0733;
-            mkdir(result.c_str(),nMode);
-            return result;
+            mkdir(GADevice::_writablepath, nMode);
 #endif
 #endif
         }

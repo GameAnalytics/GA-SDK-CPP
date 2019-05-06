@@ -9,6 +9,8 @@
 #include "GAState.h"
 #include "GALogger.h"
 #include "GAHTTPApi.h"
+#include <string.h>
+#include <stdio.h>
 
 #include <map>
 
@@ -17,56 +19,56 @@ namespace gameanalytics
     namespace validators
     {
         bool GAValidator::validateBusinessEvent(
-            const std::string& currency,
+            const char* currency,
             long amount,
-            const std::string& cartType,
-            const std::string& itemType,
-            const std::string& itemId)
+            const char* cartType,
+            const char* itemType,
+            const char* itemId)
         {
             // validate currency
             if (!GAValidator::validateCurrency(currency))
             {
-                logging::GALogger::w("Validation fail - business event - currency: Cannot be (null) and need to be A-Z, 3 characters and in the standard at openexchangerates.org. Failed currency: " + currency);
+                logging::GALogger::w("Validation fail - business event - currency: Cannot be (null) and need to be A-Z, 3 characters and in the standard at openexchangerates.org. Failed currency: %s", currency);
                 return false;
             }
 
             if (amount < 0)
             {
-                logging::GALogger::w("Validation fail - business event - amount. Cannot be less than 0. String: " + std::to_string(amount));
+                logging::GALogger::w("Validation fail - business event - amount. Cannot be less than 0. String: %ld", amount);
                 return false;
             }
 
             // validate cartType
             if (!GAValidator::validateShortString(cartType, true))
             {
-                logging::GALogger::w("Validation fail - business event - cartType. Cannot be above 32 length. String: " + cartType);
+                logging::GALogger::w("Validation fail - business event - cartType. Cannot be above 32 length. String: %s", cartType);
                 return false;
             }
 
             // validate itemType length
             if (!GAValidator::validateEventPartLength(itemType, false))
             {
-                logging::GALogger::w("Validation fail - business event - itemType: Cannot be (null), empty or above 64 characters. String: " + itemType);
+                logging::GALogger::w("Validation fail - business event - itemType: Cannot be (null), empty or above 64 characters. String: %s", itemType);
                 return false;
             }
 
             // validate itemType chars
             if (!GAValidator::validateEventPartCharacters(itemType))
             {
-                logging::GALogger::w("Validation fail - business event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemType);
+                logging::GALogger::w("Validation fail - business event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemType);
                 return false;
             }
 
             // validate itemId
             if (!GAValidator::validateEventPartLength(itemId, false))
             {
-                logging::GALogger::w("Validation fail - business event - itemId. Cannot be (null), empty or above 64 characters. String: " + itemId);
+                logging::GALogger::w("Validation fail - business event - itemId. Cannot be (null), empty or above 64 characters. String: %s", itemId);
                 return false;
             }
 
             if (!GAValidator::validateEventPartCharacters(itemId))
             {
-                logging::GALogger::w("Validation fail - business event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemId);
+                logging::GALogger::w("Validation fail - business event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemId);
                 return false;
             }
 
@@ -75,60 +77,62 @@ namespace gameanalytics
 
         bool GAValidator::validateResourceEvent(
             EGAResourceFlowType flowType,
-            const std::string& currency,
+            const char* currency,
             double amount,
-            const std::string& itemType,
-            const std::string& itemId
+            const char* itemType,
+            const char* itemId
             )
         {
-            if (events::GAEvents::resourceFlowTypeString(flowType).empty())
+            char resourceFlowTypeString[10] = "";
+            events::GAEvents::resourceFlowTypeString(flowType, resourceFlowTypeString);
+            if (strlen(resourceFlowTypeString) == 0)
             {
                 logging::GALogger::w("Validation fail - resource event - flowType: Invalid flow type.");
                 return false;
             }
-            if (currency.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(currency))
             {
                 logging::GALogger::w("Validation fail - resource event - currency: Cannot be (null)");
                 return false;
             }
             if (!state::GAState::hasAvailableResourceCurrency(currency))
             {
-                logging::GALogger::w("Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: " + currency);
+                logging::GALogger::w("Validation fail - resource event - currency: Not found in list of pre-defined available resource currencies. String: %s", currency);
                 return false;
             }
             if (!(amount > 0))
             {
-                logging::GALogger::w("Validation fail - resource event - amount: Float amount cannot be 0 or negative. Value: " + std::to_string(amount));
+                logging::GALogger::w("Validation fail - resource event - amount: Float amount cannot be 0 or negative. Value: %f", amount);
                 return false;
             }
-            if (itemType.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(itemType))
             {
                 logging::GALogger::w("Validation fail - resource event - itemType: Cannot be (null)");
                 return false;
             }
             if (!GAValidator::validateEventPartLength(itemType, false))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Cannot be (null), empty or above 64 characters. String: " + itemType);
+                logging::GALogger::w("Validation fail - resource event - itemType: Cannot be (null), empty or above 64 characters. String: %s", itemType);
                 return false;
             }
             if (!GAValidator::validateEventPartCharacters(itemType))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemType);
+                logging::GALogger::w("Validation fail - resource event - itemType: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemType);
                 return false;
             }
             if (!state::GAState::hasAvailableResourceItemType(itemType))
             {
-                logging::GALogger::w("Validation fail - resource event - itemType: Not found in list of pre-defined available resource itemTypes. String: " + itemType);
+                logging::GALogger::w("Validation fail - resource event - itemType: Not found in list of pre-defined available resource itemTypes. String: %s", itemType);
                 return false;
             }
             if (!GAValidator::validateEventPartLength(itemId, false))
             {
-                logging::GALogger::w("Validation fail - resource event - itemId: Cannot be (null), empty or above 64 characters. String: " + itemId);
+                logging::GALogger::w("Validation fail - resource event - itemId: Cannot be (null), empty or above 64 characters. String: %s", itemId);
                 return false;
             }
             if (!GAValidator::validateEventPartCharacters(itemId))
             {
-                logging::GALogger::w("Validation fail - resource event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + itemId);
+                logging::GALogger::w("Validation fail - resource event - itemId: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", itemId);
                 return false;
             }
             return true;
@@ -136,29 +140,31 @@ namespace gameanalytics
 
         bool GAValidator::validateProgressionEvent(
             EGAProgressionStatus progressionStatus,
-            const std::string& progression01,
-            const std::string& progression02,
-            const std::string& progression03
+            const char* progression01,
+            const char* progression02,
+            const char* progression03
             )
         {
-            if (events::GAEvents::progressionStatusString(progressionStatus).empty())
+            char progressionStatusString[10] = "";
+            events::GAEvents::progressionStatusString(progressionStatus, progressionStatusString);
+            if (strlen(progressionStatusString) == 0)
             {
                 logging::GALogger::w("Validation fail - progression event: Invalid progression status.");
                 return false;
             }
 
             // Make sure progressions are defined as either 01, 01+02 or 01+02+03
-            if (!progression03.empty() && !(!progression02.empty() || progression01.empty()))
+            if (!utilities::GAUtilities::isStringNullOrEmpty(progression03) && !(!utilities::GAUtilities::isStringNullOrEmpty(progression02) || utilities::GAUtilities::isStringNullOrEmpty(progression01)))
             {
                 logging::GALogger::w("Validation fail - progression event: 03 found but 01+02 are invalid. Progression must be set as either 01, 01+02 or 01+02+03.");
                 return false;
             }
-            else if (!progression02.empty() && progression01.empty())
+            else if (!utilities::GAUtilities::isStringNullOrEmpty(progression02) && utilities::GAUtilities::isStringNullOrEmpty(progression01))
             {
                 logging::GALogger::w("Validation fail - progression event: 02 found but not 01. Progression must be set as either 01, 01+02 or 01+02+03");
                 return false;
             }
-            else if (progression01.empty())
+            else if (utilities::GAUtilities::isStringNullOrEmpty(progression01))
             {
                 logging::GALogger::w("Validation fail - progression event: progression01 not valid. Progressions must be set as either 01, 01+02 or 01+02+03");
                 return false;
@@ -167,39 +173,39 @@ namespace gameanalytics
             // progression01 (required)
             if (!GAValidator::validateEventPartLength(progression01, false))
             {
-                logging::GALogger::w("Validation fail - progression event - progression01: Cannot be (null), empty or above 64 characters. String: " + progression01);
+                logging::GALogger::w("Validation fail - progression event - progression01: Cannot be (null), empty or above 64 characters. String: %s", progression01);
                 return false;
             }
             if (!GAValidator::validateEventPartCharacters(progression01))
             {
-                logging::GALogger::w("Validation fail - progression event - progression01: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + progression01);
+                logging::GALogger::w("Validation fail - progression event - progression01: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", progression01);
                 return false;
             }
             // progression02
-            if (!progression02.empty())
+            if (strlen(progression02) > 0)
             {
                 if (!GAValidator::validateEventPartLength(progression02, true))
                 {
-                    logging::GALogger::w("Validation fail - progression event - progression02: Cannot be empty or above 64 characters. String: " + progression02);
+                    logging::GALogger::w("Validation fail - progression event - progression02: Cannot be empty or above 64 characters. String: %s", progression02);
                     return false;
                 }
                 if (!GAValidator::validateEventPartCharacters(progression02))
                 {
-                    logging::GALogger::w("Validation fail - progression event - progression02: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + progression02);
+                    logging::GALogger::w("Validation fail - progression event - progression02: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", progression02);
                     return false;
                 }
             }
             // progression03
-            if (!progression03.empty())
+            if (strlen(progression03) > 0)
             {
                 if (!GAValidator::validateEventPartLength(progression03, true))
                 {
-                    logging::GALogger::w("Validation fail - progression event - progression03: Cannot be empty or above 64 characters. String: " + progression03);
+                    logging::GALogger::w("Validation fail - progression event - progression03: Cannot be empty or above 64 characters. String: %s", progression03);
                     return false;
                 }
                 if (!GAValidator::validateEventPartCharacters(progression03))
                 {
-                    logging::GALogger::w("Validation fail - progression event - progression03: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: " + progression03);
+                    logging::GALogger::w("Validation fail - progression event - progression03: Cannot contain other characters than A-z, 0-9, -_., ()!?. String: %s", progression03);
                     return false;
                 }
             }
@@ -207,16 +213,16 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateDesignEvent(const std::string& eventId, double value)
+        bool GAValidator::validateDesignEvent(const char* eventId, double value)
         {
             if (!GAValidator::validateEventIdLength(eventId))
             {
-                logging::GALogger::w("Validation fail - design event - eventId: Cannot be (null) or empty. Only 5 event parts allowed seperated by :. Each part need to be 32 characters or less. String: " + eventId);
+                logging::GALogger::w("Validation fail - design event - eventId: Cannot be (null) or empty. Only 5 event parts allowed seperated by :. Each part need to be 32 characters or less. String: %s", eventId);
                 return false;
             }
             if (!GAValidator::validateEventIdCharacters(eventId))
             {
-                logging::GALogger::w("Validation fail - design event - eventId: Non valid characters. Only allowed A-z, 0-9, -_., ()!?. String: " + eventId);
+                logging::GALogger::w("Validation fail - design event - eventId: Non valid characters. Only allowed A-z, 0-9, -_., ()!?. String: %s", eventId);
                 return false;
             }
             // value: allow 0, negative and nil (not required)
@@ -224,29 +230,33 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const std::string& message)
+        bool GAValidator::validateErrorEvent(EGAErrorSeverity severity, const char* message)
         {
-            if (events::GAEvents::errorSeverityString(severity).empty())
+            char errorSeverityString[10] = "";
+            events::GAEvents::errorSeverityString(severity, errorSeverityString);
+            if (strlen(errorSeverityString) == 0)
             {
                 logging::GALogger::w("Validation fail - error event - severity: Severity was unsupported value.");
                 return false;
             }
             if (!GAValidator::validateLongString(message, true))
             {
-                logging::GALogger::w("Validation fail - error event - message: Message cannot be above 8192 characters.");
+                logging::GALogger::w("Validation fail - error event - message: Message cannot be above 8192 characters. message=%s", message);
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateSdkErrorEvent(const std::string& gameKey, const std::string& gameSecret, http::EGASdkErrorType type)
+        bool GAValidator::validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type)
         {
             if(!validateKeys(gameKey, gameSecret))
             {
                 return false;
             }
 
-            if (http::GAHTTPApi::sdkErrorTypeToString(type).empty())
+            char s[9] = "";
+            http::GAHTTPApi::sdkErrorTypeToString(type, s);
+            if (strlen(s) == 0)
             {
                 logging::GALogger::w("Validation fail - sdk error event - type: Type was unsupported value.");
                 return false;
@@ -256,7 +266,7 @@ namespace gameanalytics
 
 
         // event params
-        bool GAValidator::validateKeys(const std::string& gameKey, const std::string& gameSecret)
+        bool GAValidator::validateKeys(const char* gameKey, const char* gameSecret)
         {
             if (utilities::GAUtilities::stringMatch(gameKey, "^[A-z0-9]{32}$"))
             {
@@ -268,9 +278,9 @@ namespace gameanalytics
             return false;
         }
 
-        bool GAValidator::validateCurrency(const std::string& currency)
+        bool GAValidator::validateCurrency(const char* currency)
         {
-            if (currency.empty())
+            if (strlen(currency) == 0)
             {
                 return false;
             }
@@ -281,26 +291,27 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventPartLength(const std::string& eventPart, bool allowNull)
+        bool GAValidator::validateEventPartLength(const char* eventPart, bool allowNull)
         {
-            if (allowNull == true && eventPart.empty())
+            size_t size = strlen(eventPart);
+            if (allowNull == true && size == 0)
             {
                 return true;
             }
 
-            if (eventPart.empty())
+            if (size == 0)
             {
                 return false;
             }
 
-            if (eventPart.length() == 0 || (eventPart.length() > 64))
+            if (size > 64)
             {
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateEventPartCharacters(const std::string& eventPart)
+        bool GAValidator::validateEventPartCharacters(const char* eventPart)
         {
             if (!utilities::GAUtilities::stringMatch(eventPart, "^[A-Za-z0-9\\s\\-_\\.\\(\\)\\!\\?]{1,64}$"))
             {
@@ -309,9 +320,9 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventIdLength(const std::string& eventId)
+        bool GAValidator::validateEventIdLength(const char* eventId)
         {
-            if (eventId.empty())
+            if (strlen(eventId) == 0)
             {
                 return false;
             }
@@ -323,9 +334,9 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEventIdCharacters(const std::string& eventId)
+        bool GAValidator::validateEventIdCharacters(const char* eventId)
         {
-            if (eventId.empty())
+            if (strlen(eventId) == 0)
             {
                 return false;
             }
@@ -337,45 +348,48 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateShortString(const std::string& shortString, bool canBeEmpty = false)
+        bool GAValidator::validateShortString(const char* shortString, bool canBeEmpty = false)
         {
+            size_t size = strlen(shortString);
             // String is allowed to be empty or nil
-            if (canBeEmpty && shortString.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (shortString.empty() || shortString.length() > 32)
+            if (size == 0 || size > 32)
             {
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateString(const std::string& string, bool canBeEmpty = false)
+        bool GAValidator::validateString(const char* string, bool canBeEmpty = false)
         {
+            size_t size = strlen(string);
             // String is allowed to be empty or nil
-            if (canBeEmpty && string.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (string.empty() || string.length() > 64)
+            if (size == 0 || size > 64)
             {
                 return false;
             }
             return true;
         }
 
-        bool GAValidator::validateLongString(const std::string& longString, bool canBeEmpty = false)
+        bool GAValidator::validateLongString(const char* longString, bool canBeEmpty = false)
         {
+            size_t size = strlen(longString);
             // String is allowed to be empty
-            if (canBeEmpty && longString.empty())
+            if (canBeEmpty && size == 0)
             {
                 return true;
             }
 
-            if (longString.empty() || longString.length() > 8192)
+            if (size == 0 || size > 8192)
             {
                 return false;
             }
@@ -383,7 +397,7 @@ namespace gameanalytics
         }
 
         // validate wrapper version, build, engine version, store
-        bool GAValidator::validateSdkWrapperVersion(const std::string& wrapperVersion)
+        bool GAValidator::validateSdkWrapperVersion(const char* wrapperVersion)
         {
             if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -392,7 +406,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateBuild(const std::string& build)
+        bool GAValidator::validateBuild(const char* build)
         {
             if (!GAValidator::validateShortString(build))
             {
@@ -401,7 +415,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateEngineVersion(const std::string& engineVersion)
+        bool GAValidator::validateEngineVersion(const char* engineVersion)
         {
             if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
@@ -410,24 +424,24 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateStore(const std::string& store)
+        bool GAValidator::validateStore(const char* store)
         {
             return utilities::GAUtilities::stringMatch(store, "^(apple|google_play)$");
         }
 
-        bool GAValidator::validateConnectionType(const std::string& connectionType)
+        bool GAValidator::validateConnectionType(const char* connectionType)
         {
             return utilities::GAUtilities::stringMatch(connectionType, "^(wwan|wifi|lan|offline)$");
         }
 
         // dimensions
-        bool GAValidator::validateCustomDimensions(const std::vector<std::string>& customDimensions)
+        bool GAValidator::validateCustomDimensions(const StringVector& customDimensions)
         {
             return GAValidator::validateArrayOfStrings(customDimensions, 20, 32, false, "custom dimensions");
 
         }
 
-        bool GAValidator::validateResourceCurrencies(const std::vector<std::string>& resourceCurrencies)
+        bool GAValidator::validateResourceCurrencies(const StringVector& resourceCurrencies)
         {
             if (!GAValidator::validateArrayOfStrings(resourceCurrencies, 20, 64, false, "resource currencies"))
             {
@@ -435,18 +449,18 @@ namespace gameanalytics
             }
 
             // validate each string for regex
-            for (std::string resourceCurrency : resourceCurrencies)
+            for (CharArray resourceCurrency : resourceCurrencies.getVector())
             {
-                if (!utilities::GAUtilities::stringMatch(resourceCurrency, "^[A-Za-z]+$"))
+                if (!utilities::GAUtilities::stringMatch(resourceCurrency.array, "^[A-Za-z]+$"))
                 {
-                    logging::GALogger::w("resource currencies validation failed: a resource currency can only be A-Z, a-z. String was: " + resourceCurrency);
+                    logging::GALogger::w("resource currencies validation failed: a resource currency can only be A-Z, a-z. String was: %s", resourceCurrency.array);
                     return false;
                 }
             }
             return true;
         }
 
-        bool GAValidator::validateResourceItemTypes(const std::vector<std::string>& resourceItemTypes)
+        bool GAValidator::validateResourceItemTypes(const StringVector& resourceItemTypes)
         {
             if (!GAValidator::validateArrayOfStrings(resourceItemTypes, 20, 32, false, "resource item types"))
             {
@@ -454,11 +468,11 @@ namespace gameanalytics
             }
 
             // validate each resourceItemType for eventpart validation
-            for (std::string resourceItemType : resourceItemTypes)
+            for (CharArray resourceItemType : resourceItemTypes.getVector())
             {
-                if (!GAValidator::validateEventPartCharacters(resourceItemType))
+                if (!GAValidator::validateEventPartCharacters(resourceItemType.array))
                 {
-                    logging::GALogger::w("resource item types validation failed: a resource item type cannot contain other characters than A-z, 0-9, -_., ()!?. String was: " + resourceItemType);
+                    logging::GALogger::w("resource item types validation failed: a resource item type cannot contain other characters than A-z, 0-9, -_., ()!?. String was: %s", resourceItemType.array);
                     return false;
                 }
             }
@@ -466,10 +480,10 @@ namespace gameanalytics
         }
 
 
-        bool GAValidator::validateDimension01(const std::string& dimension01)
+        bool GAValidator::validateDimension01(const char* dimension01)
         {
             // allow nil
-            if (dimension01.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension01))
             {
                 return true;
             }
@@ -480,10 +494,10 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension02(const std::string& dimension02)
+        bool GAValidator::validateDimension02(const char* dimension02)
         {
             // allow nil
-            if (dimension02.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension02))
             {
                 return true;
             }
@@ -494,10 +508,10 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateDimension03(const std::string& dimension03)
+        bool GAValidator::validateDimension03(const char* dimension03)
         {
             // allow nil
-            if (dimension03.empty())
+            if (utilities::GAUtilities::isStringNullOrEmpty(dimension03))
             {
                 return true;
             }
@@ -509,57 +523,58 @@ namespace gameanalytics
         }
 
         bool GAValidator::validateArrayOfStrings(
-            const std::vector<std::string>& arrayOfStrings,
-            unsigned long maxCount,
-            unsigned long maxStringLength,
+            const StringVector& arrayOfStrings,
+            size_t maxCount,
+            size_t maxStringLength,
             bool allowNoValues,
-            const std::string& logTag
+            const char* logTag
             )
         {
-            std::string arrayTag = logTag;
+            char arrayTag[33] = "";
+            snprintf(arrayTag, sizeof(arrayTag), "%s", logTag);
 
             // use arrayTag to annotate warning log
-            if (arrayTag.empty())
+            if (strlen(arrayTag) == 0)
             {
-                arrayTag = "Array";
+                snprintf(arrayTag, sizeof(arrayTag), "%s", "Array");
             }
 
             // check if empty
-            if (allowNoValues == false && arrayOfStrings.size() == 0)
+            if (allowNoValues == false && arrayOfStrings.getVector().size() == 0)
             {
-                logging::GALogger::w(arrayTag + " validation failed: array cannot be empty. ");
+                logging::GALogger::w("%s validation failed: array cannot be empty.", arrayTag);
                 return false;
             }
 
             // check if exceeding max count
-            if (maxCount && maxCount > static_cast<int>(0) && arrayOfStrings.size() > maxCount)
+            if (maxCount && maxCount > static_cast<size_t>(0) && arrayOfStrings.getVector().size() > maxCount)
             {
-                logging::GALogger::w(arrayTag + " validation failed: array cannot exceed " + std::to_string(maxCount) + " values. It has " + std::to_string(arrayOfStrings.size()) + " values.");
+                logging::GALogger::w("%s alidation failed: array cannot exceed %lu values. It has %lu values.", arrayTag, maxCount, arrayOfStrings.getVector().size());
                 return false;
             }
 
             // validate each string
-            for (std::string arrayString : arrayOfStrings)
+            for (CharArray arrayString : arrayOfStrings.getVector())
             {
-                auto stringLength = arrayString.length();
+                size_t stringLength = strlen(arrayString.array);
                 // check if empty (not allowed)
                 if (stringLength == 0)
                 {
-                    logging::GALogger::w(arrayTag + " validation failed: contained an empty string.");
+                    logging::GALogger::w("%s validation failed: contained an empty string.", arrayTag);
                     return false;
                 }
 
                 // check if exceeding max length
-                if (maxStringLength && maxStringLength > static_cast<int>(0) && stringLength > maxStringLength)
+                if (maxStringLength && maxStringLength > static_cast<size_t>(0) && stringLength > maxStringLength)
                 {
-                    logging::GALogger::w(arrayTag + " validation failed: a string exceeded max allowed length (which is: " + std::to_string(maxStringLength) + "). String was: " + arrayString);
+                    logging::GALogger::w("%s validation failed: a string exceeded max allowed length (which is: %lu). String was: %s", arrayTag, maxStringLength, arrayString.array);
                     return false;
                 }
             }
             return true;
         }
 
-        bool GAValidator::validateFacebookId(const std::string& facebookId)
+        bool GAValidator::validateFacebookId(const char* facebookId)
         {
             if (!GAValidator::validateString(facebookId))
             {
@@ -582,7 +597,7 @@ namespace gameanalytics
             return false;
         }
 
-        bool GAValidator::validateBirthyear(long birthYear)
+        bool GAValidator::validateBirthyear(int64_t birthYear)
         {
             if (birthYear < 0 || birthYear > 9999)
             {
@@ -592,7 +607,7 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateClientTs(Json::Int64 clientTs)
+        bool GAValidator::validateClientTs(int64_t clientTs)
         {
             // server regex: ^([0-9]{10,11})$
             if (clientTs < 1000000000 || clientTs > 9999999999)
@@ -602,9 +617,9 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateUserId(const std::string& uId)
+        bool GAValidator::validateUserId(const char* uId)
         {
-            if (uId.empty())
+            if (strlen(uId) == 0)
             {
                 logging::GALogger::w("Validation fail - user id cannot be empty.");
                 return false;
@@ -612,39 +627,41 @@ namespace gameanalytics
             return true;
         }
 
-        Json::Value GAValidator::validateAndCleanInitRequestResponse(Json::Value& initResponse)
+        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out)
         {
             // make sure we have a valid dict
-            if (initResponse.isNull())
+            if (initResponse.IsNull())
             {
                 logging::GALogger::w("validateInitRequestResponse failed - no response dictionary.");
-                return{};
+                rapidjson::Value v(rapidjson::kObjectType);
+                out.SetNull();
+                return;
             }
 
-            Json::Value validatedDict;
+            out.SetObject();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             // validate enabled field
-            if(initResponse["enabled"].isBool())
+            if(initResponse.HasMember("enabled") && initResponse["enabled"].IsBool())
             {
-                validatedDict["enabled"] = initResponse.get("enabled", true).asBool();
+                out.AddMember("enabled", initResponse["enabled"].GetBool(), allocator);
             }
 
             // validate server_ts
-            if (initResponse["server_ts"].isNumeric())
+            if (initResponse.HasMember("server_ts") && initResponse["server_ts"].IsNumber())
             {
-                Json::Int64 serverTsNumber = initResponse.get("server_ts", -1).asInt64();
+                int64_t serverTsNumber = initResponse["server_ts"].GetInt64();
                 if (serverTsNumber > 0)
                 {
-                    validatedDict["server_ts"] = serverTsNumber;
+                    out.AddMember("server_ts", serverTsNumber, allocator);
                 }
             }
 
-            if (initResponse["configurations"].isArray())
+            if (initResponse.HasMember("configurations") && initResponse["configurations"].IsArray())
             {
-                validatedDict["configurations"] = initResponse["configurations"];
+                rapidjson::Value configurations = rapidjson::Value(initResponse["configurations"], allocator);
+                out.AddMember("configurations", configurations, allocator);
             }
-
-            return validatedDict;
         }
     }
 }

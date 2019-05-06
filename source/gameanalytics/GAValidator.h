@@ -6,8 +6,7 @@
 #pragma once
 
 #include <vector>
-#include <string>
-#include <json/json.h>
+#include "rapidjson/document.h"
 #include "GameAnalytics.h"
 #include "GAHTTPApi.h"
 
@@ -22,91 +21,90 @@ namespace gameanalytics
 
             // user created events
             static bool validateBusinessEvent(
-                const std::string& currency,
+                const char* currency,
                 long amount,
-                const std::string& cartType,
-                const std::string& itemType,
-                const std::string& itemId
+                const char* cartType,
+                const char* itemType,
+                const char* itemId
                 );
 
             static bool validateResourceEvent(
                 EGAResourceFlowType flowType,
-                const std::string& currency,
+                const char* currency,
                 double amount,
-                const std::string& itemType,
-                const std::string& itemId
+                const char* itemType,
+                const char* itemId
                 );
 
 
             static bool validateProgressionEvent(
                 EGAProgressionStatus progressionStatus,
-                const std::string& progression01,
-                const std::string& progression02,
-                const std::string& progression03
+                const char* progression01,
+                const char* progression02,
+                const char* progression03
                 );
 
             static bool validateDesignEvent(
-                const std::string& eventId,
+                const char* eventId,
                 double value
                 );
 
             static bool validateErrorEvent(
                 EGAErrorSeverity severity,
-                const std::string& message
+                const char* message
                 );
 
-            static bool validateSdkErrorEvent(const std::string& gameKey, const std::string& gameSecret, http::EGASdkErrorType type);
+            static bool validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type);
 
 
             // -------------------- HELPERS --------------------- //
 
             // event params
-            static bool validateKeys(const std::string& gameKey, const std::string& gameSecret);
-            static bool validateCurrency(const std::string& currency);
-            static bool validateEventPartLength(const std::string& eventPart, bool allowNull);
-            static bool validateEventPartCharacters(const std::string& eventPart);
-            static bool validateEventIdLength(const std::string& eventId);
-            static bool validateEventIdCharacters(const std::string& eventId);
-            static bool validateShortString(const std::string& shortString, bool canBeEmpty);
-            static bool validateString(const std::string& string, bool canBeEmpty);
-            static bool validateLongString(const std::string& longString, bool canBeEmpty);
+            static bool validateKeys(const char* gameKey, const char* gameSecret);
+            static bool validateCurrency(const char* currency);
+            static bool validateEventPartLength(const char* eventPart, bool allowNull);
+            static bool validateEventPartCharacters(const char* eventPart);
+            static bool validateEventIdLength(const char* eventId);
+            static bool validateEventIdCharacters(const char* eventId);
+            static bool validateShortString(const char* shortString, bool canBeEmpty);
+            static bool validateString(const char* string, bool canBeEmpty);
+            static bool validateLongString(const char* longString, bool canBeEmpty);
 
             // validate wrapper version, build, engine version, store
-            static bool validateSdkWrapperVersion(const std::string& wrapperVersion);
-            static bool validateBuild(const std::string& build);
-            static bool validateEngineVersion(const std::string& engineVersion);
-            static bool validateStore(const std::string& store);
-            static bool validateConnectionType(const std::string& connectionType);
+            static bool validateSdkWrapperVersion(const char* wrapperVersion);
+            static bool validateBuild(const char* build);
+            static bool validateEngineVersion(const char* engineVersion);
+            static bool validateStore(const char* store);
+            static bool validateConnectionType(const char* connectionType);
 
             // dimensions
-            static bool validateCustomDimensions(const std::vector<std::string>& customDimensions);
+            static bool validateCustomDimensions(const StringVector& customDimensions);
 
             // resource
-            static bool validateResourceCurrencies(const std::vector<std::string>& resourceCurrencies);
-            static bool validateResourceItemTypes(const std::vector<std::string>& resourceItemTypes);
+            static bool validateResourceCurrencies(const StringVector& resourceCurrencies);
+            static bool validateResourceItemTypes(const StringVector& resourceItemTypes);
 
-            //static  bool validateCustomDimensionsWithDimension01:const std::string& dimension01 andDimension02:const std::string& dimension02 andDimension03:const std::string& dimension03 andEventTag:const std::string& eventTag;
-            static bool validateDimension01(const std::string& dimension01);
-            static bool validateDimension02(const std::string& dimension02);
-            static bool validateDimension03(const std::string& dimension03);
+            static bool validateDimension01(const char* dimension01);
+            static bool validateDimension02(const char* dimension02);
+            static bool validateDimension03(const char* dimension03);
 
-            static Json::Value validateAndCleanInitRequestResponse(Json::Value& initResponse);
+            static void validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out);
 
             // array of strings
             static bool validateArrayOfStrings(
-                const std::vector<std::string>& arrayOfStrings,
-                unsigned long maxCount,
-                unsigned long maxStringLength,
+                const StringVector& arrayOfStrings,
+                size_t maxCount,
+                size_t maxStringLength,
                 bool allowNoValues,
-                const std::string& arrayTag
+                const char* arrayTag
                 );
             // facebook id, gender, birthyear
-            static bool validateFacebookId(const std::string& facebookId);
+            static bool validateFacebookId(const char* facebookId);
             static bool validateGender(EGAGender gender);
-            static bool validateBirthyear(long birthYear);
-            static bool validateClientTs(Json::Int64 clientTs);
+            static bool validateBirthyear(int64_t birthYear);
+            static bool validateClientTs(int64_t clientTs);
 
-            static bool validateUserId(const std::string& uId);
+            static bool validateUserId(const char* uId);
         };
     }
-} 
+}

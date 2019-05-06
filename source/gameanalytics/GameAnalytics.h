@@ -10,7 +10,6 @@
 #pragma comment(lib, "gdi32.lib")
 #endif
 
-#include <string>
 #include <vector>
 #include <memory>
 #if USE_TIZEN || GA_SHARED_LIB
@@ -18,14 +17,6 @@
 #endif
 #if !USE_UWP && !USE_TIZEN
 #include <ostream>
-#endif
-
-#if USE_LINUX
-using STRING = const char*;
-using RETURN_STRING = const char*;
-#else
-using STRING = const std::string&;
-using RETURN_STRING = std::string;
 #endif
 
 namespace gameanalytics
@@ -95,50 +86,75 @@ namespace gameanalytics
             virtual void onCommandCenterUpdated() = 0;
     };
 
+    struct CharArray
+    {
+    public:
+        char array[65] = "";
+    };
+
+    struct StringVector
+    {
+    public:
+        StringVector& add(const char* s)
+        {
+            v.push_back(CharArray());
+            snprintf(v[v.size() - 1].array, sizeof(v[v.size() - 1].array), "%s", s);
+            return *this;
+        }
+
+        const std::vector<CharArray>& getVector() const
+        {
+            return v;
+        }
+
+    private:
+        std::vector<CharArray> v;
+    };
+
     class GameAnalytics
     {
      public:
         // configure calls should be used before initialize
-        static void configureAvailableCustomDimensions01(const std::vector<std::string>& customDimensions);
-        static void configureAvailableCustomDimensions01(STRING customDimensions);
-        static void configureAvailableCustomDimensions02(const std::vector<std::string>& customDimensions);
-        static void configureAvailableCustomDimensions02(STRING customDimensions);
-        static void configureAvailableCustomDimensions03(const std::vector<std::string>& customDimensions);
-        static void configureAvailableCustomDimensions03(STRING customDimensions);
-        static void configureAvailableResourceCurrencies(const std::vector<std::string>& resourceCurrencies);
-        static void configureAvailableResourceCurrencies(STRING resourceCurrencies);
-        static void configureAvailableResourceItemTypes(const std::vector<std::string>& resourceItemTypes);
-        static void configureAvailableResourceItemTypes(STRING resourceCurrencies);
-        static void configureBuild(STRING build);
-        static void configureWritablePath(STRING writablePath);
-        static void configureDeviceModel(STRING deviceModel);
-        static void configureDeviceManufacturer(STRING deviceManufacturer);
+        static void configureAvailableCustomDimensions01(const StringVector& customDimensions);
+        static void configureAvailableCustomDimensions01(const char* customDimensions);
+        static void configureAvailableCustomDimensions02(const StringVector& customDimensions);
+        static void configureAvailableCustomDimensions02(const char* customDimensions);
+        static void configureAvailableCustomDimensions03(const StringVector& customDimensions);
+        static void configureAvailableCustomDimensions03(const char* customDimensions);
+        static void configureAvailableResourceCurrencies(const StringVector& resourceCurrencies);
+        static void configureAvailableResourceCurrencies(const char* resourceCurrencies);
+        static void configureAvailableResourceItemTypes(const StringVector& resourceItemTypes);
+        static void configureAvailableResourceItemTypes(const char* resourceItemTypes);
+        static void configureBuild(const char* build);
+        static void configureWritablePath(const char* writablePath);
+        static void configureDeviceModel(const char* deviceModel);
+        static void configureDeviceManufacturer(const char* deviceManufacturer);
 
         // the version of SDK code used in an engine. Used for sdk_version field.
         // !! if set then it will override the SdkWrapperVersion.
         // example "unity 4.6.9"
-        static void configureSdkGameEngineVersion(STRING sdkGameEngineVersion);
+        static void configureSdkGameEngineVersion(const char* sdkGameEngineVersion);
         // the version of the game engine (if used and version is available)
-        static void configureGameEngineVersion(STRING engineVersion);
+        static void configureGameEngineVersion(const char* engineVersion);
 
-        static void configureUserId(STRING uId);
+        static void configureUserId(const char* uId);
 
         // initialize - starting SDK (need configuration before starting)
-        static void initialize(STRING gameKey, STRING gameSecret);
+        static void initialize(const char* gameKey, const char* gameSecret);
 
         // add events
-        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType);
+        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType);
 
-        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03);
 
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score);
 
-        static void addDesignEvent(STRING eventId);
+        static void addDesignEvent(const char* eventId);
 
-        static void addDesignEvent(STRING eventId, double value);
-        static void addErrorEvent(EGAErrorSeverity severity, STRING message);
+        static void addDesignEvent(const char* eventId, double value);
+        static void addErrorEvent(EGAErrorSeverity severity, const char* message);
 
         // set calls can be changed at any time (pre- and post-initialize)
         // some calls only work after a configure is called (setCustomDimension)
@@ -147,22 +163,22 @@ namespace gameanalytics
         static void setEnabledManualSessionHandling(bool flag);
         static void setEnabledErrorReporting(bool flag);
         static void setEnabledEventSubmission(bool flag);
-        static void setCustomDimension01(STRING dimension01);
-        static void setCustomDimension02(STRING dimension02);
-        static void setCustomDimension03(STRING dimension03);
-        static void setFacebookId(STRING facebookId);
+        static void setCustomDimension01(const char* dimension01);
+        static void setCustomDimension02(const char* dimension02);
+        static void setCustomDimension03(const char* dimension03);
+        static void setFacebookId(const char* facebookId);
         static void setGender(EGAGender gender);
         static void setBirthYear(int birthYear);
 
         static void startSession();
         static void endSession();
 
-        static RETURN_STRING getCommandCenterValueAsString(STRING key);
-        static RETURN_STRING getCommandCenterValueAsString(STRING key, STRING defaultValue);
+        static std::vector<char> getCommandCenterValueAsString(const char* key);
+        static std::vector<char> getCommandCenterValueAsString(const char* key, const char* defaultValue);
         static bool isCommandCenterReady();
         static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-        static RETURN_STRING getConfigurationsContentAsString();
+        static std::vector<char> getConfigurationsContentAsString();
 
         // game state changes
         // will affect how session is started / ended
@@ -171,10 +187,6 @@ namespace gameanalytics
         static void onQuit();
 
         static bool isThreadEnding();
-
-#if !USE_UWP && !USE_TIZEN
-        static void addCustomLogStream(std::ostream& os);
-#endif
 
 #if USE_UWP
         static void configureAvailableCustomDimensions01(const std::vector<std::wstring>& customDimensions);
@@ -214,17 +226,17 @@ namespace gameanalytics
         static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
         static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
 #endif
-        static void addBusinessEvent(STRING currency, int amount, STRING itemType, STRING itemId, STRING cartType, STRING fields);
-        static void addResourceEvent(EGAResourceFlowType flowType, STRING currency, float amount, STRING itemType, STRING itemId, STRING fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, STRING fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, STRING progression01, STRING progression02, STRING progression03, int score, STRING fields);
-        static void addDesignEvent(STRING eventId, STRING fields);
-        static void addDesignEvent(STRING eventId, double value, STRING fields);
-        static void addErrorEvent(EGAErrorSeverity severity, STRING message, STRING fields);
+        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const char* fields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, const char* fields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* fields);
+        static void addDesignEvent(const char* eventId, const char* fields);
+        static void addDesignEvent(const char* eventId, double value, const char* fields);
+        static void addErrorEvent(EGAErrorSeverity severity, const char* message, const char* fields);
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
-        static bool isSdkReady(bool needsInitialized, bool warn, std::string message);
+        static bool isSdkReady(bool needsInitialized, bool warn, const char* message);
 #if USE_UWP
         static void OnAppSuspending(Platform::Object ^sender, Windows::ApplicationModel::SuspendingEventArgs ^e);
         static void OnAppResuming(Platform::Object ^sender, Platform::Object ^args);

@@ -50,10 +50,9 @@ target_include_directories(
     ${PROJECT_NAME}
     PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
-    "${DEPENDENCIES_DIR}/jsoncpp/"
-    "${DEPENDENCIES_DIR}/spdlog/include"
+    "${DEPENDENCIES_DIR}/rapidjson/"
+    "${DEPENDENCIES_DIR}/zf_log"
     "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
-    "${DEPENDENCIES_DIR}/curlcpp/include"
 )
 
 # include gmock and GameAnalytics library

@@ -71,11 +71,13 @@ EVAL_CONDITION(LINUX_X86_CLANG_SHARED "${PLATFORM}" STREQUAL "linux-x86-clang-sh
 EVAL_CONDITION(LINUX_X86_GCC_SHARED "${PLATFORM}" STREQUAL "linux-x86-gcc-shared")
 EVAL_CONDITION(LINUX_X64_CLANG_STATIC "${PLATFORM}" STREQUAL "linux-x64-clang-static")
 EVAL_CONDITION(LINUX_X64_GCC_STATIC "${PLATFORM}" STREQUAL "linux-x64-gcc-static")
+EVAL_CONDITION(LINUX_X64_GCC5_STATIC "${PLATFORM}" STREQUAL "linux-x64-gcc5-static")
 EVAL_CONDITION(LINUX_X64_CLANG_SHARED "${PLATFORM}" STREQUAL "linux-x64-clang-shared")
 EVAL_CONDITION(LINUX_X64_GCC_SHARED "${PLATFORM}" STREQUAL "linux-x64-gcc-shared")
+EVAL_CONDITION(LINUX_X64_GCC5_SHARED "${PLATFORM}" STREQUAL "linux-x64-gcc5-shared")
 
-EVAL_CONDITION(LINUX_STATIC "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X86_GCC_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X64_GCC_STATIC}")
-EVAL_CONDITION(LINUX_SHARED "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X86_GCC_SHARED}" OR "${LINUX_X64_CLANG_SHARED}" OR "${LINUX_X64_GCC_SHARED}")
+EVAL_CONDITION(LINUX_STATIC "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X86_GCC_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X64_GCC_STATIC}" OR "${LINUX_X64_GCC5_STATIC}")
+EVAL_CONDITION(LINUX_SHARED "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X86_GCC_SHARED}" OR "${LINUX_X64_CLANG_SHARED}" OR "${LINUX_X64_GCC_SHARED}" OR "${LINUX_X64_GCC5_SHARED}")
 EVAL_CONDITION(LINUX_CLANG "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X64_CLANG_SHARED}")
 EVAL_CONDITION(LINUX_ALL "${LINUX_STATIC}" OR "${LINUX_SHARED}")
 
@@ -123,7 +125,7 @@ elseif("${LINUX_STATIC}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
-    add_definitions("-D_GLIBCXX_USE_CXX11_ABI=0")
+    #add_definitions("-D_GLIBCXX_USE_CXX11_ABI=0")
 elseif("${LINUX_SHARED}")
     set(LIB_EXTENSION "so")
     SET (LIB_TYPE SHARED)
@@ -136,7 +138,7 @@ elseif("${LINUX_SHARED}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
-    add_definitions("-DGA_SHARED_LIB -D_GLIBCXX_USE_CXX11_ABI=0")
+    #add_definitions("-DGA_SHARED_LIB -D_GLIBCXX_USE_CXX11_ABI=0")
 endif("${WIN_UWP_STATIC}")
 
 if("${UWP_ALL}")
@@ -168,7 +170,6 @@ if("${UWP_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
@@ -176,7 +177,7 @@ if("${UWP_ALL}")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/miniz"
     )
@@ -190,31 +191,28 @@ elseif("${OSX_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 elseif("${LINUX_ALL}")
     # traverse all the subdirectories of the matched directory
@@ -225,31 +223,28 @@ elseif("${LINUX_ALL}")
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/sqlite/*.c"
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 else()
     # traverse all the subdirectories of the matched directory
@@ -260,7 +255,6 @@ else()
 
         # Add dependencies
         "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/jsoncpp/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
         "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
         "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
@@ -268,25 +262,23 @@ else()
         "${DEPENDENCIES_DIR}/sqlite/*.h"
         "${DEPENDENCIES_DIR}/crypto/*.c"
         "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/spdlog/include/*.h"
+        "${DEPENDENCIES_DIR}/zf_log/*.c"
+        "${DEPENDENCIES_DIR}/zf_log/*.h"
         "${DEPENDENCIES_DIR}/miniz/*.c"
-        "${DEPENDENCIES_DIR}/curlcpp/include/*.h"
-        "${DEPENDENCIES_DIR}/curlcpp/src/*.cpp"
     )
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
     include_directories(
         "${DEPENDENCIES_DIR}/crossguid"
-        "${DEPENDENCIES_DIR}/jsoncpp"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
         "${DEPENDENCIES_DIR}/stackwalker"
-        "${DEPENDENCIES_DIR}/spdlog/include"
+        "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"
         "${DEPENDENCIES_DIR}/miniz"
         "${DEPENDENCIES_DIR}/curl/include"
-        "${DEPENDENCIES_DIR}/curlcpp/include"
     )
 endif("${UWP_ALL}")
 

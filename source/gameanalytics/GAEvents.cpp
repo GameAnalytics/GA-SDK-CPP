@@ -11,18 +11,25 @@
 #include "GAStore.h"
 #include "GAThreading.h"
 #include "GAValidator.h"
+#include <string.h>
+#include <stdio.h>
+#include <cmath>
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/error/en.h"
+#include <inttypes.h>
 
 namespace gameanalytics
 {
     namespace events
     {
-        const std::string GAEvents::CategorySessionStart = "user";
-        const std::string GAEvents::CategorySessionEnd = "session_end";
-        const std::string GAEvents::CategoryDesign = "design";
-        const std::string GAEvents::CategoryBusiness = "business";
-        const std::string GAEvents::CategoryProgression = "progression";
-        const std::string GAEvents::CategoryResource = "resource";
-        const std::string GAEvents::CategoryError = "error";
+        const char* GAEvents::CategorySessionStart = "user";
+        const char* GAEvents::CategorySessionEnd = "session_end";
+        const char* GAEvents::CategoryDesign = "design";
+        const char* GAEvents::CategoryBusiness = "business";
+        const char* GAEvents::CategoryProgression = "progression";
+        const char* GAEvents::CategoryResource = "resource";
+        const char* GAEvents::CategoryError = "error";
         const double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
         const int GAEvents::MaxEventCount = 500;
 
@@ -55,18 +62,24 @@ namespace gameanalytics
                 return;
             }
 
-            std::string categorySessionStart = GAEvents::CategorySessionStart;
+            const char* categorySessionStart = GAEvents::CategorySessionStart;
 
             // Event specific data
-            Json::Value eventDict;
-            eventDict["category"] = categorySessionStart;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
+            {
+                rapidjson::Value v(categorySessionStart, allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+
 
             // Increment session number  and persist
             state::GAState::incrementSessionNum();
-            std::vector<std::string> parameters;
-            parameters.push_back("session_num");
-            parameters.push_back(std::to_string(state::GAState::getSessionNum()));
-            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameters);
+            char sessionNum[11] = "";
+            snprintf(sessionNum, sizeof(sessionNum), "%d", state::GAState::getSessionNum());
+            const char* parameters[2] = {"session_num", sessionNum};
+            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", parameters, 2);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
@@ -88,9 +101,9 @@ namespace gameanalytics
                 return;
             }
 
-            Json::Int64 session_start_ts = state::GAState::sharedInstance()->getSessionStart();
-            Json::Int64 client_ts_adjusted = state::GAState::getClientTsAdjusted();
-            Json::Int64 sessionLength = client_ts_adjusted - session_start_ts;
+            int64_t session_start_ts = state::GAState::sharedInstance()->getSessionStart();
+            int64_t client_ts_adjusted = state::GAState::getClientTsAdjusted();
+            int64_t sessionLength = client_ts_adjusted - session_start_ts;
 
             if(sessionLength < 0)
             {
@@ -101,10 +114,15 @@ namespace gameanalytics
             }
 
             // Event specific data
-            Json::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
-            eventDict["category"] = GAEvents::CategorySessionEnd;
-            eventDict["length"] = sessionLength;
+            {
+                rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            eventDict.AddMember("length", sessionLength, allocator);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
@@ -120,7 +138,7 @@ namespace gameanalytics
         }
 
         // BUSINESS EVENT
-        void GAEvents::addBusinessEvent(const std::string& currency, int amount, const std::string& itemType, const std::string& itemId, const std::string& cartType, const Json::Value& fields)
+        void GAEvents::addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -135,38 +153,64 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // Increment transaction number and persist
             state::GAState::incrementTransactionNum();
-            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", {"transaction_num", std::to_string(state::GAState::getTransactionNum())});
+            char transactionNum[11] = "";
+            snprintf(transactionNum, sizeof(transactionNum), "%d", state::GAState::getTransactionNum());
+            const char* params[2] = {"transaction_num", transactionNum};
+            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_state (key, value) VALUES(?, ?);", params, 2);
 
             // Required
-            eventDict["event_id"] = itemType + ":" + itemId;
-            eventDict["category"] = GAEvents::CategoryBusiness;
-            eventDict["currency"] = currency;
-            eventDict["amount"] = amount;
-            eventDict["transaction_num"] = state::GAState::getTransactionNum();
+            {
+                char s[129] = "";
+                snprintf(s, sizeof(s), "%s:%s", itemType, itemId);
+                rapidjson::Value v(s, allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(GAEvents::CategoryBusiness, allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(currency, allocator);
+                eventDict.AddMember("currency", v.Move(), allocator);
+            }
+            eventDict.AddMember("amount", amount, allocator);
+            eventDict.AddMember("transaction_num", state::GAState::getTransactionNum(), allocator);
 
             // Optional
-            if (!cartType.empty())
+            if (strlen(cartType) > 0)
             {
-                eventDict["cart_type"] = cartType;
+                rapidjson::Value v(cartType, allocator);
+                eventDict.AddMember("cart_type", v.Move(), allocator);
             }
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
 
             // Log
-            logging::GALogger::i("Add BUSINESS event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemId + ", cartType:" + cartType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add BUSINESS event: {currency:%s, amount:%d, itemType:%s, itemId:%s, cartType:%s, fields:%s}", currency, amount, itemType, itemId, cartType, buffer.GetString());
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const std::string& currency, double amount, const std::string& itemType, const std::string& itemId, const Json::Value& fields)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const char* currency, double amount, const char* itemType, const char* itemId, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -187,34 +231,55 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // insert event specific values
-            std::string flowTypeString = resourceFlowTypeString(flowType);
-            eventDict["event_id"] = flowTypeString + ":" + currency + ":" + itemType + ":" + itemId;
-            eventDict["category"] = GAEvents::CategoryResource;
-            eventDict["amount"] = amount;
+            char flowTypeString[10] = "";
+            resourceFlowTypeString(flowType, flowTypeString);
+            {
+                char s[257] = "";
+                snprintf(s, sizeof(s), "%s:%s:%s:%s", flowTypeString, currency, itemType, itemId);
+                rapidjson::Value v(s, allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(GAEvents::CategoryResource, allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            eventDict.AddMember("amount", amount, allocator);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
 
             // Log
-            logging::GALogger::i("Add RESOURCE event: {currency:" + currency + ", amount:" + std::to_string(amount) + ", itemType:" + itemType + ", itemId:" + itemType + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add RESOURCE event: {currency:%s, amount: %f, itemType:%s, itemId:%s, fields:%s}", currency, amount, itemType, itemId, buffer.GetString());
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::string& progression01, const std::string& progression02, const std::string& progression03, double score, bool sendScore, const Json::Value& fields)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, bool sendScore, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
                 return;
             }
 
-            std::string progressionStatusString = GAEvents::progressionStatusString(progressionStatus);
+            char statusString[10] = "";
+            progressionStatusString(progressionStatus, statusString);
 
             // Validate event params
             if (!validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03))
@@ -224,35 +289,45 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventDict;
+            rapidjson::Document eventDict;
+            eventDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventDict.GetAllocator();
 
             // Progression identifier
-            std::string progressionIdentifier;
+            char progressionIdentifier[257] = "";
 
-            if (progression02.empty())
+            if (strlen(progression02) == 0)
             {
-                progressionIdentifier = progression01;
+                snprintf(progressionIdentifier, sizeof(progressionIdentifier), "%s", progression01);
             }
-            else if (progression03.empty())
+            else if (strlen(progression03) == 0)
             {
-                progressionIdentifier = progression01 + ":" + progression02;
+                snprintf(progressionIdentifier, sizeof(progressionIdentifier), "%s:%s", progression01, progression02);
             }
             else
             {
-                progressionIdentifier = progression01 + ":" + progression02 + ":" + progression03;
+                snprintf(progressionIdentifier, sizeof(progressionIdentifier), "%s:%s:%s", progression01, progression02, progression03);
             }
 
             // Append event specifics
-            eventDict["category"] = GAEvents::CategoryProgression;
-            eventDict["event_id"] = progressionStatusString + ":" + progressionIdentifier;
+            {
+                rapidjson::Value v(GAEvents::CategoryProgression, allocator);
+                eventDict.AddMember("category", v.Move(), allocator);
+            }
+            {
+                char s[513] = "";
+                snprintf(s, sizeof(s), "%s:%s", statusString, progressionIdentifier);
+                rapidjson::Value v(s, allocator);
+                eventDict.AddMember("event_id", v.Move(), allocator);
+            }
 
             // Attempt
-            double attempt_num = 0;
+            int attempt_num = 0;
 
             // Add score if specified and status is not start
             if (sendScore && progressionStatus != EGAProgressionStatus::Start)
             {
-                eventDict["score"] = score;
+                eventDict.AddMember("score", score, allocator);
             }
 
             // Count attempts on each progression fail and persist
@@ -270,7 +345,7 @@ namespace gameanalytics
 
                 // Add to event
                 attempt_num = state::GAState::getProgressionTries(progressionIdentifier);
-                eventDict["attempt_num"] = attempt_num;
+                eventDict.AddMember("attempt_num", attempt_num, allocator);
 
                 // Clear
                 state::GAState::clearProgressionTries(progressionIdentifier);
@@ -279,16 +354,26 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
-            GAEvents::addFieldsToEvent(eventDict, state::GAState::validateAndCleanCustomFields(fields));
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
 
             // Log
-            logging::GALogger::i("Add PROGRESSION event: {status:" + progressionStatusString + ", progression01:" + progression01 + ", progression02:" + progression02 + ", progression03:" + progression03 + ", score:" + std::to_string(score) + ", attempt:" + std::to_string(attempt_num) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%d, attempt:%d, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
+
 
             // Send to store
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const std::string& eventId, double value, bool sendValue, const Json::Value& fields)
+        void GAEvents::addDesignEvent(const char* eventId, double value, bool sendValue, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -303,37 +388,55 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventData;
+            rapidjson::Document eventData;
+            eventData.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData["category"] = GAEvents::CategoryDesign;
-            eventData["event_id"] = eventId;
+            {
+                rapidjson::Value v(GAEvents::CategoryDesign, allocator);
+                eventData.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(eventId, allocator);
+                eventData.AddMember("event_id", v.Move(), allocator);
+            }
 
             if (sendValue)
             {
-                eventData["value"] = value;
+                eventData.AddMember("value", value, allocator);
             }
 
-            GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            GAEvents::addFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add DESIGN event: {eventId:" + eventId + ", value:" + std::to_string(value) + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add DESIGN event: {eventId:%s, value:%f, fields:%s}", eventId, value, buffer.GetString());
 
             // Send to store
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const std::string& message, const Json::Value& fields)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
                 return;
             }
 
-            std::string severityString = errorSeverityString(severity);
+            char severityString[10] = "";
+            errorSeverityString(severity, severityString);
 
             // Validate
             if (!validators::GAValidator::validateErrorEvent(severity, message))
@@ -343,20 +446,40 @@ namespace gameanalytics
             }
 
             // Create empty eventData
-            Json::Value eventData;
+            rapidjson::Document eventData;
+            eventData.SetObject();
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
 
             // Append event specifics
-            eventData["category"] = GAEvents::CategoryError;
-            eventData["severity"] = severityString;
-            eventData["message"] = message;
+            {
+                rapidjson::Value v(GAEvents::CategoryError, allocator);
+                eventData.AddMember("category", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(severityString, allocator);
+                eventData.AddMember("severity", v.Move(), allocator);
+            }
+            {
+                rapidjson::Value v(message, allocator);
+                eventData.AddMember("message", v.Move(), allocator);
+            }
 
-            GAEvents::addFieldsToEvent(eventData, state::GAState::validateAndCleanCustomFields(fields));
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            GAEvents::addFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                fields.Accept(writer);
+            }
+
             // Log
-            logging::GALogger::i("Add ERROR event: {severity:" + severityString + ", message:" + message + ", fields:" + utilities::GAUtilities::jsonToString(fields) + "}");
+            logging::GALogger::i("Add ERROR event: {severity:%s, message:%s, fields:%s}", severityString, message, buffer.GetString());
 
             // Send to store
             addEventToStore(eventData);
@@ -375,7 +498,7 @@ namespace gameanalytics
             }
         }
 
-        void GAEvents::processEvents(const std::string& category, bool performCleanup)
+        void GAEvents::processEvents(const char* category, bool performCleanup)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -383,12 +506,15 @@ namespace gameanalytics
             }
 
             // Request identifier
-            std::string requestIdentifier = utilities::GAUtilities::generateUUID();
+            char requestIdentifier[65] = "";
+            utilities::GAUtilities::generateUUID(requestIdentifier);
 
-            std::string selectSql;
-            std::string updateSql;
-            std::string deleteSql = "DELETE FROM ga_events WHERE status = '" + requestIdentifier + "'";
-            std::string putbackSql = "UPDATE ga_events SET status = 'new' WHERE status = '" + requestIdentifier + "';";
+            char selectSql[129] = "";
+            char updateSql[257] = "";
+            char deleteSql[129] = "";
+            snprintf(deleteSql, sizeof(deleteSql), "DELETE FROM ga_events WHERE status = '%s'", requestIdentifier);
+            char putbackSql[129] = "";
+            snprintf(putbackSql, sizeof(putbackSql), "UPDATE ga_events SET status = 'new' WHERE status = '%s';", requestIdentifier);
 
             // Cleanup
             if (performCleanup)
@@ -398,19 +524,20 @@ namespace gameanalytics
             }
 
             // Prepare SQL
-            std::string andCategory = "";
-            if (!category.empty())
+            char andCategory[65] = "";
+            if (strlen(category) > 0)
             {
-                andCategory = " AND category='" + category + "' ";
+                snprintf(andCategory, sizeof(andCategory), " AND category='%s' ", category);
             }
-            selectSql = "SELECT event FROM ga_events WHERE status = 'new' " + andCategory + ";";
-            updateSql = "UPDATE ga_events SET status = '" + requestIdentifier + "' WHERE status = 'new' " + andCategory + ";";
+            snprintf(selectSql, sizeof(selectSql), "SELECT event FROM ga_events WHERE status = 'new' %s;", andCategory);
+            snprintf(updateSql, sizeof(updateSql), "UPDATE ga_events SET status = '%s' WHERE status = 'new' %s;", requestIdentifier, andCategory);
 
             // Get events to process
-            auto events = store::GAStore::executeQuerySync(selectSql);
+            rapidjson::Document events;
+            store::GAStore::executeQuerySync(selectSql, events);
 
             // Check for errors or empty
-            if (events.empty())
+            if (events.IsNull() || events.Size() == 0)
             {
                 logging::GALogger::i("Event queue: No events to send");
                 GAEvents::updateSessionTime();
@@ -418,58 +545,80 @@ namespace gameanalytics
             }
 
             // Check number of events and take some action if there are too many?
-            if (events.size() > GAEvents::MaxEventCount)
+            if (events.Size() > GAEvents::MaxEventCount)
             {
                 // Make a limit request
-                selectSql = "SELECT client_ts FROM ga_events WHERE status = 'new' " + andCategory + " ORDER BY client_ts ASC LIMIT 0," + std::to_string(GAEvents::MaxEventCount) + ";";
-                events = store::GAStore::executeQuerySync(selectSql);
-                if (events.empty())
+                snprintf(selectSql, sizeof(selectSql), "SELECT client_ts FROM ga_events WHERE status = 'new' %s ORDER BY client_ts ASC LIMIT 0,%d;", andCategory, GAEvents::MaxEventCount);
+                store::GAStore::executeQuerySync(selectSql, events);
+                if (events.IsNull())
                 {
                     return;
                 }
 
                 // Get last timestamp
-                auto lastItem = events[events.size() - 1];
-                auto lastTimestamp = lastItem["client_ts"].asString();
+                const rapidjson::Value& lastItem = events[events.Size() - 1];
+                const char* lastTimestamp = lastItem["client_ts"].GetString();
 
                 // Select again
-                selectSql = "SELECT event FROM ga_events WHERE status = 'new' " + andCategory + " AND client_ts<='" + lastTimestamp + "';";
-                events = store::GAStore::executeQuerySync(selectSql);
-                if (events.empty())
+                snprintf(selectSql, sizeof(selectSql), "SELECT event FROM ga_events WHERE status = 'new' %s AND client_ts<='%s';", andCategory, lastTimestamp);
+                store::GAStore::executeQuerySync(selectSql, events);
+                if (events.IsNull())
                 {
                     return;
                 }
 
                 // Update sql
-                updateSql = "UPDATE ga_events SET status='" + requestIdentifier + "' WHERE status='new' " + andCategory + " AND client_ts<='" + lastTimestamp + "';";
+                snprintf(updateSql, sizeof(updateSql), "UPDATE ga_events SET status='%s' WHERE status='new' %s AND client_ts<='%s';", requestIdentifier, andCategory, lastTimestamp);
             }
 
-
-
             // Log
-            logging::GALogger::i("Event queue: Sending " + std::to_string(events.size()) + " events.");
+            logging::GALogger::i("Event queue: Sending %d events.", events.Size());
 
             // Set status of events to 'sending' (also check for error)
-            if (store::GAStore::executeQuerySync(updateSql).isNull())
+            rapidjson::Document updateResult;
+            store::GAStore::executeQuerySync(updateSql, updateResult);
+            if (updateResult.IsNull())
             {
                 return;
             }
 
             // Create payload data from events
-            std::vector<Json::Value> payloadArray;
+            rapidjson::Document payloadArray;
+            payloadArray.SetArray();
+            rapidjson::Document::AllocatorType& allocator = payloadArray.GetAllocator();
 
-            for (auto ev : events)
+            for (rapidjson::Value::ConstValueIterator itr = events.Begin(); itr != events.End(); ++itr)
             {
-                auto eventDict = utilities::GAUtilities::jsonFromString(ev["event"].asString());
-                if (!eventDict.empty())
+                const char* eventDict = (*itr).HasMember("event") ? (*itr)["event"].GetString() : "";
+                if (strlen(eventDict) > 0)
                 {
-                    payloadArray.push_back(eventDict);
+                    rapidjson::Document d;
+                    rapidjson::ParseResult ok = d.Parse(eventDict);
+                    if(!ok)
+                    {
+                        logging::GALogger::d("processEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                        logging::GALogger::d("%s", eventDict);
+                    }
+                    else
+                    {
+                        rapidjson::Value v;
+                        v.CopyFrom(d, allocator);
+                        payloadArray.PushBack(v.Move(), allocator);
+                    }
                 }
             }
 
+            rapidjson::StringBuffer buffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                payloadArray.Accept(writer);
+            }
+
             // send events
+            rapidjson::Value dataDict(rapidjson::kArrayType);
+            http::EGAHTTPApiResponse responseEnum;
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            std::pair<http::EGAHTTPApiResponse, std::string> pair;
 
             try
             {
@@ -477,19 +626,33 @@ namespace gameanalytics
             }
             catch(Platform::COMException^ e)
             {
-                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+                pair = std::pair<http::EGAHTTPApiResponse, std::string>(http::NoResponse, "");
+            }
+            responseEnum = pair.first;
+            rapidjson::Document d;
+            if(pair.second.size() > 0)
+            {
+                rapidjson::ParseResult ok = d.Parse(pair.second.c_str());
+                if(!ok)
+                {
+                    logging::GALogger::d("processEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                    logging::GALogger::d("%s", pair.second.c_str());
+                }
+                else
+                {
+                    dataDict.CopyFrom(d, d.GetAllocator());
+                }
             }
 #else
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray);
+            http::GAHTTPApi::sharedInstance()->sendEventsInArray(responseEnum, dataDict, payloadArray);
 #endif
-            Json::Value dataDict = pair.second;
-            http::EGAHTTPApiResponse responseEnum = pair.first;
 
             if (responseEnum == http::Ok)
             {
                 // Delete events
                 store::GAStore::executeQuerySync(deleteSql);
-                logging::GALogger::i("Event queue: " + std::to_string(events.size()) + " events sent.");
+
+                logging::GALogger::i("Event queue: %d events sent.", events.Size());
             }
             else
             {
@@ -502,9 +665,9 @@ namespace gameanalytics
                 }
                 else
                 {
-                    if (responseEnum == http::BadRequest && dataDict.isArray())
+                    if (responseEnum == http::BadRequest && dataDict.IsArray())
                     {
-                        logging::GALogger::w("Event queue: " + std::to_string(events.size()) + " events sent. " + std::to_string(dataDict.size()) + " events failed GA server validation.");
+                        logging::GALogger::w("Event queue: %d events sent. %d events failed GA server validation.", events.Size(), dataDict.Size());
                     }
                     else
                     {
@@ -520,11 +683,20 @@ namespace gameanalytics
         {
             if(state::GAState::sessionIsStarted())
             {
-                Json::Value ev = state::GAState::getEventAnnotations();
-                auto jsonDefaults = utilities::GAUtilities::jsonToString(ev);
-                std::string sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
-                std::vector<std::string> parameters = { ev["session_id"].asString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
-                store::GAStore::executeQuerySync(sql, parameters);
+                rapidjson::Document ev;
+                ev.SetObject();
+                state::GAState::getEventAnnotations(ev);
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    ev.Accept(writer);
+                }
+                const char* jsonDefaults = buffer.GetString();
+                const char* sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
+                char sessionStart[21] = "";
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
+                const char* parameters[3] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
+                store::GAStore::executeQuerySync(sql, parameters, 3);
             }
         }
 
@@ -541,39 +713,60 @@ namespace gameanalytics
             }
 
             // Get all sessions that are not current
-            std::vector<std::string> parameters = { state::GAState::getSessionId() };
+            const char* parameters[] = { state::GAState::getSessionId() };
 
-            std::string sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
-            auto sessions = store::GAStore::executeQuerySync(sql, parameters);
+            const char* sql = "SELECT timestamp, event FROM ga_session WHERE session_id != ?;";
+            rapidjson::Document sessions;
+            store::GAStore::executeQuerySync(sql, parameters, 1, sessions);
 
-            if (sessions.empty())
+            if (sessions.IsNull() || sessions.Empty())
             {
                 return;
             }
 
-            logging::GALogger::i(std::to_string(sessions.size()) + " session(s) located with missing session_end event.");
+            logging::GALogger::i("%d session(s) located with missing session_end event.", sessions.Size());
 
             // Add missing session_end events
-            for (auto session : sessions)
+            for (rapidjson::Value::ConstValueIterator itr = sessions.Begin(); itr != sessions.End(); ++itr)
             {
-                auto sessionEndEvent = utilities::GAUtilities::jsonFromString(session["event"].asString());
-                auto event_ts = sessionEndEvent["client_ts"].asInt();
-                auto start_ts = utilities::GAUtilities::parseString<int>(session.get("timestamp", "0").asString());
+                const rapidjson::Value& session = *itr;
+                if(session.HasMember("event"))
+                {
+                    rapidjson::Document sessionEndEvent;
+                    rapidjson::ParseResult ok = sessionEndEvent.Parse(session["event"].GetString());
+                    if(!ok)
+                    {
+                        logging::GALogger::d("fixMissingSessionEndEvents -- JSON error (offset %u): %s", (unsigned)ok.Offset(), GetParseError_En(ok.Code()));
+                        logging::GALogger::d("%s", session["event"].GetString());
+                    }
+                    if(!ok)
+                    {
+                        logging::GALogger::d("JSON parse error: %s (%u)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+                    }
 
-                auto length = event_ts - start_ts;
+                    rapidjson::Document::AllocatorType& allocator = sessionEndEvent.GetAllocator();
+                    int64_t event_ts = sessionEndEvent.HasMember("client_ts") ? sessionEndEvent["client_ts"].GetInt64() : 0;
+                    int64_t start_ts = (int64_t)strtol(session.HasMember("timestamp") ? session["timestamp"].GetString() : "0", NULL, 10);
 
-                logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
+                    int64_t length = event_ts - start_ts;
+                    length = static_cast<int64_t>(fmax(length, 0));
 
-                sessionEndEvent["category"] = GAEvents::CategorySessionEnd;
-                sessionEndEvent["length"] = length;
+                    logging::GALogger::d("fixMissingSessionEndEvents length calculated: %lld", length);
 
-                // Add to store
-                addEventToStore(sessionEndEvent);
+                    {
+                        rapidjson::Value v(GAEvents::CategorySessionEnd, allocator);
+                        sessionEndEvent.AddMember("category", v.Move(), allocator);
+                    }
+                    sessionEndEvent.AddMember("length", length, allocator);
+
+                    // Add to store
+                    addEventToStore(sessionEndEvent);
+                }
             }
         }
 
         // GENERAL
-        void GAEvents::addEventToStore(const Json::Value& eventData)
+        void GAEvents::addEventToStore(const rapidjson::Value& eventData)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -596,131 +789,168 @@ namespace gameanalytics
 
             // Check db size limits (10mb)
             // If database is too large block all except user, session and business
-            if (store::GAStore::isDbTooLargeForEvents() && !utilities::GAUtilities::stringMatch(eventData["category"].asString(), "^(user|session_end|business)$"))
+            if (store::GAStore::isDbTooLargeForEvents() && !utilities::GAUtilities::stringMatch(eventData["category"].GetString(), "^(user|session_end|business)$"))
             {
                 logging::GALogger::w("Database too large. Event has been blocked.");
                 return;
             }
 
             // Get default annotations
-            Json::Value ev = state::GAState::getEventAnnotations();
+            rapidjson::Document ev;
+            ev.SetObject();
+            state::GAState::getEventAnnotations(ev);
 
             // Create json with only default annotations
-            auto jsonDefaults = utilities::GAUtilities::jsonToString(ev);
+            rapidjson::StringBuffer defaultEvbuffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(defaultEvbuffer);
+                ev.Accept(writer);
+            }
+            const char* jsonDefaults = defaultEvbuffer.GetString();
 
             // Merge with eventData
-            for (auto e : eventData.getMemberNames())
+            for (rapidjson::Value::ConstMemberIterator itr = eventData.MemberBegin(); itr != eventData.MemberEnd(); ++itr)
             {
-                ev[e] = eventData[e];
+                const char* key = itr->name.GetString();
+                const rapidjson::Value& value = eventData[key];
+
+                utilities::GAUtilities::setJsonKeyValue(ev, key, value);
             }
 
             // Create json string representation
-            std::string json = utilities::GAUtilities::jsonToString(ev);
+            rapidjson::StringBuffer evBuffer;
+            {
+                rapidjson::Writer<rapidjson::StringBuffer> writer(evBuffer);
+                ev.Accept(writer);
+            }
+            const char* json = evBuffer.GetString();
 
             // output if VERBOSE LOG enabled
-
-            logging::GALogger::ii("Event added to queue: " + json);
+            logging::GALogger::ii("Event added to queue: %s", json);
 
             // Add to store
-            std::vector<std::string> parameters = { "new", ev["category"].asString(), ev["session_id"].asString(), ev["client_ts"].asString(), json };
-            std::string sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
+            char client_ts[21] = "";
+            snprintf(client_ts, sizeof(client_ts), "%" PRId64, ev["client_ts"].GetInt64());
+            const char* parameters[] = { "new", ev["category"].GetString(), ev["session_id"].GetString(), client_ts, json };
+            const char* sql = "INSERT INTO ga_events (status, category, session_id, client_ts, event) VALUES(?, ?, ?, ?, ?);";
 
-            store::GAStore::executeQuerySync(sql, parameters);
+            store::GAStore::executeQuerySync(sql, parameters, 5);
 
             // Add to session store if not last
-            if (eventData["category"].asString() == GAEvents::CategorySessionEnd)
+            if (strcmp(eventData["category"].GetString(), GAEvents::CategorySessionEnd) == 0)
             {
-                parameters = { ev["session_id"].asString() };
-                sql = "DELETE FROM ga_session WHERE session_id = ?;";
-                store::GAStore::executeQuerySync(sql, parameters);
+                const char* params[] = { ev["session_id"].GetString() };
+                store::GAStore::executeQuerySync("DELETE FROM ga_session WHERE session_id = ?;", params, 1);
             }
             else
             {
-                sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
-                parameters = { ev["session_id"].asString(), std::to_string(static_cast<int>(state::GAState::sharedInstance()->getSessionStart())), jsonDefaults};
-                store::GAStore::executeQuerySync(sql, parameters);
+                char sessionStart[21] = "";
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
+                const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
+                store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);", params, 3);
             }
         }
 
-        void GAEvents::addDimensionsToEvent(Json::Value& eventData)
+        void GAEvents::addDimensionsToEvent(rapidjson::Document& eventData)
         {
-            if (!eventData)
+            if (eventData.IsNull())
             {
                 return;
             }
+
+            rapidjson::Document::AllocatorType& allocator = eventData.GetAllocator();
+
             // add to dict (if not nil)
-            if (!state::GAState::getCurrentCustomDimension01().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension01()) > 0)
             {
-                eventData["custom_01"] = state::GAState::getCurrentCustomDimension01();
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension01(), allocator);
+                eventData.AddMember("custom_01", v.Move(), allocator);
             }
-            if (!state::GAState::getCurrentCustomDimension02().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension02()) > 0)
             {
-                eventData["custom_02"] = state::GAState::getCurrentCustomDimension02();
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension02(), allocator);
+                eventData.AddMember("custom_02", v.Move(), allocator);
             }
-            if (!state::GAState::getCurrentCustomDimension03().empty())
+            if (strlen(state::GAState::getCurrentCustomDimension03()) > 0)
             {
-                eventData["custom_03"] = state::GAState::getCurrentCustomDimension03();
+                rapidjson::Value v(state::GAState::getCurrentCustomDimension03(), allocator);
+                eventData.AddMember("custom_03", v.Move(), allocator);
             }
         }
 
-        void GAEvents::addFieldsToEvent(Json::Value& eventData, const Json::Value& fields)
+        void GAEvents::addFieldsToEvent(rapidjson::Document& eventData, rapidjson::Document& fields)
         {
-            if(eventData.empty())
+            if(eventData.IsNull())
             {
                 return;
             }
 
-            if(!fields.empty())
+            if(!fields.ObjectEmpty())
             {
-                eventData["custom_fields"] = fields;
+                rapidjson::Value v(rapidjson::kObjectType);
+                v.CopyFrom(fields, fields.GetAllocator());
+                eventData.AddMember("custom_fields", v, eventData.GetAllocator());
             }
         }
 
-        const std::string GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus)
+        void GAEvents::progressionStatusString(EGAProgressionStatus progressionStatus, char* out)
         {
             switch (progressionStatus) {
             case Start:
-                return "Start";
+                snprintf(out, 10, "%s", "Start");
+                return;
             case Complete:
-                return "Complete";
+                snprintf(out, 10, "%s", "Complete");
+                return;
             case Fail:
-                return "Fail";
+                snprintf(out, 10, "%s", "Complete");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
 
-        const std::string GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity)
+        void GAEvents::errorSeverityString(EGAErrorSeverity errorSeverity, char* out)
         {
             switch (errorSeverity) {
             case Info:
-                return "info";
+                snprintf(out, 10, "%s", "info");
+                return;
             case Debug:
-                return "debug";
+                snprintf(out, 10, "%s", "debug");
+                return;
             case Warning:
-                return "warning";
+                snprintf(out, 10, "%s", "warning");
+                return;
             case Error:
-                return "error";
+                snprintf(out, 10, "%s", "error");
+                return;
             case Critical:
-                return "critical";
+                snprintf(out, 10, "%s", "critical");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
 
-        const std::string GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType)
+        void GAEvents::resourceFlowTypeString(EGAResourceFlowType flowType, char* out)
         {
             switch (flowType) {
             case Source:
-                return "Source";
+                snprintf(out, 10, "%s", "Source");
+                return;
             case Sink:
-                return "Sink";
+                snprintf(out, 10, "%s", "Sink");
+                return;
             default:
                 break;
             }
-            return{};
+
+            snprintf(out, 10, "%s", "");
         }
     }
 }

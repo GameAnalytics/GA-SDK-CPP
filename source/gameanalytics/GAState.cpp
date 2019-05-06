@@ -15,6 +15,11 @@
 #include <utility>
 #include <algorithm>
 #include <climits>
+#include <string.h>
+#include <stdio.h>
+#include <cstdlib>
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
 
 #define MAX_CUSTOM_FIELDS_COUNT 50
 #define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
@@ -24,7 +29,7 @@ namespace gameanalytics
 {
     namespace state
     {
-        const std::string GAState::CategorySdkError = "sdk_error";
+        const char* GAState::CategorySdkError = "sdk_error";
 
         GAState::GAState()
         {
@@ -35,13 +40,13 @@ namespace gameanalytics
             state::GAState::endSessionAndStopQueue(false);
         }
 
-        void GAState::setUserId(const std::string& id)
+        void GAState::setUserId(const char* id)
         {
-            sharedInstance()->_userId = id;
+            snprintf(sharedInstance()->_userId, sizeof(sharedInstance()->_userId), "%s", id);
             cacheIdentifier();
         }
 
-        const std::string GAState::getIdentifier()
+        const char* GAState::getIdentifier()
         {
             return GAState::sharedInstance()->_identifier;
         }
@@ -51,7 +56,7 @@ namespace gameanalytics
             return GAState::sharedInstance()->_initialized;
         }
 
-        Json::Int64 GAState::getSessionStart()
+        int64_t GAState::getSessionStart()
         {
             return GAState::sharedInstance()->_sessionStart;
         }
@@ -66,27 +71,27 @@ namespace gameanalytics
             return GAState::sharedInstance()->_transactionNum;
         }
 
-        const std::string GAState::getSessionId()
+        const char* GAState::getSessionId()
         {
             return sharedInstance()->_sessionId;
         }
 
-        const std::string GAState::getCurrentCustomDimension01()
+        const char* GAState::getCurrentCustomDimension01()
         {
             return GAState::sharedInstance()->_currentCustomDimension01;
         }
 
-        const std::string GAState::getCurrentCustomDimension02()
+        const char* GAState::getCurrentCustomDimension02()
         {
             return GAState::sharedInstance()->_currentCustomDimension02;
         }
 
-        const std::string GAState::getCurrentCustomDimension03()
+        const char* GAState::getCurrentCustomDimension03()
         {
             return GAState::sharedInstance()->_currentCustomDimension03;
         }
 
-        void GAState::setAvailableCustomDimensions01(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions01(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -98,10 +103,12 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+
+
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom01 dimension values: (%s)");
         }
 
-        void GAState::setAvailableCustomDimensions02(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions02(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -113,10 +120,10 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom02 dimension values: (%s)");
         }
 
-        void GAState::setAvailableCustomDimensions03(const std::vector<std::string>& availableCustomDimensions)
+        void GAState::setAvailableCustomDimensions03(const StringVector& availableCustomDimensions)
         {
             // Validate
             if (!validators::GAValidator::validateCustomDimensions(availableCustomDimensions))
@@ -128,10 +135,10 @@ namespace gameanalytics
             // validate current dimension values
             validateAndFixCurrentDimensions();
 
-            logging::GALogger::i("Set available custom01 dimension values: (" + utilities::GAUtilities::joinStringArray(availableCustomDimensions) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableCustomDimensions, "Set available custom03 dimension values: (%s)");
         }
 
-        void GAState::setAvailableResourceCurrencies(const std::vector<std::string>& availableResourceCurrencies)
+        void GAState::setAvailableResourceCurrencies(const StringVector& availableResourceCurrencies)
         {
             // Validate
             if (!validators::GAValidator::validateResourceCurrencies(availableResourceCurrencies)) {
@@ -139,10 +146,10 @@ namespace gameanalytics
             }
             sharedInstance()->_availableResourceCurrencies = availableResourceCurrencies;
 
-            logging::GALogger::i("Set available resource currencies: (" + utilities::GAUtilities::joinStringArray(availableResourceCurrencies) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableResourceCurrencies, "Set available resource currencies: (%s)");
         }
 
-        void GAState::setAvailableResourceItemTypes(const std::vector<std::string>& availableResourceItemTypes)
+        void GAState::setAvailableResourceItemTypes(const StringVector& availableResourceItemTypes)
         {
             // Validate
             if (!validators::GAValidator::validateResourceItemTypes(availableResourceItemTypes)) {
@@ -150,34 +157,39 @@ namespace gameanalytics
             }
             sharedInstance()->_availableResourceItemTypes = availableResourceItemTypes;
 
-            logging::GALogger::i("Set available resource item types: (" + utilities::GAUtilities::joinStringArray(availableResourceItemTypes) + ")");
+            utilities::GAUtilities::printJoinStringArray(availableResourceItemTypes, "Set available resource item types: (%s)");
         }
 
-        void GAState::setBuild(const std::string& build)
+        void GAState::setBuild(const char* build)
         {
-            sharedInstance()->_build = build;
+            snprintf(sharedInstance()->_build, sizeof(sharedInstance()->_build), "%s", build);
 
-            logging::GALogger::i("Set build: " + build);
+            logging::GALogger::i("Set build: %s", build);
         }
 
-        void GAState::setDefaultUserId(const std::string& id)
+        void GAState::setDefaultUserId(const char* id)
         {
-            sharedInstance()->_defaultUserId = id;
+            snprintf(sharedInstance()->_defaultUserId, sizeof(sharedInstance()->_defaultUserId), "%s", id);
             cacheIdentifier();
         }
 
-        Json::Value GAState::getSdkConfig()
+        void GAState::getSdkConfig(rapidjson::Value& out)
         {
-            if (GAState::sharedInstance()->_sdkConfig.isObject())
+            if (GAState::sharedInstance()->_sdkConfig.IsObject())
             {
-                return GAState::sharedInstance()->_sdkConfig;
+                out = GAState::sharedInstance()->_sdkConfig;
             }
-            else if (GAState::sharedInstance()->_sdkConfigCached.isObject())
+            else if (GAState::sharedInstance()->_sdkConfigCached.IsObject())
             {
-                return GAState::sharedInstance()->_sdkConfigCached;
+                out = GAState::sharedInstance()->_sdkConfigCached;
             }
 
-            return GAState::sharedInstance()->_sdkConfigDefault;
+            if(GAState::sharedInstance()->_sdkConfigDefault.IsNull())
+            {
+                GAState::sharedInstance()->_sdkConfigDefault = rapidjson::Value(rapidjson::kObjectType);
+            }
+
+            out = GAState::sharedInstance()->_sdkConfigDefault;
         }
 
         bool GAState::isEnabled()
@@ -185,60 +197,62 @@ namespace gameanalytics
             return GAState::sharedInstance()->_enabled;
         }
 
-        void GAState::setCustomDimension01(const std::string& dimension)
+        void GAState::setCustomDimension01(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension01 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension01, sizeof(sharedInstance()->_currentCustomDimension01), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension01", dimension);
             }
-            logging::GALogger::i("Set custom01 dimension value: " + dimension);
+            logging::GALogger::i("Set custom01 dimension value: %s", dimension);
         }
 
-        void GAState::setCustomDimension02(const std::string& dimension)
+        void GAState::setCustomDimension02(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension02 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension02, sizeof(sharedInstance()->_currentCustomDimension02), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension02", dimension);
             }
-            logging::GALogger::i("Set custom02 dimension value: " + dimension);
+            logging::GALogger::i("Set custom02 dimension value: %s", dimension);
         }
 
-        void GAState::setCustomDimension03(const std::string& dimension)
+        void GAState::setCustomDimension03(const char* dimension)
         {
-            sharedInstance()->_currentCustomDimension03 = dimension;
+            snprintf(sharedInstance()->_currentCustomDimension03, sizeof(sharedInstance()->_currentCustomDimension03), "%s", dimension);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("dimension03", dimension);
             }
-            logging::GALogger::i("Set custom03 dimension value: " + dimension);
+            logging::GALogger::i("Set custom03 dimension value: %s", dimension);
         }
 
-        void GAState::setFacebookId(const std::string& facebookId)
+        void GAState::setFacebookId(const char* facebookId)
         {
-            sharedInstance()->_facebookId = facebookId;
+            snprintf(sharedInstance()->_facebookId, sizeof(sharedInstance()->_facebookId), "%s", facebookId);
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("facebook_id", facebookId);
             }
-            logging::GALogger::i("Set facebook id: " + facebookId);
+            logging::GALogger::i("Set facebook id: %s", facebookId);
         }
 
         void GAState::setGender(EGAGender gender)
         {
             switch (gender) {
             case Male:
-                sharedInstance()->_gender = "male";
+                snprintf(sharedInstance()->_gender, sizeof(sharedInstance()->_gender), "%s", "male");
+                break;
             case Female:
-                sharedInstance()->_gender = "female";
+                snprintf(sharedInstance()->_gender, sizeof(sharedInstance()->_gender), "%s", "female");
+                break;
             }
 
             if (store::GAStore::sharedInstance()->getTableReady())
             {
                 store::GAStore::setState("gender", sharedInstance()->_gender);
             }
-            logging::GALogger::i("Set gender: " + sharedInstance()->_gender);
+            logging::GALogger::i("Set gender: %s", sharedInstance()->_gender);
         }
 
         void GAState::setBirthYear(int birthYear)
@@ -246,9 +260,11 @@ namespace gameanalytics
             sharedInstance()->_birthYear = birthYear;
             if (store::GAStore::sharedInstance()->getTableReady())
             {
-                store::GAStore::setState("birth_year", std::to_string(birthYear));
+                char s[11] = "";
+                snprintf(s, sizeof(s), "%d", birthYear);
+                store::GAStore::setState("birth_year", s);
             }
-            logging::GALogger::i("Set birth year: " + std::to_string(birthYear));
+            logging::GALogger::i("Set birth year: %d", birthYear);
         }
 
         void GAState::incrementSessionNum()
@@ -263,19 +279,21 @@ namespace gameanalytics
             GAState::sharedInstance()->_transactionNum = transactionNumInt;
         }
 
-        void GAState::incrementProgressionTries(const std::string& progression)
+        void GAState::incrementProgressionTries(const char* progression)
         {
             auto tries = static_cast<int>(getProgressionTries(progression) + 1);
-            GAState::sharedInstance()->_progressionTries[progression] = tries;
+            char key[257] = "";
+            snprintf(key, sizeof(key), "%s", progression);
+            GAState::sharedInstance()->_progressionTries[key] = tries;
 
             // Persist
-            std::vector<std::string> parms;
-            parms.push_back(progression);
-            parms.push_back(std::to_string(tries));
-            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms);
+            char triesString[11] = "";
+            snprintf(triesString, sizeof(triesString), "%d", tries);
+            const char* parms[2] = {progression, triesString};
+            store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_progression (progression, tries) VALUES(?, ?);", parms, 2);
         }
 
-        int GAState::getProgressionTries(const std::string& progression)
+        int GAState::getProgressionTries(const char* progression)
         {
             if (sharedInstance()->_progressionTries.find(progression) != sharedInstance()->_progressionTries.end())
             {
@@ -287,7 +305,7 @@ namespace gameanalytics
             }
         }
 
-        void GAState::clearProgressionTries(const std::string& progression)
+        void GAState::clearProgressionTries(const char* progression)
         {
             auto progressionTries = GAState::sharedInstance()->_progressionTries;
             auto searchResult = progressionTries.find(progression);
@@ -297,48 +315,47 @@ namespace gameanalytics
             }
 
             // Delete
-            std::vector<std::string> parms;
-            parms.push_back(progression);
-            store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms);
+            const char* parms[1] = {progression};
+            store::GAStore::executeQuerySync("DELETE FROM ga_progression WHERE progression = ?;", parms, 1);
         }
 
-        bool GAState::hasAvailableCustomDimensions01(const std::string& dimension1)
+        bool GAState::hasAvailableCustomDimensions01(const char* dimension1)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions01, dimension1);
         }
 
-        bool GAState::hasAvailableCustomDimensions02(const std::string& dimension2)
+        bool GAState::hasAvailableCustomDimensions02(const char* dimension2)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions02, dimension2);
         }
 
-        bool GAState::hasAvailableCustomDimensions03(const std::string& dimension3)
+        bool GAState::hasAvailableCustomDimensions03(const char* dimension3)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableCustomDimensions03, dimension3);
         }
 
-        bool GAState::hasAvailableResourceCurrency(const std::string& currency)
+        bool GAState::hasAvailableResourceCurrency(const char* currency)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceCurrencies, currency);
         }
 
-        bool GAState::hasAvailableResourceItemType(const std::string& itemType)
+        bool GAState::hasAvailableResourceItemType(const char* itemType)
         {
             return utilities::GAUtilities::stringVectorContainsString(sharedInstance()->_availableResourceItemTypes, itemType);
         }
 
-        void GAState::setKeys(const std::string& gameKey, const std::string& gameSecret)
+        void GAState::setKeys(const char* gameKey, const char* gameSecret)
         {
-            GAState::sharedInstance()->_gameKey = gameKey;
-            GAState::sharedInstance()->_gameSecret = gameSecret;
+            snprintf(sharedInstance()->_gameKey, sizeof(sharedInstance()->_gameKey), "%s", gameKey);
+            snprintf(sharedInstance()->_gameSecret, sizeof(sharedInstance()->_gameSecret), "%s", gameSecret);
         }
 
-        const std::string GAState::getGameKey()
+        const char* GAState::getGameKey()
         {
             return sharedInstance()->_gameKey;
         }
 
-        const std::string GAState::getGameSecret()
+        const char* GAState::getGameSecret()
         {
             return sharedInstance()->_gameSecret;
         }
@@ -397,289 +414,375 @@ namespace gameanalytics
             }
         }
 
-        Json::Value GAState::getEventAnnotations()
+        void GAState::getEventAnnotations(rapidjson::Document& out)
         {
-            Json::Value annotations;
+            out.SetObject();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             // ---- REQUIRED ---- //
 
             // collector event API version
-            annotations["v"] = 2;
+            out.AddMember("v", 2, allocator);
             // User identifier
-            annotations["user_id"] = getIdentifier();
 
+            {
+                rapidjson::Value v(getIdentifier(), allocator);
+                out.AddMember("user_id", v.Move(), allocator);
+            }
             // Client Timestamp (the adjusted timestamp)
-            annotations["client_ts"] = GAState::getClientTsAdjusted();
+            out.AddMember("client_ts", GAState::getClientTsAdjusted(), allocator);
             // SDK version
-            annotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            {
+                rapidjson::Value v(device::GADevice::getRelevantSdkVersion(), allocator);
+                out.AddMember("sdk_version", v.Move(), allocator);
+            }
             // Operation system version
-            annotations["os_version"] = device::GADevice::getOSVersion();
+            {
+                rapidjson::Value v(device::GADevice::getOSVersion(), allocator);
+                out.AddMember("os_version", v.Move(), allocator);
+            }
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = device::GADevice::getDeviceManufacturer();
+            {
+                rapidjson::Value v(device::GADevice::getDeviceManufacturer(), allocator);
+                out.AddMember("manufacturer", v.Move(), allocator);
+            }
             // Device version
-            annotations["device"] = device::GADevice::getDeviceModel();
+            {
+                rapidjson::Value v(device::GADevice::getDeviceModel(), allocator);
+                out.AddMember("device", v.Move(), allocator);
+            }
             // Platform (operating system)
-            annotations["platform"] = device::GADevice::getBuildPlatform();
+            {
+                rapidjson::Value v(device::GADevice::getBuildPlatform(), allocator);
+                out.AddMember("platform", v.Move(), allocator);
+            }
             // Session identifier
-            annotations["session_id"] = sharedInstance()->_sessionId;
+            {
+                rapidjson::Value v(sharedInstance()->_sessionId, allocator);
+                out.AddMember("session_id", v.Move(), allocator);
+            }
             // Session number
-            annotations["session_num"] = getSessionNum();
+            out.AddMember("session_num", getSessionNum(), allocator);
 
             // type of connection the user is currently on (add if valid)
-            std::string connection_type = device::GADevice::getConnectionType();
+            const char* connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = connection_type;
+                rapidjson::Value v(connection_type, allocator);
+                out.AddMember("connection_type", v.Move(), allocator);
             }
 
-            if (!device::GADevice::getGameEngineVersion().empty())
+            if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = device::GADevice::getGameEngineVersion();
+                rapidjson::Value v(device::GADevice::getGameEngineVersion(), allocator);
+                out.AddMember("engine_version", v.Move(), allocator);
             }
 
 #if USE_UWP
-            if (!device::GADevice::getAdvertisingId().empty())
+            if (strlen(device::GADevice::getAdvertisingId()) > 0)
             {
-                annotations["uwp_aid"] = device::GADevice::getAdvertisingId();
+                rapidjson::Value v(device::GADevice::getAdvertisingId(), allocator);
+                out.AddMember("uwp_aid", v.Move(), allocator);
             }
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                annotations["uwp_id"] = device::GADevice::getDeviceId();
+                rapidjson::Value v(device::GADevice::getDeviceId(), allocator);
+                out.AddMember("uwp_id", v.Move(), allocator);
             }
 #elif USE_TIZEN
-            if (!device::GADevice::getDeviceId().empty())
+            if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                annotations["tizen_id"] = device::GADevice::getDeviceId();
+                rapidjson::Value v(device::GADevice::getDeviceId(), allocator);
+                out.AddMember("tizen_id", v.Move(), allocator);
             }
 #endif
 
             // ---- CONDITIONAL ---- //
 
             // App build version (use if not nil)
-            if (!getBuild().empty())
+            if (strlen(getBuild()) > 0)
             {
-                annotations["build"] = getBuild();
+                rapidjson::Value v(getBuild(), allocator);
+                out.AddMember("build", v.Move(), allocator);
             }
 
             // ---- OPTIONAL cross-session ---- //
 
             // facebook id (optional)
-            if (!getFacebookId().empty())
+            if (strlen(getFacebookId()) > 0)
             {
-                annotations["facebook_id"] = getFacebookId();
+                rapidjson::Value v(getFacebookId(), allocator);
+                out.AddMember("facebook_id", v.Move(), allocator);
             }
             // gender (optional)
-            if (!getGender().empty())
+            if (strlen(getGender()) > 0)
             {
-                annotations["gender"] = getGender();
+                rapidjson::Value v(getGender(), allocator);
+                out.AddMember("gender", v.Move(), allocator);
             }
             // birth_year (optional)
             if (getBirthYear() != 0)
             {
-                annotations["birth_year"] = getBirthYear();
+                out.AddMember("birth_year", getBirthYear(), allocator);
             }
-
-            return annotations;
         }
 
-        Json::Value GAState::getSdkErrorEventAnnotations()
+        void GAState::getSdkErrorEventAnnotations(rapidjson::Document& out)
         {
-            Json::Value annotations;
+            out.SetObject();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             // ---- REQUIRED ---- //
 
             // collector event API version
-            annotations["v"] = 2;
+            out.AddMember("v", 2, allocator);
 
             // Category
-            annotations["category"] = GAState::CategorySdkError;
+            {
+                rapidjson::Value v(GAState::CategorySdkError, allocator);
+                out.AddMember("category", v.Move(), allocator);
+            }
             // SDK version
-            annotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            {
+                rapidjson::Value v(device::GADevice::getRelevantSdkVersion(), allocator);
+                out.AddMember("sdk_version", v.Move(), allocator);
+            }
             // Operation system version
-            annotations["os_version"] = device::GADevice::getOSVersion();
+            {
+                rapidjson::Value v(device::GADevice::getOSVersion(), allocator);
+                out.AddMember("os_version", v.Move(), allocator);
+            }
             // Device make (hardcoded to apple)
-            annotations["manufacturer"] = device::GADevice::getDeviceManufacturer();
+            {
+                rapidjson::Value v(device::GADevice::getDeviceManufacturer(), allocator);
+                out.AddMember("manufacturer", v.Move(), allocator);
+            }
             // Device version
-            annotations["device"] = device::GADevice::getDeviceModel();
+            {
+                rapidjson::Value v(device::GADevice::getDeviceModel(), allocator);
+                out.AddMember("device", v.Move(), allocator);
+            }
             // Platform (operating system)
-            annotations["platform"] = device::GADevice::getBuildPlatform();
+            {
+                rapidjson::Value v(device::GADevice::getBuildPlatform(), allocator);
+                out.AddMember("platform", v.Move(), allocator);
+            }
 
             // type of connection the user is currently on (add if valid)
-            std::string connection_type = device::GADevice::getConnectionType();
+            const char* connection_type = device::GADevice::getConnectionType();
             if (validators::GAValidator::validateConnectionType(connection_type))
             {
-                annotations["connection_type"] = connection_type;
+                rapidjson::Value v(connection_type, allocator);
+                out.AddMember("connection_type", v.Move(), allocator);
             }
 
-            if (!device::GADevice::getGameEngineVersion().empty())
+            if(strlen(device::GADevice::getGameEngineVersion()) > 0)
             {
-                annotations["engine_version"] = device::GADevice::getGameEngineVersion();
+                rapidjson::Value v(device::GADevice::getGameEngineVersion(), allocator);
+                out.AddMember("engine_version", v.Move(), allocator);
             }
-
-            return annotations;
         }
 
-        Json::Value GAState::getInitAnnotations()
+        void GAState::getInitAnnotations(rapidjson::Document& out)
         {
-            Json::Value initAnnotations;
-            initAnnotations["user_id"] = getIdentifier();
+            out.SetObject();
+            rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
+
+            {
+                rapidjson::Value v(getIdentifier(), allocator);
+                out.AddMember("user_id", v.Move(), allocator);
+            }
             // SDK version
-            initAnnotations["sdk_version"] = device::GADevice::getRelevantSdkVersion();
+            {
+                rapidjson::Value v(device::GADevice::getRelevantSdkVersion(), allocator);
+                out.AddMember("sdk_version", v.Move(), allocator);
+            }
             // Operation system version
-            initAnnotations["os_version"] = device::GADevice::getOSVersion();
+            {
+                rapidjson::Value v(device::GADevice::getOSVersion(), allocator);
+                out.AddMember("os_version", v.Move(), allocator);
+            }
 
             // Platform (operating system)
-            initAnnotations["platform"] = device::GADevice::getBuildPlatform();
-            return initAnnotations;
+            {
+                rapidjson::Value v(device::GADevice::getBuildPlatform(), allocator);
+                out.AddMember("platform", v.Move(), allocator);
+            }
         }
 
         void GAState::cacheIdentifier()
         {
-            if (!GAState::sharedInstance()->_userId.empty())
+            if (strlen(GAState::sharedInstance()->_userId) > 0)
             {
-                GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_userId;
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", sharedInstance()->_userId);
             }
 #if USE_UWP
-            else if (!device::GADevice::getAdvertisingId().empty())
+            else if (strlen(device::GADevice::getAdvertisingId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getAdvertisingId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getAdvertisingId());
             }
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getDeviceId());
             }
 #elif USE_TIZEN
-            else if (!device::GADevice::getDeviceId().empty())
+            else if (strlen(device::GADevice::getDeviceId()) > 0)
             {
-                GAState::sharedInstance()->_identifier = device::GADevice::getDeviceId();
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", device::GADevice::getDeviceId());
             }
 #endif
-            else if (!GAState::sharedInstance()->_defaultUserId.empty())
+            else if (strlen(GAState::sharedInstance()->_defaultUserId) > 0)
             {
-                GAState::sharedInstance()->_identifier = GAState::sharedInstance()->_defaultUserId;
+                snprintf(sharedInstance()->_identifier, sizeof(sharedInstance()->_identifier), "%s", GAState::sharedInstance()->_defaultUserId);
             }
 
-            logging::GALogger::d("identifier, {clean:" + GAState::sharedInstance()->_identifier + "}");
+            logging::GALogger::d("identifier, {clean:%s}", sharedInstance()->_identifier);
         }
 
         void GAState::ensurePersistedStates()
         {
             // get and extract stored states
-            Json::Value state_dict;
-            Json::Value results_ga_state = store::GAStore::executeQuerySync("SELECT * FROM ga_state;");
+            rapidjson::Document state_dict;
+            state_dict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = state_dict.GetAllocator();
+            rapidjson::Document results_ga_state;
+            store::GAStore::executeQuerySync("SELECT * FROM ga_state;", results_ga_state);
 
-            if (!results_ga_state.empty()) {
-                for (auto result : results_ga_state) {
-                    state_dict[result["key"].asString()] = result["value"];
+            if (!results_ga_state.IsNull() && !results_ga_state.Empty())
+            {
+                for (rapidjson::Value::ConstValueIterator itr = results_ga_state.Begin(); itr != results_ga_state.End(); ++itr)
+                {
+                    if(itr->HasMember("key") && itr->HasMember("value"))
+                    {
+                        rapidjson::Value v((*itr)["key"].GetString(), allocator);
+                        rapidjson::Value v1((*itr)["value"].GetString(), allocator);
+                        state_dict.AddMember(v.Move(), v1.Move(), allocator);
+                    }
                 }
             }
 
             // insert into GAState instance
             GAState *instance = GAState::sharedInstance();
 
-            std::string defaultId = state_dict.get("default_user_id", "").asString();
-            if(defaultId.empty())
+            const char* defaultId = state_dict.HasMember("default_user_id") ? state_dict["default_user_id"].GetString() : "";
+            if(strlen(defaultId) == 0)
             {
-                instance->setDefaultUserId(utilities::GAUtilities::generateUUID());
+                char id[129] = "";
+                utilities::GAUtilities::generateUUID(id);
+                instance->setDefaultUserId(id);
             }
             else
             {
                 instance->setDefaultUserId(defaultId);
             }
 
-            instance->_sessionNum = utilities::GAUtilities::parseString<int>(state_dict.get("session_num", "0").asString());
+            instance->_sessionNum = (int)strtol(state_dict.HasMember("session_num") ? state_dict["session_num"].GetString() : "0", NULL, 10);
 
-            instance->_transactionNum = utilities::GAUtilities::parseString<int>(state_dict.get("transaction_num", "0").asString());
+            instance->_transactionNum = (int)strtol(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0", NULL, 10);
 
             // restore cross session user values
-            if (!instance->_facebookId.empty())
+            if (strlen(instance->_facebookId) > 0)
             {
                 store::GAStore::setState("facebook_id", instance->_facebookId);
             }
             else
             {
-                instance->_facebookId = state_dict.get("facebook_id", "").asString();
-                if (!instance->_facebookId.empty()) {
-                    logging::GALogger::d("facebookid found in DB: " + instance->_facebookId);
+                snprintf(instance->_facebookId, sizeof(instance->_facebookId), "%s", state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "");
+                if (strlen(instance->_facebookId) > 0)
+                {
+                    logging::GALogger::d("facebookid found in DB: %s", instance->_facebookId);
                 }
             }
 
-            if (!instance->_gender.empty())
+            if (strlen(instance->_gender) > 0)
             {
                 store::GAStore::setState("gender", instance->_gender);
             }
             else
             {
-                instance->_gender = state_dict.get("gender", "").asString();
-                if (!instance->_gender.empty()) {
-                    logging::GALogger::d("gender found in DB: " + instance->_gender);
+                snprintf(instance->_gender, sizeof(instance->_gender), "%s", state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "");
+                if (strlen(instance->_gender) > 0)
+                {
+                    logging::GALogger::d("gender found in DB: %s", instance->_gender);
                 }
             }
 
             if (instance->_birthYear != 0)
             {
-                store::GAStore::setState("birth_year", std::to_string(instance->_birthYear));
+                char s[11] = "";
+                snprintf(s, sizeof(s), "%d", instance->_birthYear);
+                store::GAStore::setState("birth_year", s);
             }
             else
             {
-                instance->_birthYear = utilities::GAUtilities::parseString<int>(state_dict.get("birth_year", "0").asString());
-                if (instance->_birthYear != 0) {
-                    logging::GALogger::d("birthYear found in DB: " + std::to_string(instance->_birthYear));
+                instance->_birthYear = (int)strtol(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0", NULL, 10);
+                if (instance->_birthYear != 0)
+                {
+                    logging::GALogger::d("birthYear found in DB: %d", instance->_birthYear);
                 }
             }
 
             // restore dimension settings
-            if (!instance->_currentCustomDimension01.empty())
+            if (strlen(instance->_currentCustomDimension01) > 0)
             {
                 store::GAStore::setState("dimension01", instance->_currentCustomDimension01);
             }
             else
             {
-                instance->_currentCustomDimension01 = state_dict.get("dimension01", "").asString();
-                if (!instance->_currentCustomDimension01.empty()) {
-                    logging::GALogger::d("Dimension01 found in cache: " + instance->_currentCustomDimension01);
+                snprintf(instance->_currentCustomDimension01, sizeof(instance->_currentCustomDimension01), "%s", state_dict.HasMember("dimension01") ? state_dict["dimension01"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension01))
+                {
+                    logging::GALogger::d("Dimension01 found in cache: %s", instance->_currentCustomDimension01);
                 }
             }
 
-            if (!instance->_currentCustomDimension02.empty())
+            if (strlen(instance->_currentCustomDimension02) > 0)
             {
                 store::GAStore::setState("dimension02", instance->_currentCustomDimension02);
             }
             else
             {
-                instance->_currentCustomDimension02 = state_dict.get("dimension02", "").asString();
-                if (!instance->_currentCustomDimension02.empty()) {
-                    logging::GALogger::d("Dimension02 found cache: " + instance->_currentCustomDimension02);
+                snprintf(instance->_currentCustomDimension02, sizeof(instance->_currentCustomDimension02), "%s", state_dict.HasMember("dimension02") ? state_dict["dimension02"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension02) > 0)
+                {
+                    logging::GALogger::d("Dimension02 found in cache: %s", instance->_currentCustomDimension02);
                 }
             }
 
-            if (!instance->_currentCustomDimension03.empty())
+            if (strlen(instance->_currentCustomDimension03) > 0)
             {
                 store::GAStore::setState("dimension03", instance->_currentCustomDimension03);
             }
             else
             {
-                instance->_currentCustomDimension03 = state_dict.get("dimension03", "").asString();
-                if (!instance->_currentCustomDimension03.empty()) {
-                    logging::GALogger::d("Dimension03 found in cache: " + instance->_currentCustomDimension03);
+                snprintf(instance->_currentCustomDimension03, sizeof(instance->_currentCustomDimension03), "%s", state_dict.HasMember("dimension03") ? state_dict["dimension03"].GetString() : "");
+                if (strlen(instance->_currentCustomDimension03) > 0)
+                {
+                    logging::GALogger::d("Dimension03 found in cache: %s", instance->_currentCustomDimension03);
                 }
             }
 
             // get cached init call values
-            std::string sdkConfigCachedString = state_dict.get("sdk_config_cached", "").asString();
-            if (!sdkConfigCachedString.empty()) {
+            const char* sdkConfigCachedString = state_dict.HasMember("sdk_config_cached") ? state_dict["sdk_config_cached"].GetString() : "";
+            if (strlen(sdkConfigCachedString) > 0)
+            {
                 // decode JSON
-                Json::Value sdkConfigCached = utilities::GAUtilities::jsonFromString(sdkConfigCachedString);
-                if (!sdkConfigCached.isNull()) {
-                    instance->_sdkConfigCached = sdkConfigCached;
+                rapidjson::Document d;
+                d.Parse(sdkConfigCachedString);
+                if (!d.IsNull())
+                {
+                    instance->_sdkConfigCached.CopyFrom(d, d.GetAllocator());
                 }
             }
 
-            Json::Value results_ga_progression = store::GAStore::executeQuerySync("SELECT * FROM ga_progression;");
+            rapidjson::Document results_ga_progression;
+            store::GAStore::executeQuerySync("SELECT * FROM ga_progression;", results_ga_progression);
 
-            if (!results_ga_progression.empty()) {
-                for (Json::Value result : results_ga_progression) {
-                    sharedInstance()->_progressionTries[result["progression"].asString()] = utilities::GAUtilities::parseString<int>(result["tries"].asString());
+            if (!results_ga_progression.IsNull() && !results_ga_progression.Empty())
+            {
+                for (rapidjson::Value::ConstValueIterator itr = results_ga_progression.Begin(); itr != results_ga_progression.End(); ++itr)
+                {
+                    sharedInstance()->_progressionTries[(*itr)["progression"].GetString()] = (int)strtol((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0", NULL, 10);
                 }
             }
 
@@ -695,39 +798,55 @@ namespace gameanalytics
 
             // call the init call
             http::GAHTTPApi *httpApi = http::GAHTTPApi::sharedInstance();
+            rapidjson::Document initResponseDict;
+            initResponseDict.SetObject();
+            rapidjson::Document::AllocatorType& allocator = initResponseDict.GetAllocator();
+            http::EGAHTTPApiResponse initResponse;
 #if USE_UWP
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair;
+            std::pair<http::EGAHTTPApiResponse, std::string> pair;
             try
             {
                 pair = httpApi->requestInitReturningDict().get();
             }
             catch(Platform::COMException^ e)
             {
-                pair = std::pair<http::EGAHTTPApiResponse, Json::Value>(http::NoResponse, Json::Value());
+                pair = std::pair<http::EGAHTTPApiResponse, std::string>(http::NoResponse, "");
+            }
+            initResponse = pair.first;
+            rapidjson::Document d;
+            if(pair.second.size() > 0)
+            {
+                initResponseDict.Parse(pair.second.c_str());
             }
 #else
-            std::pair<http::EGAHTTPApiResponse, Json::Value> pair = httpApi->requestInitReturningDict();
+            httpApi->requestInitReturningDict(initResponse, initResponseDict);
 #endif
-            Json::Value initResponseDict = pair.second;
-            http::EGAHTTPApiResponse initResponse = pair.first;
 
             // init is ok
-            if (initResponse == http::Ok && !initResponseDict.isNull()) {
+            if (initResponse == http::Ok && !initResponseDict.IsNull())
+            {
                 // set the time offset - how many seconds the local time is different from servertime
-                Json::Int64 timeOffsetSeconds = 0;
-                if (initResponseDict.get("server_ts", -1.0).asInt64() > 0) {
-                    Json::Int64 serverTs = initResponseDict.get("server_ts", -1).asInt64();
-                    timeOffsetSeconds = calculateServerTimeOffset(serverTs);
+                int64_t timeOffsetSeconds = 0;
+                int64_t server_ts = initResponseDict.HasMember("server_ts") ? initResponseDict["server_ts"].GetInt64() : -1;
+                if (server_ts > 0)
+                {
+                    timeOffsetSeconds = calculateServerTimeOffset(server_ts);
                 }
                 // insert timeOffset in received init config (so it can be used when offline)
-                initResponseDict["time_offset"] = timeOffsetSeconds;
+                initResponseDict.AddMember("time_offset", timeOffsetSeconds, allocator);
+
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    initResponseDict.Accept(writer);
+                }
 
                 // insert new config in sql lite cross session storage
-                store::GAStore::setState("sdk_config_cached", utilities::GAUtilities::jsonToString(initResponseDict));
+                store::GAStore::setState("sdk_config_cached", buffer.GetString());
 
                 // set new config and cache in memory
-                GAState::sharedInstance()->_sdkConfigCached = initResponseDict;
-                GAState::sharedInstance()->_sdkConfig = initResponseDict;
+                GAState::sharedInstance()->_sdkConfigCached.CopyFrom(initResponseDict, allocator);
+                GAState::sharedInstance()->_sdkConfig.CopyFrom(initResponseDict, allocator);
 
                 GAState::sharedInstance()->_initAuthorized = true;
             }
@@ -752,9 +871,9 @@ namespace gameanalytics
                 }
 
                 // init call failed (perhaps offline)
-                if (GAState::sharedInstance()->_sdkConfig.isNull())
+                if (GAState::sharedInstance()->_sdkConfig.IsNull())
                 {
-                    if (!GAState::sharedInstance()->_sdkConfigCached.isNull())
+                    if (!GAState::sharedInstance()->_sdkConfigCached.IsNull())
                     {
                         logging::GALogger::i("Init call (session start) failed - using cached init values.");
                         // set last cross session stored config init values
@@ -764,6 +883,12 @@ namespace gameanalytics
                     {
                         logging::GALogger::i("Init call (session start) failed - using default init values.");
                         // set default init values
+
+                        if(GAState::sharedInstance()->_sdkConfigDefault.IsNull())
+                        {
+                            GAState::sharedInstance()->_sdkConfigDefault = rapidjson::Value(rapidjson::kObjectType);
+                        }
+
                         GAState::sharedInstance()->_sdkConfig = GAState::sharedInstance()->_sdkConfigDefault;
                     }
                 }
@@ -774,10 +899,10 @@ namespace gameanalytics
                 GAState::sharedInstance()->_initAuthorized = true;
             }
 
+            rapidjson::Value currentSdkConfig(rapidjson::kObjectType);
+            GAState::getSdkConfig(currentSdkConfig);
             {
-                Json::Value currentSdkConfig = GAState::getSdkConfig();
-
-                if (currentSdkConfig.isObject() && currentSdkConfig["enabled"].isBool() && currentSdkConfig.get("enabled", true).asBool() == false)
+                if (currentSdkConfig.IsObject() && ((currentSdkConfig.HasMember("enabled") && currentSdkConfig["enabled"].IsBool()) ? currentSdkConfig["enabled"].GetBool() : true) == false)
                 {
                     GAState::sharedInstance()->_enabled = false;
                 }
@@ -792,10 +917,11 @@ namespace gameanalytics
             }
 
             // set offset in state (memory) from current config (config could be from cache etc.)
-            GAState::sharedInstance()->_clientServerTimeOffset = utilities::GAUtilities::parseString<Json::Int64>(GAState::getSdkConfig().get("time_offset", "0.0").asString());
+
+            GAState::sharedInstance()->_clientServerTimeOffset = (int64_t)strtol(currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetString() : "0", NULL, 10);
 
             // populate configurations
-            populateConfigurations(GAState::getSdkConfig());
+            populateConfigurations(currentSdkConfig);
 
             // if SDK is disabled in config
             if (!GAState::isEnabled())
@@ -812,11 +938,12 @@ namespace gameanalytics
             }
 
             // generate the new session
-            std::string newSessionId = utilities::GAUtilities::generateUUID();
-            std::string newSessionIdLowercase = utilities::GAUtilities::lowercaseString(newSessionId);
+            char newSessionId[65] = "";
+            utilities::GAUtilities::generateUUID(newSessionId);
+            utilities::GAUtilities::lowercaseString(newSessionId);
 
             // Set session id
-            GAState::sharedInstance()->_sessionId = newSessionIdLowercase;
+            snprintf(sharedInstance()->_sessionId, sizeof(sharedInstance()->_sessionId), "%s", newSessionId);
 
             // Set session start
             GAState::sharedInstance()->_sessionStart = getClientTsAdjusted();
@@ -830,19 +957,19 @@ namespace gameanalytics
             // validate that there are no current dimension01 not in list
             if (!validators::GAValidator::validateDimension01(sharedInstance()->_currentCustomDimension01))
             {
-                logging::GALogger::d("Invalid dimension01 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension01);
+                logging::GALogger::d("Invalid dimension01 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension01);
                 setCustomDimension01("");
             }
             // validate that there are no current dimension02 not in list
             if (!validators::GAValidator::validateDimension02(sharedInstance()->_currentCustomDimension02))
             {
-                logging::GALogger::d("Invalid dimension02 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension02);
+                logging::GALogger::d("Invalid dimension02 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension02);
                 setCustomDimension02("");
             }
             // validate that there are no current dimension03 not in list
             if (!validators::GAValidator::validateDimension03(sharedInstance()->_currentCustomDimension03))
             {
-                logging::GALogger::d("Invalid dimension03 found in variable. Setting to nil. Invalid dimension: " + sharedInstance()->_currentCustomDimension03);
+                logging::GALogger::d("Invalid dimension03 found in variable. Setting to nil. Invalid dimension: %s", sharedInstance()->_currentCustomDimension03);
                 setCustomDimension03("");
             }
         }
@@ -852,10 +979,20 @@ namespace gameanalytics
             return GAState::sharedInstance()->_sessionStart != 0;
         }
 
-        std::string GAState::getConfigurationStringValue(const std::string& key, const std::string& defaultValue)
+        std::vector<char> GAState::getConfigurationStringValue(const char* key, const char* defaultValue)
         {
             std::lock_guard<std::mutex> lg(GAState::sharedInstance()->_mtx);
-            return GAState::sharedInstance()->_configurations.isMember(key) ? GAState::sharedInstance()->_configurations[key].asString() : defaultValue;
+            const char* returnValue = GAState::sharedInstance()->_configurations.HasMember(key) ? GAState::sharedInstance()->_configurations[key].GetString() : defaultValue;
+
+            std::vector<char> result;
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
         }
 
         bool GAState::isCommandCenterReady()
@@ -877,42 +1014,83 @@ namespace gameanalytics
         {
             GAState* instance = GAState::sharedInstance();
 
-            auto it = std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener);
-
             if(std::find(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener) != GAState::sharedInstance()->_commandCenterListeners.end())
             {
                 instance->_commandCenterListeners.erase(std::remove(instance->_commandCenterListeners.begin(), instance->_commandCenterListeners.end(), listener), instance->_commandCenterListeners.end());
             }
         }
 
-        std::string GAState::getConfigurationsContentAsString()
+        std::vector<char> GAState::getConfigurationsContentAsString()
         {
-            return GAState::sharedInstance()->_configurations.toStyledString();
+            rapidjson::StringBuffer buffer;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+            GAState::sharedInstance()->_configurations.Accept(writer);
+            const char* returnValue = buffer.GetString();
+
+            std::vector<char> result;
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
         }
 
-        void GAState::populateConfigurations(Json::Value sdkConfig)
+        void GAState::populateConfigurations(rapidjson::Value& sdkConfig)
         {
             GAState::sharedInstance()->_mtx.lock();
 
-            if(sdkConfig.isMember("configurations") && sdkConfig["configurations"].isArray())
+            GAState::sharedInstance()->_configurations.SetObject();
+            rapidjson::Document::AllocatorType& allocator = GAState::sharedInstance()->_configurations.GetAllocator();
+
+            if(sdkConfig.HasMember("configurations") && sdkConfig["configurations"].IsArray())
             {
-                Json::Value configurations = sdkConfig["configurations"];
+                rapidjson::Value& configurations = sdkConfig["configurations"];
 
-                for(unsigned int i = 0; i < configurations.size(); ++i)
+                for (rapidjson::Value::ConstValueIterator itr = configurations.Begin(); itr != configurations.End(); ++itr)
                 {
-                    Json::Value configuration = configurations[i];
+                    const rapidjson::Value& configuration = *itr;
 
-                    if(!configuration.isNull())
+                    if(!configuration.IsNull())
                     {
-                        std::string key = (configuration.isMember("key") && configuration["key"].isString()) ? configuration["key"].asString() : "";
-                        Json::Int64 start_ts = (configuration.isMember("start") && configuration["start"].isInt64()) ? configuration["start"].asInt64() : LONG_MIN;
-                        Json::Int64 end_ts = (configuration.isMember("end") && configuration["end"].isInt64()) ? configuration["start"].asInt64() : LONG_MAX;
-                        Json::Int64 client_ts_adjusted = getClientTsAdjusted();
+                        const char* key = (configuration.HasMember("key") && configuration["key"].IsString()) ? configuration["key"].GetString() : "";
+                        int64_t start_ts = (configuration.HasMember("start") && configuration["start"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MIN;
+                        int64_t end_ts = (configuration.HasMember("end") && configuration["end"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MAX;
+                        int64_t client_ts_adjusted = getClientTsAdjusted();
 
-                        if(!key.empty() && configuration.isMember("value") && (configuration["value"].isString() || configuration["value"].isNumeric()) && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
+                        if(strlen(key) > 0 && configuration.HasMember("value") && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)
                         {
-                            GAState::sharedInstance()->_configurations[key] = configuration["value"];
-                            logging::GALogger::d("configuration added: " + configuration.toStyledString());
+                            if(configuration["value"].IsString())
+                            {
+                                rapidjson::Value v(key, allocator);
+                                rapidjson::Value v1(configuration["value"].GetString(), allocator);
+                                GAState::sharedInstance()->_configurations.AddMember(v.Move(), v1.Move(), allocator);
+                            }
+                            else if(configuration["value"].IsNumber())
+                            {
+                                rapidjson::Value v(key, allocator);
+
+                                if(configuration["value"].IsInt64())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetInt64(), allocator);
+                                }
+                                else if(configuration["value"].IsInt())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetInt(), allocator);
+                                }
+                                else if(configuration["value"].IsDouble())
+                                {
+                                    GAState::sharedInstance()->_configurations.AddMember(v.Move(), configuration["value"].GetDouble(), allocator);
+                                }
+                            }
+
+                            rapidjson::StringBuffer buffer;
+                            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+                            configuration.Accept(writer);
+
+                            logging::GALogger::d("configuration added: %s", buffer.GetString());
                         }
                     }
                 }
@@ -927,74 +1105,77 @@ namespace gameanalytics
             GAState::sharedInstance()->_mtx.unlock();
         }
 
-        const Json::Value GAState::validateAndCleanCustomFields(const Json::Value& fields)
+        void GAState::validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out)
         {
-            Json::Value result;
+            rapidjson::Document result;
+            result.SetObject();
+            rapidjson::Document::AllocatorType& allocator = result.GetAllocator();
 
-            if (fields.isObject() && !fields.empty())
+            if (fields.IsObject() && fields.MemberCount() > 0)
             {
                 int count = 0;
 
-                for (std::string key : fields.getMemberNames())
+                for (rapidjson::Value::ConstMemberIterator itr = fields.MemberBegin(); itr != fields.MemberEnd(); ++itr)
                 {
-                    if(fields[key].isNull())
+                    const char* key = itr->name.GetString();
+                    if(fields[key].IsNull())
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
-                            " has been omitted because its key or value is null");
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=null has been omitted because its key or value is null", key);
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
-                        if(utilities::GAUtilities::stringMatch(key, "^[a-zA-Z0-9_]{1," + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + "}$"))
+                        char pattern[65] = "";
+                        snprintf(pattern, sizeof(pattern), "^[a-zA-Z0-9_]{1,%d}$", MAX_CUSTOM_FIELDS_KEY_LENGTH);
+                        if(utilities::GAUtilities::stringMatch(key, pattern))
                         {
-                            auto value = fields[key];
+                            const rapidjson::Value& value = fields[key];
 
-                            if(value.isNumeric())
+                            if(value.IsNumber())
                             {
-                                result[key] = value;
+                                rapidjson::Value v(key, allocator);
+                                result.AddMember(v.Move(), value.GetDouble(), allocator);
                                 ++count;
                             }
-                            else if(value.isString())
+                            else if(value.IsString())
                             {
-                                std::string valueAsString = value.asString();
+                                std::string valueAsString = value.GetString();
 
                                 if(valueAsString.length() <= MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH && valueAsString.length() > 0)
                                 {
-                                    result[key] = value;
+                                    rapidjson::Value v(key, allocator);
+                                    rapidjson::Value v1(value.GetString(), allocator);
+                                    result.AddMember(v.Move(), v1.Move(), allocator);
                                     ++count;
                                 }
                                 else
                                 {
-                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
-                                        " has been omitted because its value is an empty string or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH) + ")");
+                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
                                 }
                             }
                             else
                             {
-                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
-                                    " has been omitted because its value is not a string or number");
+                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because its value is not a string or number", key);
                             }
                         }
                         else
                         {
-                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
-                                " has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (" + std::to_string(MAX_CUSTOM_FIELDS_KEY_LENGTH) + ")");
+                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
                         }
                     }
                     else
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=" + key + ", value=" + fields[key].asString() +
-                            " has been omitted because it exceeds the max number of custom fields (" + std::to_string(MAX_CUSTOM_FIELDS_COUNT) + ")");
+                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because it exceeds the max number of custom fields (%d)", key, MAX_CUSTOM_FIELDS_COUNT);
                     }
                 }
             }
 
-            return result;
+            out.CopyFrom(result, allocator);
         }
 
-        Json::Int64 GAState::getClientTsAdjusted()
+        int64_t GAState::getClientTsAdjusted()
         {
-            Json::Int64 clientTs = utilities::GAUtilities::timeIntervalSince1970();
-            Json::Int64 clientTsAdjustedInteger = clientTs + GAState::sharedInstance()->_clientServerTimeOffset;
+            int64_t clientTs = utilities::GAUtilities::timeIntervalSince1970();
+            int64_t clientTsAdjustedInteger = clientTs + GAState::sharedInstance()->_clientServerTimeOffset;
 
             if (validators::GAValidator::validateClientTs(clientTsAdjustedInteger))
             {
@@ -1006,17 +1187,17 @@ namespace gameanalytics
             }
         }
 
-        const std::string GAState::getBuild()
+        const char* GAState::getBuild()
         {
             return GAState::sharedInstance()->_build;
         }
 
-        const std::string GAState::getFacebookId()
+        const char* GAState::getFacebookId()
         {
             return sharedInstance()->_facebookId;
         }
 
-        const std::string GAState::getGender()
+        const char* GAState::getGender()
         {
             return sharedInstance()->_gender;
         }
@@ -1026,9 +1207,9 @@ namespace gameanalytics
             return sharedInstance()->_birthYear;
         }
 
-        Json::Int64 GAState::calculateServerTimeOffset(Json::Int64 serverTs)
+        int64_t GAState::calculateServerTimeOffset(int64_t serverTs)
         {
-            Json::Int64 clientTs = utilities::GAUtilities::timeIntervalSince1970();
+            int64_t clientTs = utilities::GAUtilities::timeIntervalSince1970();
             return serverTs - clientTs;
         }
 

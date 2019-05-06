@@ -6,15 +6,13 @@
 #pragma once
 
 #include <vector>
-#include <string>
+#include <map>
 #include "Foundation/GASingleton.h"
-#include <json/json.h>
-#include <utility>
+#include "rapidjson/document.h"
 #if USE_UWP
 #include <ppltasks.h>
 #else
-#include "curl_easy.h"
-#include "curl_header.h"
+#include <curl/curl.h>
 #endif
 
 namespace gameanalytics
@@ -43,63 +41,56 @@ namespace gameanalytics
             Rejected = 1
         };
 
-        struct CurlFetchStruct
+        struct ResponseData
         {
-            char *payload;
-            size_t size;
+            char *ptr;
+            size_t len;
         };
 
         class GAHTTPApi : public GASingleton<GAHTTPApi>
         {
         public:
             GAHTTPApi();
+            ~GAHTTPApi();
 
 #if USE_UWP
-            concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> requestInitReturningDict();
-            concurrency::task<std::pair<EGAHTTPApiResponse, Json::Value>> sendEventsInArray(const std::vector<Json::Value>& eventArray);
+            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> requestInitReturningDict();
+            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> sendEventsInArray(const rapidjson::Value& eventArray);
 #else
-            std::pair<EGAHTTPApiResponse, Json::Value> requestInitReturningDict();
-            std::pair<EGAHTTPApiResponse, Json::Value> sendEventsInArray(const std::vector<Json::Value>& eventArray);
+            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
+            void sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);
 
-            static const std::string sdkErrorTypeToString(EGASdkErrorType value)
+            static void sdkErrorTypeToString(EGASdkErrorType value, char* out)
             {
                 switch (value) {
                 case Rejected:
-                    return "rejected";
+                    snprintf(out, 9, "%s", "rejected");
+                    return;
                 default:
                     break;
                 }
-                return{};
-            }
-
-            static void switchProtocolToHttp()
-            {
-                protocol = "http";
-                baseUrl = protocol + "://" + hostName + "/" + version;
+                snprintf(out, 9, "%s", "");
             }
 
          private:
-            const std::string createPayloadData(const std::string& payload, bool gzip);
+            std::vector<char> createPayloadData(const char* payload, bool gzip);
 
 #if USE_UWP
-            const std::string createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::string& payloadData, bool gzip);
+            std::vector<char> createRequest(Windows::Web::Http::HttpRequestMessage^ message, const std::string& url, const std::vector<char>& payloadData, bool gzip);
             EGAHTTPApiResponse processRequestResponse(Windows::Web::Http::HttpResponseMessage^ response, const std::string& requestId);
             concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> createStream(std::string data);
 #else
-            const std::string createRequest(curl::curl_easy& curl, curl::curl_header& header, const std::string& url, const std::string& payloadData, bool gzip);
-            EGAHTTPApiResponse processRequestResponse(curl::curl_easy& curl, const std::string& body, const std::string& requestId);
+            std::vector<char> createRequest(CURL *curl, const char* url, const std::vector<char>& payloadData, bool gzip);
+            EGAHTTPApiResponse processRequestResponse(long statusCode, const char* body, const char* requestId);
 #endif
-
-            static const std::string getBaseUrl();
-
-            static std::string protocol;
-            static const std::string hostName;
-            static const std::string version;
-            static std::string baseUrl;
-            static const std::string initializeUrlPath;
-            static const std::string eventsUrlPath;
+            static char protocol[];
+            static char hostName[];
+            static char version[];
+            static char baseUrl[];
+            static char initializeUrlPath[];
+            static char eventsUrlPath[];
             bool useGzip;
             static const int MaxCount;
             static std::map<EGASdkErrorType, int> countMap;

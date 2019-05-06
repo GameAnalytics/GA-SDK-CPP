@@ -2,6 +2,7 @@
 #include "GameAnalytics.h"
 #include <iostream>
 #include "GADevice.h"
+#include <cstdarg>
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>
@@ -11,7 +12,7 @@
 #else
 #include "GAUtilities.h"
 #include <vector>
-#include <spdlog/sinks/ostream_sink.h>
+#include "zf_log.h"
 #endif
 
 #if USE_UWP
@@ -27,7 +28,7 @@ namespace gameanalytics
 {
     namespace logging
     {
-        const std::string GALogger::tag = "GameAnalytics";
+        const char* GALogger::tag = "GameAnalytics";
 
         GALogger::GALogger()
         {
@@ -51,6 +52,16 @@ namespace gameanalytics
 #endif
         }
 
+        GALogger::~GALogger()
+        {
+#if !USE_UWP && !USE_TIZEN
+            if(logInitialized)
+            {
+                fclose(log_file);
+            }
+#endif
+        }
+
         void GALogger::setInfoLog(bool enabled)
         {
             GALogger::sharedInstance()->infoLogEnabled = enabled;
@@ -62,34 +73,34 @@ namespace gameanalytics
         }
 
 #if !USE_UWP && !USE_TIZEN
+        void GALogger::file_output_callback(const zf_log_message *msg, void *arg)
+        {
+            (void)arg;
+            *msg->p = '\n';
+            fwrite(msg->buf, msg->p - msg->buf + 1, 1, GALogger::sharedInstance()->log_file);
+            fflush(GALogger::sharedInstance()->log_file);
+        }
+
         void GALogger::initializeLog()
         {
             GALogger *ga = GALogger::sharedInstance();
 
             if(!ga->logInitialized)
             {
-                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
-                std::vector<spdlog::sink_ptr> sinks;
-                sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-                sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
-                ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
+                char p[513] = "";
+                snprintf(p, sizeof(p), "%s%sga_log.txt", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
 
-                if(ga->debugEnabled)
+                ga->log_file = fopen(p, "w");
+                if (!ga->log_file)
                 {
-                    ga->logger->flush_on(spdlog::level::debug);
-                    spdlog::set_level(spdlog::level::debug);
+                    ZF_LOGW("Failed to open log file %s", p);
+                    return;
                 }
-                else
-                {
-                    ga->logger->flush_on(spdlog::level::info);
-                    spdlog::set_level(spdlog::level::info);
-                }
-
-                spdlog::register_logger(ga->logger);
+                zf_log_set_output_v(ZF_LOG_PUT_STD, 0, file_output_callback);
 
                 ga->logInitialized = true;
 
-                GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+                GALogger::i("Log file added under: %s", device::GADevice::getWritablePath());
             }
         }
 
@@ -97,42 +108,25 @@ namespace gameanalytics
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            spdlog::drop("gameanalytics");
-            std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
-            std::vector<spdlog::sink_ptr> sinks;
-            sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-            sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
-            ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
-
-            if(ga->debugEnabled)
+            if(ga->logInitialized)
             {
-                ga->logger->flush_on(spdlog::level::debug);
-                spdlog::set_level(spdlog::level::debug);
-            }
-            else
-            {
-                ga->logger->flush_on(spdlog::level::info);
-                spdlog::set_level(spdlog::level::info);
+                fclose(ga->log_file);
             }
 
-            spdlog::register_logger(ga->logger);
+            char p[513] = "";
+            snprintf(p, sizeof(p), "%s%sga_log.txt", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
+
+            ga->log_file = fopen(p, "w");
+            if (!ga->log_file)
+            {
+                ZF_LOGW("Failed to open log file %s", p);
+                return;
+            }
+            zf_log_set_output_v(ZF_LOG_PUT_STD, 0, file_output_callback);
 
             ga->logInitialized = true;
 
-            GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
-        }
-
-        void GALogger::addCustomLogStream(std::ostream& os)
-        {
-            spdlog::drop("gameanalytics_stream");
-            GALogger *ga = GALogger::sharedInstance();
-            auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_st>(os);
-            ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
-
-            ga->custom_logger->flush_on(spdlog::level::info);
-            spdlog::set_level(spdlog::level::info);
-
-            spdlog::register_logger(ga->custom_logger);
+            GALogger::i("Log file added under: %s", device::GADevice::getWritablePath());
         }
 #endif
 
@@ -142,7 +136,7 @@ namespace gameanalytics
         // - non-errors
         // - initializing, adding event, sending events etc.
         // - generally small text
-        void GALogger::i(const std::string& format)
+        void GALogger::i(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -151,8 +145,21 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Info/" + ga->tag + ": " + format;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char* formatted = new char[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 11 + strlen(ga->tag);
+            char* message = new char[s];
+            snprintf(message, s, "Info/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -162,12 +169,25 @@ namespace gameanalytics
         // - validation errors
         // - trying to initialize with wrong keys
         // - other non-critical
-        void GALogger::w(const std::string& format)
+        void GALogger::w(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            std::string message = "Warning/" + ga->tag + ": " + format;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char* formatted = new char[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 14 + strlen(ga->tag);
+            char* message = new char[s];
+            snprintf(message, s, "Warning/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Warning);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -178,12 +198,25 @@ namespace gameanalytics
         // - JSON decoding/encoding errors
         // - unexpected exceptions
         // - errors that never should happen
-        void GALogger::e(const std::string& format)
+        void GALogger::e(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            std::string message = "Error/" + ga->tag + ": " + format;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char* formatted = new char[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            size_t s = len + 1 + 12 + strlen(ga->tag);
+            char* message = new char[s];
+            snprintf(message, s, "Error/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Error);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -192,7 +225,7 @@ namespace gameanalytics
         // used for:
         // - development only
         // - use large debug text like HTTP payload etc.
-        void GALogger::d(const std::string& format)
+        void GALogger::d(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -201,8 +234,21 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Debug/" + ga->tag + ": " + format;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char* formatted = new char[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            int s = len + 1 + 12 + strlen(ga->tag);
+            char* message = new char[s];
+            snprintf(message, s, "Debug/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Debug);
+            delete[] message;
+            delete[] formatted;
         }
 
 
@@ -210,7 +256,7 @@ namespace gameanalytics
         //
         // used for:
         // - Large logs
-        void GALogger::ii(const std::string& format)
+        void GALogger::ii(const char* format, ...)
         {
             GALogger *ga = GALogger::sharedInstance();
 
@@ -219,15 +265,28 @@ namespace gameanalytics
                 return;
             }
 
-            std::string message = "Verbose/" + ga->tag + ": " + format;
+            va_list args;
+            va_start (args, format);
+            size_t len = std::vsnprintf(NULL, 0, format, args);
+            va_end (args);
+            char* formatted = new char[len + 1];
+            va_start (args, format);
+            std::vsnprintf(formatted, len + 1, format, args);
+            va_end (args);
+
+            int s = len + 1 + 14 + strlen(ga->tag);
+            char* message = new char[s];
+            snprintf(message, s, "Verbose/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);
+            delete[] message;
+            delete[] formatted;
         }
 
-        void GALogger::sendNotificationMessage(const std::string& message, EGALoggerMessageType type)
+        void GALogger::sendNotificationMessage(const char* message, EGALoggerMessageType type)
         {
             if(GameAnalytics::isThreadEnding())
             {
-                return;
+                //return;
             }
 #if USE_UWP
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
@@ -254,19 +313,10 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_ERROR, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_ERROR, GALogger::tag, message);
 #else
-                    try
-                    {
-                        logger->error(message.c_str());
-                        if(custom_logger)
-                        {
-                            custom_logger->error(message.c_str());
-                        }
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
+                    std::cout << message << std::endl;
+                    ZF_LOGE("%s", message);
 #endif
                     break;
 
@@ -281,19 +331,10 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_WARN, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_WARN, GALogger::tag, message);
 #else
-                    try
-                    {
-                        logger->warn(message.c_str());
-                        if(custom_logger)
-                        {
-                            custom_logger->warn(message.c_str());
-                        }
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
+                    std::cout << message << std::endl;
+                    ZF_LOGW("%s", message);
 #endif
                     break;
 
@@ -308,19 +349,10 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_DEBUG, GALogger::tag, message);
 #else
-                    try
-                    {
-                        logger->info(message.c_str());
-                        if(custom_logger)
-                        {
-                            custom_logger->info(message.c_str());
-                        }
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
+                    std::cout << message << std::endl;
+                    ZF_LOGD("%s", message);
 #endif
                     break;
 
@@ -335,19 +367,10 @@ namespace gameanalytics
                     }
                     LogMessageToConsole(m);
 #elif USE_TIZEN
-                    dlog_print(DLOG_INFO, GALogger::tag.c_str(), message.c_str());
+                    dlog_print(DLOG_INFO, GALogger::tag, message);
 #else
-                    try
-                    {
-                        logger->info(message.c_str());
-                        if(custom_logger)
-                        {
-                            custom_logger->info(message.c_str());
-                        }
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
+                    std::cout << message << std::endl;
+                    ZF_LOGI("%s", message);
 #endif
                     break;
             }

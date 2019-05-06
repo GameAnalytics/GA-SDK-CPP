@@ -28,9 +28,9 @@ protected:
             discard_idx--;
         } else if (discard_idx == 0) {
             stacktrace::entry e;
-            e.file = entry.lineFileName;
+            snprintf(e.file, sizeof(e.file), "%s", entry.lineFileName);
             e.line = entry.lineNumber;
-            e.function = entry.name;
+            snprintf(e.function, sizeof(e.function), "%s",  entry.name);
             stack.push_back(e);
         }
     }
