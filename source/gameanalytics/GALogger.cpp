@@ -316,7 +316,7 @@ namespace gameanalytics
                     dlog_print(DLOG_ERROR, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGE("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -334,7 +334,7 @@ namespace gameanalytics
                     dlog_print(DLOG_WARN, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGW("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -352,7 +352,7 @@ namespace gameanalytics
                     dlog_print(DLOG_DEBUG, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGD("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -370,7 +370,7 @@ namespace gameanalytics
                     dlog_print(DLOG_INFO, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGI("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
             }
