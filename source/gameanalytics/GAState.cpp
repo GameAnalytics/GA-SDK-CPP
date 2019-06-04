@@ -37,7 +37,6 @@ namespace gameanalytics
 
         GAState::~GAState()
         {
-            state::GAState::endSessionAndStopQueue(false);
         }
 
         void GAState::setUserId(const char* id)
