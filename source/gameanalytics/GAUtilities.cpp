@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <chrono>
 #if USE_LINUX
 #include <regex.h>
 #include <iterator>

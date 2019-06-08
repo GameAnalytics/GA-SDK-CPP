@@ -27,8 +27,35 @@ namespace gameanalytics
         const int GAStore::MaxDbSizeBytes = 6291456;
         const int GAStore::MaxDbSizeBytesBeforeTrim = 5242880;
 
+        bool GAStore::_destroyed = false;
+        GAStore* GAStore::_instance = 0;
+
         GAStore::GAStore()
         {
+        }
+
+        void GAStore::cleanUp()
+        {
+            delete _instance;
+            _instance = 0;
+            _destroyed = true;
+            threading::GAThreading::endThread();
+        }
+
+        GAStore* GAStore::getInstance()
+        {
+            if(!_destroyed && !_instance)
+            {
+                _instance = new GAStore();
+                std::atexit(&cleanUp);
+            }
+
+            return _instance;
+        }
+
+        bool GAStore::isDestroyed()
+        {
+            return _destroyed;
         }
 
         bool GAStore::executeQuerySync(const char* sql)
@@ -63,6 +90,11 @@ namespace gameanalytics
 
         void GAStore::executeQuerySync(const char* sql, const char* parameters[], size_t size, bool useTransaction, rapidjson::Document& out)
         {
+            GAStore* i = getInstance();
+            if(!i)
+            {
+                return;
+            }
             // Force transaction if it is an update, insert or delete.
             int arraySize = strlen(sql) + 1;
             char* sqlUpper = new char[arraySize];
@@ -74,8 +106,8 @@ namespace gameanalytics
             }
             delete[] sqlUpper;
 
-            // Get database connection from singelton sharedInstance
-            sqlite3 *sqlDatabasePtr = sharedInstance()->getDatabase();
+            // Get database connection from singelton getInstance
+            sqlite3 *sqlDatabasePtr = i->getDatabase();
 
             // Create mutable array for results
             out.SetArray();
@@ -197,13 +229,18 @@ namespace gameanalytics
 
         bool GAStore::ensureDatabase(bool dropDatabase, const char* key)
         {
+            GAStore* i = getInstance();
+            if(!i)
+            {
+                return false;
+            }
             // lazy creation of db path
-            if(strlen(sharedInstance()->dbPath) == 0)
+            if(strlen(i->dbPath) == 0)
             {
 #if USE_UWP
-                snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s\\ga.sqlite3", device::GADevice::getWritablePath());
+                snprintf(i->dbPath, sizeof(i->dbPath), "%s\\ga.sqlite3", device::GADevice::getWritablePath());
 #elif USE_TIZEN
-                snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s%sga.sqlite3", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
+                snprintf(i->dbPath, sizeof(i->dbPath), "%s%sga.sqlite3", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
 #else
                 char d[513] = "";
                 snprintf(d, sizeof(d), "%s%s%s", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator(), key);
@@ -213,21 +250,21 @@ namespace gameanalytics
                 mode_t nMode = 0733;
                 mkdir(d,nMode);
 #endif
-                snprintf(sharedInstance()->dbPath, sizeof(sharedInstance()->dbPath), "%s%sga.sqlite3", d, utilities::GAUtilities::getPathSeparator());
+                snprintf(i->dbPath, sizeof(i->dbPath), "%s%sga.sqlite3", d, utilities::GAUtilities::getPathSeparator());
 #endif
             }
 
             // Open database
-            if (sqlite3_open(sharedInstance()->dbPath, &sharedInstance()->sqlDatabase) != SQLITE_OK)
+            if (sqlite3_open(i->dbPath, &i->sqlDatabase) != SQLITE_OK)
             {
-                sharedInstance()->dbReady = false;
-                logging::GALogger::w("Could not open database: %s", sharedInstance()->dbPath);
+                i->dbReady = false;
+                logging::GALogger::w("Could not open database: %s", i->dbPath);
                 return false;
             }
             else
             {
-                sharedInstance()->dbReady = true;
-                logging::GALogger::i("Database opened: %s", sharedInstance()->dbPath);
+                i->dbReady = true;
+                logging::GALogger::i("Database opened: %s", i->dbPath);
             }
 
             if (dropDatabase)
@@ -313,7 +350,7 @@ namespace gameanalytics
 
             trimEventTable();
 
-            sharedInstance()->tableReady = true;
+            i->tableReady = true;
             logging::GALogger::d("Database tables ensured present");
 
             return true;
@@ -336,13 +373,18 @@ namespace gameanalytics
         // long long is C 64 bit int
         long long GAStore::getDbSizeBytes()
         {
-            std::ifstream in(sharedInstance()->dbPath, std::ifstream::ate | std::ifstream::binary);
+            std::ifstream in(getInstance()->dbPath, std::ifstream::ate | std::ifstream::binary);
             return in.tellg();
         }
 
         bool GAStore::getTableReady()
         {
-            return tableReady;
+            GAStore* i = GAStore::getInstance();
+            if(!i)
+            {
+                return false;
+            }
+            return i->tableReady;
         }
 
         bool GAStore::isDbTooLargeForEvents()
