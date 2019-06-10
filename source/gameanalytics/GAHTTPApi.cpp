@@ -20,6 +20,7 @@
 #include <net_connection.h>
 #endif
 #include <array>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -64,6 +65,9 @@ namespace gameanalytics
             return size*nmemb;
         }
 
+        bool GAHTTPApi::_destroyed = false;
+        GAHTTPApi* GAHTTPApi::_instance = 0;
+
         // Constructor - setup the basic information for HTTP
         GAHTTPApi::GAHTTPApi()
         {
@@ -81,6 +85,24 @@ namespace gameanalytics
         GAHTTPApi::~GAHTTPApi()
         {
             curl_global_cleanup();
+        }
+
+        void GAHTTPApi::cleanUp()
+        {
+            delete _instance;
+            _instance = 0;
+            _destroyed = true;
+        }
+
+        GAHTTPApi* GAHTTPApi::getInstance()
+        {
+            if(!_destroyed && !_instance)
+            {
+                _instance = new GAHTTPApi();
+                std::atexit(&cleanUp);
+            }
+
+            return _instance;
         }
 
         void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out)
@@ -432,7 +454,7 @@ namespace gameanalytics
 
             std::async(std::launch::async, [url, payloadJSONString, useGzip, type]() -> void
             {
-                std::vector<char> payloadData = GAHTTPApi::sharedInstance()->createPayloadData(payloadJSONString.data(), useGzip);
+                std::vector<char> payloadData = GAHTTPApi::getInstance()->createPayloadData(payloadJSONString.data(), useGzip);
 
                 CURL *curl;
                 CURLcode res;
@@ -458,7 +480,7 @@ namespace gameanalytics
                     return;
                 }
 #endif
-                GAHTTPApi::sharedInstance()->createRequest(curl, url.data(), payloadData, useGzip);
+                GAHTTPApi::getInstance()->createRequest(curl, url.data(), payloadData, useGzip);
 
                 res = curl_easy_perform(curl);
                 if(res != CURLE_OK)

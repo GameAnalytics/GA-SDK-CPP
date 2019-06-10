@@ -48,6 +48,27 @@ namespace gameanalytics
         {
         }
 
+        bool GAHTTPApi::_destroyed = false;
+        GAHTTPApi* GAHTTPApi::_instance = 0;
+
+        void GAHTTPApi::cleanUp()
+        {
+            delete _instance;
+            _instance = 0;
+            _destroyed = true;
+        }
+
+        GAHTTPApi* GAHTTPApi::getInstance()
+        {
+            if(!_destroyed && !_instance)
+            {
+                _instance = new GAHTTPApi();
+                std::atexit(&cleanUp);
+            }
+
+            return _instance;
+        }
+
         bool GANetworkStatus::hasInternetAccess = false;
 
         void GANetworkStatus::NetworkInformationOnNetworkStatusChanged(Platform::Object^ sender)

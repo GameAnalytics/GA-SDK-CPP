@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <Foundation/GASingleton.h>
 #include <memory>
 #include <cstdio>
 #if !USE_UWP && !USE_TIZEN
@@ -25,12 +24,9 @@ namespace gameanalytics
             Debug = 3
         };
 
-        class GALogger : public GASingleton<GALogger>
+        class GALogger
         {
          public:
-            GALogger();
-            ~GALogger();
-
             // set debug enabled (client)
             static void setInfoLog(bool enabled);
             static void setVerboseInfoLog(bool enabled);
@@ -42,12 +38,20 @@ namespace gameanalytics
             static void  i(const char* format, ...);
             static void ii(const char* format, ...);
 
-            void sendNotificationMessage(const char* message, EGALoggerMessageType type);
-
 #if !USE_UWP && !USE_TIZEN
             static void customInitializeLog();
 #endif
-         private:
+        private:
+            GALogger();
+            ~GALogger();
+
+            void sendNotificationMessage(const char* message, EGALoggerMessageType type);
+
+            static bool _destroyed;
+            static GALogger* _instance;
+            static void cleanUp();
+            static GALogger* getInstance();
+
 #if !USE_UWP && !USE_TIZEN
             static void initializeLog();
 #endif

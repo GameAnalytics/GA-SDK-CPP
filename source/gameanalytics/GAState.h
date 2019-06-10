@@ -9,7 +9,6 @@
 #include <map>
 #include <mutex>
 #include <functional>
-#include "Foundation/GASingleton.h"
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
 
@@ -28,14 +27,12 @@ namespace gameanalytics
             }
         };
 
-        class GAState : public GASingleton<GAState>
+        class GAState
         {
-         public:
-            GAState();
-            ~GAState();
-
+        public:
+            static GAState* getInstance();
+            static bool isDestroyed();
             static void setUserId(const char* id);
-            static const char* getIdentifier();
             static bool isInitialized();
             static int64_t getSessionStart();
             static int getSessionNum();
@@ -91,7 +88,11 @@ namespace gameanalytics
             static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static std::vector<char> getConfigurationsContentAsString();
 
-         private:
+        private:
+            GAState();
+            ~GAState();
+
+            static const char* getIdentifier();
             static void setDefaultUserId(const char* id);
             static void getSdkConfig(rapidjson::Value& out);
             static void cacheIdentifier();
@@ -104,6 +105,10 @@ namespace gameanalytics
             static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
+
+            static bool _destroyed;
+            static GAState* _instance;
+            static void cleanUp();
 
             char _userId[129] = {'\0'};
             char _identifier[129] = {'\0'};

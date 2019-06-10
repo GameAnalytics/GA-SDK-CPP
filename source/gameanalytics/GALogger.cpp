@@ -3,6 +3,7 @@
 #include <iostream>
 #include "GADevice.h"
 #include <cstdarg>
+#include <cstdlib>
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>
@@ -29,6 +30,9 @@ namespace gameanalytics
     namespace logging
     {
         const char* GALogger::tag = "GameAnalytics";
+
+        bool GALogger::_destroyed = false;
+        GALogger* GALogger::_instance = 0;
 
         GALogger::GALogger()
         {
@@ -62,28 +66,66 @@ namespace gameanalytics
 #endif
         }
 
+        void GALogger::cleanUp()
+        {
+            delete _instance;
+            _instance = 0;
+            _destroyed = true;
+        }
+
+        GALogger* GALogger::getInstance()
+        {
+            if(!_destroyed && !_instance)
+            {
+                _instance = new GALogger();
+                std::atexit(&cleanUp);
+            }
+
+            return _instance;
+        }
+
         void GALogger::setInfoLog(bool enabled)
         {
-            GALogger::sharedInstance()->infoLogEnabled = enabled;
+            GALogger* i = GALogger::getInstance();
+            if(!i)
+            {
+                return;
+            }
+            i->infoLogEnabled = enabled;
         }
 
         void GALogger::setVerboseInfoLog(bool enabled)
         {
-            GALogger::sharedInstance()->infoLogVerboseEnabled = enabled;
+            GALogger* i = GALogger::getInstance();
+            if(!i)
+            {
+                return;
+            }
+            i->infoLogVerboseEnabled = enabled;
         }
 
 #if !USE_UWP && !USE_TIZEN
         void GALogger::file_output_callback(const zf_log_message *msg, void *arg)
         {
+            GALogger* i = GALogger::getInstance();
+            if(!i)
+            {
+                return;
+            }
+
             (void)arg;
             *msg->p = '\n';
-            fwrite(msg->buf, msg->p - msg->buf + 1, 1, GALogger::sharedInstance()->log_file);
-            fflush(GALogger::sharedInstance()->log_file);
+            fwrite(msg->buf, msg->p - msg->buf + 1, 1, i->log_file);
+            fflush(i->log_file);
         }
 
         void GALogger::initializeLog()
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             if(!ga->logInitialized)
             {
@@ -106,7 +148,11 @@ namespace gameanalytics
 
         void GALogger::customInitializeLog()
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             if(ga->logInitialized)
             {
@@ -138,7 +184,11 @@ namespace gameanalytics
         // - generally small text
         void GALogger::i(const char* format, ...)
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             if (!ga->infoLogEnabled) {
                 // No logging of info unless in client debug mode
@@ -171,7 +221,11 @@ namespace gameanalytics
         // - other non-critical
         void GALogger::w(const char* format, ...)
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             va_list args;
             va_start (args, format);
@@ -200,7 +254,11 @@ namespace gameanalytics
         // - errors that never should happen
         void GALogger::e(const char* format, ...)
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             va_list args;
             va_start (args, format);
@@ -227,7 +285,11 @@ namespace gameanalytics
         // - use large debug text like HTTP payload etc.
         void GALogger::d(const char* format, ...)
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             if (!ga->debugEnabled) {
                 // No logging of debug unless in full debug logging mode
@@ -258,7 +320,11 @@ namespace gameanalytics
         // - Large logs
         void GALogger::ii(const char* format, ...)
         {
-            GALogger *ga = GALogger::sharedInstance();
+            GALogger *ga = GALogger::getInstance();
+            if(!ga)
+            {
+                return;
+            }
 
             if (!ga->infoLogVerboseEnabled) {
                 // No logging of info unless in client debug mode
@@ -316,7 +382,7 @@ namespace gameanalytics
                     dlog_print(DLOG_ERROR, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGE("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -334,7 +400,7 @@ namespace gameanalytics
                     dlog_print(DLOG_WARN, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGW("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -352,7 +418,7 @@ namespace gameanalytics
                     dlog_print(DLOG_DEBUG, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGD("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
 
@@ -370,7 +436,7 @@ namespace gameanalytics
                     dlog_print(DLOG_INFO, GALogger::tag, message);
 #else
                     std::cout << message << std::endl;
-                    ZF_LOGI("%s", message);
+                    fprintf(log_file, "%s\n", message);
 #endif
                     break;
             }

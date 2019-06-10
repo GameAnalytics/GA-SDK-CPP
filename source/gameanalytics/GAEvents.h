@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "Foundation/GASingleton.h"
 #include "GameAnalytics.h"
 #include "rapidjson/document.h"
 
@@ -13,11 +12,9 @@ namespace gameanalytics
 {
     namespace events
     {
-        class GAEvents : public GASingleton<GAEvents>
+        class GAEvents
         {
          public:
-            GAEvents();
-
             static void stopEventQueue();
             static void ensureEventQueueIsRunning();
             static void addSessionStartEvent();
@@ -32,7 +29,10 @@ namespace gameanalytics
             static void resourceFlowTypeString(EGAResourceFlowType flowType, char* out);
             static void processEvents(const char* category, bool performCleanUp);
 
-         private:
+        private:
+            GAEvents();
+            ~GAEvents();
+
             static void processEventQueue();
             static void cleanupEvents();
             static void fixMissingSessionEndEvents();
@@ -50,6 +50,11 @@ namespace gameanalytics
             static const char* CategoryError;
             static const double ProcessEventsIntervalInSeconds;
             static const int MaxEventCount;
+
+            static bool _destroyed;
+            static GAEvents* _instance;
+            static void cleanUp();
+            static GAEvents* getInstance();
 
             bool isRunning;
             bool keepRunning;

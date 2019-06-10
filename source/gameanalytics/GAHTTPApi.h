@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <map>
-#include "Foundation/GASingleton.h"
 #include "rapidjson/document.h"
 #if USE_UWP
 #include <ppltasks.h>
@@ -47,11 +46,11 @@ namespace gameanalytics
             size_t len;
         };
 
-        class GAHTTPApi : public GASingleton<GAHTTPApi>
+        class GAHTTPApi
         {
         public:
-            GAHTTPApi();
-            ~GAHTTPApi();
+
+            static GAHTTPApi* getInstance();
 
 #if USE_UWP
             concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> requestInitReturningDict();
@@ -74,7 +73,9 @@ namespace gameanalytics
                 snprintf(out, 9, "%s", "");
             }
 
-         private:
+        private:
+            GAHTTPApi();
+            ~GAHTTPApi();
             std::vector<char> createPayloadData(const char* payload, bool gzip);
 
 #if USE_UWP
@@ -94,6 +95,10 @@ namespace gameanalytics
             bool useGzip;
             static const int MaxCount;
             static std::map<EGASdkErrorType, int> countMap;
+
+            static bool _destroyed;
+            static GAHTTPApi* _instance;
+            static void cleanUp();
 #if USE_UWP
             Windows::Web::Http::HttpClient^ httpClient;
 #endif

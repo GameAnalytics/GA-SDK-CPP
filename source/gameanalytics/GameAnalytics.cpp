@@ -1183,7 +1183,7 @@ namespace gameanalytics
         }
 
         // Make sure database is ready
-        if (!store::GAStore::sharedInstance()->getTableReady())
+        if (!store::GAStore::getTableReady())
         {
             if (warn)
             {

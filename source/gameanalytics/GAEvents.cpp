@@ -18,6 +18,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
 #include <inttypes.h>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -33,23 +34,63 @@ namespace gameanalytics
         const double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
         const int GAEvents::MaxEventCount = 500;
 
+        bool GAEvents::_destroyed = false;
+        GAEvents* GAEvents::_instance = 0;
+
         GAEvents::GAEvents()
         {
             isRunning = false;
             keepRunning = false;
         }
 
+        GAEvents::~GAEvents()
+        {
+            isRunning = false;
+            keepRunning = false;
+        }
+
+        void GAEvents::cleanUp()
+        {
+            delete _instance;
+            _instance = 0;
+            _destroyed = true;
+            threading::GAThreading::endThread();
+        }
+
+        GAEvents* GAEvents::getInstance()
+        {
+            if(!_destroyed && !_instance)
+            {
+                _instance = new GAEvents();
+                std::atexit(&cleanUp);
+            }
+
+            return _instance;
+        }
+
         void GAEvents::stopEventQueue()
         {
-            GAEvents::sharedInstance()->keepRunning = false;
+            GAEvents* i = GAEvents::getInstance();
+            if(!i)
+            {
+                return;
+            }
+
+            i->keepRunning = false;
         }
 
         void GAEvents::ensureEventQueueIsRunning()
         {
-            GAEvents::sharedInstance()->keepRunning = true;
-            if (!GAEvents::sharedInstance()->isRunning)
+            GAEvents* i = GAEvents::getInstance();
+            if(!i)
             {
-                GAEvents::sharedInstance()->isRunning = true;
+                return;
+            }
+
+            i->keepRunning = true;
+            if (!i->isRunning)
+            {
+                i->isRunning = true;
                 threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
             }
         }
@@ -96,12 +137,18 @@ namespace gameanalytics
 
         void GAEvents::addSessionEndEvent()
         {
+            state::GAState* state = state::GAState::getInstance();
+            if(!state)
+            {
+                return;
+            }
+
             if(!state::GAState::isEventSubmissionEnabled())
             {
                 return;
             }
 
-            int64_t session_start_ts = state::GAState::sharedInstance()->getSessionStart();
+            int64_t session_start_ts = state->getSessionStart();
             int64_t client_ts_adjusted = state::GAState::getClientTsAdjusted();
             int64_t sessionLength = client_ts_adjusted - session_start_ts;
 
@@ -148,7 +195,12 @@ namespace gameanalytics
             // Validate event params
             if (!validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId))
             {
-                http::GAHTTPApi::sharedInstance()->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
+                if(!http)
+                {
+                    return;
+                }
+                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
                 return;
             }
 
@@ -220,7 +272,12 @@ namespace gameanalytics
             // Validate event params
             if (!validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId))
             {
-                http::GAHTTPApi::sharedInstance()->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
+                if(!http)
+                {
+                    return;
+                }
+                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
                 return;
             }
 
@@ -284,7 +341,12 @@ namespace gameanalytics
             // Validate event params
             if (!validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03))
             {
-                http::GAHTTPApi::sharedInstance()->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
+                if(!http)
+                {
+                    return;
+                }
+                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
                 return;
             }
 
@@ -383,7 +445,12 @@ namespace gameanalytics
             // Validate
             if (!validators::GAValidator::validateDesignEvent(eventId, value))
             {
-                http::GAHTTPApi::sharedInstance()->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
+                {
+                    return;
+                }
+                httpInstance->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
                 return;
             }
 
@@ -441,7 +508,12 @@ namespace gameanalytics
             // Validate
             if (!validators::GAValidator::validateErrorEvent(severity, message))
             {
-                http::GAHTTPApi::sharedInstance()->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
+                if(!http)
+                {
+                    return;
+                }
+                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
                 return;
             }
 
@@ -488,13 +560,18 @@ namespace gameanalytics
         void GAEvents::processEventQueue()
         {
             processEvents("", true);
-            if (GAEvents::sharedInstance()->keepRunning)
+            GAEvents* i = GAEvents::getInstance();
+            if(!i)
+            {
+                return;
+            }
+            if (i->keepRunning)
             {
                 threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
             }
             else
             {
-                GAEvents::sharedInstance()->isRunning = false;
+                i->isRunning = false;
             }
         }
 
@@ -617,12 +694,17 @@ namespace gameanalytics
             // send events
             rapidjson::Value dataDict(rapidjson::kArrayType);
             http::EGAHTTPApiResponse responseEnum;
+            http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
+            if(!http)
+            {
+                return;
+            }
 #if USE_UWP
             std::pair<http::EGAHTTPApiResponse, std::string> pair;
 
             try
             {
-                pair = http::GAHTTPApi::sharedInstance()->sendEventsInArray(payloadArray).get();
+                pair = http->sendEventsInArray(payloadArray).get();
             }
             catch(Platform::COMException^ e)
             {
@@ -644,7 +726,7 @@ namespace gameanalytics
                 }
             }
 #else
-            http::GAHTTPApi::sharedInstance()->sendEventsInArray(responseEnum, dataDict, payloadArray);
+            http->sendEventsInArray(responseEnum, dataDict, payloadArray);
 #endif
 
             if (responseEnum == http::Ok)
@@ -694,7 +776,12 @@ namespace gameanalytics
                 const char* jsonDefaults = buffer.GetString();
                 const char* sql = "INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);";
                 char sessionStart[21] = "";
-                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
+                state::GAState* state = state::GAState::getInstance();
+                if(!state)
+                {
+                    return;
+                }
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state->getSessionStart());
                 const char* parameters[3] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
                 store::GAStore::executeQuerySync(sql, parameters, 3);
             }
@@ -773,8 +860,13 @@ namespace gameanalytics
                 return;
             }
 
+            if(store::GAStore::isDestroyed())
+            {
+                return;
+            }
+
             // Check if datastore is available
-            if (!store::GAStore::sharedInstance()->getTableReady())
+            if (!store::GAStore::getTableReady())
             {
                 logging::GALogger::w("Could not add event: SDK datastore error");
                 return;
@@ -845,7 +937,12 @@ namespace gameanalytics
             else
             {
                 char sessionStart[21] = "";
-                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state::GAState::sharedInstance()->getSessionStart());
+                state::GAState* state = state::GAState::getInstance();
+                if(!state)
+                {
+                    return;
+                }
+                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state->getSessionStart());
                 const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
                 store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);", params, 3);
             }
@@ -903,7 +1000,7 @@ namespace gameanalytics
                 snprintf(out, 10, "%s", "Complete");
                 return;
             case Fail:
-                snprintf(out, 10, "%s", "Complete");
+                snprintf(out, 10, "%s", "Fail");
                 return;
             default:
                 break;

@@ -8,19 +8,18 @@
 #include <sqlite3.h>
 #include <vector>
 #include "rapidjson/document.h"
-#include "Foundation/GASingleton.h"
 #include "GameAnalytics.h"
 
 namespace gameanalytics
 {
     namespace store
     {
-        class GAStore : public GASingleton<GAStore>
+        class GAStore
         {
          public:
-            GAStore();
 
             sqlite3* getDatabase();
+            static bool isDestroyed();
 
             static bool ensureDatabase(bool dropDatabase, const char* key = "");
 
@@ -37,10 +36,16 @@ namespace gameanalytics
 
             static long long getDbSizeBytes();
 
-            bool getTableReady();
+            static bool getTableReady();
             static bool isDbTooLargeForEvents();
 
-         private:
+        private:
+            GAStore();
+
+            static bool _destroyed;
+            static GAStore* _instance;
+            static void cleanUp();
+            static GAStore* getInstance();
 
             static bool trimEventTable();
 
