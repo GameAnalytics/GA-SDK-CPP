@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**2.1.4**
+* fixed hanging background thread after closing application
+* progression event bug fix
+
 **2.1.3**
 * removed std::string from the SDK
 
