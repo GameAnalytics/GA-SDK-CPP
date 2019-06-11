@@ -11,6 +11,8 @@
 #define ZF_LOG_SRCLOC ZF_LOG_SRCLOC_NONE
 #include "zf_log.h"
 #endif
+#include <mutex>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -44,13 +46,25 @@ namespace gameanalytics
         private:
             GALogger();
             ~GALogger();
+            GALogger(const GALogger&) = delete;
+            GALogger& operator=(const GALogger&) = delete;
 
             void sendNotificationMessage(const char* message, EGALoggerMessageType type);
 
             static bool _destroyed;
             static GALogger* _instance;
+            static std::once_flag _initInstanceFlag;
             static void cleanUp();
             static GALogger* getInstance();
+
+            static void initInstance()
+            {
+                if(!_destroyed && !_instance)
+                {
+                    _instance = new GALogger();
+                    std::atexit(&cleanUp);
+                }
+            }
 
 #if !USE_UWP && !USE_TIZEN
             static void initializeLog();

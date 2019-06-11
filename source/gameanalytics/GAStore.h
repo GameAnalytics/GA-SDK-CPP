@@ -9,6 +9,8 @@
 #include <vector>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
+#include <mutex>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -41,11 +43,23 @@ namespace gameanalytics
 
         private:
             GAStore();
+            GAStore(const GAStore&) = delete;
+            GAStore& operator=(const GAStore&) = delete;
 
             static bool _destroyed;
             static GAStore* _instance;
+            static std::once_flag _initInstanceFlag;
             static void cleanUp();
             static GAStore* getInstance();
+
+            static void initInstance()
+            {
+                if(!_destroyed && !_instance)
+                {
+                    _instance = new GAStore();
+                    std::atexit(&cleanUp);
+                }
+            }
 
             static bool trimEventTable();
 

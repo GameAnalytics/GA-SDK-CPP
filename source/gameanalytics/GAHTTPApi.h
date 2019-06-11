@@ -13,6 +13,8 @@
 #else
 #include <curl/curl.h>
 #endif
+#include <mutex>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -76,6 +78,8 @@ namespace gameanalytics
         private:
             GAHTTPApi();
             ~GAHTTPApi();
+            GAHTTPApi(const GAHTTPApi&) = delete;
+            GAHTTPApi& operator=(const GAHTTPApi&) = delete;
             std::vector<char> createPayloadData(const char* payload, bool gzip);
 
 #if USE_UWP
@@ -98,7 +102,17 @@ namespace gameanalytics
 
             static bool _destroyed;
             static GAHTTPApi* _instance;
+            static std::once_flag _initInstanceFlag;
             static void cleanUp();
+
+            static void initInstance()
+            {
+                if(!_destroyed && !_instance)
+                {
+                    _instance = new GAHTTPApi();
+                    std::atexit(&cleanUp);
+                }
+            }
 #if USE_UWP
             Windows::Web::Http::HttpClient^ httpClient;
 #endif

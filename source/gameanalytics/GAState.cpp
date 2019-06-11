@@ -17,10 +17,8 @@
 #include <climits>
 #include <string.h>
 #include <stdio.h>
-#include <cstdlib>
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
-#include <cstdlib>
 
 #define MAX_CUSTOM_FIELDS_COUNT 50
 #define MAX_CUSTOM_FIELDS_KEY_LENGTH 64
@@ -34,6 +32,7 @@ namespace gameanalytics
 
         bool GAState::_destroyed = false;
         GAState* GAState::_instance = 0;
+        std::once_flag GAState::_initInstanceFlag;
 
         GAState::GAState()
         {
@@ -53,12 +52,7 @@ namespace gameanalytics
 
         GAState* GAState::getInstance()
         {
-            if(!_destroyed && !_instance)
-            {
-                _instance = new GAState();
-                std::atexit(&cleanUp);
-            }
-
+            std::call_once(_initInstanceFlag, &GAState::initInstance);
             return _instance;
         }
 

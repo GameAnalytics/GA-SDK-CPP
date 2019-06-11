@@ -520,7 +520,7 @@ namespace gameanalytics
             // Send to events
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0.0, false, fieldsJson);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0, false, fieldsJson);
         });
     }
 
