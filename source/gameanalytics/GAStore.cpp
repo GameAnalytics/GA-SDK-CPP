@@ -10,7 +10,6 @@
 #include "GAUtilities.h"
 #include <fstream>
 #include <string.h>
-#include <cstdlib>
 #if USE_UWP
 #elif USE_TIZEN
 #elif _WIN32
@@ -29,6 +28,7 @@ namespace gameanalytics
 
         bool GAStore::_destroyed = false;
         GAStore* GAStore::_instance = 0;
+        std::once_flag GAStore::_initInstanceFlag;
 
         GAStore::GAStore()
         {
@@ -44,12 +44,7 @@ namespace gameanalytics
 
         GAStore* GAStore::getInstance()
         {
-            if(!_destroyed && !_instance)
-            {
-                _instance = new GAStore();
-                std::atexit(&cleanUp);
-            }
-
+            std::call_once(_initInstanceFlag, &GAStore::initInstance);
             return _instance;
         }
 
@@ -96,7 +91,7 @@ namespace gameanalytics
                 return;
             }
             // Force transaction if it is an update, insert or delete.
-            int arraySize = strlen(sql) + 1;
+            size_t arraySize = strlen(sql) + 1;
             char* sqlUpper = new char[arraySize];
             snprintf(sqlUpper, arraySize, "%s", sql);
             utilities::GAUtilities::uppercaseString(sqlUpper);

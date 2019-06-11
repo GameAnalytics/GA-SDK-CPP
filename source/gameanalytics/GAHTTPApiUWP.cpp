@@ -50,6 +50,7 @@ namespace gameanalytics
 
         bool GAHTTPApi::_destroyed = false;
         GAHTTPApi* GAHTTPApi::_instance = 0;
+        std::once_flag GAHTTPApi::_initInstanceFlag;
 
         void GAHTTPApi::cleanUp()
         {
@@ -60,12 +61,7 @@ namespace gameanalytics
 
         GAHTTPApi* GAHTTPApi::getInstance()
         {
-            if(!_destroyed && !_instance)
-            {
-                _instance = new GAHTTPApi();
-                std::atexit(&cleanUp);
-            }
-
+            std::call_once(_initInstanceFlag, &GAHTTPApi::initInstance);
             return _instance;
         }
 

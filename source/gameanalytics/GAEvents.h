@@ -7,6 +7,8 @@
 
 #include "GameAnalytics.h"
 #include "rapidjson/document.h"
+#include <mutex>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -32,6 +34,8 @@ namespace gameanalytics
         private:
             GAEvents();
             ~GAEvents();
+            GAEvents(const GAEvents&) = delete;
+            GAEvents& operator=(const GAEvents&) = delete;
 
             static void processEventQueue();
             static void cleanupEvents();
@@ -53,8 +57,18 @@ namespace gameanalytics
 
             static bool _destroyed;
             static GAEvents* _instance;
+            static std::once_flag _initInstanceFlag;
             static void cleanUp();
             static GAEvents* getInstance();
+
+            static void initInstance()
+            {
+                if(!_destroyed && !_instance)
+                {
+                    _instance = new GAEvents();
+                    std::atexit(&cleanUp);
+                }
+            }
 
             bool isRunning;
             bool keepRunning;

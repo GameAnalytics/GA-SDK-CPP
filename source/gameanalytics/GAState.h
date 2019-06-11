@@ -7,10 +7,11 @@
 
 #include <vector>
 #include <map>
-#include <mutex>
 #include <functional>
 #include "rapidjson/document.h"
 #include "GameAnalytics.h"
+#include <mutex>
+#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -91,6 +92,8 @@ namespace gameanalytics
         private:
             GAState();
             ~GAState();
+            GAState(const GAState&) = delete;
+            GAState& operator=(const GAState&) = delete;
 
             static const char* getIdentifier();
             static void setDefaultUserId(const char* id);
@@ -108,7 +111,17 @@ namespace gameanalytics
 
             static bool _destroyed;
             static GAState* _instance;
+            static std::once_flag _initInstanceFlag;
             static void cleanUp();
+
+            static void initInstance()
+            {
+                if(!_destroyed && !_instance)
+                {
+                    _instance = new GAState();
+                    std::atexit(&cleanUp);
+                }
+            }
 
             char _userId[129] = {'\0'};
             char _identifier[129] = {'\0'};

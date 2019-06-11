@@ -3,7 +3,6 @@
 #include <iostream>
 #include "GADevice.h"
 #include <cstdarg>
-#include <cstdlib>
 #if USE_UWP
 #include "GAUtilities.h"
 #include <collection.h>
@@ -33,6 +32,7 @@ namespace gameanalytics
 
         bool GALogger::_destroyed = false;
         GALogger* GALogger::_instance = 0;
+        std::once_flag GALogger::_initInstanceFlag;
 
         GALogger::GALogger()
         {
@@ -75,12 +75,7 @@ namespace gameanalytics
 
         GALogger* GALogger::getInstance()
         {
-            if(!_destroyed && !_instance)
-            {
-                _instance = new GALogger();
-                std::atexit(&cleanUp);
-            }
-
+            std::call_once(_initInstanceFlag, &GALogger::initInstance);
             return _instance;
         }
 
@@ -305,7 +300,7 @@ namespace gameanalytics
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
-            int s = len + 1 + 12 + strlen(ga->tag);
+            size_t s = len + 1 + 12 + strlen(ga->tag);
             char* message = new char[s];
             snprintf(message, s, "Debug/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Debug);
@@ -340,7 +335,7 @@ namespace gameanalytics
             std::vsnprintf(formatted, len + 1, format, args);
             va_end (args);
 
-            int s = len + 1 + 14 + strlen(ga->tag);
+            size_t s = len + 1 + 14 + strlen(ga->tag);
             char* message = new char[s];
             snprintf(message, s, "Verbose/%s: %s", ga->tag, formatted);
             ga->sendNotificationMessage(message, Info);

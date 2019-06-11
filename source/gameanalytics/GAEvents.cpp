@@ -18,7 +18,6 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
 #include <inttypes.h>
-#include <cstdlib>
 
 namespace gameanalytics
 {
@@ -36,6 +35,7 @@ namespace gameanalytics
 
         bool GAEvents::_destroyed = false;
         GAEvents* GAEvents::_instance = 0;
+        std::once_flag GAEvents::_initInstanceFlag;
 
         GAEvents::GAEvents()
         {
@@ -59,12 +59,7 @@ namespace gameanalytics
 
         GAEvents* GAEvents::getInstance()
         {
-            if(!_destroyed && !_instance)
-            {
-                _instance = new GAEvents();
-                std::atexit(&cleanUp);
-            }
-
+            std::call_once(_initInstanceFlag, &GAEvents::initInstance);
             return _instance;
         }
 
