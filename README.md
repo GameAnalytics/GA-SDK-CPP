@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.5**
+* refactored code for singleton classes
+
 **2.1.4**
 * fixed hanging background thread after closing application
 * progression event bug fix
