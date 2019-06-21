@@ -238,7 +238,13 @@ namespace gameanalytics
                 snprintf(i->dbPath, sizeof(i->dbPath), "%s%sga.sqlite3", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
 #else
                 char d[513] = "";
-                snprintf(d, sizeof(d), "%s%s%s", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator(), key);
+                const char* writablepath = device::GADevice::getWritablePath();
+
+                if(device::GADevice::getWritablePathStatus() <= 0)
+                {
+                    return false;
+                }
+                snprintf(d, sizeof(d), "%s%s%s", writablepath, utilities::GAUtilities::getPathSeparator(), key);
 #ifdef _WIN32
                 _mkdir(d);
 #else

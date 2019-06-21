@@ -34,6 +34,7 @@
 #include <direct.h>
 #include <windows.h>
 #include <VersionHelpers.h>
+#include <cerrno>
 #if !GA_SHARED_LIB
 #include <comdef.h>
 #include <wbemidl.h>
@@ -43,6 +44,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cerrno>
 #endif
 #if IS_MAC
 #include "GADeviceOSX.h"
@@ -57,6 +59,7 @@ namespace gameanalytics
     namespace device
     {
         char GADevice::_writablepath[257] = "";
+        int GADevice::_writablepathStatus = 0;
         char GADevice::_buildPlatform[32] = "";
         char GADevice::_osVersion[65] = "";
         char GADevice::_deviceModel[129] = "";
@@ -71,11 +74,11 @@ namespace gameanalytics
         char GADevice::_gameEngineVersion[33] = "";
         char GADevice::_connectionType[33] = "";
 #if USE_UWP
-        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.5";
+        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 2.1.6";
 #elif USE_TIZEN
-        const char* GADevice::_sdkWrapperVersion = "tizen 2.1.5";
+        const char* GADevice::_sdkWrapperVersion = "tizen 2.1.6";
 #else
-        const char* GADevice::_sdkWrapperVersion = "cpp 2.1.5";
+        const char* GADevice::_sdkWrapperVersion = "cpp 2.1.6";
 #endif
 
         void GADevice::setSdkGameEngineVersion(const char* sdkGameEngineVersion)
@@ -180,11 +183,16 @@ namespace gameanalytics
 
         const char* GADevice::getWritablePath()
         {
-            if(strlen(GADevice::_writablepath) == 0)
+            if(GADevice::_writablepathStatus == 0 && strlen(GADevice::_writablepath) == 0)
             {
                 initPersistentPath();
             }
             return GADevice::_writablepath;
+        }
+
+        int GADevice::getWritablePathStatus()
+        {
+            return GADevice::_writablepathStatus;
         }
 
         void GADevice::UpdateConnectionType()
@@ -606,11 +614,27 @@ namespace gameanalytics
 #else
 #ifdef _WIN32
             snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("LOCALAPPDATA"), utilities::GAUtilities::getPathSeparator());
-            _mkdir(GADevice::_writablepath);
+            int result = _mkdir(GADevice::_writablepath);
+            if(result == 0 || errno == EEXIST)
+            {
+                GADevice::_writablepathStatus = 1;
+            }
+            else
+            {
+                GADevice::_writablepathStatus = -1;
+            }
 #else
             snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s%sGameAnalytics", std::getenv("HOME"), utilities::GAUtilities::getPathSeparator());
             mode_t nMode = 0733;
-            mkdir(GADevice::_writablepath, nMode);
+            int result = mkdir(GADevice::_writablepath, nMode);
+            if(result == 0 || errno == EEXIST)
+            {
+                GADevice::_writablepathStatus = 1;
+            }
+            else
+            {
+                GADevice::_writablepathStatus = -1;
+            }
 #endif
 #endif
         }
