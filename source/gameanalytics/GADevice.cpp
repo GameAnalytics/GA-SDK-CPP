@@ -179,6 +179,33 @@ namespace gameanalytics
         void GADevice::setWritablePath(const char* writablepath)
         {
             snprintf(GADevice::_writablepath, sizeof(GADevice::_writablepath), "%s", writablepath);
+
+#if USE_UWP
+#elif USE_TIZEN
+#else
+#ifdef _WIN32
+            int result = _mkdir(GADevice::_writablepath);
+            if(result == 0 || errno == EEXIST)
+            {
+                GADevice::_writablepathStatus = 1;
+            }
+            else
+            {
+                GADevice::_writablepathStatus = -1;
+            }
+#else
+            mode_t nMode = 0733;
+            int result = mkdir(GADevice::_writablepath, nMode);
+            if(result == 0 || errno == EEXIST)
+            {
+                GADevice::_writablepathStatus = 1;
+            }
+            else
+            {
+                GADevice::_writablepathStatus = -1;
+            }
+#endif
+#endif
         }
 
         const char* GADevice::getWritablePath()
