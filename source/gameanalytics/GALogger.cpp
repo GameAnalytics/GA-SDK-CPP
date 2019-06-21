@@ -125,7 +125,13 @@ namespace gameanalytics
             if(!ga->logInitialized)
             {
                 char p[513] = "";
-                snprintf(p, sizeof(p), "%s%sga_log.txt", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
+                const char* writablepath = device::GADevice::getWritablePath();
+
+                if(device::GADevice::getWritablePathStatus() <= 0)
+                {
+                    return;
+                }
+                snprintf(p, sizeof(p), "%s%sga_log.txt", writablepath, utilities::GAUtilities::getPathSeparator());
 
                 ga->log_file = fopen(p, "w");
                 if (!ga->log_file)
@@ -155,7 +161,13 @@ namespace gameanalytics
             }
 
             char p[513] = "";
-            snprintf(p, sizeof(p), "%s%sga_log.txt", device::GADevice::getWritablePath(), utilities::GAUtilities::getPathSeparator());
+            const char* writablepath = device::GADevice::getWritablePath();
+
+            if(device::GADevice::getWritablePathStatus() <= 0)
+            {
+                return;
+            }
+            snprintf(p, sizeof(p), "%s%sga_log.txt", writablepath, utilities::GAUtilities::getPathSeparator());
 
             ga->log_file = fopen(p, "w");
             if (!ga->log_file)
@@ -359,6 +371,10 @@ namespace gameanalytics
             if(!logInitialized)
             {
                 initializeLog();
+            }
+            if(device::GADevice::getWritablePathStatus() <= 0)
+            {
+                return;
             }
 #endif
             switch(type)

@@ -30,6 +30,7 @@ namespace gameanalytics
         	static const char* getDeviceManufacturer();
             static void setWritablePath(const char* writablePath);
         	static const char* getWritablePath();
+            static int getWritablePathStatus();
 #if USE_UWP
             static const char* getDeviceId();
             static const char* getAdvertisingId();
@@ -60,6 +61,7 @@ namespace gameanalytics
             static char _deviceModel[];
             static char _deviceManufacturer[];
             static char _writablepath[];
+            static int _writablepathStatus;
             static char _sdkGameEngineVersion[];
             static char _gameEngineVersion[];
             static char _connectionType[];

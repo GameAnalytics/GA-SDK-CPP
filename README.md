@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.6**
+* added check if log files and database can't be created
+
 **2.1.5**
 * refactored code for singleton classes
 
