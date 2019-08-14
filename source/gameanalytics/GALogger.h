@@ -84,7 +84,7 @@ namespace gameanalytics
             FILE *log_file;
             int currentLogCount;
             int maxLogCount;
-            char p[513] = "";
+            char p[513] = {'\0'};
 #endif
         };
     }
