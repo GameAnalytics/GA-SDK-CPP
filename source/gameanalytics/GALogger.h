@@ -82,6 +82,9 @@ namespace gameanalytics
             static void file_output_callback(const zf_log_message *msg, void *arg);
             bool logInitialized;
             FILE *log_file;
+            int currentLogCount;
+            int maxLogCount;
+            char p[513] = {'\0'};
 #endif
         };
     }
