@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.7**
+* bug fix to too large log files
+
 **2.1.6**
 * added check if log files and database can't be created
 
