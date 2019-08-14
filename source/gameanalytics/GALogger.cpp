@@ -53,6 +53,8 @@ namespace gameanalytics
 
 #if !USE_UWP && !USE_TIZEN
             logInitialized = false;
+            currentLogCount = 0;
+            maxLogCount = 5000;
 #endif
         }
 
@@ -124,24 +126,24 @@ namespace gameanalytics
 
             if(!ga->logInitialized)
             {
-                char p[513] = "";
                 const char* writablepath = device::GADevice::getWritablePath();
 
                 if(device::GADevice::getWritablePathStatus() <= 0)
                 {
                     return;
                 }
-                snprintf(p, sizeof(p), "%s%sga_log.txt", writablepath, utilities::GAUtilities::getPathSeparator());
+                snprintf(ga->p, sizeof(ga->p), "%s%sga_log.txt", writablepath, utilities::GAUtilities::getPathSeparator());
 
-                ga->log_file = fopen(p, "w");
+                ga->log_file = fopen(ga->p, "w");
                 if (!ga->log_file)
                 {
-                    ZF_LOGW("Failed to open log file %s", p);
+                    ZF_LOGW("Failed to open log file %s", ga->p);
                     return;
                 }
                 zf_log_set_output_v(ZF_LOG_PUT_STD, 0, file_output_callback);
 
                 ga->logInitialized = true;
+                ga->currentLogCount = 0;
 
                 GALogger::i("Log file added under: %s", device::GADevice::getWritablePath());
             }
@@ -361,6 +363,23 @@ namespace gameanalytics
             {
                 //return;
             }
+#if !USE_UWP && !USE_TIZEN
+            if(logInitialized)
+            {
+                ++currentLogCount;
+                if(currentLogCount > maxLogCount)
+                {
+                    fclose(log_file);
+                    log_file = fopen(p, "w");
+                    if (!log_file)
+                    {
+                        ZF_LOGW("Failed to open log file %s", p);
+                        return;
+                    }
+                    currentLogCount = 0;
+                }
+            }
+#endif
 #if USE_UWP
             auto m = ref new Platform::String(utilities::GAUtilities::s2ws(message).c_str());
             Platform::Collections::Vector<Platform::String^>^ lines = ref new Platform::Collections::Vector<Platform::String^>();
