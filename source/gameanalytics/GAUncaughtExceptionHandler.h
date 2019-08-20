@@ -20,10 +20,10 @@ namespace gameanalytics
         private:
 #if defined(_WIN32)
             static void signalHandler(int sig);
-            static void (*old_state_ill)(int);
-            static void (*old_state_abrt)(int);
-            static void (*old_state_fpe)(int);
-            static void (*old_state_segv)(int);
+            static void (*old_state_ill) (int);
+            static void (*old_state_abrt) (int);
+            static void (*old_state_fpe) (int);
+            static void (*old_state_segv) (int);
 #else
             static void signalHandler(int sig, siginfo_t *info, void *context);
             static struct sigaction prevSigAction;

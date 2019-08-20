@@ -25,10 +25,10 @@ namespace gameanalytics
     {
         std::terminate_handler GAUncaughtExceptionHandler::previousTerminateHandler = NULL;
 #if defined(_WIN32)
-        void GAUncaughtExceptionHandler::old_state_ill = NULL;
-        void GAUncaughtExceptionHandler::old_state_abrt = NULL;
-        void GAUncaughtExceptionHandler::old_state_fpe = NULL;
-        void GAUncaughtExceptionHandler::old_state_segv = NULL;
+        void (*GAUncaughtExceptionHandler::old_state_ill) (int) = NULL;
+        void (*GAUncaughtExceptionHandler::old_state_abrt) (int) = NULL;
+        void (*GAUncaughtExceptionHandler::old_state_fpe) (int) = NULL;
+        void (*GAUncaughtExceptionHandler::old_state_segv) (int) = NULL;
 #else
         struct sigaction GAUncaughtExceptionHandler::prevSigAction;
 #endif
@@ -38,6 +38,22 @@ namespace gameanalytics
 #if defined(_WIN32)
         void GAUncaughtExceptionHandler::signalHandler(int sig)
         {
+            if(sig == SIGILL && old_state_ill != NULL)
+            {
+                old_state_ill(sig);
+            }
+            else if(sig == SIGABRT && old_state_abrt != NULL)
+            {
+                old_state_abrt(sig);
+            }
+            else if(sig == SIGFPE && old_state_fpe != NULL)
+            {
+                old_state_fpe(sig);
+            }
+            else if(sig == SIGSEGV && old_state_segv != NULL)
+            {
+                old_state_segv(sig);
+            }
             if(errorCount <= MAX_ERROR_TYPE_COUNT)
             {
                 stacktrace::call_stack st;
