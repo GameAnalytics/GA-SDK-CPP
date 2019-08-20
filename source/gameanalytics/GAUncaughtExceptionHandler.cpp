@@ -24,6 +24,14 @@ namespace gameanalytics
     namespace errorreporter
     {
         std::terminate_handler GAUncaughtExceptionHandler::previousTerminateHandler = NULL;
+#if defined(_WIN32)
+        void GAUncaughtExceptionHandler::old_state_ill = NULL;
+        void GAUncaughtExceptionHandler::old_state_abrt = NULL;
+        void GAUncaughtExceptionHandler::old_state_fpe = NULL;
+        void GAUncaughtExceptionHandler::old_state_segv = NULL;
+#else
+        struct sigaction GAUncaughtExceptionHandler::prevSigAction;
+#endif
         int GAUncaughtExceptionHandler::errorCount = 0;
         int GAUncaughtExceptionHandler::MAX_ERROR_TYPE_COUNT = 5;
 
@@ -69,21 +77,73 @@ namespace gameanalytics
             mySigAction.sa_flags = SA_SIGINFO;
 
             sigemptyset(&mySigAction.sa_mask);
-            sigaction(SIGQUIT, &mySigAction, NULL);
-            sigaction(SIGILL, &mySigAction, NULL);
-            sigaction(SIGTRAP, &mySigAction, NULL);
-            sigaction(SIGABRT, &mySigAction, NULL);
+            sigaction(SIGQUIT, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGQUIT, &mySigAction, NULL);
+            }
+            sigaction(SIGILL, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGILL, &mySigAction, NULL);
+            }
+            sigaction(SIGTRAP, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGTRAP, &mySigAction, NULL);
+            }
+            sigaction(SIGABRT, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGABRT, &mySigAction, NULL);
+            }
 #if !USE_LINUX
-            sigaction(SIGEMT, &mySigAction, NULL);
+            sigaction(SIGEMT, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGEMT, &mySigAction, NULL);
+            }
 #endif
-            sigaction(SIGFPE, &mySigAction, NULL);
-            sigaction(SIGBUS, &mySigAction, NULL);
-            sigaction(SIGSEGV, &mySigAction, NULL);
-            sigaction(SIGSYS, &mySigAction, NULL);
-            sigaction(SIGPIPE, &mySigAction, NULL);
-            sigaction(SIGALRM, &mySigAction, NULL);
-            sigaction(SIGXCPU, &mySigAction, NULL);
-            sigaction(SIGXFSZ, &mySigAction, NULL);
+            sigaction(SIGFPE, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGFPE, &mySigAction, NULL);
+            }
+            sigaction(SIGBUS, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGBUS, &mySigAction, NULL);
+            }
+            sigaction(SIGSEGV, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGSEGV, &mySigAction, NULL);
+            }
+            sigaction(SIGSYS, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGSYS, &mySigAction, NULL);
+            }
+            sigaction(SIGPIPE, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGPIPE, &mySigAction, NULL);
+            }
+            sigaction(SIGALRM, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGALRM, &mySigAction, NULL);
+            }
+            sigaction(SIGXCPU, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGXCPU, &mySigAction, NULL);
+            }
+            sigaction(SIGXFSZ, NULL, &prevSigAction);
+            if (prevSigAction.sa_handler != SIG_IGN)
+            {
+                sigaction(SIGXFSZ, &mySigAction, NULL);
+            }
         }
 
         /*    signalHandler
@@ -92,6 +152,8 @@ namespace gameanalytics
          */
         void GAUncaughtExceptionHandler::signalHandler(int sig, siginfo_t *info, void *context)
         {
+            (*prevSigAction.sa_handler)(sig);
+
             if(!state::GAState::useErrorReporting())
             {
                 return;
