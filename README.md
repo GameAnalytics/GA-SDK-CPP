@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.8**
+* error reporting improved
+
 **2.1.7**
 * bug fix to too large log files
 
