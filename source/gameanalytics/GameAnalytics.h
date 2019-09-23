@@ -180,6 +180,9 @@ namespace gameanalytics
         static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
         static std::vector<char> getConfigurationsContentAsString();
 
+        static std::vector<char> getABTestingId();
+        static std::vector<char> getABTestingVariantId();
+
         // game state changes
         // will affect how session is started / ended
         static void onResume();

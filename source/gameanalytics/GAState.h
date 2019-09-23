@@ -88,6 +88,8 @@ namespace gameanalytics
             static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
             static std::vector<char> getConfigurationsContentAsString();
+            static const char* getAbId();
+            static const char* getAbVariantId();
 
         private:
             GAState();
@@ -108,6 +110,9 @@ namespace gameanalytics
             static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
+            static void setConfigsHahs(const char* configsHash);
+            static void setAbId(const char* abId);
+            static void setAbVariantId(const char* abVariantId);
 
             static bool _destroyed;
             static GAState* _instance;
@@ -148,6 +153,9 @@ namespace gameanalytics
             bool _enabled = false;
             int64_t _clientServerTimeOffset = 0;
             char _defaultUserId[129] = {'\0'};
+            char _configsHash[129] = {'\0'};
+            char _abId[129] = {'\0'};
+            char _abVariantId[129] = {'\0'};
             std::map<const char*, int, CStringCmp> _progressionTries;
             rapidjson::Value _sdkConfigDefault;
             rapidjson::Value _sdkConfig;

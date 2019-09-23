@@ -848,6 +848,9 @@ namespace gameanalytics
                 rapidjson::Value v(device::GADevice::getBuildPlatform(), allocator);
                 out.AddMember("platform", v.Move(), allocator);
             }
+
+            // Random salt
+            out.AddMember("random_salt", getSessionNum(), allocator);
         }
 
         void GAState::cacheIdentifier()
@@ -1025,6 +1028,14 @@ namespace gameanalytics
                 }
             }
 
+            {
+                rapidjson::Value currentSdkConfig(rapidjson::kObjectType);
+                GAState::getSdkConfig(currentSdkConfig);
+                GAState::setConfigsHash(currentSdkConfig.HasMember("configs_hash") && currentSdkConfig["configs_hash"].IsString() ? currentSdkConfig["configs_hash"].GetString() : "");
+                GAState::setAbId(currentSdkConfig.HasMember("ab_id") && currentSdkConfig["ab_id"].IsString() ? currentSdkConfig["ab_id"].GetString() : "");
+                GAState::setAbVariantId(currentSdkConfig.HasMember("ab_variant_id") && currentSdkConfig["ab_variant_id"].IsString() ? currentSdkConfig["ab_variant_id"].GetString() : "");
+            }
+
             rapidjson::Document results_ga_progression;
             store::GAStore::executeQuerySync("SELECT * FROM ga_progression;", results_ga_progression);
 
@@ -1083,7 +1094,7 @@ namespace gameanalytics
 #endif
 
             // init is ok
-            if (initResponse == http::Ok && !initResponseDict.IsNull())
+            if ((initResponse == http::Ok || initResponse == http::Created) && !initResponseDict.IsNull())
             {
                 // set the time offset - how many seconds the local time is different from servertime
                 int64_t timeOffsetSeconds = 0;
@@ -1094,6 +1105,29 @@ namespace gameanalytics
                 }
                 // insert timeOffset in received init config (so it can be used when offline)
                 initResponseDict.AddMember("time_offset", timeOffsetSeconds, allocator);
+
+                if(initResponse != http::Created)
+                {
+                    rapidjson::Value currentSdkConfig(rapidjson::kObjectType);
+                    GAState::getSdkConfig(currentSdkConfig);
+                    // use cached if not Created
+                    if(currentSdkConfig.HasMember("configs") && currentSdkConfig["configs"].IsArray())
+                    {
+                        rapidjson::Value configs(rapidjson::kArrayType);
+                        initResponseDict.AddMember("configs", configs, allocator);
+                        initResponseDict["configs"].CopyFrom(currentSdkConfig["configs"], allocator);
+                    }
+                    if(currentSdkConfig.HasMember("ab_id") && currentSdkConfig["ab_id"].IsString())
+                    {
+                        rapidjson::Value ab_id(currentSdkConfig["ab_id"].GetString(), allocator);
+                        initResponseDict.AddMember("ab_id", ab_id.Move(), allocator);
+                    }
+                    if(currentSdkConfig.HasMember("ab_variant_id") && currentSdkConfig["ab_variant_id"].IsString())
+                    {
+                        rapidjson::Value ab_variant_id(currentSdkConfig["ab_variant_id"].GetString(), allocator);
+                        initResponseDict.AddMember("ab_variant_id", ab_variant_id.Move(), allocator);
+                    }
+                }
 
                 rapidjson::StringBuffer buffer;
                 {
@@ -1614,6 +1648,83 @@ namespace gameanalytics
                 return false;
             }
             return i->_enableEventSubmission;
+        }
+
+        void GAState::setConfigsHash(const char* configsHash)
+        {
+            GAState* i = getInstance();
+            if(!i)
+            {
+                return;
+            }
+
+            snprintf(i->_configsHash, sizeof(i->_configsHash), "%s", configsHash);
+        }
+
+        void GAState::setAbId(const char* abId)
+        {
+            GAState* i = getInstance();
+            if(!i)
+            {
+                return;
+            }
+
+            snprintf(i->_abId, sizeof(i->_abId), "%s", abId);
+        }
+
+        void GAState::setAbVariantId(const char* abVariantId)
+        {
+            GAState* i = getInstance();
+            if(!i)
+            {
+                return;
+            }
+
+            snprintf(i->_abVariantId, sizeof(i->_abVariantId), "%s", abVariantId);
+        }
+
+        std::vector<char> GAState::getAbId()
+        {
+            std::vector<char> result;
+            GAState* i = getInstance();
+            if(!i)
+            {
+                result.push_back('\0');
+                return result;
+            }
+
+            const char* returnValue = i->_abId;
+
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
+        }
+
+        std::vector<char> GAState::getAbVariantId()
+        {
+            std::vector<char> result;
+            GAState* i = getInstance();
+            if(!i)
+            {
+                result.push_back('\0');
+                return result;
+            }
+
+            const char* returnValue = i->_abVariantId;
+
+            size_t s = strlen(returnValue);
+            for(size_t i = 0; i < s; ++i)
+            {
+                result.push_back(returnValue[i]);
+            }
+            result.push_back('\0');
+
+            return result;
         }
     }
 }

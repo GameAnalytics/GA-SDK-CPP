@@ -83,6 +83,9 @@ EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key
 EXPORT double isCommandCenterReady();
 EXPORT const char* getConfigurationsContentAsString();
 
+EXPORT const char* getABTestingId();
+EXPORT const char* getABTestingVariantId();
+
 #ifdef __cplusplus
 }
 #endif

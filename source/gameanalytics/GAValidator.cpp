@@ -627,7 +627,7 @@ namespace gameanalytics
             return true;
         }
 
-        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out)
+        void GAValidator::validateAndCleanInitRequestResponse(const rapidjson::Value& initResponse, rapidjson::Document& out, bool configsCreated)
         {
             // make sure we have a valid dict
             if (initResponse.IsNull())
@@ -641,12 +641,6 @@ namespace gameanalytics
             out.SetObject();
             rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
-            // validate enabled field
-            if(initResponse.HasMember("enabled") && initResponse["enabled"].IsBool())
-            {
-                out.AddMember("enabled", initResponse["enabled"].GetBool(), allocator);
-            }
-
             // validate server_ts
             if (initResponse.HasMember("server_ts") && initResponse["server_ts"].IsNumber())
             {
@@ -657,10 +651,23 @@ namespace gameanalytics
                 }
             }
 
-            if (initResponse.HasMember("configurations") && initResponse["configurations"].IsArray())
+            if(configsCreated)
             {
-                rapidjson::Value configurations = rapidjson::Value(initResponse["configurations"], allocator);
-                out.AddMember("configurations", configurations, allocator);
+                if (initResponse.HasMember("configs") && initResponse["configs"].IsArray())
+                {
+                    rapidjson::Value configurations = rapidjson::Value(initResponse["configs"], allocator);
+                    out.AddMember("configs", configurations, allocator);
+                }
+                if (initResponse.HasMember("ab_id") && initResponse["ab_id"].IsString())
+                {
+                    rapidjson::Value ab_id = rapidjson::Value(initResponse["ab_id"].GetString(), allocator);
+                    out.AddMember("ab_id", ab_id, allocator);
+                }
+                if (initResponse.HasMember("ab_variant_id") && initResponse["ab_variant_id"].IsString())
+                {
+                    rapidjson::Value ab_variant_id = rapidjson::Value(initResponse["ab_variant_id"].GetString(), allocator);
+                    out.AddMember("ab_variant_id", ab_variant_id, allocator);
+                }
             }
         }
     }

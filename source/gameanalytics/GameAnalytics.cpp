@@ -876,6 +876,16 @@ namespace gameanalytics
         return state::GAState::getConfigurationsContentAsString();
     }
 
+    std::vector<char> GameAnalytics::getABTestingId()
+    {
+        return state::GAState::getAbId();
+    }
+
+    std::vector<char> GameAnalytics::getABTestingVariantId()
+    {
+        return state::GAState::getAbVariantId();
+    }
+
     void GameAnalytics::startSession()
     {
         if(_endThread)

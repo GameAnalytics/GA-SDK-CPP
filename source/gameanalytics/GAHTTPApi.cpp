@@ -27,12 +27,14 @@ namespace gameanalytics
     {
         // base url settings
         char GAHTTPApi::protocol[6] = "https";
-        char GAHTTPApi::hostName[22] = "api.gameanalytics.com";
+        char GAHTTPApi::hostName[22] = "api.integration.gameanalytics.com";
 
         char GAHTTPApi::version[3] = "v2";
+        char GAHTTPApi::remoteConfigsVersion[3] = "v1";
 
         // create base url
         char GAHTTPApi::baseUrl[257] = "";
+        char GAHTTPApi::remoteConfigsBaseUrl[257] = "";
 
         // route paths
         char GAHTTPApi::initializeUrlPath[5] = "init";
@@ -74,6 +76,7 @@ namespace gameanalytics
             curl_global_init(CURL_GLOBAL_DEFAULT);
 
             snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
+            snprintf(GAHTTPApi::remoteConfigsBaseUrl, sizeof(GAHTTPApi::remoteConfigsBaseUrl), "%s://%s/remote_configs/%s", protocol, hostName, remoteConfigsVersion);
             // use gzip compression on JSON body
 #if defined(_DEBUG)
             useGzip = false;
@@ -100,14 +103,13 @@ namespace gameanalytics
             return _instance;
         }
 
-        void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out)
+        void GAHTTPApi::requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out, const char* configsHash)
         {
             const char* gameKey = state::GAState::getGameKey();
 
             // Generate URL
             char url[513] = "";
-            snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, initializeUrlPath);
-            snprintf(url, sizeof(url), "https://rubick.gameanalytics.com/v2/command_center?game_key=%s&interval_seconds=1000000", gameKey);
+            snprintf(url, sizeof(url), "%s/%s?game_key=%s&interval_seconds=0&configs_hash=%s", remoteConfigsBaseUrl, gameKey, initializeUrlPath, configsHash);
 
             logging::GALogger::d("Sending 'init' URL: %s", url);
 
@@ -190,7 +192,7 @@ namespace gameanalytics
             free(s.ptr);
 
             // if not 200 result
-            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+            if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.data());
 #if USE_TIZEN
@@ -229,7 +231,7 @@ namespace gameanalytics
             }
 
             // validate Init call values
-            validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, json_out);
+            validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, json_out, requestResponseEnum == Created);
 
             if (json_out.IsNull())
             {
@@ -246,7 +248,7 @@ namespace gameanalytics
 #endif
 
             // all ok
-            response_out = Ok;
+            response_out = requestResponseEnum;
         }
 
         void GAHTTPApi::sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray)
@@ -332,7 +334,7 @@ namespace gameanalytics
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response_code, s.ptr, "Events");
 
             // if not 200 result
-            if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+            if (requestResponseEnum != Ok && equestResponseEnum != Created && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.data());
 #if USE_TIZEN

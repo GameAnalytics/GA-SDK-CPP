@@ -292,4 +292,20 @@ const char* getConfigurationsContentAsString()
     return result;
 }
 
+const char* getABTestingId()
+{
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getABTestingId();
+    char* result = new char[returnValue.size()];
+    snprintf(result, returnValue.size(), "%s", returnValue.data());
+    return result;
+}
+
+const char* getABTestingVariantId()
+{
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getABTestingVariantId();
+    char* result = new char[returnValue.size()];
+    snprintf(result, returnValue.size(), "%s", returnValue.data());
+    return result;
+}
+
 #endif
