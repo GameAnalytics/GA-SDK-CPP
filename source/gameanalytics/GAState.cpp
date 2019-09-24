@@ -1305,17 +1305,17 @@ namespace gameanalytics
             return result;
         }
 
-        bool GAState::isCommandCenterReady()
+        bool GAState::isRemoteConfigsReady()
         {
             GAState* i = getInstance();
             if(!i)
             {
                 return false;
             }
-            return i->_commandCenterIsReady;
+            return i->_remoteConfigsIsReady;
         }
 
-        void GAState::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+        void GAState::addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener)
         {
             GAState* i = getInstance();
             if(!i)
@@ -1323,13 +1323,13 @@ namespace gameanalytics
                 return;
             }
 
-            if(std::find(i->_commandCenterListeners.begin(), i->_commandCenterListeners.end(), listener) == i->_commandCenterListeners.end())
+            if(std::find(i->_remoteConfigsListeners.begin(), i->_remoteConfigsListeners.end(), listener) == i->_remoteConfigsListeners.end())
             {
-                i->_commandCenterListeners.push_back(listener);
+                i->_remoteConfigsListeners.push_back(listener);
             }
         }
 
-        void GAState::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+        void GAState::removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener)
         {
             GAState* i = getInstance();
             if(!i)
@@ -1337,9 +1337,9 @@ namespace gameanalytics
                 return;
             }
 
-            if(std::find(i->_commandCenterListeners.begin(), i->_commandCenterListeners.end(), listener) != i->_commandCenterListeners.end())
+            if(std::find(i->_remoteConfigsListeners.begin(), i->_remoteConfigsListeners.end(), listener) != i->_remoteConfigsListeners.end())
             {
-                i->_commandCenterListeners.erase(std::remove(i->_commandCenterListeners.begin(), i->_commandCenterListeners.end(), listener), i->_commandCenterListeners.end());
+                i->_remoteConfigsListeners.erase(std::remove(i->_remoteConfigsListeners.begin(), i->_remoteConfigsListeners.end(), listener), i->_remoteConfigsListeners.end());
             }
         }
 
@@ -1431,10 +1431,10 @@ namespace gameanalytics
                 }
             }
 
-            i->_commandCenterIsReady = true;
-            for(auto& listener : i->_commandCenterListeners)
+            i->_remoteConfigsIsReady = true;
+            for(auto& listener : i->_RemoteConfigsListeners)
             {
-                listener->onCommandCenterUpdated();
+                listener->onRemoteConfigsUpdated();
             }
 
             i->_mtx.unlock();

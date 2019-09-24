@@ -65,10 +65,6 @@ EXPORT void setFacebookId(const char *facebookId);
 EXPORT void setGender(double gender);
 EXPORT void setBirthYear(double birthYear);
 
-// EXPORT const char* getCommandCenterValueAsString(const char *key);
-// EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
-// EXPORT bool isCommandCenterReady();
-
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
 
@@ -78,9 +74,9 @@ EXPORT void onResume();
 EXPORT void onSuspend();
 EXPORT void onQuit();
 
-EXPORT const char* getCommandCenterValueAsString(const char *key);
-EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
-EXPORT double isCommandCenterReady();
+EXPORT const char* getRemoteConfigsValueAsString(const char *key);
+EXPORT const char* getRemoteConfigsValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
+EXPORT double isRemoteConfigsReady();
 EXPORT const char* getConfigurationsContentAsString();
 
 EXPORT const char* getABTestingId();

@@ -216,21 +216,6 @@ void setGender(double gender)
     gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
 }
 
-// const char* getCommandCenterValueAsString(const char *key)
-// {
-//     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key).c_str();
-// }
-//
-// const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
-// {
-//     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue).c_str();
-// }
-//
-// bool isCommandCenterReady()
-// {
-//     return gameanalytics::GameAnalytics::isCommandCenterReady();
-// }
-
 void setBirthYear(double birthYear)
 {
     gameanalytics::GameAnalytics::setBirthYear((int)birthYear);
@@ -263,25 +248,25 @@ void onQuit()
     gameanalytics::GameAnalytics::onQuit();
 }
 
-const char* getCommandCenterValueAsString(const char *key)
+const char* getRemoteConfigsValueAsString(const char *key)
 {
-    std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key);
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getRemoteConfigsValueAsString(key);
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
     return result;
 }
 
-const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
+const char* getRemoteConfigsValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
 {
-    std::vector<char> returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue);
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getRemoteConfigsValueAsString(key, defaultValue);
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
     return result;
 }
 
-double isCommandCenterReady()
+double isRemoteConfigsReady()
 {
-    return gameanalytics::GameAnalytics::isCommandCenterReady() ? 1 : 0;
+    return gameanalytics::GameAnalytics::isRemoteConfigsReady() ? 1 : 0;
 }
 
 const char* getConfigurationsContentAsString()

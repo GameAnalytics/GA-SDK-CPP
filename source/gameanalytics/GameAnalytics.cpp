@@ -846,29 +846,29 @@ namespace gameanalytics
         });
     }
 
-    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key)
+    std::vector<char> GameAnalytics::getRemoteConfigsValueAsString(const char* key)
     {
-        return getCommandCenterValueAsString(key, "");
+        return getRemoteConfigsValueAsString(key, "");
     }
 
-    std::vector<char> GameAnalytics::getCommandCenterValueAsString(const char* key, const char* defaultValue)
+    std::vector<char> GameAnalytics::getRemoteConfigsValueAsString(const char* key, const char* defaultValue)
     {
         return state::GAState::getConfigurationStringValue(key, defaultValue);
     }
 
-    bool GameAnalytics::isCommandCenterReady()
+    bool GameAnalytics::isRemoteConfigsReady()
     {
-        return state::GAState::isCommandCenterReady();
+        return state::GAState::isRemoteConfigsReady();
     }
 
-    void GameAnalytics::addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+    void GameAnalytics::addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener)
     {
-        state::GAState::addCommandCenterListener(listener);
+        state::GAState::addRemoteConfigsListener(listener);
     }
 
-    void GameAnalytics::removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener)
+    void GameAnalytics::removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener)
     {
-        state::GAState::removeCommandCenterListener(listener);
+        state::GAState::removeRemoteConfigsListener(listener);
     }
 
     std::vector<char> GameAnalytics::getConfigurationsContentAsString()

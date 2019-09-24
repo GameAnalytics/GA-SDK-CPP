@@ -84,9 +84,9 @@ namespace gameanalytics
             static bool sessionIsStarted();
             static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
             static std::vector<char> getConfigurationStringValue(const char* key, const char* defaultValue);
-            static bool isCommandCenterReady();
-            static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-            static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static bool isRemoteConfigsReady();
+            static void addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
+            static void removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
             static std::vector<char> getConfigurationsContentAsString();
             static const char* getAbId();
             static const char* getAbVariantId();
@@ -165,8 +165,8 @@ namespace gameanalytics
             bool _enableErrorReporting = true;
             bool _enableEventSubmission = true;
             rapidjson::Document _configurations;
-            bool _commandCenterIsReady;
-            std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
+            bool _remoteConfigsIsReady;
+            std::vector<std::shared_ptr<IRemoteConfigsListener>> _remoteConfigsListeners;
             std::mutex _mtx;
         };
     }
