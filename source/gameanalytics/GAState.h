@@ -88,8 +88,8 @@ namespace gameanalytics
             static void addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
             static void removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
             static std::vector<char> getConfigurationsContentAsString();
-            static const char* getAbId();
-            static const char* getAbVariantId();
+            static std::vector<char> getAbId();
+            static std::vector<char> getAbVariantId();
 
         private:
             GAState();
@@ -110,7 +110,7 @@ namespace gameanalytics
             static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
-            static void setConfigsHahs(const char* configsHash);
+            static void setConfigsHash(const char* configsHash);
             static void setAbId(const char* abId);
             static void setAbVariantId(const char* abVariantId);
 

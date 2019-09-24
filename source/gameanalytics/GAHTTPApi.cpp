@@ -27,7 +27,7 @@ namespace gameanalytics
     {
         // base url settings
         char GAHTTPApi::protocol[6] = "https";
-        char GAHTTPApi::hostName[22] = "api.integration.gameanalytics.com";
+        char GAHTTPApi::hostName[34] = "api.integration.gameanalytics.com";
 
         char GAHTTPApi::version[3] = "v2";
         char GAHTTPApi::remoteConfigsVersion[3] = "v1";
@@ -334,7 +334,7 @@ namespace gameanalytics
             EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response_code, s.ptr, "Events");
 
             // if not 200 result
-            if (requestResponseEnum != Ok && equestResponseEnum != Created && requestResponseEnum != BadRequest)
+            if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
             {
                 logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.data());
 #if USE_TIZEN

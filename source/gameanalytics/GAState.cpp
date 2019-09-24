@@ -1090,7 +1090,7 @@ namespace gameanalytics
                 initResponseDict.Parse(pair.second.c_str());
             }
 #else
-            httpApi->requestInitReturningDict(initResponse, initResponseDict);
+            httpApi->requestInitReturningDict(initResponse, initResponseDict, i->_configsHash);
 #endif
 
             // init is ok
@@ -1432,7 +1432,7 @@ namespace gameanalytics
             }
 
             i->_remoteConfigsIsReady = true;
-            for(auto& listener : i->_RemoteConfigsListeners)
+            for(auto& listener : i->_remoteConfigsListeners)
             {
                 listener->onRemoteConfigsUpdated();
             }
