@@ -673,7 +673,7 @@ namespace gameanalytics
             }
 
             // command center configurations
-            if(i->_configurations.IsObject() && i->_configurations.Size() > 0)
+            if(i->_configurations.IsObject() && i->_configurations.MemberCount() > 0)
             {
                 rapidjson::Value v(rapidjson::kObjectType);
                 v.CopyFrom(i->_configurations, i->_configurations.GetAllocator());
