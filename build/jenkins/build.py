@@ -179,8 +179,9 @@ class TargetWin(TargetCMake):
                 [
                     os.path.join(
                         Config.BUILD_ROOT,
-                        'vswhere'
+                        'vswhere.exe'
                     ),
+                    '-latest',
                     '-requires',
                     'Microsoft.Component.MSBuild',
                     '-property',
@@ -190,6 +191,7 @@ class TargetWin(TargetCMake):
                 useOutput=True
             )
 
+            path = path.replace("2019", "2017")
             path = os.path.join(path, "MSBuild", "15.0", "Bin")
 
             return path
@@ -199,7 +201,7 @@ class TargetWin(TargetCMake):
     def build(self, silent=False, vs="2017"):
         # call msbuild and compile projects in solution
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'MSBuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',
@@ -207,7 +209,7 @@ class TargetWin(TargetCMake):
         ])
 
         subprocess.check_call([
-            os.path.join(self.get_msbuild_path(vs), 'msbuild.exe'),
+            os.path.join(self.get_msbuild_path(vs), 'MSBuild.exe'),
             os.path.join(self.build_dir(), 'GameAnalytics.sln'),
             '/m',  # parallel builds
             '/t:GameAnalytics',

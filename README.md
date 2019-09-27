@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**2.1.9**
+* fixes to command center
+
 **2.1.8**
 * error reporting improved
 
