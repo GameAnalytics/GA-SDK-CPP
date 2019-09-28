@@ -149,9 +149,9 @@ namespace gameanalytics
             int64_t _clientServerTimeOffset = 0;
             char _defaultUserId[129] = {'\0'};
             std::map<const char*, int, CStringCmp> _progressionTries;
-            rapidjson::Value _sdkConfigDefault;
-            rapidjson::Value _sdkConfig;
-            rapidjson::Value _sdkConfigCached;
+            rapidjson::Document _sdkConfigDefault;
+            rapidjson::Document _sdkConfig;
+            rapidjson::Document _sdkConfigCached;
             static const char* CategorySdkError;
             bool _useManualSessionHandling = false;
             bool _enableErrorReporting = true;
