@@ -288,19 +288,21 @@ namespace gameanalytics
 
             if (i->_sdkConfig.IsObject())
             {
-                out = i->_sdkConfig;
+                out.CopyFrom(i->_sdkConfig, i->_sdkConfig.GetAllocator());
+                return;
             }
             else if (i->_sdkConfigCached.IsObject())
             {
-                out = i->_sdkConfigCached;
+                out.CopyFrom(i->_sdkConfigCached, i->_sdkConfigCached.GetAllocator());
+                return;
             }
 
             if(i->_sdkConfigDefault.IsNull())
             {
-                i->_sdkConfigDefault = rapidjson::Value(rapidjson::kObjectType);
+                i->_sdkConfigDefault.SetObject();
             }
 
-            out = i->_sdkConfigDefault;
+            out.CopyFrom(i->_sdkConfigDefault, i->_sdkConfigDefault.GetAllocator());
         }
 
         bool GAState::isEnabled()
@@ -669,6 +671,15 @@ namespace gameanalytics
                 rapidjson::Value v(getIdentifier(), allocator);
                 out.AddMember("user_id", v.Move(), allocator);
             }
+
+            // command center configurations
+            if(i->_configurations.IsObject() && i->_configurations.MemberCount() > 0)
+            {
+                rapidjson::Value v(rapidjson::kObjectType);
+                v.CopyFrom(i->_configurations, i->_configurations.GetAllocator());
+                out.AddMember("configurations", v.Move(), allocator);
+            }
+
             // Client Timestamp (the adjusted timestamp)
             out.AddMember("client_ts", GAState::getClientTsAdjusted(), allocator);
             // SDK version
@@ -1024,7 +1035,7 @@ namespace gameanalytics
                 d.Parse(sdkConfigCachedString);
                 if (!d.IsNull())
                 {
-                    i->_sdkConfigCached.CopyFrom(d, d.GetAllocator());
+                    i->_sdkConfigCached.CopyFrom(d, i->_sdkConfigCached.GetAllocator());
                 }
             }
 
@@ -1139,8 +1150,8 @@ namespace gameanalytics
                 store::GAStore::setState("sdk_config_cached", buffer.GetString());
 
                 // set new config and cache in memory
-                i->_sdkConfigCached.CopyFrom(initResponseDict, allocator);
-                i->_sdkConfig.CopyFrom(initResponseDict, allocator);
+                i->_sdkConfigCached.CopyFrom(initResponseDict, i->_sdkConfigCached.GetAllocator());
+                i->_sdkConfig.CopyFrom(initResponseDict, i->_sdkConfig.GetAllocator());
 
                 i->_initAuthorized = true;
             }
@@ -1171,7 +1182,7 @@ namespace gameanalytics
                     {
                         logging::GALogger::i("Init call (session start) failed - using cached init values.");
                         // set last cross session stored config init values
-                        i->_sdkConfig = i->_sdkConfigCached;
+                        i->_sdkConfig.CopyFrom(i->_sdkConfigCached, i->_sdkConfig.GetAllocator());
                     }
                     else
                     {
@@ -1180,10 +1191,10 @@ namespace gameanalytics
 
                         if(i->_sdkConfigDefault.IsNull())
                         {
-                            i->_sdkConfigDefault = rapidjson::Value(rapidjson::kObjectType);
+                            i->_sdkConfigDefault.SetObject();
                         }
 
-                        i->_sdkConfig = i->_sdkConfigDefault;
+                        i->_sdkConfig.CopyFrom(i->_sdkConfigDefault, i->_sdkConfig.GetAllocator());
                     }
                 }
                 else
@@ -1193,8 +1204,9 @@ namespace gameanalytics
                 i->_initAuthorized = true;
             }
 
-            rapidjson::Value currentSdkConfig(rapidjson::kObjectType);
+            rapidjson::Value currentSdkConfig;
             GAState::getSdkConfig(currentSdkConfig);
+
             {
                 if (currentSdkConfig.IsObject() && ((currentSdkConfig.HasMember("enabled") && currentSdkConfig["enabled"].IsBool()) ? currentSdkConfig["enabled"].GetBool() : true) == false)
                 {
@@ -1212,7 +1224,7 @@ namespace gameanalytics
 
             // set offset in state (memory) from current config (config could be from cache etc.)
 
-            i->_clientServerTimeOffset = (int64_t)strtol(currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetString() : "0", NULL, 10);
+            i->_clientServerTimeOffset = currentSdkConfig.HasMember("time_offset") ? currentSdkConfig["time_offset"].GetInt64() : 0;
 
             // populate configurations
             populateConfigurations(currentSdkConfig);

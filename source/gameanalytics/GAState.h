@@ -157,9 +157,9 @@ namespace gameanalytics
             char _abId[129] = {'\0'};
             char _abVariantId[129] = {'\0'};
             std::map<const char*, int, CStringCmp> _progressionTries;
-            rapidjson::Value _sdkConfigDefault;
-            rapidjson::Value _sdkConfig;
-            rapidjson::Value _sdkConfigCached;
+            rapidjson::Document _sdkConfigDefault;
+            rapidjson::Document _sdkConfig;
+            rapidjson::Document _sdkConfigCached;
             static const char* CategorySdkError;
             bool _useManualSessionHandling = false;
             bool _enableErrorReporting = true;
