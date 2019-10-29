@@ -292,4 +292,129 @@ const char* getConfigurationsContentAsString()
     return result;
 }
 
+#if USE_UWP
+void configureAvailableCustomDimensions01UWP(const wchar_t *customDimensionsJson)
+{
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(gameanalytics::utilities::GAUtilities::ws2s(customDimensionsJson).c_str());
+}
+
+void configureAvailableCustomDimensions02UWP(const wchar_t *customDimensionsJson)
+{
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(gameanalytics::utilities::GAUtilities::ws2s(customDimensionsJson).c_str());
+}
+
+void configureAvailableCustomDimensions03UWP(const wchar_t *customDimensionsJson)
+{
+    gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(gameanalytics::utilities::GAUtilities::ws2s(customDimensionsJson).c_str());
+}
+
+void configureAvailableResourceCurrenciesUWP(const wchar_t *resourceCurrenciesJson)
+{
+    gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(gameanalytics::utilities::GAUtilities::ws2s(resourceCurrenciesJson).c_str());
+}
+
+void configureAvailableResourceItemTypesUWP(const wchar_t *resourceItemTypesJson)
+{
+    gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(gameanalytics::utilities::GAUtilities::ws2s(resourceItemTypesJson).c_str());
+}
+
+void configureBuildUWP(const wchar_t *build)
+{
+    gameanalytics::GameAnalytics::configureBuild(gameanalytics::utilities::GAUtilities::ws2s(build).c_str());
+}
+
+void configureWritablePathUWP(const wchar_t *writablePath)
+{
+    gameanalytics::GameAnalytics::configureWritablePath(gameanalytics::utilities::GAUtilities::ws2s(writablePath).c_str());
+}
+
+void configureDeviceModelUWP(const wchar_t *deviceModel)
+{
+    gameanalytics::GameAnalytics::configureDeviceModel(gameanalytics::utilities::GAUtilities::ws2s(deviceModel).c_str());
+}
+
+void configureDeviceManufacturerUWP(const wchar_t *deviceManufacturer)
+{
+    gameanalytics::GameAnalytics::configureDeviceManufacturer(gameanalytics::utilities::GAUtilities::ws2s(deviceManufacturer).c_str());
+}
+
+void initialize(const wchar_t *gameKey, const wchar_t *gameSecret)
+{
+    gameanalytics::GameAnalytics::initialize(gameKey, gameSecret);
+}
+
+void setCustomDimension01(const wchar_t *dimension01)
+{
+    gameanalytics::GameAnalytics::setCustomDimension01(dimension01);
+}
+
+void setCustomDimension02(const wchar_t *dimension02)
+{
+    gameanalytics::GameAnalytics::setCustomDimension02(dimension02);
+}
+
+void setCustomDimension03(const wchar_t *dimension03)
+{
+    gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
+}
+
+void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType/*, const char *fields*/)
+{
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType/*, fields*/);
+}
+
+void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId/*, const char *fields*/)
+{
+    int flowTypeInt = (int)flowType;
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId/*, fields*/);
+}
+
+void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03/*, const char *fields*/)
+{
+    int progressionStatusInt = (int)progressionStatus;
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03/*, fields*/);
+}
+
+void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score/*, const char *fields*/)
+{
+    int progressionStatusInt = (int)progressionStatus;
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score/*, fields*/);
+}
+
+void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/)
+{
+    gameanalytics::GameAnalytics::addDesignEvent(eventId/*, fields*/);
+}
+
+void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/)
+{
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value/*, fields*/);
+}
+
+void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/)
+{
+    int severityInt = (int)severity;
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
+}
+
+void setFacebookIdUWP(const wchar_t *facebookId)
+{
+    gameanalytics::GameAnalytics::setFacebookId(facebookId);
+}
+
+void getCommandCenterValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out)
+{
+    std::string returnValue = gameanalytics::GameAnalytics::getCommandCenterValueAsString(gameanalytics::utilities::GAUtilities::ws2s(key).c_str(), gameanalytics::utilities::GAUtilities::ws2s(defaultValue).c_str()).data();
+    std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
+    wcscpy_s(out, result.length() + 1, result.c_str());
+}
+
+void getConfigurationsContentAsStringUWP(wchar_t *out)
+{
+    std::string returnValue = gameanalytics::GameAnalytics::getConfigurationsContentAsString().data();
+    std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
+    wcscpy_s(out, result.length() + 1, result.c_str());
+}
+#endif
+
 #endif
