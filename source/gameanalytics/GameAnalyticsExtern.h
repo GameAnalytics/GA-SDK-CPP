@@ -65,10 +65,6 @@ EXPORT void setFacebookId(const char *facebookId);
 EXPORT void setGender(double gender);
 EXPORT void setBirthYear(double birthYear);
 
-// EXPORT const char* getCommandCenterValueAsString(const char *key);
-// EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
-// EXPORT bool isCommandCenterReady();
-
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
 
@@ -78,51 +74,13 @@ EXPORT void onResume();
 EXPORT void onSuspend();
 EXPORT void onQuit();
 
-EXPORT const char* getCommandCenterValueAsString(const char *key);
-EXPORT const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
-EXPORT double isCommandCenterReady();
+EXPORT const char* getRemoteConfigsValueAsString(const char *key);
+EXPORT const char* getRemoteConfigsValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
+EXPORT double isRemoteConfigsReady();
 EXPORT const char* getConfigurationsContentAsString();
 
-#if USE_UWP
-EXPORT void configureAvailableCustomDimensions01UWP(const wchar_t *customDimensionsJson);
-EXPORT void configureAvailableCustomDimensions02UWP(const wchar_t *customDimensionsJson);
-EXPORT void configureAvailableCustomDimensions03UWP(const wchar_t *customDimensionsJson);
-EXPORT void configureAvailableResourceCurrenciesUWP(const wchar_t *resourceCurrenciesJson);
-EXPORT void configureAvailableResourceItemTypesUWP(const wchar_t *resourceItemTypesJson);
-EXPORT void configureBuildUWP(const wchar_t *build);
-EXPORT void configureWritablePathUWP(const wchar_t *writablePath);
-EXPORT void configureDeviceModelUWP(const wchar_t *deviceModel);
-EXPORT void configureDeviceManufacturerUWP(const wchar_t *deviceManufacturer);
-
-// the version of SDK code used in an engine. Used for sdk_version field.
-// !! if set then it will override the SdkWrapperVersion.
-// example "unity 4.6.9"
-EXPORT void configureSdkGameEngineVersionUWP(const wchar_t *sdkGameEngineVersion);
-// the version of the game engine (if used and version is available)
-EXPORT void configureGameEngineVersionUWP(const wchar_t *engineVersion);
-
-EXPORT void configureUserIdUWP(const wchar_t *uId);
-
-EXPORT void initializeUWP(const wchar_t *gameKey, const wchar_t *gameSecret);
-
-EXPORT void setCustomDimension01UWP(const wchar_t *dimension01);
-EXPORT void setCustomDimension02UWP(const wchar_t *dimension02);
-EXPORT void setCustomDimension03UWP(const wchar_t *dimension03);
-
-EXPORT void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType/*, const char *fields*/);
-EXPORT void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId/*, const char *fields*/);
-EXPORT void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03/*, const char *fields*/);
-EXPORT void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score/*, const char *fields*/);
-
-EXPORT void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/);
-EXPORT void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/);
-EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/);
-
-EXPORT void setFacebookIdUWP(const wchar_t *facebookId);
-
-EXPORT void getCommandCenterValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
-EXPORT void getConfigurationsContentAsStringUWP(wchar_t *out);
-#endif
+EXPORT const char* getABTestingId();
+EXPORT const char* getABTestingVariantId();
 
 #ifdef __cplusplus
 }

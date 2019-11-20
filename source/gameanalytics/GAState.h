@@ -84,10 +84,12 @@ namespace gameanalytics
             static bool sessionIsStarted();
             static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
             static std::vector<char> getConfigurationStringValue(const char* key, const char* defaultValue);
-            static bool isCommandCenterReady();
-            static void addCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
-            static void removeCommandCenterListener(const std::shared_ptr<ICommandCenterListener>& listener);
+            static bool isRemoteConfigsReady();
+            static void addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
+            static void removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
             static std::vector<char> getConfigurationsContentAsString();
+            static std::vector<char> getAbId();
+            static std::vector<char> getAbVariantId();
 
         private:
             GAState();
@@ -108,6 +110,9 @@ namespace gameanalytics
             static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
+            static void setConfigsHash(const char* configsHash);
+            static void setAbId(const char* abId);
+            static void setAbVariantId(const char* abVariantId);
 
             static bool _destroyed;
             static GAState* _instance;
@@ -148,6 +153,9 @@ namespace gameanalytics
             bool _enabled = false;
             int64_t _clientServerTimeOffset = 0;
             char _defaultUserId[129] = {'\0'};
+            char _configsHash[129] = {'\0'};
+            char _abId[129] = {'\0'};
+            char _abVariantId[129] = {'\0'};
             std::map<const char*, int, CStringCmp> _progressionTries;
             rapidjson::Document _sdkConfigDefault;
             rapidjson::Document _sdkConfig;
@@ -157,8 +165,8 @@ namespace gameanalytics
             bool _enableErrorReporting = true;
             bool _enableEventSubmission = true;
             rapidjson::Document _configurations;
-            bool _commandCenterIsReady;
-            std::vector<std::shared_ptr<ICommandCenterListener>> _commandCenterListeners;
+            bool _remoteConfigsIsReady;
+            std::vector<std::shared_ptr<IRemoteConfigsListener>> _remoteConfigsListeners;
             std::mutex _mtx;
         };
     }

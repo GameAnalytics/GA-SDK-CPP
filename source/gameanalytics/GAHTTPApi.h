@@ -33,7 +33,8 @@ namespace gameanalytics
             BadRequest = 6, // 400
             Unauthorized = 7, // 401
             UnknownResponseCode = 8,
-            Ok = 9
+            Ok = 9,
+            Created = 10
         };
 
         enum EGASdkErrorType
@@ -55,10 +56,10 @@ namespace gameanalytics
             static GAHTTPApi* getInstance();
 
 #if USE_UWP
-            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> requestInitReturningDict();
+            concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> requestInitReturningDict(const char* configsHash);
             concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> sendEventsInArray(const rapidjson::Value& eventArray);
 #else
-            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out);
+            void requestInitReturningDict(EGAHTTPApiResponse& response_out, rapidjson::Document& json_out, const char* configsHash);
             void sendEventsInArray(EGAHTTPApiResponse& response_out, rapidjson::Value& json_out, const rapidjson::Value& eventArray);
 #endif
             void sendSdkErrorEvent(EGASdkErrorType type);
@@ -93,7 +94,9 @@ namespace gameanalytics
             static char protocol[];
             static char hostName[];
             static char version[];
+            static char remoteConfigsVersion[];
             static char baseUrl[];
+            static char remoteConfigsBaseUrl[];
             static char initializeUrlPath[];
             static char eventsUrlPath[];
             bool useGzip;
