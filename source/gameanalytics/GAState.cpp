@@ -672,12 +672,24 @@ namespace gameanalytics
                 out.AddMember("user_id", v.Move(), allocator);
             }
 
-            // command center configurations
+            // remote configs configurations
             if(i->_configurations.IsObject() && i->_configurations.MemberCount() > 0)
             {
                 rapidjson::Value v(rapidjson::kObjectType);
                 v.CopyFrom(i->_configurations, i->_configurations.GetAllocator());
                 out.AddMember("configurations", v.Move(), allocator);
+            }
+
+            // A/B testing
+            if (strlen(i->_abId) > 0)
+            {
+                rapidjson::Value v(i->_abId, allocator);
+                out.AddMember("ab_id", v.Move(), allocator);
+            }
+            if (strlen(i->_abVariantId) > 0)
+            {
+                rapidjson::Value v(i->_abVariantId, allocator);
+                out.AddMember("ab_variant_id", v.Move(), allocator);
             }
 
             // Client Timestamp (the adjusted timestamp)
