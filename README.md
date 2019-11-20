@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**3.0.0**
+* command center is now called remote configs
+* A/B testing support added
+
 **2.1.9**
 * fixes to command center
 

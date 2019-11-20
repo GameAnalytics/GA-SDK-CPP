@@ -22,9 +22,11 @@ namespace gameanalytics
         char GAHTTPApi::hostName[22] = "api.gameanalytics.com";
 
         char GAHTTPApi::version[3] = "v2";
+        char GAHTTPApi::remoteConfigsVersion[3] = "v1";
 
         // create base url
         char GAHTTPApi::baseUrl[257] = "";
+        char GAHTTPApi::remoteConfigsBaseUrl[257] = "";
 
         // route paths
         char GAHTTPApi::initializeUrlPath[5] = "init";
@@ -39,6 +41,7 @@ namespace gameanalytics
             useGzip = true;
 #endif
             snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
+            snprintf(GAHTTPApi::remoteConfigsBaseUrl, sizeof(GAHTTPApi::remoteConfigsBaseUrl), "%s://%s/remote_configs/%s", protocol, hostName, remoteConfigsVersion);
             httpClient = ref new Windows::Web::Http::HttpClient();
             Windows::Networking::Connectivity::NetworkInformation::NetworkStatusChanged += ref new Windows::Networking::Connectivity::NetworkStatusChangedEventHandler(&GANetworkStatus::NetworkInformationOnNetworkStatusChanged);
             GANetworkStatus::CheckInternetAccess();
@@ -98,14 +101,12 @@ namespace gameanalytics
             }
         }
 
-        concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> GAHTTPApi::requestInitReturningDict()
+        concurrency::task<std::pair<EGAHTTPApiResponse, std::string>> GAHTTPApi::requestInitReturningDict(const char* configsHash)
         {
             std::string gameKey = state::GAState::getGameKey();
 
             // Generate URL
-            std::string url = std::string(baseUrl) + "/" + std::string(gameKey) + "/" + std::string(initializeUrlPath);
-            url = "https://rubick.gameanalytics.com/v2/command_center?game_key=" + gameKey + "&interval_seconds=1000000";
-            logging::GALogger::d("Sending 'init' URL: %s", url.c_str());
+            std::string url = std::string(remoteConfigsBaseUrl) + "/" + std::string(gameKey) + "/" + std::string(initializeUrlPath);
 
             rapidjson::Document initAnnotations;
             initAnnotations.SetObject();
@@ -145,7 +146,7 @@ namespace gameanalytics
                 EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response, "Init");
 
                 // if not 200 result
-                if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+                if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
                 {
                     logging::GALogger::d("Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization);
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum, "");
@@ -186,7 +187,7 @@ namespace gameanalytics
 
                 rapidjson::Document validatedInitValues;
                 // validate Init call values
-                validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, validatedInitValues);
+                validators::GAValidator::validateAndCleanInitRequestResponse(requestJsonDict, validatedInitValues, requestResponseEnum == Created);
 
                 if (validatedInitValues.IsNull())
                 {
@@ -199,7 +200,7 @@ namespace gameanalytics
                     validatedInitValues.Accept(writer);
                 }
                 // all ok
-                return std::pair<EGAHTTPApiResponse, std::string>(Ok, buffer.GetString());
+                return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum, buffer.GetString());
             });
         }
 
@@ -253,7 +254,7 @@ namespace gameanalytics
                 EGAHTTPApiResponse requestResponseEnum = processRequestResponse(response, "Events");
 
                 // if not 200 result
-                if (requestResponseEnum != Ok && requestResponseEnum != BadRequest)
+                if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
                 {
                     logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum,"");
