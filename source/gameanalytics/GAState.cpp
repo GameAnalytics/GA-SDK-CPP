@@ -1100,7 +1100,7 @@ namespace gameanalytics
             std::pair<http::EGAHTTPApiResponse, std::string> pair;
             try
             {
-                pair = httpApi->requestInitReturningDict().get();
+                pair = httpApi->requestInitReturningDict(i->_configsHash).get();
             }
             catch(Platform::COMException^ e)
             {
