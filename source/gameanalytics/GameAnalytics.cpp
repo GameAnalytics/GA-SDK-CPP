@@ -853,7 +853,7 @@ namespace gameanalytics
 
     std::vector<char> GameAnalytics::getRemoteConfigsValueAsString(const char* key, const char* defaultValue)
     {
-        return state::GAState::getConfigurationStringValue(key, defaultValue);
+        return state::GAState::getRemoteConfigsStringValue(key, defaultValue);
     }
 
     bool GameAnalytics::isRemoteConfigsReady()
@@ -871,9 +871,9 @@ namespace gameanalytics
         state::GAState::removeRemoteConfigsListener(listener);
     }
 
-    std::vector<char> GameAnalytics::getConfigurationsContentAsString()
+    std::vector<char> GameAnalytics::getRemoteConfigsContentAsString()
     {
-        return state::GAState::getConfigurationsContentAsString();
+        return state::GAState::getRemoteConfigsContentAsString();
     }
 
     std::vector<char> GameAnalytics::getABTestingId()

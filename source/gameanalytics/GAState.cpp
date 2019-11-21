@@ -1307,7 +1307,7 @@ namespace gameanalytics
             return i->_sessionStart != 0;
         }
 
-        std::vector<char> GAState::getConfigurationStringValue(const char* key, const char* defaultValue)
+        std::vector<char> GAState::getRemoteConfigsStringValue(const char* key, const char* defaultValue)
         {
             std::vector<char> result;
             GAState* i = getInstance();
@@ -1367,7 +1367,7 @@ namespace gameanalytics
             }
         }
 
-        std::vector<char> GAState::getConfigurationsContentAsString()
+        std::vector<char> GAState::getRemoteConfigsContentAsString()
         {
             std::vector<char> result;
             GAState* i = getInstance();
