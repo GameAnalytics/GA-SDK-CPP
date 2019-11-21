@@ -77,7 +77,7 @@ EXPORT void onQuit();
 EXPORT const char* getRemoteConfigsValueAsString(const char *key);
 EXPORT const char* getRemoteConfigsValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
 EXPORT double isRemoteConfigsReady();
-EXPORT const char* getConfigurationsContentAsString();
+EXPORT const char* getRemoteConfigsContentAsString();
 
 EXPORT const char* getABTestingId();
 EXPORT const char* getABTestingVariantId();
@@ -120,7 +120,7 @@ EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const ch
 EXPORT void setFacebookIdUWP(const wchar_t *facebookId);
 
 EXPORT void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
-EXPORT void getConfigurationsContentAsStringUWP(wchar_t *out);
+EXPORT void getRemoteConfigsContentAsStringUWP(wchar_t *out);
 #endif
 
 #ifdef __cplusplus

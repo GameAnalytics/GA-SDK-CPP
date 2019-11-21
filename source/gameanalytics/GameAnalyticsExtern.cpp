@@ -269,9 +269,9 @@ double isRemoteConfigsReady()
     return gameanalytics::GameAnalytics::isRemoteConfigsReady() ? 1 : 0;
 }
 
-const char* getConfigurationsContentAsString()
+const char* getRemoteConfigsContentAsString()
 {
-    std::vector<char> returnValue = gameanalytics::GameAnalytics::getConfigurationsContentAsString();
+    std::vector<char> returnValue = gameanalytics::GameAnalytics::getRemoteConfigsContentAsString();
     char* result = new char[returnValue.size()];
     snprintf(result, returnValue.size(), "%s", returnValue.data());
     return result;
@@ -410,9 +410,9 @@ void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const 
     wcscpy_s(out, result.length() + 1, result.c_str());
 }
 
-void getConfigurationsContentAsStringUWP(wchar_t *out)
+void getRemoteConfigsContentAsStringUWP(wchar_t *out)
 {
-    std::string returnValue = gameanalytics::GameAnalytics::getConfigurationsContentAsString().data();
+    std::string returnValue = gameanalytics::GameAnalytics::getRemoteConfigsContentAsString().data();
     std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
     wcscpy_s(out, result.length() + 1, result.c_str());
 }

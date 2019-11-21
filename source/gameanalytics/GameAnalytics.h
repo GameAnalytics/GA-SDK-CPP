@@ -178,7 +178,7 @@ namespace gameanalytics
         static bool isRemoteConfigsReady();
         static void addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
         static void removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
-        static std::vector<char> getConfigurationsContentAsString();
+        static std::vector<char> getRemoteConfigsContentAsString();
 
         static std::vector<char> getABTestingId();
         static std::vector<char> getABTestingVariantId();

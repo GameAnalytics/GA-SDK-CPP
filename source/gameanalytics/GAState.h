@@ -83,11 +83,11 @@ namespace gameanalytics
             static bool isEventSubmissionEnabled();
             static bool sessionIsStarted();
             static void validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out);
-            static std::vector<char> getConfigurationStringValue(const char* key, const char* defaultValue);
+            static std::vector<char> getRemoteConfigsStringValue(const char* key, const char* defaultValue);
             static bool isRemoteConfigsReady();
             static void addRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
             static void removeRemoteConfigsListener(const std::shared_ptr<IRemoteConfigsListener>& listener);
-            static std::vector<char> getConfigurationsContentAsString();
+            static std::vector<char> getRemoteConfigsContentAsString();
             static std::vector<char> getAbId();
             static std::vector<char> getAbVariantId();
 
