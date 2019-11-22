@@ -321,40 +321,50 @@ void configureAvailableResourceItemTypesUWP(const wchar_t *resourceItemTypesJson
 
 void configureBuildUWP(const wchar_t *build)
 {
-    gameanalytics::GameAnalytics::configureBuild(gameanalytics::utilities::GAUtilities::ws2s(build).c_str());
+    gameanalytics::GameAnalytics::configureBuild(build);
 }
 
 void configureWritablePathUWP(const wchar_t *writablePath)
 {
-    gameanalytics::GameAnalytics::configureWritablePath(gameanalytics::utilities::GAUtilities::ws2s(writablePath).c_str());
+    gameanalytics::GameAnalytics::configureWritablePath(writablePath);
 }
 
 void configureDeviceModelUWP(const wchar_t *deviceModel)
 {
-    gameanalytics::GameAnalytics::configureDeviceModel(gameanalytics::utilities::GAUtilities::ws2s(deviceModel).c_str());
+    gameanalytics::GameAnalytics::configureDeviceModel(deviceModel);
 }
 
 void configureDeviceManufacturerUWP(const wchar_t *deviceManufacturer)
 {
-    gameanalytics::GameAnalytics::configureDeviceManufacturer(gameanalytics::utilities::GAUtilities::ws2s(deviceManufacturer).c_str());
+    gameanalytics::GameAnalytics::configureDeviceManufacturer(deviceManufacturer);
 }
 
-void initialize(const wchar_t *gameKey, const wchar_t *gameSecret)
+void configureSdkGameEngineVersionUWP(const wchar_t *sdkGameEngineVersion)
+{
+    gameanalytics::GameAnalytics::configureSdkGameEngineVersion(sdkGameEngineVersion);
+}
+
+void configureGameEngineVersionUWP(const wchar_t *engineVersion)
+{
+    gameanalytics::GameAnalytics::configureGameEngineVersion(engineVersion);
+}
+
+void initializeUWP(const wchar_t *gameKey, const wchar_t *gameSecret)
 {
     gameanalytics::GameAnalytics::initialize(gameKey, gameSecret);
 }
 
-void setCustomDimension01(const wchar_t *dimension01)
+void setCustomDimension01UWP(const wchar_t *dimension01)
 {
     gameanalytics::GameAnalytics::setCustomDimension01(dimension01);
 }
 
-void setCustomDimension02(const wchar_t *dimension02)
+void setCustomDimension02UWP(const wchar_t *dimension02)
 {
     gameanalytics::GameAnalytics::setCustomDimension02(dimension02);
 }
 
-void setCustomDimension03(const wchar_t *dimension03)
+void setCustomDimension03UWP(const wchar_t *dimension03)
 {
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
 }
