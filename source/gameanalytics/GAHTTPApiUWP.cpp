@@ -38,7 +38,7 @@ namespace gameanalytics
 #if defined(_DEBUG)
             useGzip = false;
 #else
-            useGzip = true;
+            useGzip = false;
 #endif
             snprintf(GAHTTPApi::baseUrl, sizeof(GAHTTPApi::baseUrl), "%s://%s/%s", protocol, hostName, version);
             snprintf(GAHTTPApi::remoteConfigsBaseUrl, sizeof(GAHTTPApi::remoteConfigsBaseUrl), "%s://%s/remote_configs/%s", protocol, hostName, remoteConfigsVersion);
@@ -105,8 +105,12 @@ namespace gameanalytics
         {
             std::string gameKey = state::GAState::getGameKey();
 
+            std::string hash = std::string(configsHash);
+
             // Generate URL
-            std::string url = std::string(remoteConfigsBaseUrl) + "/" + std::string(gameKey) + "/" + std::string(initializeUrlPath);
+            std::string url = std::string(remoteConfigsBaseUrl) + "/" + std::string(initializeUrlPath) + "?game_key=" + std::string(gameKey) + "&interval_seconds=0&configs_hash=" + hash;
+
+            logging::GALogger::d("Sending 'init' URL: %s", url.c_str());
 
             rapidjson::Document initAnnotations;
             initAnnotations.SetObject();
@@ -128,7 +132,7 @@ namespace gameanalytics
                 });
             }
 
-            std::vector<char> payloadData = createPayloadData(JSONstring.c_str(), false);
+            std::vector<char> payloadData = createPayloadData(JSONstring.c_str(), useGzip);
             auto message = ref new Windows::Web::Http::HttpRequestMessage();
 
             std::vector<char> authorization = createRequest(message, url, payloadData, useGzip);
@@ -148,22 +152,14 @@ namespace gameanalytics
                 // if not 200 result
                 if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
                 {
-                    logging::GALogger::d("Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization);
+                    logging::GALogger::d("Failed Init Call. URL: %s, JSONString: %s, Authorization: %s", url.c_str(), JSONstring.c_str(), authorization.data());
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum, "");
                 }
 
                 // print reason if bad request
                 if (requestResponseEnum == BadRequest)
                 {
-                    rapidjson::Document requestJsonDict;
-                    requestJsonDict.Parse(utilities::GAUtilities::ws2s(response->Content->ToString()->Data()).c_str());
-
-                    rapidjson::StringBuffer buffer;
-                    {
-                        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                        requestJsonDict.Accept(writer);
-                    }
-                    logging::GALogger::d("Failed Init Call. Bad request. Response: %s", buffer.GetString());
+                    logging::GALogger::d("Failed Init Call. Bad request. Response: %s", utilities::GAUtilities::ws2s(response->Content->ToString()->Data()).c_str());
                     // return bad request result
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum, "");
                 }
@@ -214,9 +210,8 @@ namespace gameanalytics
             auto gameKey = state::GAState::getGameKey();
 
             // Generate URL
-            char url[513];
-            snprintf(url, sizeof(url), "%s/%s/%s", baseUrl, gameKey, eventsUrlPath);
-            logging::GALogger::d("Sending 'events' URL: %s", url);
+            std::string url = std::string(baseUrl) + "/" + std::string(gameKey) + "/" + std::string(eventsUrlPath);
+            logging::GALogger::d("Sending 'events' URL: %s", url.c_str());
 
             // make JSON string from data
             rapidjson::StringBuffer buffer;
@@ -256,21 +251,14 @@ namespace gameanalytics
                 // if not 200 result
                 if (requestResponseEnum != Ok && requestResponseEnum != Created && requestResponseEnum != BadRequest)
                 {
-                    logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url, JSONstring, authorization.c_str());
+                    logging::GALogger::d("Failed Events Call. URL: %s, JSONString: %s, Authorization: %s", url.c_str(), JSONstring.c_str(), authorization.c_str());
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum,"");
                 }
 
                 // print reason if bad request
                 if (requestResponseEnum == BadRequest)
                 {
-                    rapidjson::Document requestJsonDict;
-                    requestJsonDict.Parse(utilities::GAUtilities::ws2s(response->Content->ToString()->Data()).c_str());
-
-                    rapidjson::StringBuffer buffer;
-                    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-                    requestJsonDict.Accept(writer);
-
-                    logging::GALogger::d("Failed Events Call. Bad request. Response: %s", buffer.GetString());
+                    logging::GALogger::d("Failed Events Call. Bad request. Response: %s", utilities::GAUtilities::ws2s(response->Content->ToString()->Data()).c_str());
                     // return bad request result
                     return std::pair<EGAHTTPApiResponse, std::string>(requestResponseEnum,"");
                 }
@@ -368,7 +356,7 @@ namespace gameanalytics
                 // if not 200 result
                 if (statusCode != Windows::Web::Http::HttpStatusCode::Ok)
                 {
-                    logging::GALogger::d("sdk error failed. response code not 200. status code: %s", utilities::GAUtilities::ws2s(statusCode.ToString()->Data()));
+                    logging::GALogger::d("sdk error failed. response code not 200. status code: %s", utilities::GAUtilities::ws2s(statusCode.ToString()->Data()).c_str());
                     return;
                 }
 
@@ -378,7 +366,7 @@ namespace gameanalytics
                 // Return response.
                 std::string body = utilities::GAUtilities::ws2s(responseBodyAsText->Data());
 
-                logging::GALogger::d("init request content : %s", body);
+                logging::GALogger::d("init request content : %s", body.c_str());
 
                 countMap[type] = countMap[type] + 1;
             });
@@ -416,23 +404,32 @@ namespace gameanalytics
             message->Method = Windows::Web::Http::HttpMethod::Post;
 
             // create authorization hash
-            std::string key = state::GAState::getGameSecret();
-            char a[257];
-            utilities::GAUtilities::hmacWithKey(key.c_str(), payloadData, a);
-            auto authorization = ref new Platform::String(utilities::GAUtilities::s2ws(a).c_str());
+            auto data = ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str());
+            auto key = ref new Platform::String(utilities::GAUtilities::s2ws(state::GAState::getGameSecret()).c_str());
+            auto input = Windows::Security::Cryptography::CryptographicBuffer::ConvertStringToBinary(data,
+                Windows::Security::Cryptography::BinaryStringEncoding::Utf8);
+            auto keyBuffer = Windows::Security::Cryptography::CryptographicBuffer::ConvertStringToBinary(key,
+                Windows::Security::Cryptography::BinaryStringEncoding::Utf8);
+            auto macProvider = Windows::Security::Cryptography::Core::MacAlgorithmProvider::OpenAlgorithm(Windows::Security::Cryptography::Core::MacAlgorithmNames::HmacSha256);
+            auto signatureKey = macProvider->CreateKey(keyBuffer);
+            auto hashed = Windows::Security::Cryptography::Core::CryptographicEngine::Sign(signatureKey, input);
+            auto authorization = Windows::Security::Cryptography::CryptographicBuffer::EncodeToBase64String(hashed);
 
             message->Headers->TryAppendWithoutValidation(L"Authorization", authorization);
 
+            message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8);
+
             if (gzip)
             {
-                Windows::Storage::Streams::InMemoryRandomAccessStream^ stream = createStream(std::string(payloadData.data())).get();
-                message->Content = ref new Windows::Web::Http::HttpStreamContent(stream);
+                //Windows::Storage::Streams::InMemoryRandomAccessStream^ stream = createStream(std::string(payloadData.data())).get();
+                //message->Content = ref new Windows::Web::Http::HttpStreamContent(stream);
                 message->Content->Headers->ContentEncoding->Append(ref new Windows::Web::Http::Headers::HttpContentCodingHeaderValue(ref new Platform::String(L"gzip")));
             }
             else
             {
-                message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8, ref new Platform::String(L"application/json"));
+
             }
+            message->Content->Headers->ContentType = ref new Windows::Web::Http::Headers::HttpMediaTypeHeaderValue(L"application/json");
 
             std::string r = utilities::GAUtilities::ws2s(authorization->Data());
             std::vector<char> result;
@@ -495,7 +492,7 @@ namespace gameanalytics
             // if no result - often no connection
             if (!response->IsSuccessStatusCode && std::wstring(response->Content->ToString()->Data()).empty())
             {
-                logging::GALogger::d("%s request. failed. Might be no connection. Status code: %s", requestId, utilities::GAUtilities::ws2s(statusCode.ToString()->Data()));
+                logging::GALogger::d("%s request. failed. Might be no connection. Status code: %s", requestId.c_str(), utilities::GAUtilities::ws2s(statusCode.ToString()->Data()).c_str());
                 return NoResponse;
             }
 
@@ -504,25 +501,32 @@ namespace gameanalytics
             {
                 return Ok;
             }
+            if (statusCode == Windows::Web::Http::HttpStatusCode::Created)
+            {
+                return Created;
+            }
 
             // 401 can return 0 status
             if (statusCode == (Windows::Web::Http::HttpStatusCode)0 || statusCode == Windows::Web::Http::HttpStatusCode::Unauthorized)
             {
-                logging::GALogger::d("%s request. 401 - Unauthorized.", requestId);
+                logging::GALogger::d("%s request. 401 - Unauthorized.", requestId.c_str());
                 return Unauthorized;
             }
 
             if (statusCode == Windows::Web::Http::HttpStatusCode::BadRequest)
             {
-                logging::GALogger::d("%s request. 400 - Bad Request.", requestId);
+                logging::GALogger::d("%s request. 400 - Bad Request.", requestId.c_str());
                 return BadRequest;
             }
 
             if (statusCode == Windows::Web::Http::HttpStatusCode::InternalServerError)
             {
-                logging::GALogger::d("%s request. 500 - Internal Server Error.", requestId);
+                logging::GALogger::d("%s request. 500 - Internal Server Error.", requestId.c_str());
                 return InternalServerError;
             }
+
+            logging::GALogger::d("%s request. statusCode=%s response=%s.", requestId.c_str(), utilities::GAUtilities::ws2s(statusCode.ToString()->Data()).c_str(), utilities::GAUtilities::ws2s(response->Content->ToString()->Data()).c_str());
+
             return UnknownResponseCode;
         }
     }

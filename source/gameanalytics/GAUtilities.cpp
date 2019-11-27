@@ -261,14 +261,13 @@ namespace gameanalytics
             return pathSeparator;
         }
 
-        // TODO(nikolaj): explain function
         void GAUtilities::generateUUID(char* out)
         {
 #if USE_UWP
             GUID result;
-            HRESULT hr = CoCreateGuid(&result);
+            CoCreateGuid(&result);
 
-            if (SUCCEEDED(hr))
+            //if (SUCCEEDED(hr))
             {
                 // Generate new GUID.
                 Platform::Guid guid(result);
@@ -279,8 +278,6 @@ namespace gameanalytics
                 std::string result = ws2s(sessionId);
                 snprintf(out, result.size() + 1, "%s", result.c_str());
             }
-
-            throw Platform::Exception::CreateException(hr);
 #else
             GuidGenerator generator;
             auto myGuid = generator.newGuid();
