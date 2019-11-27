@@ -1069,8 +1069,6 @@ namespace gameanalytics
                     i->_progressionTries[(*itr)["progression"].GetString()] = (int)strtol((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0", NULL, 10);
                 }
             }
-
-            return;
         }
 
         void GAState::startNewSession()
@@ -1107,7 +1105,6 @@ namespace gameanalytics
                 pair = std::pair<http::EGAHTTPApiResponse, std::string>(http::NoResponse, "");
             }
             initResponse = pair.first;
-            rapidjson::Document d;
             if(pair.second.size() > 0)
             {
                 initResponseDict.Parse(pair.second.c_str());
@@ -1140,6 +1137,11 @@ namespace gameanalytics
                         initResponseDict.AddMember("configs", configs, allocator);
                         initResponseDict["configs"].CopyFrom(currentSdkConfig["configs"], allocator);
                     }
+                    if(currentSdkConfig.HasMember("configs_hash") && currentSdkConfig["configs_hash"].IsString())
+                    {
+                        rapidjson::Value configs_hash(currentSdkConfig["configs_hash"].GetString(), allocator);
+                        initResponseDict.AddMember("configs_hash", configs_hash.Move(), allocator);
+                    }
                     if(currentSdkConfig.HasMember("ab_id") && currentSdkConfig["ab_id"].IsString())
                     {
                         rapidjson::Value ab_id(currentSdkConfig["ab_id"].GetString(), allocator);
@@ -1152,11 +1154,20 @@ namespace gameanalytics
                     }
                 }
 
+                GAState::setConfigsHash(initResponseDict.HasMember("configs_hash") && initResponseDict["configs_hash"].IsString() ? initResponseDict["configs_hash"].GetString() : "");
+                GAState::setAbId(initResponseDict.HasMember("ab_id") && initResponseDict["ab_id"].IsString() ? initResponseDict["ab_id"].GetString() : "");
+                GAState::setAbVariantId(initResponseDict.HasMember("ab_variant_id") && initResponseDict["ab_variant_id"].IsString() ? initResponseDict["ab_variant_id"].GetString() : "");
+
                 rapidjson::StringBuffer buffer;
                 {
                     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                     initResponseDict.Accept(writer);
                 }
+
+                logging::GALogger::d("sdkConfig: %s", buffer.GetString());
+                logging::GALogger::d("configs_hash: %s, HasMember=%d, IsString=%d, string=%s", i->_configsHash, initResponseDict.HasMember("configs_hash"), initResponseDict["configs_hash"].IsString(), initResponseDict["configs_hash"].GetString());
+                logging::GALogger::d("ab_id: %s, HasMember=%d, IsString=%d, string=%s", i->_abId, initResponseDict.HasMember("ab_id"), initResponseDict["ab_id"].IsString(), initResponseDict["ab_id"].GetString());
+                logging::GALogger::d("ab_variant_id: %s, HasMember=%d, IsString=%d, string=%s", i->_abVariantId, initResponseDict.HasMember("ab_variant_id"), initResponseDict["ab_variant_id"].IsString(), initResponseDict["ab_variant_id"].GetString());
 
                 // insert new config in sql lite cross session storage
                 store::GAStore::setState("sdk_config_cached", buffer.GetString());
@@ -1404,9 +1415,9 @@ namespace gameanalytics
             i->_configurations.SetObject();
             rapidjson::Document::AllocatorType& allocator = i->_configurations.GetAllocator();
 
-            if(sdkConfig.HasMember("configurations") && sdkConfig["configurations"].IsArray())
+            if(sdkConfig.HasMember("configs") && sdkConfig["configs"].IsArray())
             {
-                rapidjson::Value& configurations = sdkConfig["configurations"];
+                rapidjson::Value& configurations = sdkConfig["configs"];
 
                 for (rapidjson::Value::ConstValueIterator itr = configurations.Begin(); itr != configurations.End(); ++itr)
                 {
@@ -1415,8 +1426,8 @@ namespace gameanalytics
                     if(!configuration.IsNull())
                     {
                         const char* key = (configuration.HasMember("key") && configuration["key"].IsString()) ? configuration["key"].GetString() : "";
-                        int64_t start_ts = (configuration.HasMember("start") && configuration["start"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MIN;
-                        int64_t end_ts = (configuration.HasMember("end") && configuration["end"].IsInt64()) ? configuration["start"].GetInt64() : LONG_MAX;
+                        int64_t start_ts = (configuration.HasMember("start_ts") && configuration["start_ts"].IsInt64()) ? configuration["start_ts"].GetInt64() : LONG_MIN;
+                        int64_t end_ts = (configuration.HasMember("end_ts") && configuration["end_ts"].IsInt64()) ? configuration["end_ts"].GetInt64() : LONG_MAX;
                         int64_t client_ts_adjusted = getClientTsAdjusted();
 
                         if(strlen(key) > 0 && configuration.HasMember("value") && client_ts_adjusted > start_ts && client_ts_adjusted < end_ts)

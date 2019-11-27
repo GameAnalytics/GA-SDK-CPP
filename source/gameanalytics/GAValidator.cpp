@@ -399,7 +399,7 @@ namespace gameanalytics
         // validate wrapper version, build, engine version, store
         bool GAValidator::validateSdkWrapperVersion(const char* wrapperVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unity|unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -417,7 +417,7 @@ namespace gameanalytics
 
         bool GAValidator::validateEngineVersion(const char* engineVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unity|unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -657,6 +657,11 @@ namespace gameanalytics
                 {
                     rapidjson::Value configurations = rapidjson::Value(initResponse["configs"], allocator);
                     out.AddMember("configs", configurations, allocator);
+                }
+                if (initResponse.HasMember("configs_hash") && initResponse["configs_hash"].IsString())
+                {
+                    rapidjson::Value configs_hash = rapidjson::Value(initResponse["configs_hash"].GetString(), allocator);
+                    out.AddMember("configs_hash", configs_hash, allocator);
                 }
                 if (initResponse.HasMember("ab_id") && initResponse["ab_id"].IsString())
                 {

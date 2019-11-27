@@ -109,7 +109,7 @@ namespace gameanalytics
 
             // Generate URL
             char url[513] = "";
-            snprintf(url, sizeof(url), "%s/%s?game_key=%s&interval_seconds=0&configs_hash=%s", remoteConfigsBaseUrl, gameKey, initializeUrlPath, configsHash);
+            snprintf(url, sizeof(url), "%s/%s?game_key=%s&interval_seconds=0&configs_hash=%s", remoteConfigsBaseUrl, initializeUrlPath, gameKey, configsHash);
 
             logging::GALogger::d("Sending 'init' URL: %s", url);
 
@@ -132,7 +132,7 @@ namespace gameanalytics
                 return;
             }
 
-            std::vector<char> payloadData = createPayloadData(JSONstring, false);
+            std::vector<char> payloadData = createPayloadData(JSONstring, useGzip);
 
             CURL *curl;
             CURLcode res;
@@ -591,6 +591,10 @@ namespace gameanalytics
             if (statusCode == 200)
             {
                 return Ok;
+            }
+            if (statusCode == 201)
+            {
+                return Created;
             }
 
             // 401 can return 0 status

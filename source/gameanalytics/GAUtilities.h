@@ -12,6 +12,8 @@
 #include <string>
 #include <locale>
 #include <codecvt>
+#include <exception>
+#include "GALogger.h"
 #endif
 
 namespace gameanalytics
@@ -43,12 +45,28 @@ namespace gameanalytics
 #if USE_UWP
             inline static std::string ws2s(const std::wstring wstr)
             {
-                return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+                try
+                {
+                    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+                }
+                catch(const std::exception& e)
+                {
+                    logging::GALogger::d("Error with ws2s: %S", wstr.c_str());
+                    return "";
+                }
             }
 
             inline static std::wstring s2ws(const std::string str)
             {
-                return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+                try
+                {
+                    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+                }
+                catch(const std::exception& e)
+                {
+                    logging::GALogger::d("Error with s2ws: %s", str.c_str());
+                    return L"";
+                }
             }
 #endif
         private:
