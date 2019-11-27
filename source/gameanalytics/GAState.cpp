@@ -1164,11 +1164,6 @@ namespace gameanalytics
                     initResponseDict.Accept(writer);
                 }
 
-                logging::GALogger::d("sdkConfig: %s", buffer.GetString());
-                logging::GALogger::d("configs_hash: %s, HasMember=%d, IsString=%d, string=%s", i->_configsHash, initResponseDict.HasMember("configs_hash"), initResponseDict["configs_hash"].IsString(), initResponseDict["configs_hash"].GetString());
-                logging::GALogger::d("ab_id: %s, HasMember=%d, IsString=%d, string=%s", i->_abId, initResponseDict.HasMember("ab_id"), initResponseDict["ab_id"].IsString(), initResponseDict["ab_id"].GetString());
-                logging::GALogger::d("ab_variant_id: %s, HasMember=%d, IsString=%d, string=%s", i->_abVariantId, initResponseDict.HasMember("ab_variant_id"), initResponseDict["ab_variant_id"].IsString(), initResponseDict["ab_variant_id"].GetString());
-
                 // insert new config in sql lite cross session storage
                 store::GAStore::setState("sdk_config_cached", buffer.GetString());
 
