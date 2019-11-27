@@ -872,6 +872,18 @@ namespace gameanalytics
                 out.AddMember("platform", v.Move(), allocator);
             }
 
+            // Build
+            if (strlen(getBuild()) > 0)
+            {
+                rapidjson::Value v(getBuild(), allocator);
+                out.AddMember("build", v.Move(), allocator);
+            }
+            else
+            {
+                rapidjson::Value v;
+                out.AddMember("build", v.Move(), allocator);
+            }
+
             // Random salt
             out.AddMember("random_salt", getSessionNum(), allocator);
         }
