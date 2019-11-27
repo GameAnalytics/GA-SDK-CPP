@@ -404,23 +404,30 @@ namespace gameanalytics
             message->Method = Windows::Web::Http::HttpMethod::Post;
 
             // create authorization hash
-            std::string key = state::GAState::getGameSecret();
-            char a[257];
-            utilities::GAUtilities::hmacWithKey(key.c_str(), payloadData, a);
-            auto authorization = ref new Platform::String(utilities::GAUtilities::s2ws(a).c_str());
+            auto data = ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str());
+            auto key = ref new Platform::String(utilities::GAUtilities::s2ws(state::GAState::getGameSecret()).c_str());
+            auto input = Windows::Security::Cryptography::CryptographicBuffer::ConvertStringToBinary(data,
+                Windows::Security::Cryptography::BinaryStringEncoding::Utf8);
+            auto keyBuffer = Windows::Security::Cryptography::CryptographicBuffer::ConvertStringToBinary(key,
+                Windows::Security::Cryptography::BinaryStringEncoding::Utf8);
+            auto macProvider = Windows::Security::Cryptography::Core::MacAlgorithmProvider::OpenAlgorithm(Windows::Security::Cryptography::Core::MacAlgorithmNames::HmacSha256);
+            auto signatureKey = macProvider->CreateKey(keyBuffer);
+            auto hashed = Windows::Security::Cryptography::Core::CryptographicEngine::Sign(signatureKey, input);
+            auto authorization = Windows::Security::Cryptography::CryptographicBuffer::EncodeToBase64String(hashed);
 
             message->Headers->TryAppendWithoutValidation(L"Authorization", authorization);
 
+            message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8);
+
             if (gzip)
             {
-                Windows::Storage::Streams::InMemoryRandomAccessStream^ stream = createStream(std::string(payloadData.data())).get();
-                message->Content = ref new Windows::Web::Http::HttpStreamContent(stream);
+                //Windows::Storage::Streams::InMemoryRandomAccessStream^ stream = createStream(std::string(payloadData.data())).get();
+                //message->Content = ref new Windows::Web::Http::HttpStreamContent(stream);
                 message->Content->Headers->ContentEncoding->Append(ref new Windows::Web::Http::Headers::HttpContentCodingHeaderValue(ref new Platform::String(L"gzip")));
             }
             else
             {
-                message->Content = ref new Windows::Web::Http::HttpStringContent(ref new Platform::String(utilities::GAUtilities::s2ws(payloadData.data()).c_str()), Windows::Storage::Streams::UnicodeEncoding::Utf8);
-                message->Content->Headers->ContentEncoding->Clear();
+
             }
             message->Content->Headers->ContentType = ref new Windows::Web::Http::Headers::HttpMediaTypeHeaderValue(L"application/json");
 
