@@ -852,6 +852,10 @@ namespace gameanalytics
             rapidjson::Document::AllocatorType& allocator = out.GetAllocator();
 
             {
+                if(strlen(getIdentifier()) == 0)
+                {
+                    cacheIdentifier();
+                }
                 rapidjson::Value v(getIdentifier(), allocator);
                 out.AddMember("user_id", v.Move(), allocator);
             }

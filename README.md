@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.0.3**
+* A/B testing fixes
+
 **3.0.2**
 * remote configs fixes
 
