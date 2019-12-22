@@ -44,7 +44,7 @@ namespace gameanalytics
             // log debug is in dev mode
             debugEnabled = true;
 #else
-            debugEnabled = false;
+            debugEnabled = true;
 #endif
 
 #if USE_UWP

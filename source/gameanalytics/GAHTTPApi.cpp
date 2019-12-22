@@ -179,7 +179,7 @@ namespace gameanalytics
             curl_easy_cleanup(curl);
 
             // process the response
-            logging::GALogger::d("init request content: %s", s.ptr);
+            logging::GALogger::d("init request content: %s, JSONString: %s", s.ptr, JSONstring);
 
             rapidjson::Document requestJsonDict;
             rapidjson::ParseResult ok = requestJsonDict.Parse(s.ptr);
