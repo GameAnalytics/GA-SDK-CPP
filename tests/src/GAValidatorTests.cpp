@@ -524,16 +524,6 @@ TEST(GAValidator, testValidateResourceCurrencies)
 
  }
 
- TEST(GAValidator, testValidateBirthyear)
- {
-     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateBirthyear(1982));
-     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateBirthyear(9999));
-     ASSERT_TRUE(gameanalytics::validators::GAValidator::validateBirthyear(0));
-
-     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateBirthyear(10000));
-     ASSERT_FALSE(gameanalytics::validators::GAValidator::validateBirthyear(-1));
- }
-
  TEST(GAValidator, testValidateClientTs)
  {
      ASSERT_TRUE(gameanalytics::validators::GAValidator::validateClientTs(gameanalytics::utilities::GAUtilities::timeIntervalSince1970()));
