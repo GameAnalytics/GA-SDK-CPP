@@ -796,56 +796,6 @@ namespace gameanalytics
         });
     }
 
-    void GameAnalytics::setFacebookId(const char* facebookId_)
-    {
-        if(_endThread)
-        {
-            return;
-        }
-
-        std::array<char, 65> facebookId = {'\0'};
-        snprintf(facebookId.data(), facebookId.size(), "%s", facebookId_ ? facebookId_ : "");
-        threading::GAThreading::performTaskOnGAThread([facebookId]()
-        {
-            if (validators::GAValidator::validateFacebookId(facebookId.data()))
-            {
-                state::GAState::setFacebookId(facebookId.data());
-            }
-        });
-    }
-
-    void GameAnalytics::setGender(EGAGender gender)
-    {
-        if(_endThread)
-        {
-            return;
-        }
-
-        threading::GAThreading::performTaskOnGAThread([gender]()
-        {
-            if (validators::GAValidator::validateGender(gender))
-            {
-                state::GAState::setGender(gender);
-            }
-        });
-    }
-
-    void GameAnalytics::setBirthYear(int birthYear)
-    {
-        if(_endThread)
-        {
-            return;
-        }
-
-        threading::GAThreading::performTaskOnGAThread([birthYear]()
-        {
-            if (validators::GAValidator::validateBirthyear(birthYear))
-            {
-                state::GAState::setBirthYear(birthYear);
-            }
-        });
-    }
-
     std::vector<char> GameAnalytics::getRemoteConfigsValueAsString(const char* key)
     {
         return getRemoteConfigsValueAsString(key, "");

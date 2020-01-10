@@ -61,9 +61,6 @@ EXPORT void setEnabledEventSubmission(double flag);
 EXPORT void setCustomDimension01(const char *dimension01);
 EXPORT void setCustomDimension02(const char *dimension02);
 EXPORT void setCustomDimension03(const char *dimension03);
-EXPORT void setFacebookId(const char *facebookId);
-EXPORT void setGender(double gender);
-EXPORT void setBirthYear(double birthYear);
 
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();

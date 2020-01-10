@@ -205,22 +205,6 @@ void setCustomDimension03(const char *dimension03)
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
 }
 
-void setFacebookId(const char *facebookId)
-{
-    gameanalytics::GameAnalytics::setFacebookId(facebookId);
-}
-
-void setGender(double gender)
-{
-    int genderInt = (int)gender;
-    gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
-}
-
-void setBirthYear(double birthYear)
-{
-    gameanalytics::GameAnalytics::setBirthYear((int)birthYear);
-}
-
 void gameAnalyticsStartSession()
 {
     gameanalytics::GameAnalytics::startSession();

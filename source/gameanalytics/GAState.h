@@ -54,9 +54,6 @@ namespace gameanalytics
             static void setCustomDimension01(const char* dimension);
             static void setCustomDimension02(const char* dimension);
             static void setCustomDimension03(const char* dimension);
-            static void setFacebookId(const char* facebookId);
-            static void setGender(EGAGender gender);
-            static void setBirthYear(int birthYear);
             static void incrementSessionNum();
             static void incrementTransactionNum();
             static void incrementProgressionTries(const char* progression);
@@ -105,9 +102,6 @@ namespace gameanalytics
             static void startNewSession();
             static void validateAndFixCurrentDimensions();
             static const char* getBuild();
-            static const char* getFacebookId();
-            static const char* getGender();
-            static int getBirthYear();
             static int64_t calculateServerTimeOffset(int64_t serverTs);
             static void populateConfigurations(rapidjson::Value& sdkConfig);
             static void setConfigsHash(const char* configsHash);
@@ -146,9 +140,6 @@ namespace gameanalytics
             StringVector _availableResourceCurrencies;
             StringVector _availableResourceItemTypes;
             char _build[65] = {'\0'};
-            char _facebookId[65] = {'\0'};
-            char _gender[9] = {'\0'};
-            int _birthYear = 0;
             bool _initAuthorized = false;
             bool _enabled = false;
             int64_t _clientServerTimeOffset = 0;

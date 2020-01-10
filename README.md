@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.0.4**
+* removed gender, birth year and facebook methods
+
 **3.0.3**
 * A/B testing fixes
 

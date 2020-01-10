@@ -363,64 +363,6 @@ namespace gameanalytics
             logging::GALogger::i("Set custom03 dimension value: %s", dimension);
         }
 
-        void GAState::setFacebookId(const char* facebookId)
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return;
-            }
-
-            snprintf(i->_facebookId, sizeof(i->_facebookId), "%s", facebookId);
-            if (store::GAStore::getTableReady())
-            {
-                store::GAStore::setState("facebook_id", facebookId);
-            }
-            logging::GALogger::i("Set facebook id: %s", facebookId);
-        }
-
-        void GAState::setGender(EGAGender gender)
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return;
-            }
-
-            switch (gender) {
-            case Male:
-                snprintf(i->_gender, sizeof(i->_gender), "%s", "male");
-                break;
-            case Female:
-                snprintf(i->_gender, sizeof(i->_gender), "%s", "female");
-                break;
-            }
-
-            if (store::GAStore::getTableReady())
-            {
-                store::GAStore::setState("gender", getInstance()->_gender);
-            }
-            logging::GALogger::i("Set gender: %s", getInstance()->_gender);
-        }
-
-        void GAState::setBirthYear(int birthYear)
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return;
-            }
-
-            i->_birthYear = birthYear;
-            if (store::GAStore::getTableReady())
-            {
-                char s[11] = "";
-                snprintf(s, sizeof(s), "%d", birthYear);
-                store::GAStore::setState("birth_year", s);
-            }
-            logging::GALogger::i("Set birth year: %d", birthYear);
-        }
-
         void GAState::incrementSessionNum()
         {
             GAState* i = getInstance();
@@ -768,26 +710,6 @@ namespace gameanalytics
                 rapidjson::Value v(getBuild(), allocator);
                 out.AddMember("build", v.Move(), allocator);
             }
-
-            // ---- OPTIONAL cross-session ---- //
-
-            // facebook id (optional)
-            if (strlen(getFacebookId()) > 0)
-            {
-                rapidjson::Value v(getFacebookId(), allocator);
-                out.AddMember("facebook_id", v.Move(), allocator);
-            }
-            // gender (optional)
-            if (strlen(getGender()) > 0)
-            {
-                rapidjson::Value v(getGender(), allocator);
-                out.AddMember("gender", v.Move(), allocator);
-            }
-            // birth_year (optional)
-            if (getBirthYear() != 0)
-            {
-                out.AddMember("birth_year", getBirthYear(), allocator);
-            }
         }
 
         void GAState::getSdkErrorEventAnnotations(rapidjson::Document& out)
@@ -971,48 +893,6 @@ namespace gameanalytics
             i->_sessionNum = (int)strtol(state_dict.HasMember("session_num") ? state_dict["session_num"].GetString() : "0", NULL, 10);
 
             i->_transactionNum = (int)strtol(state_dict.HasMember("transaction_num") ? state_dict["transaction_num"].GetString() : "0", NULL, 10);
-
-            // restore cross session user values
-            if (strlen(i->_facebookId) > 0)
-            {
-                store::GAStore::setState("facebook_id", i->_facebookId);
-            }
-            else
-            {
-                snprintf(i->_facebookId, sizeof(i->_facebookId), "%s", state_dict.HasMember("facebook_id") ? state_dict["facebook_id"].GetString() : "");
-                if (strlen(i->_facebookId) > 0)
-                {
-                    logging::GALogger::d("facebookid found in DB: %s", i->_facebookId);
-                }
-            }
-
-            if (strlen(i->_gender) > 0)
-            {
-                store::GAStore::setState("gender", i->_gender);
-            }
-            else
-            {
-                snprintf(i->_gender, sizeof(i->_gender), "%s", state_dict.HasMember("gender") ? state_dict["gender"].GetString() : "");
-                if (strlen(i->_gender) > 0)
-                {
-                    logging::GALogger::d("gender found in DB: %s", i->_gender);
-                }
-            }
-
-            if (i->_birthYear != 0)
-            {
-                char s[11] = "";
-                snprintf(s, sizeof(s), "%d", i->_birthYear);
-                store::GAStore::setState("birth_year", s);
-            }
-            else
-            {
-                i->_birthYear = (int)strtol(state_dict.HasMember("birth_year") ? state_dict["birth_year"].GetString() : "0", NULL, 10);
-                if (i->_birthYear != 0)
-                {
-                    logging::GALogger::d("birthYear found in DB: %d", i->_birthYear);
-                }
-            }
 
             // restore dimension settings
             if (strlen(i->_currentCustomDimension01) > 0)
@@ -1582,36 +1462,6 @@ namespace gameanalytics
                 return NULL;
             }
             return i->_build;
-        }
-
-        const char* GAState::getFacebookId()
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return NULL;
-            }
-            return i->_facebookId;
-        }
-
-        const char* GAState::getGender()
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return NULL;
-            }
-            return i->_gender;
-        }
-
-        int GAState::getBirthYear()
-        {
-            GAState* i = getInstance();
-            if(!i)
-            {
-                return 0;
-            }
-            return i->_birthYear;
         }
 
         int64_t GAState::calculateServerTimeOffset(int64_t serverTs)
