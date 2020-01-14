@@ -24,8 +24,8 @@ add_definitions("-DGUID_CFUUID")
 set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 
 target_link_libraries(${PROJECT_NAME}
-    ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
-    ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
+    ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/osx/libcrypto.a
+    ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/osx/libssl.a
     ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
     "-framework CoreFoundation"
     "-framework Foundation"
@@ -52,7 +52,7 @@ target_include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/../source/gameanalytics/"
     "${DEPENDENCIES_DIR}/rapidjson/"
     "${DEPENDENCIES_DIR}/zf_log"
-    "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx/"
+    "${DEPENDENCIES_DIR}/openssl/1.1.1d/include/"
 )
 
 # include gmock and GameAnalytics library
