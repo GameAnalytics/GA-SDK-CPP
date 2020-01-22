@@ -61,9 +61,6 @@ EXPORT void setEnabledEventSubmission(double flag);
 EXPORT void setCustomDimension01(const char *dimension01);
 EXPORT void setCustomDimension02(const char *dimension02);
 EXPORT void setCustomDimension03(const char *dimension03);
-EXPORT void setFacebookId(const char *facebookId);
-EXPORT void setGender(double gender);
-EXPORT void setBirthYear(double birthYear);
 
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
@@ -116,8 +113,6 @@ EXPORT void addProgressionEventWithScoreUWP(double progressionStatus, const wcha
 EXPORT void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/);
 EXPORT void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/);
 EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/);
-
-EXPORT void setFacebookIdUWP(const wchar_t *facebookId);
 
 EXPORT void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
 EXPORT void getRemoteConfigsContentAsStringUWP(wchar_t *out);

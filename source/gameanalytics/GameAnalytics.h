@@ -8,6 +8,7 @@
 #if GA_SHARED_LIB && defined(_WIN32)
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "crypt32.lib")
 #endif
 
 #include <vector>
@@ -72,12 +73,6 @@ namespace gameanalytics
         Warning = 3,
         Error = 4,
         Critical = 5
-    };
-
-    enum EGAGender
-    {
-        Male = 1,
-        Female = 2
     };
 
     class IRemoteConfigsListener
@@ -166,9 +161,6 @@ namespace gameanalytics
         static void setCustomDimension01(const char* dimension01);
         static void setCustomDimension02(const char* dimension02);
         static void setCustomDimension03(const char* dimension03);
-        static void setFacebookId(const char* facebookId);
-        static void setGender(EGAGender gender);
-        static void setBirthYear(int birthYear);
 
         static void startSession();
         static void endSession();
@@ -215,7 +207,6 @@ namespace gameanalytics
         static void setCustomDimension01(const std::wstring& dimension01);
         static void setCustomDimension02(const std::wstring& dimension02);
         static void setCustomDimension03(const std::wstring& dimension03);
-        static void setFacebookId(const std::wstring& facebookId);
 #endif
 
      private:

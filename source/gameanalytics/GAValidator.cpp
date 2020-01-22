@@ -574,39 +574,6 @@ namespace gameanalytics
             return true;
         }
 
-        bool GAValidator::validateFacebookId(const char* facebookId)
-        {
-            if (!GAValidator::validateString(facebookId))
-            {
-                logging::GALogger::w("Validation fail - facebook id: id cannot be (null), empty or above 64 characters.");
-                return false;
-            }
-            return true;
-        }
-
-        bool GAValidator::validateGender(EGAGender gender)
-        {
-            switch (gender) {
-            case Male:
-                return true;
-            case Female:
-                return true;
-            }
-
-            logging::GALogger::w("Validation fail - gender: Has to be 'male' or 'female'.");
-            return false;
-        }
-
-        bool GAValidator::validateBirthyear(int64_t birthYear)
-        {
-            if (birthYear < 0 || birthYear > 9999)
-            {
-                logging::GALogger::w("Validation fail - birthYear: Cannot be (null) or invalid range.");
-                return false;
-            }
-            return true;
-        }
-
         bool GAValidator::validateClientTs(int64_t clientTs)
         {
             // server regex: ^([0-9]{10,11})$

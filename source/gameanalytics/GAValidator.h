@@ -98,10 +98,6 @@ namespace gameanalytics
                 bool allowNoValues,
                 const char* arrayTag
                 );
-            // facebook id, gender, birthyear
-            static bool validateFacebookId(const char* facebookId);
-            static bool validateGender(EGAGender gender);
-            static bool validateBirthyear(int64_t birthYear);
             static bool validateClientTs(int64_t clientTs);
 
             static bool validateUserId(const char* uId);

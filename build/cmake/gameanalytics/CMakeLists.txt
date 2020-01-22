@@ -291,26 +291,26 @@ ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 
 if("${OSX_STATIC}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 endif("${OSX_STATIC}")
 
 if("${LINUX_ALL}")
     include_directories(
         "${DEPENDENCIES_DIR}/ooid"
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
     set_target_properties(GameAnalytics PROPERTIES COMPILE_FLAGS "${TARGET_ARCH}" LINK_FLAGS "${TARGET_ARCH}")
 endif("${LINUX_ALL}")
 
 if("${OSX_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libcrypto.a
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/osx/libssl.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/osx/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/osx/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/osx/libcurl.a
         "-framework CoreFoundation"
         "-framework Foundation"
@@ -320,54 +320,54 @@ endif("${OSX_SHARED}")
 
 if("${LINUX_X64_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x64/libcrypto.a
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x64/libssl.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/linux_x64/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/linux_x64/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/linux_x64/libcurl.a
     )
 endif("${LINUX_X64_SHARED}")
 
 if("${LINUX_X86_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include_osx"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x86/libcrypto.a
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/linux_x86/libssl.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/linux_x86/libcrypto.a
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/linux_x86/libssl.a
         ${DEPENDENCIES_DIR}/curl/lib/linux_x86/libcurl.a
     )
 endif("${LINUX_X86_SHARED}")
 
 if("${WIN_STATIC}" OR "${UWP_ALL}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 endif("${WIN_STATIC}" OR "${UWP_ALL}")
 
 if("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}" OR "${WIN32_VC141_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/libeay32.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc140_x86_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win32/vc140_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win32/vc140_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc140_x86_release/libcurl.lib
     )
 endif("${WIN32_VC140_SHARED}" OR "${WIN32_VC140_SHARED_NO_WMI}" OR "${WIN32_VC141_SHARED}")
 
 if("${WIN32_VC120_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/libeay32.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win32/vc120_x86_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win32/vc120_x86_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win32/vc120_x86_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win32/vc120_x86_release/libcurl.lib
     )
 endif("${WIN32_VC120_SHARED}")
@@ -378,24 +378,24 @@ endif("${UWP_ALL}")
 
 if("${WIN64_VC140_SHARED}" OR "${WIN64_VC141_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/libeay32.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc140_x64_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win64/vc140_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win64/vc140_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc140_x64_release/libcurl.lib
     )
 endif("${WIN64_VC140_SHARED}" OR "${WIN64_VC141_SHARED}")
 
 if("${WIN64_VC120_SHARED}")
     include_directories(
-        "${DEPENDENCIES_DIR}/openssl/1.0.2h/include"
+        "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"
     )
 
     target_link_libraries(GameAnalytics
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/libeay32.lib
-        ${DEPENDENCIES_DIR}/openssl/1.0.2h/libs/win64/vc120_x64_release/ssleay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win64/vc120_x64_release/libeay32.lib
+        ${DEPENDENCIES_DIR}/openssl/1.1.1d/libs/win64/vc120_x64_release/ssleay32.lib
         ${DEPENDENCIES_DIR}/curl/lib/win64/vc120_x64_release/libcurl.lib
     )
 endif("${WIN64_VC120_SHARED}")

@@ -205,22 +205,6 @@ void setCustomDimension03(const char *dimension03)
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
 }
 
-void setFacebookId(const char *facebookId)
-{
-    gameanalytics::GameAnalytics::setFacebookId(facebookId);
-}
-
-void setGender(double gender)
-{
-    int genderInt = (int)gender;
-    gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
-}
-
-void setBirthYear(double birthYear)
-{
-    gameanalytics::GameAnalytics::setBirthYear((int)birthYear);
-}
-
 void gameAnalyticsStartSession()
 {
     gameanalytics::GameAnalytics::startSession();
@@ -406,11 +390,6 @@ void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fie
 {
     int severityInt = (int)severity;
     gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
-}
-
-void setFacebookIdUWP(const wchar_t *facebookId)
-{
-    gameanalytics::GameAnalytics::setFacebookId(facebookId);
 }
 
 void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out)
