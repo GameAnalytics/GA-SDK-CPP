@@ -4,7 +4,7 @@ import sys
 import re
 
 vs_version = "140"
-compile_flags = "-no-asm -no-shared"
+compile_flags = "-no-asm -no-shared -no-capieng"
 debug = False
 
 openssl_32_flag = "VC-WIN32"
