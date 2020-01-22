@@ -207,7 +207,6 @@ namespace gameanalytics
         static void setCustomDimension01(const std::wstring& dimension01);
         static void setCustomDimension02(const std::wstring& dimension02);
         static void setCustomDimension03(const std::wstring& dimension03);
-        static void setFacebookId(const std::wstring& facebookId);
 #endif
 
      private:

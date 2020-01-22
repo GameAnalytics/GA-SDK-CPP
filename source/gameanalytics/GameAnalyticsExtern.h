@@ -114,8 +114,6 @@ EXPORT void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/);
 EXPORT void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/);
 EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/);
 
-EXPORT void setFacebookIdUWP(const wchar_t *facebookId);
-
 EXPORT void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
 EXPORT void getRemoteConfigsContentAsStringUWP(wchar_t *out);
 #endif

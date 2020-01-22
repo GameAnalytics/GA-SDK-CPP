@@ -392,11 +392,6 @@ void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fie
     gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
 }
 
-void setFacebookIdUWP(const wchar_t *facebookId)
-{
-    gameanalytics::GameAnalytics::setFacebookId(facebookId);
-}
-
 void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out)
 {
     std::string returnValue = gameanalytics::GameAnalytics::getRemoteConfigsValueAsString(gameanalytics::utilities::GAUtilities::ws2s(key).c_str(), gameanalytics::utilities::GAUtilities::ws2s(defaultValue).c_str()).data();

@@ -1115,11 +1115,6 @@ namespace gameanalytics
     {
         setCustomDimension03(utilities::GAUtilities::ws2s(dimension03).c_str());
     }
-
-    void GameAnalytics::setFacebookId(const std::wstring& facebookId)
-    {
-        setFacebookId(utilities::GAUtilities::ws2s(facebookId).c_str());
-    }
 #endif
 
     // --------------PRIVATE HELPERS -------------- //

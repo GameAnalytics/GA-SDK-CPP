@@ -30,6 +30,7 @@ Changelog
 ---------
 **3.0.4**
 * removed gender, birth year and facebook methods
+* updated curl and openssl libraries
 
 **3.0.3**
 * A/B testing fixes
