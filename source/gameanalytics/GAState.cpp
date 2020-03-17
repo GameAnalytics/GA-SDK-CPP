@@ -810,6 +810,8 @@ namespace gameanalytics
                 out.AddMember("build", v.Move(), allocator);
             }
 
+            out.AddMember("session_num", getSessionNum(), allocator);
+
             // Random salt
             out.AddMember("random_salt", getSessionNum(), allocator);
         }
