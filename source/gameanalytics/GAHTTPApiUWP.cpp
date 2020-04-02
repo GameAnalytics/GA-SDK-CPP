@@ -289,7 +289,7 @@ namespace gameanalytics
             });
         }
 
-        void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorType type)
+        void GAHTTPApi::sendSdkErrorEvent(EGASdkErrorCategory category, EGASdkErrorArea area, EGASdkErrorAction action, EGASdkErrorParameter parameter, std::string reason, std::string gameKey, std::string secretKey)
         {
             std::string gameKey = state::GAState::getGameKey();
             std::string secretKey = state::GAState::getGameSecret();

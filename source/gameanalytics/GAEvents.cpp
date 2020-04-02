@@ -188,14 +188,16 @@ namespace gameanalytics
             }
 
             // Validate event params
-            if (!validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId))
+            validators::ValidationResult validationResult;
+            validators::GAValidator::validateBusinessEvent(currency, amount, cartType, itemType, itemId, validationResult);
+            if (!validationResult.result)
             {
-                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
-                if(!http)
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
                 {
                     return;
                 }
-                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                httpInstance->sendSdkErrorEvent(validationResult.category, validationResult.area, validationResult.action, validationResult.parameter, validationResult.reason, state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
@@ -265,14 +267,16 @@ namespace gameanalytics
             }
 
             // Validate event params
-            if (!validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId))
+            validators::ValidationResult validationResult;
+            validators::GAValidator::validateResourceEvent(flowType, currency, amount, itemType, itemId, validationResult);
+            if (!validationResult.result)
             {
-                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
-                if(!http)
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
                 {
                     return;
                 }
-                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                httpInstance->sendSdkErrorEvent(validationResult.category, validationResult.area, validationResult.action, validationResult.parameter, validationResult.reason, state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
@@ -334,14 +338,16 @@ namespace gameanalytics
             progressionStatusString(progressionStatus, statusString);
 
             // Validate event params
-            if (!validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03))
+            validators::ValidationResult validationResult;
+            validators::GAValidator::validateProgressionEvent(progressionStatus, progression01, progression02, progression03, validationResult);
+            if (!validationResult.result)
             {
-                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
-                if(!http)
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
                 {
                     return;
                 }
-                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                httpInstance->sendSdkErrorEvent(validationResult.category, validationResult.area, validationResult.action, validationResult.parameter, validationResult.reason, state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
@@ -438,14 +444,16 @@ namespace gameanalytics
             }
 
             // Validate
-            if (!validators::GAValidator::validateDesignEvent(eventId, value))
+            validators::ValidationResult validationResult;
+            validators::GAValidator::validateDesignEvent(eventId, validationResult);
+            if (!validationResult.result)
             {
                 http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
                 if(!httpInstance)
                 {
                     return;
                 }
-                httpInstance->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                httpInstance->sendSdkErrorEvent(validationResult.category, validationResult.area, validationResult.action, validationResult.parameter, validationResult.reason, state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
@@ -501,14 +509,16 @@ namespace gameanalytics
             errorSeverityString(severity, severityString);
 
             // Validate
-            if (!validators::GAValidator::validateErrorEvent(severity, message))
+            validators::ValidationResult validationResult;
+            validators::GAValidator::validateErrorEvent(severity, message, validationResult);
+            if (!validationResult.result)
             {
-                http::GAHTTPApi* http = http::GAHTTPApi::getInstance();
-                if(!http)
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
                 {
                     return;
                 }
-                http->sendSdkErrorEvent(http::EGASdkErrorType::Rejected);
+                httpInstance->sendSdkErrorEvent(validationResult.category, validationResult.area, validationResult.action, validationResult.parameter, validationResult.reason, state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
