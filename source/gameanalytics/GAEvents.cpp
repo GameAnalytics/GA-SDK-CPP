@@ -889,6 +889,12 @@ namespace gameanalytics
             if (store::GAStore::isDbTooLargeForEvents() && !utilities::GAUtilities::stringMatch(eventData["category"].GetString(), "^(user|session_end|business)$"))
             {
                 logging::GALogger::w("Database too large. Event has been blocked.");
+                http::GAHTTPApi* httpInstance = http::GAHTTPApi::getInstance();
+                if(!httpInstance)
+                {
+                    return;
+                }
+                httpInstance->sendSdkErrorEvent(http::EGASdkErrorCategory::Database, http::EGASdkErrorArea::AddEventsToStore, http::EGASdkErrorAction::DatabaseTooLarge, (http::EGASdkErrorParameter)0, "", state::GAState::getGameKey(), state::GAState::getGameSecret());
                 return;
             }
 
