@@ -116,6 +116,9 @@ EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const ch
 
 EXPORT void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
 EXPORT void getRemoteConfigsContentAsStringUWP(wchar_t *out);
+
+EXPORT void getABTestingIdUWP(wchar_t *out);
+EXPORT void getABTestingVariantIdUWP(wchar_t *out);
 #endif
 
 #ifdef __cplusplus

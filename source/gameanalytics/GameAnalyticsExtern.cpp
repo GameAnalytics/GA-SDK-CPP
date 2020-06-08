@@ -405,6 +405,20 @@ void getRemoteConfigsContentAsStringUWP(wchar_t *out)
     std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
     wcscpy_s(out, result.length() + 1, result.c_str());
 }
+
+void getABTestingIdUWP(wchar_t *out)
+{
+    std::string returnValue = gameanalytics::GameAnalytics::getABTestingId().data();
+    std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
+    wcscpy_s(out, result.length() + 1, result.c_str());
+}
+
+void getABTestingVariantIdUWP(wchar_t *out)
+{
+    std::string returnValue = gameanalytics::GameAnalytics::getABTestingVariantId().data();
+    std::wstring result = gameanalytics::utilities::GAUtilities::s2ws(returnValue);
+    wcscpy_s(out, result.length() + 1, result.c_str());
+}
 #endif
 
 #endif
