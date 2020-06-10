@@ -297,7 +297,7 @@ namespace gameanalytics
             }
 
             // Validate
-            if (!validators::GAValidator::validateSdkErrorEvent(gameKey, secretKey, category, area, action))
+            if (!validators::GAValidator::validateSdkErrorEvent(gameKey.c_str(), secretKey.c_str(), category, area, action))
             {
                 return;
             }
@@ -310,11 +310,39 @@ namespace gameanalytics
             json.SetObject();
             state::GAState::getSdkErrorEventAnnotations(json);
 
-            char typeString[65];
-            sdkErrorTypeToString(type, typeString);
+            char categoryString[40] = "";
+            sdkErrorCategoryString(category, categoryString);
             {
-                rapidjson::Value v(typeString, json.GetAllocator());
-                json.AddMember("type", v.Move(), json.GetAllocator());
+                rapidjson::Value v(categoryString, json.GetAllocator());
+                json.AddMember("error_category", v.Move(), json.GetAllocator());
+            }
+
+            char areaString[40] = "";
+            sdkErrorAreaString(area, areaString);
+            {
+                rapidjson::Value v(areaString, json.GetAllocator());
+                json.AddMember("error_area", v.Move(), json.GetAllocator());
+            }
+
+            char actionString[40] = "";
+            sdkErrorActionString(action, actionString);
+            {
+                rapidjson::Value v(actionString, json.GetAllocator());
+                json.AddMember("error_action", v.Move(), json.GetAllocator());
+            }
+
+            char parameterString[40] = "";
+            sdkErrorParameterString(parameter, parameterString);
+            if(strlen(parameterString) > 0)
+            {
+                rapidjson::Value v(parameterString, json.GetAllocator());
+                json.AddMember("error_parameter", v.Move(), json.GetAllocator());
+            }
+
+            if(reason.length() > 0)
+            {
+                rapidjson::Value v(reason.c_str(), json.GetAllocator());
+                json.AddMember("reason", v.Move(), json.GetAllocator());
             }
 
             rapidjson::Document eventArray;
@@ -336,7 +364,26 @@ namespace gameanalytics
 
             logging::GALogger::d("sendSdkErrorEvent json: %s", payloadJSONString.c_str());
 
-            if (countMap[type] >= MaxCount)
+            ErrorType errorType = std::make_tuple(category, area);
+
+            int64_t now = utilities::GAUtilities::timeIntervalSince1970();
+            if(timestampMap.count(errorType) == 0)
+            {
+                timestampMap[errorType] = now;
+            }
+            if(countMap.count(errorType) == 0)
+            {
+                countMap[errorType] = 0;
+            }
+
+            int64_t diff = now - timestampMap[errorType];
+            if(diff >= 3600)
+            {
+                countMap[errorType] = 0;
+                timestampMap[errorType] = now;
+            }
+
+            if(countMap[errorType] >= MaxCount)
             {
                 return;
             }
@@ -370,12 +417,13 @@ namespace gameanalytics
 
                 logging::GALogger::d("init request content : %s", body.c_str());
 
-                countMap[type] = countMap[type] + 1;
+                countMap[errorType] = countMap[errorType] + 1;
             });
         }
 
         const int GAHTTPApi::MaxCount = 10;
-        std::map<EGASdkErrorType, int> GAHTTPApi::countMap = std::map<EGASdkErrorType, int>();
+        std::map<ErrorType, int> GAHTTPApi::countMap = std::map<ErrorType, int>();
+        std::map<ErrorType, int64_t> GAHTTPApi::timestampMap = std::map<ErrorType, int64_t>();
 
         std::vector<char> GAHTTPApi::createPayloadData(const char* payload, bool gzip)
         {
