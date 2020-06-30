@@ -574,7 +574,7 @@ namespace gameanalytics
         // validate wrapper version, build, engine version, store
         bool GAValidator::validateSdkWrapperVersion(const char* wrapperVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unity|unreal|corona|cocos2d|lumberyard|air|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(wrapperVersion, "^(unity|unreal|corona|cocos2d|lumberyard|air|gamemaker|defold|godot) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
@@ -592,7 +592,7 @@ namespace gameanalytics
 
         bool GAValidator::validateEngineVersion(const char* engineVersion)
         {
-            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unity|unreal|corona|cocos2d|lumberyard|gamemaker|defold) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
+            if (!utilities::GAUtilities::stringMatch(engineVersion, "^(unity|unreal|corona|cocos2d|lumberyard|gamemaker|defold|godot) [0-9]{0,5}(\\.[0-9]{0,5}){0,2}$"))
             {
                 return false;
             }
