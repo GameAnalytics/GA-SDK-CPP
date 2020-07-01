@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.0.5**
+* added godot to version validator
+
 **3.0.4**
 * removed gender, birth year and facebook methods
 * updated curl and openssl libraries
