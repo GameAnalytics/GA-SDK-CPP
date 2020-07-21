@@ -14,47 +14,61 @@ namespace gameanalytics
 {
     namespace validators
     {
+        struct ValidationResult
+        {
+            http::EGASdkErrorCategory category;
+            http::EGASdkErrorArea area;
+            http::EGASdkErrorAction action;
+            http::EGASdkErrorParameter parameter;
+            char reason[8193] = {'\0'};
+            bool result = false;
+        };
+
         class GAValidator
         {
          public:
             // ---------- EVENTS -------------- //
 
             // user created events
-            static bool validateBusinessEvent(
+            static void validateBusinessEvent(
                 const char* currency,
                 long amount,
                 const char* cartType,
                 const char* itemType,
-                const char* itemId
+                const char* itemId,
+                ValidationResult& out
                 );
 
-            static bool validateResourceEvent(
+            static void validateResourceEvent(
                 EGAResourceFlowType flowType,
                 const char* currency,
                 double amount,
                 const char* itemType,
-                const char* itemId
+                const char* itemId,
+                ValidationResult& out
                 );
 
 
-            static bool validateProgressionEvent(
+            static void validateProgressionEvent(
                 EGAProgressionStatus progressionStatus,
                 const char* progression01,
                 const char* progression02,
-                const char* progression03
+                const char* progression03,
+                ValidationResult& out
                 );
 
-            static bool validateDesignEvent(
+            static void validateDesignEvent(
                 const char* eventId,
-                double value
+                ValidationResult& out
                 );
 
-            static bool validateErrorEvent(
+            static void validateErrorEvent(
                 EGAErrorSeverity severity,
-                const char* message
+                const char* message,
+                ValidationResult& out
                 );
 
-            static bool validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorType type);
+            static bool validateSdkErrorEvent(const char* gameKey, const char* gameSecret, http::EGASdkErrorCategory category, http::EGASdkErrorArea area, http::EGASdkErrorAction action);
 
 
             // -------------------- HELPERS --------------------- //

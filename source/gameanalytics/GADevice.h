@@ -16,20 +16,21 @@ namespace gameanalytics
         class GADevice
         {
         public:
-        	static void setSdkGameEngineVersion(const char* sdkGameEngineVersion);
-        	static const char* getGameEngineVersion();
-        	static void setGameEngineVersion(const char* gameEngineVersion);
+            static void disableDeviceInfo();
+            static void setSdkGameEngineVersion(const char* sdkGameEngineVersion);
+            static const char* getGameEngineVersion();
+            static void setGameEngineVersion(const char* gameEngineVersion);
             static void setConnectionType(const char* connectionType);
             static const char* getConnectionType();
-        	static const char* getRelevantSdkVersion();
-        	static const char* getBuildPlatform();
-        	static const char* getOSVersion();
+            static const char* getRelevantSdkVersion();
+            static const char* getBuildPlatform();
+            static const char* getOSVersion();
             static void setDeviceModel(const char* deviceModel);
-        	static const char* getDeviceModel();
+            static const char* getDeviceModel();
             static void setDeviceManufacturer(const char* deviceManufacturer);
-        	static const char* getDeviceManufacturer();
+            static const char* getDeviceManufacturer();
             static void setWritablePath(const char* writablePath);
-        	static const char* getWritablePath();
+            static const char* getWritablePath();
             static int getWritablePathStatus();
 #if USE_UWP
             static const char* getDeviceId();
@@ -56,6 +57,7 @@ namespace gameanalytics
             static char _deviceId[];
 #endif
 
+            static bool _useDeviceInfo;
             static char _buildPlatform[];
             static char _osVersion[];
             static char _deviceModel[];
