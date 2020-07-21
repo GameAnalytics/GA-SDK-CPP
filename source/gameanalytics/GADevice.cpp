@@ -58,6 +58,7 @@ namespace gameanalytics
 {
     namespace device
     {
+        bool GADevice::_useDeviceInfo = true;
         char GADevice::_writablepath[257] = "";
         int GADevice::_writablepathStatus = 0;
         char GADevice::_buildPlatform[32] = "";
@@ -74,12 +75,17 @@ namespace gameanalytics
         char GADevice::_gameEngineVersion[33] = "";
         char GADevice::_connectionType[33] = "";
 #if USE_UWP
-        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 3.0.5";
+        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 3.0.6";
 #elif USE_TIZEN
-        const char* GADevice::_sdkWrapperVersion = "tizen 3.0.5";
+        const char* GADevice::_sdkWrapperVersion = "tizen 3.0.6";
 #else
-        const char* GADevice::_sdkWrapperVersion = "cpp 3.0.5";
+        const char* GADevice::_sdkWrapperVersion = "cpp 3.0.6";
 #endif
+
+        void GADevice::disableDeviceInfo()
+        {
+            GADevice::_useDeviceInfo = false;
+        }
 
         void GADevice::setSdkGameEngineVersion(const char* sdkGameEngineVersion)
         {
@@ -314,6 +320,12 @@ namespace gameanalytics
 
         void GADevice::initDeviceManufacturer()
         {
+            if(!GADevice::_useDeviceInfo)
+            {
+                snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "unknown");
+                return;
+            }
+
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             snprintf(GADevice::_deviceManufacturer, sizeof(GADevice::_deviceManufacturer), "%s", utilities::GAUtilities::ws2s(info->SystemManufacturer->Data()).c_str());
@@ -415,6 +427,12 @@ namespace gameanalytics
 
         void GADevice::initDeviceModel()
         {
+            if(!GADevice::_useDeviceInfo)
+            {
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "unknown");
+                return;
+            }
+
 #if USE_UWP
             auto info = ref new Windows::Security::ExchangeActiveSyncProvisioning::EasClientDeviceInformation();
             snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", utilities::GAUtilities::ws2s(info->SystemProductName->Data()).c_str());

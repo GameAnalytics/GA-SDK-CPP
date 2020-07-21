@@ -238,6 +238,24 @@ namespace gameanalytics
         });
     }
 
+    void GameAnalytics::disableDeviceInfo()
+    {
+        if(_endThread)
+        {
+            return;
+        }
+
+        threading::GAThreading::performTaskOnGAThread([]()
+        {
+            if (isSdkReady(true, false))
+            {
+                logging::GALogger::w("Disable device info must be set before SDK is initialized.");
+                return;
+            }
+            device::GADevice::disableDeviceInfo();
+        });
+    }
+
     void GameAnalytics::configureDeviceModel(const char* deviceModel_)
     {
         if(_endThread)
