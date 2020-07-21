@@ -1,1 +1,1 @@
-python build\jenkins\main.py %*
+python2 build\jenkins\main.py %*
