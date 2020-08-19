@@ -32,7 +32,7 @@ def change_to_build_dir():
 
 
 def run_cmake_tests():
-    cmake_call = CMAKE_BIN_FILE + ' -DPLATFORM:STRING=osx-static -G Xcode ..'
+    cmake_call = CMAKE_BIN_FILE + ' -DPLATFORM:STRING=osx-static -DNO_SQLITE_SRC:STRING=NO -G Xcode ..'
     subprocess.call(cmake_call, shell=True)
 
 

@@ -21,7 +21,7 @@ before_install:
     - travis_wait 40 python build/jenkins/main.py -s -t osx-static
 
 install:
-    - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -G Xcode ..)
+    - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -DNO_SQLITE_SRC:STRING=NO -G Xcode ..)
 
 script:
     - cd tests
