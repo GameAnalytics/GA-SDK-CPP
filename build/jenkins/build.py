@@ -78,7 +78,7 @@ class TargetCMake(Target):
     def build_dir(self):
         return os.path.abspath(os.path.join(__file__, '..', 'build', self.name))
 
-    def create_project_file(self):
+    def create_project_file(self, noSqliteSrc="NO"):
         call_process(
             [
                 os.path.join(
@@ -88,6 +88,7 @@ class TargetCMake(Target):
                 ),
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
                 '-G',
                 self.generator
             ],
@@ -95,7 +96,7 @@ class TargetCMake(Target):
         )
 
     def build(self, silent=False):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class TargetOSX(TargetCMake):
@@ -123,10 +124,12 @@ class TargetOSX(TargetCMake):
         self.binary_name = {
             'osx-shared': 'libGameAnalytics.dylib',
             'osx-static': 'libGameAnalytics.a',
+            'osx-static-no-sqlite-src': 'libGameAnalytics.a',
         }[self.name]
         self.target_name = {
             'osx-shared': 'GameAnalytics.bundle',
             'osx-static': 'libGameAnalytics.a',
+            'osx-static-no-sqlite-src': 'libGameAnalytics.a',
         }[self.name]
 
         debug_dir = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug'))
@@ -235,7 +238,7 @@ class TargetWin(TargetCMake):
 
 
 class TargetWin10(TargetWin):
-    def create_project_file(self):
+    def create_project_file(self, noSqliteSrc="NO"):
         call_process(
             [
                 os.path.join(
@@ -255,7 +258,7 @@ class TargetWin10(TargetWin):
 
 
 class TargetTizen(TargetCMake):
-    def create_project_file(self):
+    def create_project_file(self, noSqliteSrc="NO"):
         build_folder = os.path.join(Config.BUILD_DIR, self.name)
 
         if sys.platform == 'darwin':
@@ -406,7 +409,7 @@ class TargetLinux(TargetCMake):
         self.ccompiler = ccompiler
         self.cppcompiler = cppcompiler
 
-    def create_project_file(self):
+    def create_project_file(self, noSqliteSrc="NO"):
         print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
@@ -534,6 +537,7 @@ all_targets = {
     'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
     'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
+    'osx-static-no-sqlite-src': TargetOSX('osx-static-no-sqlite-src', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
     'tizen-arm-static': TargetTizen('tizen-arm-static', 'arm'),
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
@@ -554,6 +558,7 @@ all_targets = {
 available_targets = {
     'Darwin': {
         'osx-static': all_targets['osx-static'],
+        'osx-static-no-sqlite-src': all_targets['osx-static-no-sqlite-src'],
         'osx-shared': all_targets['osx-shared'],
         'tizen-arm-static': all_targets['tizen-arm-static'],
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
@@ -638,7 +643,10 @@ def build(target_name, vs, silent=False):
             sys.exit(1)
 
     target = available_targets[target_name]
-    target.create_project_file()
+    noSqliteSrc = "NO"
+    if "no-sqlite-src" in target_name:
+        noSqliteSrc = "YES"
+    target.create_project_file(noSqliteSrc=noSqliteSrc)
 
     if platform.system() == 'Windows':
         if 'tizen' in target_name:
