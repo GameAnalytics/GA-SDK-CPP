@@ -517,7 +517,10 @@ class TargetLinux(TargetCMake):
         print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
-        noSqliteSrc = "no-sqlite-src" in self.name
+        noSqliteSrc = "NO"
+        if "no-sqlite-src" in self.name:
+            noSqliteSrc = "YES"
+
         call_process(
             [
                 os.path.join(
