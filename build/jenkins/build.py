@@ -696,7 +696,7 @@ class TargetLinux(TargetCMake):
                     'make',
                     '-j4'
                 ],
-                self.build_dir(),
+                self.sqlite_build_dir(),
                 silent=silent
             )
 
