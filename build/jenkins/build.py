@@ -78,6 +78,9 @@ class TargetCMake(Target):
     def build_dir(self):
         return os.path.abspath(os.path.join(__file__, '..', 'build', self.name))
 
+    def sqlite_build_dir(self):
+        return os.path.abspath(os.path.join(__file__, '..', 'build', 'sqlite', self.name))
+
     def create_project_file(self, noSqliteSrc="NO"):
         call_process(
             [
@@ -93,6 +96,22 @@ class TargetCMake(Target):
                 self.generator
             ],
             self.build_dir()
+        )
+
+    def create_sqlite_project_file(self):
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../../cmake/sqlite/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-G',
+                self.generator
+            ],
+            self.sqlite_build_dir()
         )
 
     def build(self, silent=False):
@@ -165,6 +184,52 @@ class TargetOSX(TargetCMake):
             os.path.join(release_dir, self.target_name)
         )
 
+        if "no-sqlite-src" in self.name:
+            self.create_sqlite_project_file()
+
+            sqlite_debug_dir = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Debug'))
+            sqlite_release_dir = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Release'))
+
+            call_process(
+                [
+                    'xcodebuild',
+                    '-configuration',
+                    'Release'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    'xcodebuild',
+                    '-configuration',
+                    'Debug'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            if not LibTools.folder_exists(sqlite_debug_dir):
+                os.makedirs(sqlite_debug_dir)
+
+            if not LibTools.folder_exists(sqlite_release_dir):
+                os.makedirs(sqlite_release_dir)
+
+            shutil.copy(
+                os.path.join(self.sqlite_build_dir(),
+                             'Debug', 'libSqlite.a'),
+                os.path.join(sqlite_debug_dir, 'libSqlite.a')
+            )
+
+            shutil.copy(
+                os.path.join(self.sqlite_build_dir(),
+                             'Release', 'libSqlite.a'),
+                os.path.join(sqlite_release_dir, 'libSqlite.a')
+            )
+
 
 class TargetWin(TargetCMake):
     @staticmethod
@@ -235,6 +300,45 @@ class TargetWin(TargetCMake):
             os.path.join(self.build_dir(), 'Release'),
             release_dir
         )
+
+        if "no-sqlite-src" in self.name:
+            self.create_sqlite_project_file()
+
+            sqlite_debug_dir = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Debug'))
+            sqlite_release_dir = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Release'))
+
+            subprocess.check_call([
+                os.path.join(self.get_msbuild_path(vs), 'MSBuild.exe'),
+                os.path.join(self.sqlite_build_dir(), 'Sqlite.sln'),
+                '/m',  # parallel builds
+                '/t:Sqlite',
+                '/p:Configuration=Release',
+            ])
+
+            subprocess.check_call([
+                os.path.join(self.get_msbuild_path(vs), 'MSBuild.exe'),
+                os.path.join(self.sqlite_build_dir(), 'Sqlite.sln'),
+                '/m',  # parallel builds
+                '/t:Sqlite',
+                '/p:Configuration=Debug',
+            ])
+
+            LibTools.remove_folder(sqlite_debug_dir)
+            LibTools.remove_folder(sqlite_release_dir)
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(),
+                             'Debug'),
+                sqlite_debug_dir
+            )
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(),
+                             'Release'),
+                sqlite_release_dir
+            )
 
 
 class TargetWin10(TargetWin):
@@ -510,11 +614,110 @@ class TargetLinux(TargetCMake):
             release_file
         )
 
+        if "no-sqlite-src" in self.name:
+            sqlite_debug_file = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Debug', 'libSqlite.' + libEnding))
+            sqlite_release_file = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Release', 'libSqlite.' + libEnding))
+
+            call_process(
+                [
+                    os.path.join(
+                        Config.CMAKE_ROOT,
+                        'bin',
+                        'cmake'
+                    ),
+                    '../../../../cmake/sqlite/',
+                    '-DPLATFORM:STRING=' + self.name,
+                    '-DCMAKE_BUILD_TYPE=RELEASE',
+                    '-DTARGET_ARCH:STRING=' + self.architecture,
+                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-G',
+                    self.generator
+                ],
+                self.sqlite_build_dir()
+            )
+
+            call_process(
+                [
+                    'make',
+                    'clean'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    'make',
+                    '-j4'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    os.path.join(
+                        Config.CMAKE_ROOT,
+                        'bin',
+                        'cmake'
+                    ),
+                    '../../../../cmake/sqlite/',
+                    '-DPLATFORM:STRING=' + self.name,
+                    '-DCMAKE_BUILD_TYPE=DEBUG',
+                    '-DTARGET_ARCH:STRING=' + self.architecture,
+                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-G',
+                    self.generator
+                ],
+                self.sqlite_build_dir()
+            )
+
+            call_process(
+                [
+                    'make',
+                    'clean'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    'make',
+                    '-j4'
+                ],
+                self.build_dir(),
+                silent=silent
+            )
+
+            if not os.path.exists(os.path.dirname(sqlite_debug_file)):
+                os.makedirs(os.path.dirname(sqlite_debug_file))
+
+            if not os.path.exists(os.path.dirname(sqlite_release_file)):
+                os.makedirs(os.path.dirname(sqlite_release_file))
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(), 'Debug',
+                             'libSqlite.' + libEnding),
+                sqlite_debug_file
+            )
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(), 'Release',
+                             'libSqlite.' + libEnding),
+                sqlite_release_file
+            )
+
 
 all_targets = {
     'win32-vc141-static': TargetWin('win32-vc141-static', 'Visual Studio 15'),
     'win32-vc141-mt-static': TargetWin('win32-vc141-mt-static', 'Visual Studio 15'),
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
+    'win32-vc140-static-no-sqlite-src': TargetWin('win32-vc140-static-no-sqlite-src', 'Visual Studio 14'),
     'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
     'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
     'win32-vc120-mt-static': TargetWin('win32-vc120-mt-static', 'Visual Studio 12'),
@@ -524,6 +727,7 @@ all_targets = {
     'win64-vc141-static': TargetWin('win64-vc141-static', 'Visual Studio 15 Win64'),
     'win64-vc141-mt-static': TargetWin('win64-vc141-mt-static', 'Visual Studio 15 Win64'),
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
+    'win64-vc140-static-no-sqlite-src': TargetWin('win64-vc140-static-no-sqlite-src', 'Visual Studio 14 Win64'),
     'win64-vc140-mt-static': TargetWin('win64-vc140-mt-static', 'Visual Studio 14 Win64'),
     'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
     'win64-vc120-mt-static': TargetWin('win64-vc120-mt-static', 'Visual Studio 12 Win64'),
@@ -548,6 +752,7 @@ all_targets = {
     'linux-x86-clang-shared': TargetLinux('linux-x86-clang-shared', 'Unix Makefiles', '-m32', 'clang-5.0', 'clang++-5.0'),
     'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc-4.8', 'g++-4.8'),
     'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
+    'linux-x64-clang-static-no-sqlite-src': TargetLinux('linux-x64-clang-static-no-sqlite-src', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
     'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc-4.8', 'g++-4.8'),
     'linux-x64-gcc5-static': TargetLinux('linux-x64-gcc5-static', 'Unix Makefiles', '-m64', 'gcc-5', 'g++-5'),
     'linux-x64-clang-shared': TargetLinux('linux-x64-clang-shared', 'Unix Makefiles', '-m64', 'clang-5.0', 'clang++-5.0'),
@@ -569,6 +774,7 @@ available_targets = {
         'win32-vc141-static': all_targets['win32-vc141-static'],
         'win32-vc141-mt-static': all_targets['win32-vc141-mt-static'],
         'win32-vc140-static': all_targets['win32-vc140-static'],
+        'win32-vc140-static-no-sqlite-src': all_targets['win32-vc140-static-no-sqlite-src'],
         'win32-vc140-mt-static': all_targets['win32-vc140-mt-static'],
         # 'win32-vc120-static': all_targets['win32-vc120-static'],
         # 'win32-vc120-mt-static': all_targets['win32-vc120-mt-static'],
@@ -578,6 +784,7 @@ available_targets = {
         'win64-vc141-static': all_targets['win64-vc141-static'],
         'win64-vc141-mt-static': all_targets['win64-vc141-mt-static'],
         'win64-vc140-static': all_targets['win64-vc140-static'],
+        'win64-vc140-static-no-sqlite-src': all_targets['win64-vc140-static-no-sqlite-src'],
         'win64-vc140-mt-static': all_targets['win64-vc140-mt-static'],
         # 'win64-vc120-static': all_targets['win64-vc120-static'],
         # 'win64-vc120-mt-static': all_targets['win64-vc120-mt-static'],
@@ -601,6 +808,7 @@ available_targets = {
         'linux-x86-clang-shared': all_targets['linux-x86-clang-shared'],
         'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
         'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
+        'linux-x64-clang-static-no-sqlite-src': all_targets['linux-x64-clang-static-no-sqlite-src'],
         'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
         # 'linux-x64-gcc5-static': all_targets['linux-x64-gcc5-static'],
         'linux-x64-clang-shared': all_targets['linux-x64-clang-shared'],
@@ -646,6 +854,7 @@ def build(target_name, vs, silent=False):
     noSqliteSrc = "NO"
     if "no-sqlite-src" in target_name:
         noSqliteSrc = "YES"
+
     target.create_project_file(noSqliteSrc=noSqliteSrc)
 
     if platform.system() == 'Windows':
@@ -657,12 +866,14 @@ def build(target_name, vs, silent=False):
         target.build(silent=silent)
 
 
-def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
+def build_targets(target_names, silent=False, vs="2017", skip_tizen=False, no_sqlite_src=False):
 
     for target_name in target_names:
         if skip_tizen and 'tizen' in target_name:
             continue
         if skip_tizen and 'clang' in target_name:
+            continue
+        if no_sqlite_src and 'no-sqlite-src' not in target_name:
             continue
         print("")
         print("-----------------------------------------")
@@ -684,7 +895,8 @@ def main(argv, silent=False):
     print(argv)
 
     try:
-        opts, args = getopt.getopt(argv, "t:v:nh", ["target=", "vs=", "notizen", "help"])
+        opts, args = getopt.getopt(
+            argv, "t:v:nqh", ["target=", "vs=", "notizen",  "nosqlitesrc", "help"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -692,6 +904,7 @@ def main(argv, silent=False):
     build_target_name = None
     visual_studio = "2017"
     skip_tizen = False
+    no_sqlite_src = False
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
@@ -706,6 +919,8 @@ def main(argv, silent=False):
                 sys.exit(2)
         elif opt in ('-n', '--notizen'):
             skip_tizen = True
+        elif opt in ('-q', '--nosqlitesrc'):
+            no_sqlite_src = True
         elif opt in ('-v', '--vs'):
             if arg in valid_visual_studio:
                 visual_studio = arg
@@ -715,10 +930,12 @@ def main(argv, silent=False):
                 sys.exit(2)
 
     if build_target_name:
-        build_targets([build_target_name], silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+        build_targets([build_target_name], silent=silent, vs=visual_studio,
+                      skip_tizen=skip_tizen, no_sqlite_src=no_sqlite_src)
     else:
         # build all
-        build_targets(valid_target_names, silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+        build_targets(valid_target_names, silent=silent, vs=visual_studio,
+                      skip_tizen=skip_tizen, no_sqlite_src=no_sqlite_src)
 
 
 if __name__ == '__main__':
