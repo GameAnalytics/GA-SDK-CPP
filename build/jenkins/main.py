@@ -97,6 +97,8 @@ def main(argv):
 
     if skip_tizen is True:
         installTizen = False
+    if no_sqlite_src is True:
+        installTizen = False
 
     if build_dependencies is True:
         install_dependencies(installTizen=installTizen, silent=silent)
