@@ -517,6 +517,7 @@ class TargetLinux(TargetCMake):
         print('Skip create_project_file for Linux')
 
     def build(self, silent=False):
+        noSqliteSrc = "no-sqlite-src" in self.name
         call_process(
             [
                 os.path.join(
@@ -526,6 +527,7 @@ class TargetLinux(TargetCMake):
                 ),
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-DCMAKE_C_COMPILER=' + self.ccompiler,
@@ -563,6 +565,7 @@ class TargetLinux(TargetCMake):
                 ),
                 '../../../cmake/gameanalytics/',
                 '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
                 '-DTARGET_ARCH:STRING=' + self.architecture,
                 '-DCMAKE_C_COMPILER=' + self.ccompiler,
