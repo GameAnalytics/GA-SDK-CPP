@@ -248,23 +248,43 @@ elseif("${OSX_ALL}")
     )
 elseif("${LINUX_ALL}")
     # traverse all the subdirectories of the matched directory
-    FILE(GLOB_RECURSE CPP_SOURCES
-        # Add GameAnalytics Sources
-        "${GA_SOURCE_DIR}/*.cpp"
-        "${GA_SOURCE_DIR}/*.h"
 
-        # Add dependencies
-        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
-        "${DEPENDENCIES_DIR}/sqlite/*.c"
-        "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/zf_log/*.c"
-        "${DEPENDENCIES_DIR}/zf_log/*.h"
-        "${DEPENDENCIES_DIR}/miniz/*.c"
-    )
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
@@ -280,24 +300,45 @@ elseif("${LINUX_ALL}")
     )
 else()
     # traverse all the subdirectories of the matched directory
-    FILE(GLOB_RECURSE CPP_SOURCES
-        # Add GameAnalytics Sources
-        "${GA_SOURCE_DIR}/*.cpp"
-        "${GA_SOURCE_DIR}/*.h"
 
-        # Add dependencies
-        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
-        "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
-        "${DEPENDENCIES_DIR}/sqlite/*.c"
-        "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/zf_log/*.c"
-        "${DEPENDENCIES_DIR}/zf_log/*.h"
-        "${DEPENDENCIES_DIR}/miniz/*.c"
-    )
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
