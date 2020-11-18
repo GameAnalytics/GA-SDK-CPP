@@ -3,6 +3,7 @@
 import os
 import sys
 import urllib
+import urllib.request
 import config
 import zipfile
 import tarfile
@@ -25,7 +26,7 @@ if platform == 'win32':  # win32 and/or win64
     else:
         TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-32.exe'
 elif platform == 'darwin':  # OSX
-    CMAKE_URL = 'https://cmake.org/files/v3.12/cmake-3.12.3-Darwin-x86_64.tar.gz'
+    CMAKE_URL = 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Darwin-x86_64.tar.gz'
     TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
 elif platform in ('linux', 'linux2'):
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz'
@@ -58,9 +59,9 @@ def download(url, destination, silent=False):
         ))
 
     if silent is True:
-        urllib.urlretrieve(url, destination)
+        urllib.request.urlretrieve(url, destination)
     else:
-        urllib.urlretrieve(url, destination, reporthook)
+        urllib.request.urlretrieve(url, destination, reporthook)
     print('download done')
 
 # windows has an restriction about the size of a filename (260)
