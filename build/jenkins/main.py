@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 # from sys import platform
 
 
-def build(specific_target=None, silent=False, vs="2017", skip_tizen=False):
+def build(specific_target=None, silent=False, vs="2017", skip_tizen=False, no_sqlite_src=False):
     try:
         os.makedirs(config.BUILD_DIR)
     except OSError:
@@ -27,13 +27,18 @@ def build(specific_target=None, silent=False, vs="2017", skip_tizen=False):
     if specific_target:
         if skip_tizen:
             build_main(['-t', specific_target, '-v', vs, "-n"], silent=silent)
+        elif no_sqlite_src:
+            build_main(['-t', specific_target, '-v', vs, "-q"], silent=silent)
         else:
             build_main(['-t', specific_target, '-v', vs], silent=silent)
     else:
         if skip_tizen:
             build_main(['-v', vs, "-n"], silent=silent)
+        elif no_sqlite_src:
+            build_main(['-v', vs, "-q"], silent=silent)
         else:
             build_main(['-v', vs], silent=silent)
+
 
 def print_help():
     print('main.py -t <target> --skip-dependencies --help')
@@ -46,7 +51,8 @@ def print_help():
 # -t / --target: [specific target] (default all is built)
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "t:h:v:ns", ["target=", "skip-dependencies", "help", "vs", "notizen", "silent"])
+        opts, args = getopt.getopt(argv, "t:h:v:nqs", [
+                                   "target=", "skip-dependencies", "help", "vs", "notizen", "nosqlitesrc", "silent"])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -57,6 +63,7 @@ def main(argv):
     visual_studio = "2017"
     installTizen = False
     skip_tizen = False
+    no_sqlite_src = False
 
     for opt, arg in opts:
         if opt in ['-h', '--help']:
@@ -78,6 +85,9 @@ def main(argv):
         elif opt in ['-n', '--notizen']:
             print("SKIPPING TIZEN INSTALLATION")
             skip_tizen = True
+        elif opt in ['-q', '--nosqlitesrc']:
+            print("ONLY NO SQL SRC TARGETS")
+            no_sqlite_src = True
 
     os.chdir(config.BUILD_ROOT)
     if build_target_name is not None:
@@ -87,15 +97,19 @@ def main(argv):
 
     if skip_tizen is True:
         installTizen = False
+    if no_sqlite_src is True:
+        installTizen = False
 
     if build_dependencies is True:
         install_dependencies(installTizen=installTizen, silent=silent)
 
     if build_target_name is not None:
-        build(specific_target=build_target_name, silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+        build(specific_target=build_target_name, silent=silent,
+              vs=visual_studio, skip_tizen=skip_tizen, no_sqlite_src=no_sqlite_src)
     else:
         # build all
-        build(silent=silent, vs=visual_studio, skip_tizen=skip_tizen)
+        build(silent=silent, vs=visual_studio,
+              skip_tizen=skip_tizen, no_sqlite_src=no_sqlite_src)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

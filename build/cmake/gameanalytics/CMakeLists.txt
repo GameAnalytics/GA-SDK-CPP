@@ -18,7 +18,9 @@ set(DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/../../../source/dependencies")
 message(STATUS "********************** platform is ${PLATFORM}")
 
 # osx platforms
-EVAL_CONDITION(OSX_STATIC "${PLATFORM}" STREQUAL "osx-static")
+EVAL_CONDITION(OSX_STATIC_SQLITE_SRC "${PLATFORM}" STREQUAL "osx-static")
+EVAL_CONDITION(OSX_STATIC_NO_SQLITE_SRC "${PLATFORM}" STREQUAL "osx-static-no-sqlite-src")
+EVAL_CONDITION(OSX_STATIC "${OSX_STATIC_SQLITE_SRC}" OR "${OSX_STATIC_NO_SQLITE_SRC}")
 EVAL_CONDITION(OSX_SHARED "${PLATFORM}" STREQUAL "osx-shared")
 EVAL_CONDITION(OSX_ALL "${OSX_STATIC}" OR "${OSX_SHARED}")
 
@@ -33,10 +35,12 @@ EVAL_CONDITION(WIN64_VC120_SHARED "${PLATFORM}" STREQUAL "win64-vc120-shared")
 
 # vc140
 EVAL_CONDITION(WIN32_VC140_STATIC "${PLATFORM}" STREQUAL "win32-vc140-static")
+EVAL_CONDITION(WIN32_VC140_STATIC_NO_SQLITE_SRC "${PLATFORM}" STREQUAL "win32-vc140-static-no-sqlite-src")
 EVAL_CONDITION(WIN32_VC140_MT_STATIC "${PLATFORM}" STREQUAL "win32-vc140-mt-static")
 EVAL_CONDITION(WIN32_VC140_SHARED "${PLATFORM}" STREQUAL "win32-vc140-shared")
 EVAL_CONDITION(WIN32_VC140_SHARED_NO_WMI "${PLATFORM}" STREQUAL "win32-vc140-shared-nowmi")
 EVAL_CONDITION(WIN64_VC140_STATIC "${PLATFORM}" STREQUAL "win64-vc140-static")
+EVAL_CONDITION(WIN64_VC140_STATIC_NO_SQLITE_SRC "${PLATFORM}" STREQUAL "win64-vc140-static-no-sqlite-src")
 EVAL_CONDITION(WIN64_VC140_MT_STATIC "${PLATFORM}" STREQUAL "win64-vc140-mt-static")
 EVAL_CONDITION(WIN64_VC140_SHARED "${PLATFORM}" STREQUAL "win64-vc140-shared")
 EVAL_CONDITION(UWP_X86_VC140_STATIC "${PLATFORM}" STREQUAL "uwp-x86-vc140-static")
@@ -54,7 +58,7 @@ EVAL_CONDITION(WIN64_VC141_STATIC "${PLATFORM}" STREQUAL "win64-vc141-static")
 EVAL_CONDITION(WIN64_VC141_MT_STATIC "${PLATFORM}" STREQUAL "win64-vc141-mt-static")
 EVAL_CONDITION(WIN64_VC141_SHARED "${PLATFORM}" STREQUAL "win64-vc141-shared")
 
-EVAL_CONDITION(WIN_STATIC "${WIN32_VC120_MT_STATIC}" OR "${WIN64_VC120_MT_STATIC}" OR "${WIN32_VC120_STATIC}" OR "${WIN64_VC120_STATIC}" OR "${WIN32_VC140_STATIC}" OR "${WIN32_VC140_MT_STATIC}" OR "${WIN64_VC140_STATIC}" OR "${WIN64_VC140_MT_STATIC}" OR "${WIN32_VC141_STATIC}" OR "${WIN32_VC141_MT_STATIC}" OR "${WIN64_VC141_STATIC}" OR "${WIN64_VC141_MT_STATIC}")
+EVAL_CONDITION(WIN_STATIC "${WIN32_VC120_MT_STATIC}" OR "${WIN64_VC120_MT_STATIC}" OR "${WIN32_VC120_STATIC}" OR "${WIN64_VC120_STATIC}" OR "${WIN32_VC140_STATIC}" OR "${WIN32_VC140_STATIC_NO_SQLITE_SRC}" OR "${WIN32_VC140_MT_STATIC}" OR "${WIN64_VC140_STATIC}" OR "${WIN64_VC140_STATIC_NO_SQLITE_SRC}" OR "${WIN64_VC140_MT_STATIC}" OR "${WIN32_VC141_STATIC}" OR "${WIN32_VC141_MT_STATIC}" OR "${WIN64_VC141_STATIC}" OR "${WIN64_VC141_MT_STATIC}")
 EVAL_CONDITION(WIN_MT "${WIN32_VC120_MT_STATIC}" OR "${WIN64_VC120_MT_STATIC}" OR "${WIN32_VC140_MT_STATIC}" OR "${WIN64_VC140_MT_STATIC}" OR "${WIN32_VC141_MT_STATIC}" OR "${WIN64_VC141_MT_STATIC}")
 EVAL_CONDITION(UWP_STATIC "${UWP_X86_VC140_STATIC}" OR "${UWP_X64_VC140_STATIC}" OR "${UWP_ARM_VC140_STATIC}")
 EVAL_CONDITION(WIN_UWP_STATIC "${WIN_STATIC}" OR "${UWP_STATIC}")
@@ -70,16 +74,22 @@ EVAL_CONDITION(LINUX_X86_GCC_STATIC "${PLATFORM}" STREQUAL "linux-x86-gcc-static
 EVAL_CONDITION(LINUX_X86_CLANG_SHARED "${PLATFORM}" STREQUAL "linux-x86-clang-shared")
 EVAL_CONDITION(LINUX_X86_GCC_SHARED "${PLATFORM}" STREQUAL "linux-x86-gcc-shared")
 EVAL_CONDITION(LINUX_X64_CLANG_STATIC "${PLATFORM}" STREQUAL "linux-x64-clang-static")
+EVAL_CONDITION(LINUX_X64_CLANG_STATIC_NO_SQLITE_SRC "${PLATFORM}" STREQUAL "linux-x64-clang-static-no-sqlite-src")
 EVAL_CONDITION(LINUX_X64_GCC_STATIC "${PLATFORM}" STREQUAL "linux-x64-gcc-static")
 EVAL_CONDITION(LINUX_X64_GCC5_STATIC "${PLATFORM}" STREQUAL "linux-x64-gcc5-static")
 EVAL_CONDITION(LINUX_X64_CLANG_SHARED "${PLATFORM}" STREQUAL "linux-x64-clang-shared")
 EVAL_CONDITION(LINUX_X64_GCC_SHARED "${PLATFORM}" STREQUAL "linux-x64-gcc-shared")
 EVAL_CONDITION(LINUX_X64_GCC5_SHARED "${PLATFORM}" STREQUAL "linux-x64-gcc5-shared")
 
-EVAL_CONDITION(LINUX_STATIC "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X86_GCC_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X64_GCC_STATIC}" OR "${LINUX_X64_GCC5_STATIC}")
+EVAL_CONDITION(LINUX_STATIC "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X86_GCC_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X64_CLANG_STATIC_NO_SQLITE_SRC}" OR "${LINUX_X64_GCC_STATIC}" OR "${LINUX_X64_GCC5_STATIC}")
 EVAL_CONDITION(LINUX_SHARED "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X86_GCC_SHARED}" OR "${LINUX_X64_CLANG_SHARED}" OR "${LINUX_X64_GCC_SHARED}" OR "${LINUX_X64_GCC5_SHARED}")
-EVAL_CONDITION(LINUX_CLANG "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X64_CLANG_SHARED}")
+EVAL_CONDITION(LINUX_CLANG "${LINUX_X86_CLANG_STATIC}" OR "${LINUX_X64_CLANG_STATIC}" OR "${LINUX_X64_CLANG_STATIC_NO_SQLITE_SRC}" OR "${LINUX_X86_CLANG_SHARED}" OR "${LINUX_X64_CLANG_SHARED}")
 EVAL_CONDITION(LINUX_ALL "${LINUX_STATIC}" OR "${LINUX_SHARED}")
+
+# no sqlite src
+EVAL_CONDITION(NO_SQLITE "${NO_SQLITE_SRC}" STREQUAL "YES")
+
+message(STATUS "No sqlite src: ${NO_SQLITE}")
 
 if("${WIN_MT}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
@@ -102,7 +112,7 @@ elseif("${WIN_UWP_SHARED}")
 elseif("${OSX_STATIC}")
     set(LIB_EXTENSION "a")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
     set(EXTRA_LIBS z)
     SET (LIB_TYPE STATIC)
 elseif("${OSX_SHARED}")
@@ -138,6 +148,7 @@ elseif("${LINUX_SHARED}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
+    add_definitions("-DGA_SHARED_LIB")
     #add_definitions("-DGA_SHARED_LIB -D_GLIBCXX_USE_CXX11_ABI=0")
 endif("${WIN_UWP_STATIC}")
 
@@ -183,24 +194,46 @@ if("${UWP_ALL}")
     )
 elseif("${OSX_ALL}")
     # traverse all the subdirectories of the matched directory
-    FILE(GLOB_RECURSE CPP_SOURCES
-        # Add GameAnalytics Sources
-        "${GA_SOURCE_DIR}/*.cpp"
-        "${GA_SOURCE_DIR}/*.mm"
-        "${GA_SOURCE_DIR}/*.h"
 
-        # Add dependencies
-        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
-        "${DEPENDENCIES_DIR}/sqlite/*.c"
-        "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/zf_log/*.c"
-        "${DEPENDENCIES_DIR}/zf_log/*.h"
-        "${DEPENDENCIES_DIR}/miniz/*.c"
-    )
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.mm"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.mm"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
+
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
@@ -216,23 +249,43 @@ elseif("${OSX_ALL}")
     )
 elseif("${LINUX_ALL}")
     # traverse all the subdirectories of the matched directory
-    FILE(GLOB_RECURSE CPP_SOURCES
-        # Add GameAnalytics Sources
-        "${GA_SOURCE_DIR}/*.cpp"
-        "${GA_SOURCE_DIR}/*.h"
 
-        # Add dependencies
-        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
-        "${DEPENDENCIES_DIR}/sqlite/*.c"
-        "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/zf_log/*.c"
-        "${DEPENDENCIES_DIR}/zf_log/*.h"
-        "${DEPENDENCIES_DIR}/miniz/*.c"
-    )
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
@@ -248,24 +301,45 @@ elseif("${LINUX_ALL}")
     )
 else()
     # traverse all the subdirectories of the matched directory
-    FILE(GLOB_RECURSE CPP_SOURCES
-        # Add GameAnalytics Sources
-        "${GA_SOURCE_DIR}/*.cpp"
-        "${GA_SOURCE_DIR}/*.h"
 
-        # Add dependencies
-        "${DEPENDENCIES_DIR}/crossguid/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
-        "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
-        "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
-        "${DEPENDENCIES_DIR}/sqlite/*.c"
-        "${DEPENDENCIES_DIR}/sqlite/*.h"
-        "${DEPENDENCIES_DIR}/crypto/*.c"
-        "${DEPENDENCIES_DIR}/crypto/*.cpp"
-        "${DEPENDENCIES_DIR}/zf_log/*.c"
-        "${DEPENDENCIES_DIR}/zf_log/*.h"
-        "${DEPENDENCIES_DIR}/miniz/*.c"
-    )
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.cpp"
+            "${DEPENDENCIES_DIR}/stacktrace/*.hpp"
+            "${DEPENDENCIES_DIR}/stackwalker/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
 
     add_definitions("-DCRYPTOPP_DISABLE_ASM")
 
