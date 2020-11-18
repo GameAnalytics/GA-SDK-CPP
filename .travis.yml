@@ -18,8 +18,7 @@ notifications:
 
 before_install:
     - brew update
-    - brew install python3
-    - travis_wait 40 python build/jenkins/main.py -s -t osx-static
+    - travis_wait 40 python3 build/jenkins/main.py -s -t osx-static
 
 install:
     - (cd tests && mkdir build && cd build && "../../build/jenkins/dependencies/cmake/bin/cmake" -DPLATFORM:STRING=osx-static -DNO_SQLITE_SRC:STRING=NO -G Xcode ..)
