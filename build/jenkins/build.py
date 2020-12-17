@@ -13,10 +13,10 @@ import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import ConnectRegistry
-    from _winreg import HKEY_LOCAL_MACHINE
-    from _winreg import OpenKey
-    from _winreg import QueryValueEx
+    from winreg import ConnectRegistry
+    from winreg import HKEY_LOCAL_MACHINE
+    from winreg import OpenKey
+    from winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
@@ -259,8 +259,10 @@ class TargetWin(TargetCMake):
                 useOutput=True
             )
 
-            path = path.replace("2019", "2017")
+            path = path.decode("utf-8").replace("2019", "2017")
             path = os.path.join(path, "MSBuild", "15.0", "Bin")
+
+            print("get_msbuild_path: " + path)
 
             return path
         else:
@@ -354,6 +356,7 @@ class TargetWin10(TargetWin):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_SYSTEM_NAME=WindowsStore',
                 '-DCMAKE_SYSTEM_VERSION=10.0',
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
                 '-G',
                 self.generator
             ],
