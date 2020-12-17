@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.0.7**
+* removed memory info from automatic crash reporting
+
 **3.0.6**
 * added disable device info method
 
