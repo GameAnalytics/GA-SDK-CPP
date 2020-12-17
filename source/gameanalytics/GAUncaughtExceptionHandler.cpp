@@ -180,13 +180,13 @@ namespace gameanalytics
                  *    Now format into a message for sending to the user
                  */
                 size_t totalSize = 0;
-                totalSize += strlen("Uncaught Signal\n");
+                /*totalSize += strlen("Uncaught Signal\n");
                 totalSize += formatSize("si_signo    %d\n", info->si_signo);
                 totalSize += formatSize("si_code     %d\n", info->si_code);
                 totalSize += formatSize("si_value    %d\n", info->si_value);
                 totalSize += formatSize("si_errno    %d\n", info->si_errno);
                 totalSize += formatSize("si_addr     0x%08lX\n", info->si_addr);
-                totalSize += formatSize("si_status   %d\n", info->si_status);
+                totalSize += formatSize("si_status   %d\n", info->si_status);*/
                 totalSize += strlen("Stack trace:\n");
                 for (i = 0; i < len; ++i)
                 {
@@ -195,14 +195,14 @@ namespace gameanalytics
 
                 char buffer[totalSize + 1];
                 buffer[0] = 0;
-                strcat(buffer, "Uncaught Signal\n");
+                /*strcat(buffer, "Uncaught Signal\n");
 
                 formatConcat(buffer, "si_signo    %d\n", info->si_signo);
                 formatConcat(buffer, "si_code     %d\n", info->si_code);
                 formatConcat(buffer, "si_value    %d\n", info->si_value);
                 formatConcat(buffer, "si_errno    %d\n", info->si_errno);
                 formatConcat(buffer, "si_addr     0x%08lX\n", info->si_addr);
-                formatConcat(buffer, "si_status   %d\n", info->si_status);
+                formatConcat(buffer, "si_status   %d\n", info->si_status);*/
                 strcat(buffer, "Stack trace:\n");
                 for (i = 0; i < len; ++i)
                 {
