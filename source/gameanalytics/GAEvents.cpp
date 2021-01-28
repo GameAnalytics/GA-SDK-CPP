@@ -683,6 +683,14 @@ namespace gameanalytics
                     }
                     else
                     {
+                        if(d.HasMember("client_ts"))
+                        {
+                            if (!validators::GAValidator::validateClientTs(d["client_ts"].GetInt64()))
+                            {
+                                d.RemoveMember("client_ts");
+                            }
+                        }
+
                         rapidjson::Value v;
                         v.CopyFrom(d, allocator);
                         payloadArray.PushBack(v.Move(), allocator);

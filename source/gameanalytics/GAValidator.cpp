@@ -751,8 +751,7 @@ namespace gameanalytics
 
         bool GAValidator::validateClientTs(int64_t clientTs)
         {
-            // server regex: ^([0-9]{10,11})$
-            if (clientTs < 1000000000 || clientTs > 9999999999)
+            if (clientTs < 0 || clientTs > 99999999999)
             {
                 return false;
             }
