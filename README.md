@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.0.8**
+* updated client ts validator
+
 **3.0.7**
 * removed memory info from automatic crash reporting
 
