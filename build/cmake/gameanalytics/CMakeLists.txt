@@ -363,6 +363,18 @@ endif("${LINUX_ALL}")
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
+#if("${WIN_UWP_STATIC}")
+#    target_compile_options(GameAnalytics PRIVATE /Zi)
+#    set_target_properties(GameAnalytics PROPERTIES
+#        LINK_FLAGS "/INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF"
+#    )
+#
+#    set_target_properties(GameAnalytics PROPERTIES
+#        COMPILE_PDB_NAME GameAnalytics
+#        COMPILE_PDB_OUTPUT_DIR ${CMAKE_BINARY_DIR}
+#    )
+#endif("${WIN_UWP_STATIC}")
+
 if("${OSX_STATIC}")
     include_directories(
         "${DEPENDENCIES_DIR}/openssl/1.1.1d/include"

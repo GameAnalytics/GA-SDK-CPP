@@ -19,6 +19,9 @@
 #if !USE_UWP && !USE_TIZEN
 #include <ostream>
 #endif
+#if USE_UWP
+#include <string>
+#endif
 
 namespace gameanalytics
 {

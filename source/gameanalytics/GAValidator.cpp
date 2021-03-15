@@ -355,7 +355,7 @@ namespace gameanalytics
         {
             if (!GAValidator::validateEventIdLength(eventId))
             {
-                logging::GALogger::w("Validation fail - design event - eventId: Cannot be (null) or empty. Only 5 event parts allowed seperated by :. Each part need to be 32 characters or less. String: %s", eventId);
+                logging::GALogger::w("Validation fail - design event - eventId: Cannot be (null) or empty. Only 5 event parts allowed seperated by :. Each part need to be 64 characters or less. String: %s", eventId);
                 out.category = http::EGASdkErrorCategory::EventValidation;
                 out.area = http::EGASdkErrorArea::DesignEvent;
                 out.action = http::EGASdkErrorAction::InvalidEventIdLength;

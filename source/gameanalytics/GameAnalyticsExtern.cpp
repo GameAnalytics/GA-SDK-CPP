@@ -333,6 +333,11 @@ void configureGameEngineVersionUWP(const wchar_t *engineVersion)
     gameanalytics::GameAnalytics::configureGameEngineVersion(engineVersion);
 }
 
+void configureUserIdUWP(const wchar_t *uId)
+{
+    gameanalytics::GameAnalytics::configureUserId(uId);
+}
+
 void initializeUWP(const wchar_t *gameKey, const wchar_t *gameSecret)
 {
     gameanalytics::GameAnalytics::initialize(gameKey, gameSecret);

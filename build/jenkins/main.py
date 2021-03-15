@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(__file__, '..', '..')))
 # from sys import platform
 
 
-def build(specific_target=None, silent=False, vs="2017", skip_tizen=False, no_sqlite_src=False):
+def build(specific_target=None, silent=False, vs="2019", skip_tizen=False, no_sqlite_src=False):
     try:
         os.makedirs(config.BUILD_DIR)
     except OSError:
@@ -60,7 +60,7 @@ def main(argv):
     build_dependencies = True
     build_target_name = None
     silent = False
-    visual_studio = "2017"
+    visual_studio = "2019"
     installTizen = False
     skip_tizen = False
     no_sqlite_src = False
