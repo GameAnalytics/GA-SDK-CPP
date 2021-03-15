@@ -233,7 +233,7 @@ class TargetOSX(TargetCMake):
 
 class TargetWin(TargetCMake):
     @staticmethod
-    def get_msbuild_path(vs="2017"):
+    def get_msbuild_path(vs="2019"):
         if vs == "2015":
             try:
                 aReg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
@@ -242,7 +242,7 @@ class TargetWin(TargetCMake):
             except OSError:
                 print('msbuild path not found')
             return ''
-        elif vs == "2017":
+        elif vs == "2017" or vs == "2019":
             path = call_process(
                 [
                     os.path.join(
@@ -257,10 +257,13 @@ class TargetWin(TargetCMake):
                 ],
                 os.getcwd(),
                 useOutput=True
-            )
+            ).decode("utf-8")
 
-            path = path.decode("utf-8").replace("2019", "2017")
-            path = os.path.join(path, "MSBuild", "15.0", "Bin")
+            if vs == "2017":
+                path = path.decode("utf-8").replace("2019", "2017")
+                path = os.path.join(path, "MSBuild", "15.0", "Bin")
+            else:
+                path = os.path.join(path, "MSBuild", "Current", "Bin")
 
             print("get_msbuild_path: " + path)
 
@@ -268,7 +271,7 @@ class TargetWin(TargetCMake):
         else:
             return ''
 
-    def build(self, silent=False, vs="2017"):
+    def build(self, silent=False, vs="2019"):
         # call msbuild and compile projects in solution
         subprocess.check_call([
             os.path.join(self.get_msbuild_path(vs), 'MSBuild.exe'),
@@ -344,6 +347,10 @@ class TargetWin(TargetCMake):
 
 
 class TargetWin10(TargetWin):
+    def __init__(self, name, generator, architecture):
+        super(TargetWin10, self).__init__(name, generator)
+        self.architecture = architecture
+
     def create_project_file(self, noSqliteSrc="NO"):
         call_process(
             [
@@ -358,7 +365,9 @@ class TargetWin10(TargetWin):
                 '-DCMAKE_SYSTEM_VERSION=10.0',
                 '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
                 '-G',
-                self.generator
+                self.generator,
+                '-A',
+                self.architecture
             ],
             self.build_dir()
         )
@@ -728,27 +737,21 @@ all_targets = {
     'win32-vc140-static': TargetWin('win32-vc140-static', 'Visual Studio 14'),
     'win32-vc140-static-no-sqlite-src': TargetWin('win32-vc140-static-no-sqlite-src', 'Visual Studio 14'),
     'win32-vc140-mt-static': TargetWin('win32-vc140-mt-static', 'Visual Studio 14'),
-    'win32-vc120-static': TargetWin('win32-vc120-static', 'Visual Studio 12'),
-    'win32-vc120-mt-static': TargetWin('win32-vc120-mt-static', 'Visual Studio 12'),
     'win32-vc141-shared': TargetWin('win32-vc141-shared', 'Visual Studio 15'),
     'win32-vc140-shared': TargetWin('win32-vc140-shared', 'Visual Studio 14'),
-    'win32-vc120-shared': TargetWin('win32-vc120-shared', 'Visual Studio 12'),
     'win64-vc141-static': TargetWin('win64-vc141-static', 'Visual Studio 15 Win64'),
     'win64-vc141-mt-static': TargetWin('win64-vc141-mt-static', 'Visual Studio 15 Win64'),
     'win64-vc140-static': TargetWin('win64-vc140-static', 'Visual Studio 14 Win64'),
     'win64-vc140-static-no-sqlite-src': TargetWin('win64-vc140-static-no-sqlite-src', 'Visual Studio 14 Win64'),
     'win64-vc140-mt-static': TargetWin('win64-vc140-mt-static', 'Visual Studio 14 Win64'),
-    'win64-vc120-static': TargetWin('win64-vc120-static', 'Visual Studio 12 Win64'),
-    'win64-vc120-mt-static': TargetWin('win64-vc120-mt-static', 'Visual Studio 12 Win64'),
     'win64-vc141-shared': TargetWin('win64-vc141-shared', 'Visual Studio 15 Win64'),
     'win64-vc140-shared': TargetWin('win64-vc140-shared', 'Visual Studio 14 Win64'),
-    'win64-vc120-shared': TargetWin('win64-vc120-shared', 'Visual Studio 12 Win64'),
-    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 15'),
-    'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 15 Win64'),
-    'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 15 ARM'),
-    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 15'),
-    'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 15 Win64'),
-    'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 15 ARM'),
+    'uwp-x86-vc140-static': TargetWin10('uwp-x86-vc140-static', 'Visual Studio 16 2019', 'Win32'),
+    'uwp-x64-vc140-static': TargetWin10('uwp-x64-vc140-static', 'Visual Studio 16 2019', 'x64'),
+    'uwp-arm-vc140-static': TargetWin10('uwp-arm-vc140-static', 'Visual Studio 16 2019', 'ARM'),
+    'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 16 2019', 'Win32'),
+    'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 16 2019', 'x64'),
+    'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 16 2019', 'ARM'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-static-no-sqlite-src': TargetOSX('osx-static-no-sqlite-src', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
@@ -827,8 +830,8 @@ available_targets = {
 }[platform.system()]
 
 valid_visual_studio = [
-    '2015',
-    '2017'
+    '2017',
+    '2019'
 ]
 
 # Sorted since we want android-wrapper to be built after android-shared (due to jni generation)
@@ -855,8 +858,8 @@ def build(target_name, vs, silent=False):
         sys.exit(1)
 
     if platform.system() == 'Windows':
-        if vs != "2017" and 'vc141' in target_name:
-            print('can only build vc141 target on visual studio 2017')
+        if (vs != "2017" or vs != "2019") and 'vc141' in target_name:
+            print('can only build vc141 target on visual studio 2017 or 2019')
             sys.exit(1)
 
     target = available_targets[target_name]
@@ -875,7 +878,7 @@ def build(target_name, vs, silent=False):
         target.build(silent=silent)
 
 
-def build_targets(target_names, silent=False, vs="2017", skip_tizen=False, no_sqlite_src=False):
+def build_targets(target_names, silent=False, vs="2019", skip_tizen=False, no_sqlite_src=False):
 
     for target_name in target_names:
         if skip_tizen and 'tizen' in target_name:
@@ -911,7 +914,7 @@ def main(argv, silent=False):
         sys.exit(2)
 
     build_target_name = None
-    visual_studio = "2017"
+    visual_studio = "2019"
     skip_tizen = False
     no_sqlite_src = False
 
