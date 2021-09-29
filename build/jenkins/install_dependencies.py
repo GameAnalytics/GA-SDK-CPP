@@ -27,7 +27,7 @@ if platform == 'win32':  # win32 and/or win64
         TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-32.exe'
 elif platform == 'darwin':  # OSX
     CMAKE_URL = 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Darwin-x86_64.tar.gz'
-    TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_macos-64.bin'
+    TIZEN_URL = 'https://download.tizen.org/sdk/Installer/tizen-studio_4.1.1/web-cli_Tizen_Studio_4.1.1_macos-64.bin'
 elif platform in ('linux', 'linux2'):
     CMAKE_URL = 'http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz'
 else:
@@ -167,7 +167,8 @@ def install_tizen(silent=False):
 
             os.unlink(tizen_package)
 
-            update_manager = os.path.join(config.TIZEN_ROOT, "update-manager", "update-manager-cli.bin")
+            update_manager = os.path.join(
+                config.TIZEN_ROOT, "package-manager", "package-manager-cli.bin")
             tizen_ide = os.path.join(config.TIZEN_ROOT, "tools", "ide", "bin", "tizen")
 
             st = os.stat(update_manager)

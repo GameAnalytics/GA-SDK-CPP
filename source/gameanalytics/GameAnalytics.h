@@ -143,17 +143,25 @@ namespace gameanalytics
 
         // add events
         static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType);
+        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const char* customFields);
 
         static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId);
+        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* customFields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, const char* customFields);
 
         static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* customFields);
 
         static void addDesignEvent(const char* eventId);
+        static void addDesignEvent(const char* eventId, const char* customFields);
 
         static void addDesignEvent(const char* eventId, double value);
+        static void addDesignEvent(const char* eventId, double value, const char* customFields);
+
         static void addErrorEvent(EGAErrorSeverity severity, const char* message);
+        static void addErrorEvent(EGAErrorSeverity severity, const char* message, const char* customFields);
 
         // set calls can be changed at any time (pre- and post-initialize)
         // some calls only work after a configure is called (setCustomDimension)
@@ -208,6 +216,13 @@ namespace gameanalytics
         static void addDesignEvent(const std::wstring& eventId);
         static void addDesignEvent(const std::wstring& eventId, double value);
         static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message);
+        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& customFields);
+        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& customFields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& customFields);
+        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& customFields);
+        static void addDesignEvent(const std::wstring& eventId, const std::wstring& customFields);
+        static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& customFields);
+        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& customFields);
         static void setCustomDimension01(const std::wstring& dimension01);
         static void setCustomDimension02(const std::wstring& dimension02);
         static void setCustomDimension03(const std::wstring& dimension03);
@@ -215,22 +230,6 @@ namespace gameanalytics
 
      private:
          static bool _endThread;
-#if USE_UWP
-        static void addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields);
-        static void addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields);
-        static void addDesignEvent(const std::wstring& eventId, const std::wstring& fields);
-        static void addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields);
-        static void addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields);
-#endif
-        static void addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const char* fields);
-        static void addResourceEvent(EGAResourceFlowType flowType, const char* currency, float amount, const char* itemType, const char* itemId, const char* fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, const char* fields);
-        static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, const char* fields);
-        static void addDesignEvent(const char* eventId, const char* fields);
-        static void addDesignEvent(const char* eventId, double value, const char* fields);
-        static void addErrorEvent(EGAErrorSeverity severity, const char* message, const char* fields);
 
         static bool isSdkReady(bool needsInitialized);
         static bool isSdkReady(bool needsInitialized, bool warn);
