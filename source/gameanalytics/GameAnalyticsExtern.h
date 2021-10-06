@@ -35,21 +35,21 @@ EXPORT void configureUserId(const char *uId);
 EXPORT void initialize(const char *gameKey, const char *gameSecret);
 
 // add events
-EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType/*, const char *fields*/);
+EXPORT void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType, const char *customFields);
 EXPORT void addBusinessEventJson(const char *jsonArgs);
 
-EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId/*, const char *fields*/);
+EXPORT void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId, const char *customFields);
 EXPORT void addResourceEventJson(const char *jsonArgs);
 
-EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03/*, const char *fields*/);
+EXPORT void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, const char *customFields);
 EXPORT void addProgressionEventJson(const char *jsonArgs);
 
-EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score/*, const char *fields*/);
+EXPORT void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score, const char *customFields);
 EXPORT void addProgressionEventWithScoreJson(const char *jsonArgs);
 
-EXPORT void addDesignEvent(const char *eventId/*, const char *fields*/);
-EXPORT void addDesignEventWithValue(const char *eventId, double value/*, const char *fields*/);
-EXPORT void addErrorEvent(double severity, const char *message/*, const char *fields*/);
+EXPORT void addDesignEvent(const char *eventId, const char *customFields);
+EXPORT void addDesignEventWithValue(const char *eventId, double value, const char *customFields);
+EXPORT void addErrorEvent(double severity, const char *message, const char *customFields);
 
 // set calls can be changed at any time (pre- and post-initialize)
 // some calls only work after a configure is called (setCustomDimension)
@@ -105,14 +105,14 @@ EXPORT void setCustomDimension01UWP(const wchar_t *dimension01);
 EXPORT void setCustomDimension02UWP(const wchar_t *dimension02);
 EXPORT void setCustomDimension03UWP(const wchar_t *dimension03);
 
-EXPORT void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType/*, const char *fields*/);
-EXPORT void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId/*, const char *fields*/);
-EXPORT void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03/*, const char *fields*/);
-EXPORT void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score/*, const char *fields*/);
+EXPORT void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields);
+EXPORT void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *fields);
+EXPORT void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, const wchar_t *fields);
+EXPORT void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score, const wchar_t *fields);
 
-EXPORT void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/);
-EXPORT void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/);
-EXPORT void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/);
+EXPORT void addDesignEventUWP(const wchar_t *eventId, const wchar_t *fields);
+EXPORT void addDesignEventWithValueUWP(const wchar_t *eventId, double value, const wchar_t *fields);
+EXPORT void addErrorEventUWP(double severity, const wchar_t *message, const wchar_t *fields);
 
 EXPORT void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out);
 EXPORT void getRemoteConfigsContentAsStringUWP(wchar_t *out);

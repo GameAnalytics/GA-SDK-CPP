@@ -76,9 +76,9 @@ void initialize(const char *gameKey, const char *gameSecret)
 }
 
 // add events
-void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType/*, const char *fields*/)
+void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType, const char *fields)
 {
-    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType/*, fields*/);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType, fields);
 }
 
 void addBusinessEventJson(const char *jsonArgs)
@@ -88,14 +88,14 @@ void addBusinessEventJson(const char *jsonArgs)
 
     if(json.IsArray() && json.Size() == 5)
     {
-        gameanalytics::GameAnalytics::addBusinessEvent(json[0].GetString(), (int)(json[1].GetDouble()), json[2].GetString(), json[3].GetString(), json[4].GetString()/*, json[5].asString().c_str()*/);
+        gameanalytics::GameAnalytics::addBusinessEvent(json[0].GetString(), (int)(json[1].GetDouble()), json[2].GetString(), json[3].GetString(), json[4].GetString(), json[5].GetString());
     }
 }
 
-void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId/*, const char *fields*/)
+void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId, const char *fields)
 {
     int flowTypeInt = (int)flowType;
-    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId/*, fields*/);
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId, fields);
 }
 
 void addResourceEventJson(const char *jsonArgs)
@@ -106,14 +106,14 @@ void addResourceEventJson(const char *jsonArgs)
     if(json.IsArray() && json.Size() == 5)
     {
         int flowTypeInt = (int)(json[0].GetDouble());
-        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].GetString(), (float)(json[2].GetDouble()), json[3].GetString(), json[4].GetString()/*, json[5].asString().c_str()*/);
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].GetString(), (float)(json[2].GetDouble()), json[3].GetString(), json[4].GetString(), json[5].GetString());
     }
 }
 
-void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03/*, const char *fields*/)
+void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, const char *fields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03/*, fields*/);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
 }
 
 void addProgressionEventJson(const char *jsonArgs)
@@ -124,14 +124,14 @@ void addProgressionEventJson(const char *jsonArgs)
     if(json.IsArray() && json.Size() == 4)
     {
         int progressionStatusInt = (int)(json[0].GetDouble());
-        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].GetString(), json[2].GetString(), json[3].GetString()/*, json[4].asString().c_str()*/);
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].GetString(), json[2].GetString(), json[3].GetString(), json[4].GetString());
     }
 }
 
-void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score/*, const char *fields*/)
+void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score, const char *fields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score/*, fields*/);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score, fields);
 }
 
 void addProgressionEventWithScoreJson(const char *jsonArgs)
@@ -142,24 +142,24 @@ void addProgressionEventWithScoreJson(const char *jsonArgs)
     if(json.IsArray() && json.Size() == 5)
     {
         int progressionStatusInt = (int)(json[0].GetDouble());
-        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].GetString(), json[2].GetString(), json[3].GetString(), (int)(json[4].GetDouble())/*, json[5].asString().c_str()*/);
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].GetString(), json[2].GetString(), json[3].GetString(), (int)(json[4].GetDouble()), json[5].GetString());
     }
 }
 
-void addDesignEvent(const char *eventId/*, const char *fields*/)
+void addDesignEvent(const char *eventId, const char *fields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId/*, fields*/);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, fields);
 }
 
-void addDesignEventWithValue(const char *eventId, double value/*, const char *fields*/)
+void addDesignEventWithValue(const char *eventId, double value, const char *fields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId, value/*, fields*/);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value, fields);
 }
 
-void addErrorEvent(double severity, const char *message/*, const char *fields*/)
+void addErrorEvent(double severity, const char *message, const char *fields)
 {
     int severityInt = (int)severity;
-    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message, fields);
 }
 
 // set calls can be changed at any time (pre- and post-initialize)
@@ -358,43 +358,43 @@ void setCustomDimension03UWP(const wchar_t *dimension03)
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
 }
 
-void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType/*, const char *fields*/)
+void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields)
 {
-    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType/*, fields*/);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType, fields);
 }
 
-void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId/*, const char *fields*/)
+void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *fields)
 {
     int flowTypeInt = (int)flowType;
-    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId/*, fields*/);
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId, fields);
 }
 
-void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03/*, const char *fields*/)
+void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, const wchar_t *fields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03/*, fields*/);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
 }
 
-void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score/*, const char *fields*/)
+void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score, const wchar_t *fields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score/*, fields*/);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score, fields);
 }
 
-void addDesignEventUWP(const wchar_t *eventId/*, const char *fields*/)
+void addDesignEventUWP(const wchar_t *eventId, const wchar_t *fields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId/*, fields*/);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, fields);
 }
 
-void addDesignEventWithValueUWP(const wchar_t *eventId, double value/*, const char *fields*/)
+void addDesignEventWithValueUWP(const wchar_t *eventId, double value, const wchar_t *fields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId, value/*, fields*/);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value, fields);
 }
 
-void addErrorEventUWP(double severity, const wchar_t *message/*, const char *fields*/)
+void addErrorEventUWP(double severity, const wchar_t *message, const wchar_t *fields)
 {
     int severityInt = (int)severity;
-    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message, fields);
 }
 
 void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out)
