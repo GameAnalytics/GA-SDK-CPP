@@ -28,6 +28,12 @@ Dependencies
 
 Changelog
 ---------
+**3.1.1**
+* small fixes to shared libraries
+
+**3.1.0**
+* added custom event fields feature
+
 **3.0.8**
 * updated client ts validator
 
