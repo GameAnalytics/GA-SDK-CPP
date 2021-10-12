@@ -246,15 +246,6 @@ namespace gameanalytics
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventDict, cleanedFields);
 
-            {
-                rapidjson::StringBuffer buffer;
-                {
-                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                    eventDict.Accept(writer);
-                }
-                logging::GALogger::w("eventDict: %s", buffer.GetString());
-            }
-
             rapidjson::StringBuffer buffer;
             {
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
