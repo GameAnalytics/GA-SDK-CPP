@@ -440,62 +440,54 @@ namespace gameanalytics
             delete[] result;
         }
 
-        void GAUtilities::setJsonKeyValue(rapidjson::Document& d, const char* key, const rapidjson::Value& value)
+        bool GAUtilities::mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapidjson::Document::AllocatorType &allocator)
         {
-            rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
-            rapidjson::Value::MemberIterator iter = d.FindMember(key);
-            if (iter == d.MemberEnd())
+            for (auto srcIt = srcObject.MemberBegin(); srcIt != srcObject.MemberEnd(); ++srcIt)
             {
-                if(value.IsNumber())
+                auto dstIt = dstObject.FindMember(srcIt->name);
+                if (dstIt == dstObject.MemberEnd())
                 {
-                    rapidjson::Value v(key, allocator);
+                    rapidjson::Value dstName;
+                    dstName.CopyFrom(srcIt->name, allocator);
+                    rapidjson::Value dstVal;
+                    dstVal.CopyFrom(srcIt->value, allocator);
 
-                    if(value.IsInt64())
-                    {
-                        d.AddMember(v.Move(), value.GetInt64(), allocator);
-                    }
-                    else if(value.IsInt())
-                    {
-                        d.AddMember(v.Move(), value.GetInt(), allocator);
-                    }
-                    else if(value.IsDouble())
-                    {
-                        d.AddMember(v.Move(), value.GetDouble(), allocator);
-                    }
+                    dstObject.AddMember(dstName, dstVal, allocator);
+
+                    dstName.CopyFrom(srcIt->name, allocator);
+                    dstIt = dstObject.FindMember(dstName);
+                    if (dstIt == dstObject.MemberEnd())
+                        return false;
                 }
-                else if(value.IsString())
+                else
                 {
-                    rapidjson::Value v(key, allocator);
-                    rapidjson::Value v1(value.GetString(), allocator);
-                    d.AddMember(v.Move(), v1.Move(), allocator);
+                    auto srcT = srcIt->value.GetType();
+                    auto dstT = dstIt->value.GetType();
+                    if (srcT != dstT)
+                        return false;
+
+                    if (srcIt->value.IsArray())
+                    {
+                        for (auto arrayIt = srcIt->value.Begin(); arrayIt != srcIt->value.End(); ++arrayIt)
+                        {
+                            rapidjson::Value dstVal;
+                            dstVal.CopyFrom(*arrayIt, allocator);
+                            dstIt->value.PushBack(dstVal, allocator);
+                        }
+                    }
+                    else if (srcIt->value.IsObject())
+                    {
+                        if (!mergeObjects(dstIt->value, srcIt->value, allocator))
+                            return false;
+                    }
+                    else
+                    {
+                        dstIt->value.CopyFrom(srcIt->value, allocator);
+                    }
                 }
             }
-            else
-            {
-                if(value.IsNumber())
-                {
-                    if(value.IsInt64())
-                    {
-                        rapidjson::Value v(value.GetInt64());
-                        iter->value = v.Move();
-                    }
-                    else if(value.IsInt())
-                    {
-                        rapidjson::Value v(value.GetInt());
-                        iter->value = v.Move();
-                    }
-                    else if(value.IsDouble())
-                    {
-                        rapidjson::Value v(value.GetDouble());
-                        iter->value = v.Move();
-                    }
-                }
-                else if(value.IsString())
-                {
-                    rapidjson::Value v(value.GetString(), allocator);
-                    iter->value = v.Move();
-                }
-            }
+
+            return true;
         }
     }
 }

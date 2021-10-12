@@ -246,10 +246,19 @@ namespace gameanalytics
             state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
             GAEvents::addFieldsToEvent(eventDict, cleanedFields);
 
+            {
+                rapidjson::StringBuffer buffer;
+                {
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    eventDict.Accept(writer);
+                }
+                logging::GALogger::w("eventDict: %s", buffer.GetString());
+            }
+
             rapidjson::StringBuffer buffer;
             {
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                fields.Accept(writer);
+                cleanedFields.Accept(writer);
             }
 
             // Log
@@ -866,7 +875,7 @@ namespace gameanalytics
         }
 
         // GENERAL
-        void GAEvents::addEventToStore(const rapidjson::Value& eventData)
+        void GAEvents::addEventToStore(rapidjson::Document& eventData)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -920,13 +929,7 @@ namespace gameanalytics
             const char* jsonDefaults = defaultEvbuffer.GetString();
 
             // Merge with eventData
-            for (rapidjson::Value::ConstMemberIterator itr = eventData.MemberBegin(); itr != eventData.MemberEnd(); ++itr)
-            {
-                const char* key = itr->name.GetString();
-                const rapidjson::Value& value = eventData[key];
-
-                utilities::GAUtilities::setJsonKeyValue(ev, key, value);
-            }
+            utilities::GAUtilities::mergeObjects(ev, eventData, ev.GetAllocator());
 
             // Create json string representation
             rapidjson::StringBuffer evBuffer;
@@ -1001,11 +1004,11 @@ namespace gameanalytics
                 return;
             }
 
-            if(!fields.ObjectEmpty())
+            if (fields.IsObject() && fields.MemberCount() > 0)
             {
                 rapidjson::Value v(rapidjson::kObjectType);
                 v.CopyFrom(fields, fields.GetAllocator());
-                eventData.AddMember("custom_fields", v, eventData.GetAllocator());
+                eventData.AddMember("custom_fields", v.Move(), eventData.GetAllocator());
             }
         }
 
