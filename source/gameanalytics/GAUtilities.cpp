@@ -439,55 +439,5 @@ namespace gameanalytics
             logging::GALogger::i(format, result);
             delete[] result;
         }
-
-        bool GAUtilities::mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapidjson::Document::AllocatorType &allocator)
-        {
-            for (auto srcIt = srcObject.MemberBegin(); srcIt != srcObject.MemberEnd(); ++srcIt)
-            {
-                auto dstIt = dstObject.FindMember(srcIt->name);
-                if (dstIt == dstObject.MemberEnd())
-                {
-                    rapidjson::Value dstName;
-                    dstName.CopyFrom(srcIt->name, allocator);
-                    rapidjson::Value dstVal;
-                    dstVal.CopyFrom(srcIt->value, allocator);
-
-                    dstObject.AddMember(dstName, dstVal, allocator);
-
-                    dstName.CopyFrom(srcIt->name, allocator);
-                    dstIt = dstObject.FindMember(dstName);
-                    if (dstIt == dstObject.MemberEnd())
-                        return false;
-                }
-                else
-                {
-                    auto srcT = srcIt->value.GetType();
-                    auto dstT = dstIt->value.GetType();
-                    if (srcT != dstT)
-                        return false;
-
-                    if (srcIt->value.IsArray())
-                    {
-                        for (auto arrayIt = srcIt->value.Begin(); arrayIt != srcIt->value.End(); ++arrayIt)
-                        {
-                            rapidjson::Value dstVal;
-                            dstVal.CopyFrom(*arrayIt, allocator);
-                            dstIt->value.PushBack(dstVal, allocator);
-                        }
-                    }
-                    else if (srcIt->value.IsObject())
-                    {
-                        if (!mergeObjects(dstIt->value, srcIt->value, allocator))
-                            return false;
-                    }
-                    else
-                    {
-                        dstIt->value.CopyFrom(srcIt->value, allocator);
-                    }
-                }
-            }
-
-            return true;
-        }
     }
 }
