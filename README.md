@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.1.2**
+* fix to custom event fields
+
 **3.1.1**
 * small fixes to shared libraries
 
