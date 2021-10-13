@@ -19,6 +19,56 @@
 #include "rapidjson/error/en.h"
 #include <inttypes.h>
 
+bool mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapidjson::Document::AllocatorType &allocator)
+{
+    for (auto srcIt = srcObject.MemberBegin(); srcIt != srcObject.MemberEnd(); ++srcIt)
+    {
+        auto dstIt = dstObject.FindMember(srcIt->name);
+        if (dstIt == dstObject.MemberEnd())
+        {
+            rapidjson::Value dstName;
+            dstName.CopyFrom(srcIt->name, allocator);
+            rapidjson::Value dstVal;
+            dstVal.CopyFrom(srcIt->value, allocator);
+
+            dstObject.AddMember(dstName, dstVal, allocator);
+
+            dstName.CopyFrom(srcIt->name, allocator);
+            dstIt = dstObject.FindMember(dstName);
+            if (dstIt == dstObject.MemberEnd())
+                return false;
+        }
+        else
+        {
+            auto srcT = srcIt->value.GetType();
+            auto dstT = dstIt->value.GetType();
+            if (srcT != dstT)
+                return false;
+
+            if (srcIt->value.IsArray())
+            {
+                for (auto arrayIt = srcIt->value.Begin(); arrayIt != srcIt->value.End(); ++arrayIt)
+                {
+                    rapidjson::Value dstVal;
+                    dstVal.CopyFrom(*arrayIt, allocator);
+                    dstIt->value.PushBack(dstVal, allocator);
+                }
+            }
+            else if (srcIt->value.IsObject())
+            {
+                if (!mergeObjects(dstIt->value, srcIt->value, allocator))
+                    return false;
+            }
+            else
+            {
+                dstIt->value.CopyFrom(srcIt->value, allocator);
+            }
+        }
+    }
+
+    return true;
+}
+
 namespace gameanalytics
 {
     namespace events
@@ -249,7 +299,7 @@ namespace gameanalytics
             rapidjson::StringBuffer buffer;
             {
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                fields.Accept(writer);
+                cleanedFields.Accept(writer);
             }
 
             // Log
@@ -866,7 +916,7 @@ namespace gameanalytics
         }
 
         // GENERAL
-        void GAEvents::addEventToStore(const rapidjson::Value& eventData)
+        void GAEvents::addEventToStore(rapidjson::Document& eventData)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -920,13 +970,7 @@ namespace gameanalytics
             const char* jsonDefaults = defaultEvbuffer.GetString();
 
             // Merge with eventData
-            for (rapidjson::Value::ConstMemberIterator itr = eventData.MemberBegin(); itr != eventData.MemberEnd(); ++itr)
-            {
-                const char* key = itr->name.GetString();
-                const rapidjson::Value& value = eventData[key];
-
-                utilities::GAUtilities::setJsonKeyValue(ev, key, value);
-            }
+            mergeObjects(ev, eventData, ev.GetAllocator());
 
             // Create json string representation
             rapidjson::StringBuffer evBuffer;
@@ -1001,11 +1045,11 @@ namespace gameanalytics
                 return;
             }
 
-            if(!fields.ObjectEmpty())
+            if (fields.IsObject() && fields.MemberCount() > 0)
             {
                 rapidjson::Value v(rapidjson::kObjectType);
                 v.CopyFrom(fields, fields.GetAllocator());
-                eventData.AddMember("custom_fields", v, eventData.GetAllocator());
+                eventData.AddMember("custom_fields", v.Move(), eventData.GetAllocator());
             }
         }
 
