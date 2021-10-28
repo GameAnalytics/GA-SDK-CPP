@@ -779,8 +779,10 @@ namespace gameanalytics
                     cacheIdentifier();
                 }
                 rapidjson::Value v(getIdentifier(), allocator);
+                store::GAStore::setState("last_used_identifier", getIdentifier());
                 out.AddMember("user_id", v.Move(), allocator);
             }
+
             // SDK version
             {
                 rapidjson::Value v(device::GADevice::getRelevantSdkVersion(), allocator);
@@ -945,6 +947,14 @@ namespace gameanalytics
                 d.Parse(sdkConfigCachedString);
                 if (!d.IsNull())
                 {
+                    const char *lastUsedIdentifier = state_dict.HasMember("last_used_identifier") ? state_dict["last_used_identifier"].GetString() : "";
+                    if (strlen(lastUsedIdentifier) > 0 && strcmp(lastUsedIdentifier, getIdentifier()) != 0)
+                    {
+                        if (d.HasMember("configs_hash"))
+                        {
+                            d.RemoveMember("configs_hash");
+                        }
+                    }
                     i->_sdkConfigCached.CopyFrom(d, i->_sdkConfigCached.GetAllocator());
                 }
             }

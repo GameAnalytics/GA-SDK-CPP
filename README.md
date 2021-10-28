@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.1.3**
+* added functionality to force a new user in a/b testing without having to uninstall app first, simply use custom user id function to set a new user id which hasn't been used yet
+
 **3.1.2**
 * fix to custom event fields
 
