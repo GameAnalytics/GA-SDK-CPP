@@ -157,6 +157,17 @@ namespace gameanalytics
             return i->_currentCustomDimension03;
         }
 
+        void GAState::getGlobalCustomEventFields(rapidjson::Document& out)
+        {
+            GAState *i = getInstance();
+            if (!i)
+            {
+                return;
+            }
+
+            out.CopyFrom(i->_currentGlobalCustomEventFields, out.GetAllocator());
+        }
+
         void GAState::setAvailableCustomDimensions01(const StringVector& availableCustomDimensions)
         {
             GAState* i = getInstance();
@@ -361,6 +372,37 @@ namespace gameanalytics
                 store::GAStore::setState("dimension03", dimension);
             }
             logging::GALogger::i("Set custom03 dimension value: %s", dimension);
+        }
+
+        void GAState::setGlobalCustomEventFields(const char *customFields)
+        {
+            GAState *i = getInstance();
+            if (!i)
+            {
+                return;
+            }
+
+            if (!customFields || strlen(customFields) == 0)
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                i->_currentGlobalCustomEventFields.CopyFrom(d, i->_currentGlobalCustomEventFields.GetAllocator());
+                return;
+            }
+
+            rapidjson::Document d;
+            d.Parse(customFields);
+            if(!d.IsNull())
+            {
+                i->_currentGlobalCustomEventFields.CopyFrom(d, i->_currentGlobalCustomEventFields.GetAllocator());
+            }
+            else
+            {
+                d.SetObject();
+                i->_currentGlobalCustomEventFields.CopyFrom(d, i->_currentGlobalCustomEventFields.GetAllocator());
+            }
+
+            logging::GALogger::i("Set global custom event fields: %s", customFields);
         }
 
         void GAState::incrementSessionNum()

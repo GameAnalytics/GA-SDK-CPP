@@ -170,6 +170,18 @@ namespace gameanalytics
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
 
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventDict, cleanedFields);
+
             // Add to store
             addEventToStore(eventDict);
 
@@ -218,6 +230,18 @@ namespace gameanalytics
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventDict);
+
+            rapidjson::Document cleanedFields;
+            cleanedFields.SetObject();
+
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventDict, cleanedFields);
 
             // Add to store
             addEventToStore(eventDict);
@@ -293,8 +317,20 @@ namespace gameanalytics
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
-            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            if (fields.IsObject() && fields.MemberCount() > 0)
+            {
+                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            }
+            else
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventDict, cleanedFields);
 
             rapidjson::StringBuffer buffer;
             {
@@ -361,8 +397,20 @@ namespace gameanalytics
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
-            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            if (fields.IsObject() && fields.MemberCount() > 0)
+            {
+                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            }
+            else
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventDict, cleanedFields);
 
             rapidjson::StringBuffer buffer;
             {
@@ -469,8 +517,20 @@ namespace gameanalytics
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
-            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            GAEvents::addFieldsToEvent(eventDict, cleanedFields);
+
+            if (fields.IsObject() && fields.MemberCount() > 0)
+            {
+                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            }
+            else
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventDict, cleanedFields);
 
             rapidjson::StringBuffer buffer;
             {
@@ -529,8 +589,20 @@ namespace gameanalytics
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
-            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            GAEvents::addFieldsToEvent(eventData, cleanedFields);
+
+            if (fields.IsObject() && fields.MemberCount() > 0)
+            {
+                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            }
+            else
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
@@ -593,8 +665,20 @@ namespace gameanalytics
 
             rapidjson::Document cleanedFields;
             cleanedFields.SetObject();
-            state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            GAEvents::addFieldsToEvent(eventData, cleanedFields);
+
+            if (fields.IsObject() && fields.MemberCount() > 0)
+            {
+                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+            }
+            else
+            {
+                rapidjson::Document d;
+                d.SetObject();
+                state::GAState::getGlobalCustomEventFields(d);
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+            }
+
+            GAEvents::addCustomFieldsToEvent(eventData, cleanedFields);
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
@@ -831,6 +915,22 @@ namespace gameanalytics
                 rapidjson::Document ev;
                 ev.SetObject();
                 state::GAState::getEventAnnotations(ev);
+
+                // Add custom dimensions
+                GAEvents::addDimensionsToEvent(ev);
+
+                rapidjson::Document cleanedFields;
+                cleanedFields.SetObject();
+
+                {
+                    rapidjson::Document d;
+                    d.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+                }
+
+                GAEvents::addCustomFieldsToEvent(ev, cleanedFields);
+
                 rapidjson::StringBuffer buffer;
                 {
                     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -1038,7 +1138,7 @@ namespace gameanalytics
             }
         }
 
-        void GAEvents::addFieldsToEvent(rapidjson::Document& eventData, rapidjson::Document& fields)
+        void GAEvents::addCustomFieldsToEvent(rapidjson::Document &eventData, rapidjson::Document &fields)
         {
             if(eventData.IsNull())
             {

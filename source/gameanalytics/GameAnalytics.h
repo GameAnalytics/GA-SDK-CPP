@@ -174,6 +174,8 @@ namespace gameanalytics
         static void setCustomDimension02(const char* dimension02);
         static void setCustomDimension03(const char* dimension03);
 
+        static void setGlobalCustomEventFields(const char *customFields);
+
         static void startSession();
         static void endSession();
 
@@ -226,6 +228,7 @@ namespace gameanalytics
         static void setCustomDimension01(const std::wstring& dimension01);
         static void setCustomDimension02(const std::wstring& dimension02);
         static void setCustomDimension03(const std::wstring& dimension03);
+        static void setGlobalCustomEventFields(const std::wstring& customFields);
 #endif
 
      private:
