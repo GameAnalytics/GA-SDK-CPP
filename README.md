@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.0**
+* added global custom event fields function to allow to add custom fields to events sent automatically by the SDK
+
 **3.1.3**
 * added functionality to force a new user in a/b testing without having to uninstall app first, simply use custom user id function to set a new user id which hasn't been used yet
 

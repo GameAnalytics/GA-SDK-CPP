@@ -62,6 +62,8 @@ EXPORT void setCustomDimension01(const char *dimension01);
 EXPORT void setCustomDimension02(const char *dimension02);
 EXPORT void setCustomDimension03(const char *dimension03);
 
+EXPORT void setGlobalCustomEventFields(const char *customFields);
+
 EXPORT void gameAnalyticsStartSession();
 EXPORT void gameAnalyticsEndSession();
 
@@ -104,6 +106,8 @@ EXPORT void initializeUWP(const wchar_t *gameKey, const wchar_t *gameSecret);
 EXPORT void setCustomDimension01UWP(const wchar_t *dimension01);
 EXPORT void setCustomDimension02UWP(const wchar_t *dimension02);
 EXPORT void setCustomDimension03UWP(const wchar_t *dimension03);
+
+EXPORT void setGlobalCustomEventFieldsUWP(const wchar_t *customFields);
 
 EXPORT void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields);
 EXPORT void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *fields);

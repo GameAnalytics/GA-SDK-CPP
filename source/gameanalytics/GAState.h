@@ -42,6 +42,7 @@ namespace gameanalytics
             static const char* getCurrentCustomDimension01();
             static const char* getCurrentCustomDimension02();
             static const char* getCurrentCustomDimension03();
+            static void getGlobalCustomEventFields(rapidjson::Document& out);
             static const char* getGameKey();
             static const char* getGameSecret();
             static void setAvailableCustomDimensions01(const StringVector& dimensions);
@@ -54,6 +55,7 @@ namespace gameanalytics
             static void setCustomDimension01(const char* dimension);
             static void setCustomDimension02(const char* dimension);
             static void setCustomDimension03(const char* dimension);
+            static void setGlobalCustomEventFields(const char *customFields);
             static void incrementSessionNum();
             static void incrementTransactionNum();
             static void incrementProgressionTries(const char* progression);
@@ -132,6 +134,7 @@ namespace gameanalytics
             char _currentCustomDimension01[65] = {'\0'};
             char _currentCustomDimension02[65] = {'\0'};
             char _currentCustomDimension03[65] = {'\0'};
+            rapidjson::Document _currentGlobalCustomEventFields;
             char _gameKey[65] = {'\0'};
             char _gameSecret[65] = {'\0'};
             StringVector _availableCustomDimensions01;

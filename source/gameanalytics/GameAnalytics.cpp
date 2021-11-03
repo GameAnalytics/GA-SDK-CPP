@@ -459,7 +459,7 @@ namespace gameanalytics
         snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
         std::array<char, 65> cartType = {'\0'};
         snprintf(cartType.data(), cartType.size(), "%s", cartType_ ? cartType_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
         {
@@ -493,7 +493,7 @@ namespace gameanalytics
         snprintf(itemType.data(), itemType.size(), "%s", itemType_ ? itemType_ : "");
         std::array<char, 65> itemId = {'\0'};
         snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
         {
@@ -526,7 +526,7 @@ namespace gameanalytics
         snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
         std::array<char, 65> progression03 = {'\0'};
         snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_);
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
         {
@@ -560,7 +560,7 @@ namespace gameanalytics
         snprintf(progression02.data(), progression02.size(), "%s", progression02_ ? progression02_ : "");
         std::array<char, 65> progression03 = {'\0'};
         snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
         {
@@ -590,7 +590,7 @@ namespace gameanalytics
 
         std::array<char, 400> eventId = {'\0'};
         snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, fields]()
         {
@@ -618,7 +618,7 @@ namespace gameanalytics
 
         std::array<char, 400> eventId = {'\0'};
         snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
         {
@@ -646,7 +646,7 @@ namespace gameanalytics
 
         std::array<char, 8200> message = {'\0'};
         snprintf(message.data(), message.size(), "%s", message_ ? message_ : "");
-        std::array<char, 65> fields = {'\0'};
+        std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
         threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
         {
@@ -811,6 +811,21 @@ namespace gameanalytics
                 return;
             }
             state::GAState::setCustomDimension03(dimension.data());
+        });
+    }
+
+    void GameAnalytics::setGlobalCustomEventFields(const char *customFields_)
+    {
+        if (_endThread)
+        {
+            return;
+        }
+
+        std::array<char, 4097> fields = {'\0'};
+        snprintf(fields.data(), fields.size(), "%s", customFields_ ? customFields_ : "");
+        threading::GAThreading::performTaskOnGAThread([fields]()
+        {
+            state::GAState::setGlobalCustomEventFields(fields.data());
         });
     }
 
@@ -1132,6 +1147,11 @@ namespace gameanalytics
     void GameAnalytics::setCustomDimension03(const std::wstring& dimension03)
     {
         setCustomDimension03(utilities::GAUtilities::ws2s(dimension03).c_str());
+    }
+
+    void GameAnalytics::setGlobalCustomEventFields(const std::wstring &customFields)
+    {
+        setGlobalCustomEventFields(utilities::GAUtilities::ws2s(customFields).c_str());
     }
 #endif
 

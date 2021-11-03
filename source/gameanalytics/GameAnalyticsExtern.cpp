@@ -205,6 +205,11 @@ void setCustomDimension03(const char *dimension03)
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
 }
 
+void setGlobalCustomEventFields(const char *customFields)
+{
+    gameanalytics::GameAnalytics::setGlobalCustomEventFields(customFields);
+}
+
 void gameAnalyticsStartSession()
 {
     gameanalytics::GameAnalytics::startSession();
@@ -356,6 +361,11 @@ void setCustomDimension02UWP(const wchar_t *dimension02)
 void setCustomDimension03UWP(const wchar_t *dimension03)
 {
     gameanalytics::GameAnalytics::setCustomDimension03(dimension03);
+}
+
+void setGlobalCustomEventFieldsUWP(const wchar_t *customFields)
+{
+    gameanalytics::GameAnalytics::setGlobalCustomEventFields(customFields);
 }
 
 void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields)
