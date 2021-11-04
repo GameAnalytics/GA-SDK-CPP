@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.1**
+* added option to use custom log handler
+
 **3.2.0**
 * added global custom event fields function to allow to add custom fields to events sent automatically by the SDK
 
