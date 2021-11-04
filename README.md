@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.1**
+* added option to use custom log handler
+
 **3.2.0**
 * added global custom event fields function to allow to add custom fields to events sent automatically by the SDK
 
@@ -269,6 +272,17 @@ Remember to include the GameAnalytics header file wherever you are using the SDK
 
 ``` c++
  #include "GameAnalytics.h"
+```
+
+### Custom log handler
+If you want to use your own custom log handler here is how it is done:
+``` c++
+void logHandler(const char *message, gameanalytics::EGALoggerMessageType type)
+{
+    // add your logging in here
+}
+
+gameanalytics::GameAnalytics::configureCustomLogHandler(logHandler);
 ```
 
 ### Configuration
