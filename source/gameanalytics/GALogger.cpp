@@ -38,7 +38,7 @@ namespace gameanalytics
         GALogger::GALogger()
         {
             infoLogEnabled = false;
-
+            customLogHandler = {};
 
 #if defined(_DEBUG)
             // log debug is in dev mode
@@ -71,6 +71,7 @@ namespace gameanalytics
 
         void GALogger::cleanUp()
         {
+            _instance->customLogHandler = {};
             delete _instance;
             _instance = 0;
             _destroyed = true;
@@ -80,6 +81,16 @@ namespace gameanalytics
         {
             std::call_once(_initInstanceFlag, &GALogger::initInstance);
             return _instance;
+        }
+
+        void GALogger::setCustomLogHandler(const std::function<void(const char *, EGALoggerMessageType)> &handler)
+        {
+            GALogger *i = GALogger::getInstance();
+            if (!i)
+            {
+                return;
+            }
+            i->customLogHandler = handler;
         }
 
         void GALogger::setInfoLog(bool enabled)
@@ -218,7 +229,7 @@ namespace gameanalytics
                 size_t s = len + 1 + 11 + strlen(ga->tag);
                 char* message = new char[s];
                 snprintf(message, s, "Info/%s: %s", ga->tag, formatted);
-                ga->sendNotificationMessage(message, Info);
+                ga->sendNotificationMessage(message, LogInfo);
                 delete[] message;
                 delete[] formatted;
             }
@@ -228,7 +239,7 @@ namespace gameanalytics
                     // No logging of debug unless in full debug logging mode
                     return;
                 }
-                ga->sendNotificationMessage(format, Debug);
+                ga->sendNotificationMessage(format, LogDebug);
             }
         }
 
@@ -261,7 +272,7 @@ namespace gameanalytics
                 size_t s = len + 1 + 14 + strlen(ga->tag);
                 char* message = new char[s];
                 snprintf(message, s, "Warning/%s: %s", ga->tag, formatted);
-                ga->sendNotificationMessage(message, Warning);
+                ga->sendNotificationMessage(message, LogWarning);
                 delete[] message;
                 delete[] formatted;
             }
@@ -271,7 +282,7 @@ namespace gameanalytics
                     // No logging of debug unless in full debug logging mode
                     return;
                 }
-                ga->sendNotificationMessage(format, Debug);
+                ga->sendNotificationMessage(format, LogDebug);
             }
         }
 
@@ -305,7 +316,7 @@ namespace gameanalytics
                 size_t s = len + 1 + 12 + strlen(ga->tag);
                 char* message = new char[s];
                 snprintf(message, s, "Error/%s: %s", ga->tag, formatted);
-                ga->sendNotificationMessage(message, Error);
+                ga->sendNotificationMessage(message, LogError);
                 delete[] message;
                 delete[] formatted;
             }
@@ -315,7 +326,7 @@ namespace gameanalytics
                     // No logging of debug unless in full debug logging mode
                     return;
                 }
-                ga->sendNotificationMessage(format, Debug);
+                ga->sendNotificationMessage(format, LogDebug);
             }
         }
 
@@ -352,7 +363,7 @@ namespace gameanalytics
                 size_t s = len + 1 + 12 + strlen(ga->tag);
                 char* message = new char[s];
                 snprintf(message, s, "Debug/%s: %s", ga->tag, formatted);
-                ga->sendNotificationMessage(message, Debug);
+                ga->sendNotificationMessage(message, LogDebug);
                 delete[] message;
                 delete[] formatted;
             }
@@ -362,7 +373,7 @@ namespace gameanalytics
                     // No logging of debug unless in full debug logging mode
                     return;
                 }
-                ga->sendNotificationMessage(format, Debug);
+                ga->sendNotificationMessage(format, LogDebug);
             }
         }
 
@@ -398,7 +409,7 @@ namespace gameanalytics
                 size_t s = len + 1 + 14 + strlen(ga->tag);
                 char* message = new char[s];
                 snprintf(message, s, "Verbose/%s: %s", ga->tag, formatted);
-                ga->sendNotificationMessage(message, Info);
+                ga->sendNotificationMessage(message, LogInfo);
                 delete[] message;
                 delete[] formatted;
             }
@@ -408,7 +419,7 @@ namespace gameanalytics
                     // No logging of debug unless in full debug logging mode
                     return;
                 }
-                ga->sendNotificationMessage(format, Debug);
+                ga->sendNotificationMessage(format, LogDebug);
             }
         }
 
@@ -418,6 +429,13 @@ namespace gameanalytics
             {
                 //return;
             }
+
+            if(customLogHandler)
+            {
+                customLogHandler(message, type);
+                return;
+            }
+
 #if !USE_UWP && !USE_TIZEN
             if(logInitialized)
             {
@@ -486,7 +504,7 @@ namespace gameanalytics
 #endif
             switch(type)
             {
-                case Error:
+                case gameanalytics::LogError:
 #if USE_UWP
                     try
                     {
@@ -504,7 +522,7 @@ namespace gameanalytics
 #endif
                     break;
 
-                case Warning:
+                case gameanalytics::LogWarning:
 #if USE_UWP
                     try
                     {
@@ -522,7 +540,7 @@ namespace gameanalytics
 #endif
                     break;
 
-                case Debug:
+                case gameanalytics::LogDebug:
 #if USE_UWP
                     try
                     {
@@ -540,7 +558,7 @@ namespace gameanalytics
 #endif
                     break;
 
-                case Info:
+                case gameanalytics::LogInfo:
 #if USE_UWP
                     try
                     {

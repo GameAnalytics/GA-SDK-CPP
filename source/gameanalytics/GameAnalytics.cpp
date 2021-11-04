@@ -224,18 +224,31 @@ namespace gameanalytics
 
         std::array<char, 65> writablePath = {'\0'};
         snprintf(writablePath.data(), writablePath.size(), "%s", writablePath_ ? writablePath_ : "");
-        threading::GAThreading::performTaskOnGAThread([writablePath]()
+        if (isSdkReady(true, false))
         {
-            if (isSdkReady(true, false))
-            {
-                logging::GALogger::w("Writable path must be set before SDK is initialized.");
-                return;
-            }
-            device::GADevice::setWritablePath(writablePath.data());
+            logging::GALogger::w("Writable path must be set before SDK is initialized.");
+            return;
+        }
+        device::GADevice::setWritablePath(writablePath.data());
 #if !USE_UWP && !USE_TIZEN
-            logging::GALogger::customInitializeLog();
+        logging::GALogger::customInitializeLog();
 #endif
-        });
+    }
+
+    void GameAnalytics::configureCustomLogHandler(const LogHandler &logHandler)
+    {
+        if (_endThread)
+        {
+            return;
+        }
+
+        if (isSdkReady(true, false))
+        {
+            logging::GALogger::w("Writable path must be set before SDK is initialized.");
+            return;
+        }
+
+        logging::GALogger::setCustomLogHandler(logHandler);
     }
 
     void GameAnalytics::disableDeviceInfo()

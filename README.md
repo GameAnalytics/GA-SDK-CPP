@@ -271,6 +271,17 @@ Remember to include the GameAnalytics header file wherever you are using the SDK
  #include "GameAnalytics.h"
 ```
 
+### Custom log handler
+If you want to use your own custom log handler here is how it is done:
+``` c++
+void logHandler(const char *message, gameanalytics::EGALoggerMessageType type)
+{
+    // add your logging in here
+}
+
+gameanalytics::GameAnalytics::configureCustomLogHandler(logHandler);
+```
+
 ### Configuration
 
 Example:
