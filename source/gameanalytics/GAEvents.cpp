@@ -1061,14 +1061,6 @@ namespace gameanalytics
             ev.SetObject();
             state::GAState::getEventAnnotations(ev);
 
-            // Create json with only default annotations
-            rapidjson::StringBuffer defaultEvbuffer;
-            {
-                rapidjson::Writer<rapidjson::StringBuffer> writer(defaultEvbuffer);
-                ev.Accept(writer);
-            }
-            const char* jsonDefaults = defaultEvbuffer.GetString();
-
             // Merge with eventData
             mergeObjects(ev, eventData, ev.GetAllocator());
 
@@ -1099,15 +1091,7 @@ namespace gameanalytics
             }
             else
             {
-                char sessionStart[21] = "";
-                state::GAState* state = state::GAState::getInstance();
-                if(!state)
-                {
-                    return;
-                }
-                snprintf(sessionStart, sizeof(sessionStart), "%" PRId64, state->getSessionStart());
-                const char* params[] = { ev["session_id"].GetString(), sessionStart, jsonDefaults};
-                store::GAStore::executeQuerySync("INSERT OR REPLACE INTO ga_session(session_id, timestamp, event) VALUES(?, ?, ?);", params, 3);
+                GAEvents::updateSessionTime();
             }
         }
 
