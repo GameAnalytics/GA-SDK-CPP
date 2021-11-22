@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.2**
+* fixed missing custom event fields for when trying to fix missing session end events
+
 **3.2.1**
 * added option to use custom log handler
 
