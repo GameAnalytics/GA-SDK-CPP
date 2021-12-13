@@ -61,7 +61,7 @@ namespace gameanalytics
         bool GADevice::_useDeviceInfo = true;
         char GADevice::_writablepath[257] = "";
         int GADevice::_writablepathStatus = 0;
-        char GADevice::_buildPlatform[32] = "";
+        char GADevice::_buildPlatform[33] = "";
         char GADevice::_osVersion[65] = "";
         char GADevice::_deviceModel[129] = "";
 #if USE_UWP
@@ -129,6 +129,11 @@ namespace gameanalytics
                 initRuntimePlatform();
             }
             return GADevice::_buildPlatform;
+        }
+
+        void GADevice::setBuildPlatform(const char* platform)
+        {
+            snprintf(GADevice::_buildPlatform, sizeof(GADevice::_buildPlatform), "%s", platform);
         }
 
         const char* GADevice::getOSVersion()

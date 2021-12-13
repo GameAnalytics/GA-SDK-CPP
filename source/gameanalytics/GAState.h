@@ -115,6 +115,8 @@ namespace gameanalytics
             static std::once_flag _initInstanceFlag;
             static void cleanUp();
 
+            static void addErrorEvent(const char* baseMessage, EGAErrorSeverity severity, const char* message);
+
             static void initInstance()
             {
                 if(!_destroyed && !_instance)
@@ -162,6 +164,10 @@ namespace gameanalytics
             bool _remoteConfigsIsReady;
             std::vector<std::shared_ptr<IRemoteConfigsListener>> _remoteConfigsListeners;
             std::mutex _mtx;
+
+            static const int MaxCount;
+            static rapidjson::Document countMap;
+            static rapidjson::Document timestampMap;
         };
     }
 }

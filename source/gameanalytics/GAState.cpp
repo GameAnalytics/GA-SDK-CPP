@@ -12,8 +12,10 @@
 #include "GAThreading.h"
 #include "GALogger.h"
 #include "GADevice.h"
+#include "GAThreading.h"
 #include <utility>
 #include <algorithm>
+#include <array>
 #include <climits>
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +35,8 @@ namespace gameanalytics
         bool GAState::_destroyed = false;
         GAState* GAState::_instance = 0;
         std::once_flag GAState::_initInstanceFlag;
+
+        const int GAState::MaxCount = 10;
 
         GAState::GAState()
         {
@@ -1420,6 +1424,65 @@ namespace gameanalytics
             i->_mtx.unlock();
         }
 
+        void GAState::addErrorEvent(const char* baseMessage, EGAErrorSeverity severity, const char* message)
+        {
+            if(!GAState::isEventSubmissionEnabled())
+            {
+                return;
+            }
+
+            if(timestampMap.IsNull())
+            {
+                timestampMap.SetObject();
+            }
+            if(countMap.IsNull())
+            {
+                countMap.SetObject();
+            }
+
+            rapidjson::Document::AllocatorType& timestampMapAllocator = timestampMap.GetAllocator();
+            rapidjson::Document::AllocatorType& countMapMapAllocator = countMap.GetAllocator();
+
+            int64_t now = utilities::GAUtilities::timeIntervalSince1970();
+            if(!timestampMap.HasMember(baseMessage))
+            {
+                rapidjson::Value v(baseMessage, timestampMapAllocator);
+                timestampMap.AddMember(v.Move(), now, timestampMapAllocator);
+            }
+            if(!countMap.HasMember(baseMessage))
+            {
+                rapidjson::Value v(baseMessage, countMapMapAllocator);
+                countMap.AddMember(v.Move(), 0, countMapMapAllocator);
+            }
+
+            int64_t diff = now - timestampMap[baseMessage].GetInt64();
+            if(diff >= 3600)
+            {
+                countMap[baseMessage] = 0;
+                countMap.FindMember(baseMessage)->value = 0;
+                timestampMap.FindMember(baseMessage)->value = now;
+            }
+
+            if(countMap[baseMessage].GetInt() >= MaxCount)
+            {
+                return;
+            }
+
+            std::array<char, 8200> baseMessage_ = {'\0'};
+            snprintf(baseMessage_.data(), baseMessage_.size(), "%s", baseMessage ? baseMessage : "");
+            std::array<char, 8200> message_ = {'\0'};
+            snprintf(message_.data(), message_.size(), "%s", message ? message : "");
+
+            threading::GAThreading::performTaskOnGAThread([baseMessage_, severity, message_]()
+            {
+                rapidjson::Document fieldsJson;
+                fieldsJson.Parse("{}");
+                events::GAEvents::addErrorEvent(severity, message_.data(), fieldsJson, true);
+
+                countMap.FindMember(baseMessage_.data())->value = countMap[baseMessage_.data()].GetInt() + 1;
+            });
+        }
+
         void GAState::validateAndCleanCustomFields(const rapidjson::Value& fields, rapidjson::Value& out)
         {
             rapidjson::Document result;
@@ -1435,7 +1498,11 @@ namespace gameanalytics
                     const char* key = itr->name.GetString();
                     if(fields[key].IsNull())
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=null has been omitted because its key or value is null", key);
+                        const char* baseMessage = "validateAndCleanCustomFields: entry with key=%s, value=null has been omitted because its key or value is null";
+                        std::array<char, 8200> message = {'\0'};
+                        snprintf(message.data(), message.size(), baseMessage, key);
+                        logging::GALogger::w(message.data());
+                        addErrorEvent(baseMessage, EGAErrorSeverity::Warning, message.data());
                     }
                     else if(count < MAX_CUSTOM_FIELDS_COUNT)
                     {
@@ -1464,22 +1531,38 @@ namespace gameanalytics
                                 }
                                 else
                                 {
-                                    logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
+                                    const char* baseMessage = "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its value is an empty string or exceeds the max number of characters (%d)";
+                                    std::array<char, 8200> message = {'\0'};
+                                    snprintf(message.data(), message.size(), baseMessage, key, fields[key].GetString(), MAX_CUSTOM_FIELDS_VALUE_STRING_LENGTH);
+                                    logging::GALogger::w(message.data());
+                                    addErrorEvent(baseMessage, EGAErrorSeverity::Warning, message.data());
                                 }
                             }
                             else
                             {
-                                logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because its value is not a string or number", key);
+                                const char* baseMessage = "validateAndCleanCustomFields: entry with key=%s has been omitted because its value is not a string or number";
+                                std::array<char, 8200> message = {'\0'};
+                                snprintf(message.data(), message.size(), baseMessage, key);
+                                logging::GALogger::w(message.data());
+                                addErrorEvent(baseMessage, EGAErrorSeverity::Warning, message.data());
                             }
                         }
                         else
                         {
-                            logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)", key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
+                            const char* baseMessage = "validateAndCleanCustomFields: entry with key=%s, value=%s has been omitted because its key contains illegal character, is empty or exceeds the max number of characters (%d)";
+                            std::array<char, 8200> message = {'\0'};
+                            snprintf(message.data(), message.size(), baseMessage, key, fields[key].GetString(), MAX_CUSTOM_FIELDS_KEY_LENGTH);
+                            logging::GALogger::w(message.data());
+                            addErrorEvent(baseMessage, EGAErrorSeverity::Warning, message.data());
                         }
                     }
                     else
                     {
-                        logging::GALogger::w("validateAndCleanCustomFields: entry with key=%s has been omitted because it exceeds the max number of custom fields (%d)", key, MAX_CUSTOM_FIELDS_COUNT);
+                        const char* baseMessage = "validateAndCleanCustomFields: entry with key=%s has been omitted because it exceeds the max number of custom fields (%d)";
+                        std::array<char, 8200> message = {'\0'};
+                        snprintf(message.data(), message.size(), baseMessage, key, MAX_CUSTOM_FIELDS_COUNT);
+                        logging::GALogger::w(message.data());
+                        addErrorEvent(baseMessage, EGAErrorSeverity::Warning, message.data());
                     }
                 }
             }

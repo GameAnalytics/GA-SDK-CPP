@@ -26,6 +26,7 @@ namespace gameanalytics
             static void addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, bool sendScore, const rapidjson::Value& fields);
             static void addDesignEvent(const char* eventId, double value, bool sendValue, const rapidjson::Value& fields);
             static void addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields);
+            static void addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields, bool skipAddingFields);
             static void progressionStatusString(EGAProgressionStatus progressionStatus, char* out);
             static void errorSeverityString(EGAErrorSeverity errorSeverity, char* out);
             static void resourceFlowTypeString(EGAResourceFlowType flowType, char* out);

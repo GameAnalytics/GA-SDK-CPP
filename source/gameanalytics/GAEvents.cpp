@@ -622,6 +622,11 @@ namespace gameanalytics
 
         void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields)
         {
+            addErrorEvent(severity, message, fields, false);
+        }
+
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields, bool skipAddingFields)
+        {
             if(!state::GAState::isEventSubmissionEnabled())
             {
                 return;
@@ -663,22 +668,25 @@ namespace gameanalytics
                 eventData.AddMember("message", v.Move(), allocator);
             }
 
-            rapidjson::Document cleanedFields;
-            cleanedFields.SetObject();
-
-            if (fields.IsObject() && fields.MemberCount() > 0)
+            if(!skipAddingFields)
             {
-                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
-            }
-            else
-            {
-                rapidjson::Document d;
-                d.SetObject();
-                state::GAState::getGlobalCustomEventFields(d);
-                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
-            }
+                rapidjson::Document cleanedFields;
+                cleanedFields.SetObject();
 
-            GAEvents::addCustomFieldsToEvent(eventData, cleanedFields);
+                if (fields.IsObject() && fields.MemberCount() > 0)
+                {
+                    state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                }
+                else
+                {
+                    rapidjson::Document d;
+                    d.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    state::GAState::validateAndCleanCustomFields(d, cleanedFields);
+                }
+
+                GAEvents::addCustomFieldsToEvent(eventData, cleanedFields);
+            }
 
             // Add custom dimensions
             GAEvents::addDimensionsToEvent(eventData);
