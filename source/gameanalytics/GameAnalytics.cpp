@@ -235,6 +235,31 @@ namespace gameanalytics
 #endif
     }
 
+    void GameAnalytics::configureBuildPlatform(const char* platform_)
+    {
+        if(_endThread)
+        {
+            return;
+        }
+
+        std::array<char, 65> platform = {'\0'};
+        snprintf(platform.data(), platform.size(), "%s", platform_ ? platform_ : "");
+        threading::GAThreading::performTaskOnGAThread([platform]()
+        {
+            if (isSdkReady(true, false))
+            {
+                logging::GALogger::w("Platform must be set before SDK is initialized.");
+                return;
+            }
+            if (!validators::GAValidator::validateShortString(platform.data(), false))
+            {
+                logging::GALogger::i("Validation fail - configure platform: Cannot be null, empty or above 32 length. String: %s", platform.data());
+                return;
+            }
+            device::GADevice::setBuildPlatform(platform.data());
+        });
+    }
+
     void GameAnalytics::configureCustomLogHandler(const LogHandler &logHandler)
     {
         if (_endThread)
@@ -1045,6 +1070,11 @@ namespace gameanalytics
     void GameAnalytics::configureWritablePath(const std::wstring& writablePath)
     {
         configureWritablePath(utilities::GAUtilities::ws2s(writablePath).c_str());
+    }
+
+    void GameAnalytics::configureBuildPlatform(const std::wstring& platform)
+    {
+        configureBuildPlatform(utilities::GAUtilities::ws2s(platform).c_str());
     }
 
     void GameAnalytics::configureDeviceModel(const std::wstring& deviceModel)

@@ -24,6 +24,7 @@ namespace gameanalytics
             static const char* getConnectionType();
             static const char* getRelevantSdkVersion();
             static const char* getBuildPlatform();
+            static void setBuildPlatform(const char* platform);
             static const char* getOSVersion();
             static void setDeviceModel(const char* deviceModel);
             static const char* getDeviceModel();

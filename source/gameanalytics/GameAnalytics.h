@@ -136,6 +136,7 @@ namespace gameanalytics
          static void configureAvailableResourceItemTypes(const char *resourceItemTypes);
          static void configureBuild(const char *build);
          static void configureWritablePath(const char *writablePath);
+         static void configureBuildPlatform(const char *platform);
          static void configureCustomLogHandler(const LogHandler &logHandler);
          static void disableDeviceInfo();
          static void configureDeviceModel(const char *deviceModel);
@@ -217,6 +218,7 @@ namespace gameanalytics
         static void configureAvailableResourceItemTypes(const std::vector<std::wstring>& resourceItemTypes);
         static void configureBuild(const std::wstring& build);
         static void configureWritablePath(const std::wstring& writablePath);
+        static void configureBuildPlatform(const std::wstring& platform);
         static void configureDeviceModel(const std::wstring& deviceModel);
         static void configureDeviceManufacturer(const std::wstring& deviceManufacturer);
         static void configureSdkGameEngineVersion(const std::wstring& sdkGameEngineVersion);
