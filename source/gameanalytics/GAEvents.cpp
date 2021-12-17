@@ -19,7 +19,7 @@
 #include "rapidjson/error/en.h"
 #include <inttypes.h>
 
-bool mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapidjson::Document::AllocatorType &allocator)
+bool mergeObjects(rapidjson::Value &dstObject, const rapidjson::Value &srcObject, rapidjson::Document::AllocatorType &allocator, bool overwrite)
 {
     for (auto srcIt = srcObject.MemberBegin(); srcIt != srcObject.MemberEnd(); ++srcIt)
     {
@@ -38,7 +38,7 @@ bool mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapi
             if (dstIt == dstObject.MemberEnd())
                 return false;
         }
-        else
+        else if(overwrite)
         {
             auto srcT = srcIt->value.GetType();
             auto dstT = dstIt->value.GetType();
@@ -56,7 +56,7 @@ bool mergeObjects(rapidjson::Value &dstObject, rapidjson::Value &srcObject, rapi
             }
             else if (srcIt->value.IsObject())
             {
-                if (!mergeObjects(dstIt->value, srcIt->value, allocator))
+                if (!mergeObjects(dstIt->value, srcIt->value, allocator, overwrite))
                     return false;
             }
             else
@@ -254,7 +254,7 @@ namespace gameanalytics
         }
 
         // BUSINESS EVENT
-        void GAEvents::addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const rapidjson::Value& fields)
+        void GAEvents::addBusinessEvent(const char* currency, int amount, const char* itemType, const char* itemId, const char* cartType, const rapidjson::Value& fields, bool mergeFields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -320,7 +320,17 @@ namespace gameanalytics
 
             if (fields.IsObject() && fields.MemberCount() > 0)
             {
-                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                rapidjson::Document d;
+                d.SetObject();
+                mergeObjects(d, fields, d.GetAllocator(), false);
+                if(mergeFields)
+                {
+                    rapidjson::Document globalFields;
+                    globalFields.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    mergeObjects(d, globalFields, d.GetAllocator(), false);
+                }
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
             }
             else
             {
@@ -345,7 +355,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const char* currency, double amount, const char* itemType, const char* itemId, const rapidjson::Value& fields)
+        void GAEvents::addResourceEvent(EGAResourceFlowType flowType, const char* currency, double amount, const char* itemType, const char* itemId, const rapidjson::Value& fields, bool mergeFields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -400,7 +410,17 @@ namespace gameanalytics
 
             if (fields.IsObject() && fields.MemberCount() > 0)
             {
-                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                rapidjson::Document d;
+                d.SetObject();
+                mergeObjects(d, fields, d.GetAllocator(), false);
+                if(mergeFields)
+                {
+                    rapidjson::Document globalFields;
+                    globalFields.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    mergeObjects(d, globalFields, d.GetAllocator(), false);
+                }
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
             }
             else
             {
@@ -425,7 +445,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, bool sendScore, const rapidjson::Value& fields)
+        void GAEvents::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01, const char* progression02, const char* progression03, int score, bool sendScore, const rapidjson::Value& fields, bool mergeFields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -520,7 +540,17 @@ namespace gameanalytics
 
             if (fields.IsObject() && fields.MemberCount() > 0)
             {
-                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                rapidjson::Document d;
+                d.SetObject();
+                mergeObjects(d, fields, d.GetAllocator(), false);
+                if(mergeFields)
+                {
+                    rapidjson::Document globalFields;
+                    globalFields.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    mergeObjects(d, globalFields, d.GetAllocator(), false);
+                }
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
             }
             else
             {
@@ -546,7 +576,7 @@ namespace gameanalytics
             addEventToStore(eventDict);
         }
 
-        void GAEvents::addDesignEvent(const char* eventId, double value, bool sendValue, const rapidjson::Value& fields)
+        void GAEvents::addDesignEvent(const char* eventId, double value, bool sendValue, const rapidjson::Value& fields, bool mergeFields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -592,7 +622,17 @@ namespace gameanalytics
 
             if (fields.IsObject() && fields.MemberCount() > 0)
             {
-                state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                rapidjson::Document d;
+                d.SetObject();
+                mergeObjects(d, fields, d.GetAllocator(), false);
+                if(mergeFields)
+                {
+                    rapidjson::Document globalFields;
+                    globalFields.SetObject();
+                    state::GAState::getGlobalCustomEventFields(d);
+                    mergeObjects(d, globalFields, d.GetAllocator(), false);
+                }
+                state::GAState::validateAndCleanCustomFields(d, cleanedFields);
             }
             else
             {
@@ -620,12 +660,12 @@ namespace gameanalytics
             addEventToStore(eventData);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields, bool mergeFields)
         {
-            addErrorEvent(severity, message, fields, false);
+            addErrorEvent(severity, message, fields, mergeFields, false);
         }
 
-        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields, bool skipAddingFields)
+        void GAEvents::addErrorEvent(EGAErrorSeverity severity, const char* message, const rapidjson::Value& fields, bool mergeFields, bool skipAddingFields)
         {
             if(!state::GAState::isEventSubmissionEnabled())
             {
@@ -675,7 +715,17 @@ namespace gameanalytics
 
                 if (fields.IsObject() && fields.MemberCount() > 0)
                 {
-                    state::GAState::validateAndCleanCustomFields(fields, cleanedFields);
+                    rapidjson::Document d;
+                    d.SetObject();
+                    mergeObjects(d, fields, d.GetAllocator(), false);
+                    if(mergeFields)
+                    {
+                        rapidjson::Document globalFields;
+                        globalFields.SetObject();
+                        state::GAState::getGlobalCustomEventFields(d);
+                        mergeObjects(d, globalFields, d.GetAllocator(), false);
+                    }
+                    state::GAState::validateAndCleanCustomFields(d, cleanedFields);
                 }
                 else
                 {
@@ -1070,7 +1120,7 @@ namespace gameanalytics
             state::GAState::getEventAnnotations(ev);
 
             // Merge with eventData
-            mergeObjects(ev, eventData, ev.GetAllocator());
+            mergeObjects(ev, eventData, ev.GetAllocator(), true);
 
             // Create json string representation
             rapidjson::StringBuffer evBuffer;

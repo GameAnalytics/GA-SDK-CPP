@@ -37,6 +37,8 @@ namespace gameanalytics
         std::once_flag GAState::_initInstanceFlag;
 
         const int GAState::MaxCount = 10;
+        rapidjson::Document GAState::countMap;
+        rapidjson::Document GAState::timestampMap;
 
         GAState::GAState()
         {

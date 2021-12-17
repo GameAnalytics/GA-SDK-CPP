@@ -212,7 +212,7 @@ namespace gameanalytics
                 if(errorCount <= MAX_ERROR_TYPE_COUNT)
                 {
                     errorCount = errorCount + 1;
-                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
+                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {}, false, false);
                     events::GAEvents::processEvents("error", false);
                 }
 
@@ -278,7 +278,7 @@ namespace gameanalytics
                     strcat(buffer, "\n");
 
                     errorCount = errorCount + 1;
-                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
+                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {}, false, false);
                     events::GAEvents::processEvents("error", false);
                     delete[] buffer;
                 }

@@ -484,6 +484,18 @@ namespace gameanalytics
         const char* cartType_,
         const char* fields_)
     {
+        addBusinessEvent(currency_, amount, itemType_, itemId_, cartType_, fields_, false);
+    }
+
+    void GameAnalytics::addBusinessEvent(
+        const char* currency_,
+        int amount,
+        const char* itemType_,
+        const char* itemId_,
+        const char* cartType_,
+        const char* fields_,
+        bool mergeFields)
+    {
         if(_endThread)
         {
             return;
@@ -499,7 +511,7 @@ namespace gameanalytics
         snprintf(cartType.data(), cartType.size(), "%s", cartType_ ? cartType_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields]()
+        threading::GAThreading::performTaskOnGAThread([currency, amount, itemType, itemId, cartType, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add business event"))
             {
@@ -508,7 +520,7 @@ namespace gameanalytics
             // Send to events
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addBusinessEvent(currency.data(), amount, itemType.data(), itemId.data(), cartType.data(), fieldsJson);
+            events::GAEvents::addBusinessEvent(currency.data(), amount, itemType.data(), itemId.data(), cartType.data(), fieldsJson, mergeFields);
         });
     }
 
@@ -519,6 +531,11 @@ namespace gameanalytics
     }
 
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency_, float amount, const char* itemType_, const char* itemId_, const char* fields_)
+    {
+        addResourceEvent(flowType, currency_, amount, itemType_, itemId_, fields_, false);
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const char* currency_, float amount, const char* itemType_, const char* itemId_, const char* fields_, bool mergeFields)
     {
         if(_endThread)
         {
@@ -533,7 +550,7 @@ namespace gameanalytics
         snprintf(itemId.data(), itemId.size(), "%s", itemId_ ? itemId_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields]()
+        threading::GAThreading::performTaskOnGAThread([flowType, currency, amount, itemType, itemId, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add resource event"))
             {
@@ -542,7 +559,7 @@ namespace gameanalytics
 
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addResourceEvent(flowType, currency.data(), amount, itemType.data(), itemId.data(), fieldsJson);
+            events::GAEvents::addResourceEvent(flowType, currency.data(), amount, itemType.data(), itemId.data(), fieldsJson, mergeFields);
         });
     }
 
@@ -552,6 +569,11 @@ namespace gameanalytics
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, const char* fields_)
+    {
+        addProgressionEvent(progressionStatus, progression01_, progression02_, progression03_, fields_, false);
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, const char* fields_, bool mergeFields)
     {
         if(_endThread)
         {
@@ -566,7 +588,7 @@ namespace gameanalytics
         snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_);
-        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields]()
+        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
             {
@@ -576,7 +598,7 @@ namespace gameanalytics
             // Send to events
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0, false, fieldsJson);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), 0, false, fieldsJson, mergeFields);
         });
     }
 
@@ -586,6 +608,11 @@ namespace gameanalytics
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, int score, const char* fields_)
+    {
+        addProgressionEvent(progressionStatus, progression01_, progression02_, progression03_, score, fields_, false);
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const char* progression01_, const char* progression02_, const char* progression03_, int score, const char* fields_, bool mergeFields)
     {
         if(_endThread)
         {
@@ -600,7 +627,7 @@ namespace gameanalytics
         snprintf(progression03.data(), progression03.size(), "%s", progression03_ ? progression03_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields]()
+        threading::GAThreading::performTaskOnGAThread([progressionStatus, progression01, progression02, progression03, score, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add progression event"))
             {
@@ -610,7 +637,7 @@ namespace gameanalytics
             // Send to events
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), score, true, fieldsJson);
+            events::GAEvents::addProgressionEvent(progressionStatus, progression01.data(), progression02.data(), progression03.data(), score, true, fieldsJson, mergeFields);
         });
     }
 
@@ -621,6 +648,11 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const char* eventId_, const char* fields_)
     {
+        addDesignEvent(eventId_, fields_, false);
+    }
+
+    void GameAnalytics::addDesignEvent(const char* eventId_, const char* fields_, bool mergeFields)
+    {
         if(_endThread)
         {
             return;
@@ -630,7 +662,7 @@ namespace gameanalytics
         snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([eventId, fields]()
+        threading::GAThreading::performTaskOnGAThread([eventId, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
@@ -638,7 +670,7 @@ namespace gameanalytics
             }
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addDesignEvent(eventId.data(), 0, false, fieldsJson);
+            events::GAEvents::addDesignEvent(eventId.data(), 0, false, fieldsJson, mergeFields);
         });
     }
 
@@ -649,6 +681,11 @@ namespace gameanalytics
 
     void GameAnalytics::addDesignEvent(const char* eventId_, double value, const char* fields_)
     {
+        addDesignEvent(eventId_, value, fields_, false);
+    }
+
+    void GameAnalytics::addDesignEvent(const char* eventId_, double value, const char* fields_, bool mergeFields)
+    {
         if(_endThread)
         {
             return;
@@ -658,7 +695,7 @@ namespace gameanalytics
         snprintf(eventId.data(), eventId.size(), "%s", eventId_ ? eventId_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([eventId, value, fields]()
+        threading::GAThreading::performTaskOnGAThread([eventId, value, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add design event"))
             {
@@ -666,7 +703,7 @@ namespace gameanalytics
             }
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addDesignEvent(eventId.data(), value, true, fieldsJson);
+            events::GAEvents::addDesignEvent(eventId.data(), value, true, fieldsJson, mergeFields);
         });
     }
 
@@ -677,6 +714,11 @@ namespace gameanalytics
 
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message_, const char* fields_)
     {
+        addErrorEvent(severity, message_, fields_, false);
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const char* message_, const char* fields_, bool mergeFields)
+    {
         if(_endThread)
         {
             return;
@@ -686,7 +728,7 @@ namespace gameanalytics
         snprintf(message.data(), message.size(), "%s", message_ ? message_ : "");
         std::array<char, 4097> fields = {'\0'};
         snprintf(fields.data(), fields.size(), "%s", fields_ ? fields_ : "");
-        threading::GAThreading::performTaskOnGAThread([severity, message, fields]()
+        threading::GAThreading::performTaskOnGAThread([severity, message, fields, mergeFields]()
         {
             if (!isSdkReady(true, true, "Could not add error event"))
             {
@@ -694,7 +736,7 @@ namespace gameanalytics
             }
             rapidjson::Document fieldsJson;
             fieldsJson.Parse(fields.data());
-            events::GAEvents::addErrorEvent(severity, message.data(), fieldsJson);
+            events::GAEvents::addErrorEvent(severity, message.data(), fieldsJson, mergeFields);
         });
     }
 
