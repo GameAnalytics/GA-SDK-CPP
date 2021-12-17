@@ -368,43 +368,43 @@ void setGlobalCustomEventFieldsUWP(const wchar_t *customFields)
     gameanalytics::GameAnalytics::setGlobalCustomEventFields(customFields);
 }
 
-void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields)
+void addBusinessEventUWP(const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *cartType, const wchar_t *fields, double mergeFields)
 {
-    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType, fields);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType, fields, mergeFields != 0.0);
 }
 
-void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *fields)
+void addResourceEventUWP(double flowType, const wchar_t *currency, double amount, const wchar_t *itemType, const wchar_t *itemId, const wchar_t *fields, double mergeFields)
 {
     int flowTypeInt = (int)flowType;
-    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId, fields);
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId, fields, mergeFields != 0.0);
 }
 
-void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, const wchar_t *fields)
+void addProgressionEventUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, const wchar_t *fields, double mergeFields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, fields, mergeFields != 0.0);
 }
 
-void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score, const wchar_t *fields)
+void addProgressionEventWithScoreUWP(double progressionStatus, const wchar_t *progression01, const wchar_t *progression02, const wchar_t *progression03, double score, const wchar_t *fields, double mergeFields)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score, fields);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score, fields, mergeFields != 0.0);
 }
 
-void addDesignEventUWP(const wchar_t *eventId, const wchar_t *fields)
+void addDesignEventUWP(const wchar_t *eventId, const wchar_t *fields, double mergeFields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId, fields);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, fields, mergeFields != 0.0);
 }
 
-void addDesignEventWithValueUWP(const wchar_t *eventId, double value, const wchar_t *fields)
+void addDesignEventWithValueUWP(const wchar_t *eventId, double value, const wchar_t *fields, double mergeFields)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId, value, fields);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value, fields, mergeFields != 0.0);
 }
 
-void addErrorEventUWP(double severity, const wchar_t *message, const wchar_t *fields)
+void addErrorEventUWP(double severity, const wchar_t *message, const wchar_t *fields, double mergeFields)
 {
     int severityInt = (int)severity;
-    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message, fields);
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message, fields, mergeFields != 0.0);
 }
 
 void getRemoteConfigsValueAsStringWithDefaultValueUWP(const wchar_t *key, const wchar_t *defaultValue, wchar_t *out)
