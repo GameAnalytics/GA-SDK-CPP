@@ -56,7 +56,7 @@ namespace gameanalytics
                     strcat(buffer, "\n");
 
                     errorCount = errorCount + 1;
-                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {});
+                    events::GAEvents::addErrorEvent(EGAErrorSeverity::Critical, buffer, {}, false);
                     events::GAEvents::processEvents("error", false);
                     delete[] buffer;
                 }

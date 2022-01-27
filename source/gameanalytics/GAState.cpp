@@ -446,7 +446,7 @@ namespace gameanalytics
             auto tries = static_cast<int>(getProgressionTries(progression) + 1);
             char key[257] = "";
             snprintf(key, sizeof(key), "%s", progression);
-            i->_progressionTries[key] = tries;
+            i->_progressionTries.addOrUpdate(key, tries);
 
             // Persist
             char triesString[11] = "";
@@ -463,14 +463,7 @@ namespace gameanalytics
                 return 0;
             }
 
-            if (i->_progressionTries.find(progression) != i->_progressionTries.end())
-            {
-                return i->_progressionTries[progression];
-            }
-            else
-            {
-                return 0;
-            }
+            return i->_progressionTries.getTries(progression);
         }
 
         void GAState::clearProgressionTries(const char* progression)
@@ -481,12 +474,7 @@ namespace gameanalytics
                 return;
             }
 
-            auto progressionTries = i->_progressionTries;
-            auto searchResult = progressionTries.find(progression);
-            if (searchResult != progressionTries.end())
-            {
-                progressionTries.erase(searchResult->first);
-            }
+            i->_progressionTries.remove(progression);
 
             // Delete
             const char* parms[1] = {progression};
@@ -1022,7 +1010,8 @@ namespace gameanalytics
             {
                 for (rapidjson::Value::ConstValueIterator itr = results_ga_progression.Begin(); itr != results_ga_progression.End(); ++itr)
                 {
-                    i->_progressionTries[(*itr)["progression"].GetString()] = (int)strtol((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0", NULL, 10);
+                    i->_progressionTries.addOrUpdate((*itr)["progression"].GetString(), (int)strtol((*itr).HasMember("tries") ? (*itr)["tries"].GetString() : "0", NULL, 10));
+
                 }
             }
         }

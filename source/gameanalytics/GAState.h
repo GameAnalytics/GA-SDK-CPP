@@ -28,6 +28,71 @@ namespace gameanalytics
             }
         };
 
+        struct ProgressionTry
+        {
+        public:
+            char progression[257] = "";
+            int tries = 0;
+        };
+
+        struct ProgressionTries
+        {
+        public:
+            void addOrUpdate(const char* s, int tries)
+            {
+                for (auto & element : v)
+                {
+                    if(strcmp(s, element.progression) == 0)
+                    {
+                        element.tries = tries;
+                        return;
+                    }
+                }
+
+                v.push_back(ProgressionTry());
+                snprintf(v[v.size() - 1].progression, sizeof(v[v.size() - 1].progression), "%s", s);
+                v[v.size() - 1].tries = tries;
+            }
+
+            void remove(const char* s)
+            {
+                int index = 0;
+                bool found = false;
+                for (auto & element : v)
+                {
+                    if(strcmp(s, element.progression) == 0)
+                    {
+                        found = true;
+                        break;
+                    }
+
+                    ++index;
+                }
+
+                if(found)
+                {
+                    v.erase(v.begin() + index);
+                }
+            }
+
+            int getTries(const char* s) const
+            {
+                int result = 0;
+                for (auto & element : v)
+                {
+                    if(strcmp(s, element.progression) == 0)
+                    {
+                        result = element.tries;
+                        break;
+                    }
+                }
+                return result;
+            }
+
+        private:
+            std::vector<ProgressionTry> v;
+        };
+
         class GAState
         {
         public:
@@ -152,7 +217,7 @@ namespace gameanalytics
             char _configsHash[129] = {'\0'};
             char _abId[129] = {'\0'};
             char _abVariantId[129] = {'\0'};
-            std::map<const char*, int, CStringCmp> _progressionTries;
+            ProgressionTries _progressionTries;
             rapidjson::Document _sdkConfigDefault;
             rapidjson::Document _sdkConfig;
             rapidjson::Document _sdkConfigCached;
