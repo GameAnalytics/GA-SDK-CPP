@@ -1159,6 +1159,11 @@ namespace gameanalytics
         addBusinessEvent(utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(cartType).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
+    void GameAnalytics::addBusinessEvent(const std::wstring& currency, int amount, const std::wstring& itemType, const std::wstring& itemId, const std::wstring& cartType, const std::wstring& fields, bool mergeFields)
+    {
+        addBusinessEvent(utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(cartType).c_str(), utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
+    }
+
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId)
     {
         addResourceEvent(flowType, currency, amount, itemType, itemId, L"");
@@ -1167,6 +1172,11 @@ namespace gameanalytics
     void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const std::wstring& fields)
     {
         addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
+    }
+
+    void GameAnalytics::addResourceEvent(EGAResourceFlowType flowType, const std::wstring& currency, float amount, const std::wstring&itemType, const std::wstring& itemId, const std::wstring& fields, bool mergeFields)
+    {
+        addResourceEvent(flowType, utilities::GAUtilities::ws2s(currency).c_str(), amount, utilities::GAUtilities::ws2s(itemType).c_str(), utilities::GAUtilities::ws2s(itemId).c_str(), utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
     }
 
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03)
@@ -1179,6 +1189,11 @@ namespace gameanalytics
         addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, const std::wstring& fields, bool mergeFields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
+    }
+
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score)
     {
         addProgressionEvent(progressionStatus, progression01, progression02, progression03, score, L"");
@@ -1187,6 +1202,11 @@ namespace gameanalytics
     void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields)
     {
         addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), score, utilities::GAUtilities::ws2s(fields).c_str());
+    }
+
+    void GameAnalytics::addProgressionEvent(EGAProgressionStatus progressionStatus, const std::wstring& progression01, const std::wstring& progression02, const std::wstring& progression03, int score, const std::wstring& fields, bool mergeFields)
+    {
+        addProgressionEvent(progressionStatus, utilities::GAUtilities::ws2s(progression01).c_str(), utilities::GAUtilities::ws2s(progression02).c_str(), utilities::GAUtilities::ws2s(progression03).c_str(), score, utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
     }
 
     void GameAnalytics::addDesignEvent(const std::wstring& eventId)
@@ -1199,6 +1219,11 @@ namespace gameanalytics
         addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
     }
 
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, const std::wstring& fields, bool mergeFields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
+    }
+
     void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value)
     {
         addDesignEvent(eventId, value, L"");
@@ -1209,6 +1234,11 @@ namespace gameanalytics
         addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), value, utilities::GAUtilities::ws2s(fields).c_str());
     }
 
+    void GameAnalytics::addDesignEvent(const std::wstring& eventId, double value, const std::wstring& fields, bool mergeFields)
+    {
+        addDesignEvent(utilities::GAUtilities::ws2s(eventId).c_str(), value, utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
+    }
+
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message)
     {
         addErrorEvent(severity, message, L"");
@@ -1217,6 +1247,11 @@ namespace gameanalytics
     void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields)
     {
         addErrorEvent(severity, utilities::GAUtilities::ws2s(message).c_str(), utilities::GAUtilities::ws2s(fields).c_str());
+    }
+
+    void GameAnalytics::addErrorEvent(EGAErrorSeverity severity, const std::wstring& message, const std::wstring& fields, bool mergeFields)
+    {
+        addErrorEvent(severity, utilities::GAUtilities::ws2s(message).c_str(), utilities::GAUtilities::ws2s(fields).c_str(), mergeFields);
     }
 
     void GameAnalytics::setCustomDimension01(const std::wstring& dimension01)
