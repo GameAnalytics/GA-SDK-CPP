@@ -10,15 +10,21 @@
 #endif
 
 #if defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
-#define MAX_PATH 4096
+#if !defined(MAX_PATH_LENGTH)
+#define MAX_PATH_LENGTH 4096
+#endif
 #endif
 
 #if defined(__MACH__) || defined(__APPLE__)
-#define MAX_PATH 1017
+#if !defined(MAX_PATH_LENGTH)
+#define MAX_PATH_LENGTH 1017
+#endif
 #endif
 
 #if _WIN32
-#define MAX_PATH 261
+#if !defined(MAX_PATH_LENGTH)
+#define MAX_PATH_LENGTH 261
+#endif
 #endif
 
 namespace gameanalytics

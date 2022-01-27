@@ -59,7 +59,7 @@ namespace gameanalytics
     namespace device
     {
         bool GADevice::_useDeviceInfo = true;
-        char GADevice::_writablepath[MAX_PATH] = "";
+        char GADevice::_writablepath[MAX_PATH_LENGTH] = "";
         int GADevice::_writablepathStatus = 0;
         char GADevice::_buildPlatform[33] = "";
         char GADevice::_osVersion[65] = "";
