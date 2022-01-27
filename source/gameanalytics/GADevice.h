@@ -9,6 +9,18 @@
 #include <string>
 #endif
 
+#if defined(__linux__) || defined(__unix__) || defined(__unix) || defined(unix)
+#define MAX_PATH 4096
+#endif
+
+#if defined(__MACH__) || defined(__APPLE__)
+#define MAX_PATH 1017
+#endif
+
+#if _WIN32
+#define MAX_PATH 261
+#endif
+
 namespace gameanalytics
 {
     namespace device

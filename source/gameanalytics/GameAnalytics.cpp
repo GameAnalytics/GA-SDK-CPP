@@ -222,7 +222,7 @@ namespace gameanalytics
             return;
         }
 
-        std::array<char, 65> writablePath = {'\0'};
+        std::array<char, MAX_PATH> writablePath = {'\0'};
         snprintf(writablePath.data(), writablePath.size(), "%s", writablePath_ ? writablePath_ : "");
         if (isSdkReady(true, false))
         {
