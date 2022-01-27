@@ -571,7 +571,6 @@ namespace gameanalytics
             // Log
             logging::GALogger::i("Add PROGRESSION event: {status:%s, progression01:%s, progression02:%s, progression03:%s, score:%d, attempt:%d, fields:%s}", statusString, progression01, progression02, progression03, score, attempt_num, buffer.GetString());
 
-
             // Send to store
             addEventToStore(eventDict);
         }
