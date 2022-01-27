@@ -28,6 +28,10 @@ Dependencies
 
 Changelog
 ---------
+**3.2.4**
+* fixed progression tries bug
+* fixed max path length for configure writable path method
+
 **3.2.3**
 * added error events to be sent for invalid custom event fields used
 * added optional mergeFields argument to event methods to merge with global custom fields instead of overwrite them
