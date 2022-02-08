@@ -649,7 +649,7 @@ namespace gameanalytics
                 char id[129] = "";
                 utilities::GAUtilities::generateUUID(id);
                 rapidjson::Value v(id, allocator);
-                out.AddMember("uuid", v.Move(), allocator);
+                out.AddMember("event_uuid", v.Move(), allocator);
             }
 
             // User identifier
@@ -771,7 +771,7 @@ namespace gameanalytics
                 char id[129] = "";
                 utilities::GAUtilities::generateUUID(id);
                 rapidjson::Value v(id, allocator);
-                out.AddMember("uuid", v.Move(), allocator);
+                out.AddMember("event_uuid", v.Move(), allocator);
             }
 
             // Category
