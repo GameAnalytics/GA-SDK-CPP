@@ -643,8 +643,16 @@ namespace gameanalytics
 
             // collector event API version
             out.AddMember("v", 2, allocator);
-            // User identifier
 
+            // Event UUID
+            {
+                char id[129] = "";
+                utilities::GAUtilities::generateUUID(id);
+                rapidjson::Value v(id, allocator);
+                out.AddMember("uuid", v.Move(), allocator);
+            }
+
+            // User identifier
             {
                 rapidjson::Value v(getIdentifier(), allocator);
                 out.AddMember("user_id", v.Move(), allocator);
@@ -757,6 +765,14 @@ namespace gameanalytics
 
             // collector event API version
             out.AddMember("v", 2, allocator);
+
+            // Event UUID
+            {
+                char id[129] = "";
+                utilities::GAUtilities::generateUUID(id);
+                rapidjson::Value v(id, allocator);
+                out.AddMember("uuid", v.Move(), allocator);
+            }
 
             // Category
             {
