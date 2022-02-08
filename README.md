@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.5**
+* added event uuid to events sent
+
 **3.2.4**
 * fixed progression tries bug
 * fixed max path length for configure writable path method
