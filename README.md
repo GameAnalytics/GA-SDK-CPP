@@ -28,6 +28,9 @@ Dependencies
 
 Changelog
 ---------
+**3.2.6**
+* changed event uuid field name
+
 **3.2.5**
 * added event uuid to events sent
 

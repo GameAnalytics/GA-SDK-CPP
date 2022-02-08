@@ -75,11 +75,11 @@ namespace gameanalytics
         char GADevice::_gameEngineVersion[33] = "";
         char GADevice::_connectionType[33] = "";
 #if USE_UWP
-        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 3.2.5";
+        const char* GADevice::_sdkWrapperVersion = "uwp_cpp 3.2.6";
 #elif USE_TIZEN
-        const char* GADevice::_sdkWrapperVersion = "tizen 3.2.5";
+        const char* GADevice::_sdkWrapperVersion = "tizen 3.2.6";
 #else
-        const char* GADevice::_sdkWrapperVersion = "cpp 3.2.5";
+        const char* GADevice::_sdkWrapperVersion = "cpp 3.2.6";
 #endif
 
         void GADevice::disableDeviceInfo()
