@@ -798,7 +798,7 @@ class TargetMingW(TargetCMake):
         )
 
         shutil.move(
-            os.path.join(self.build_dir(), 'libGameAnalytics.' + libEnding),
+            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
             release_file
         )
 
@@ -839,7 +839,7 @@ class TargetMingW(TargetCMake):
         )
 
         shutil.move(
-            os.path.join(self.build_dir(), 'libGameAnalytics.' + libEnding),
+            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
             debug_file
         )
 
@@ -891,7 +891,7 @@ class TargetMingW(TargetCMake):
             )
 
             shutil.move(
-                os.path.join(self.sqlite_build_dir(),
+                os.path.join(self.sqlite_build_dir(), 'Release',
                              'libSqlite.' + libEnding),
                 sqlite_release_file
             )
@@ -932,7 +932,7 @@ class TargetMingW(TargetCMake):
             )
 
             shutil.move(
-                os.path.join(self.sqlite_build_dir(),
+                os.path.join(self.sqlite_build_dir(), 'Debug',
                              'libSqlite.' + libEnding),
                 sqlite_debug_file
             )
@@ -961,7 +961,8 @@ all_targets = {
     'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 16 2019', 'ARM'),
     'win32-gcc-static': TargetMingW('win32-gcc-static', 'MinGW Makefiles', '-m32'),
     'win64-gcc-static': TargetMingW('win64-gcc-static', 'MinGW Makefiles', '-m64'),
-    'win32-gcc-shared': TargetMingW('win32-gcc-shared', 'MinGW Makefiles', '-m32'),
+    # 'win32-gcc-shared': TargetMingW('win32-gcc-shared', 'MinGW Makefiles', '-m32'),
+    # 'win64-gcc-shared': TargetMingW('win64-gcc-shared', 'MinGW Makefiles', '-m64'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-static-no-sqlite-src': TargetOSX('osx-static-no-sqlite-src', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
@@ -1025,7 +1026,8 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
         'win32-gcc-static': all_targets['win32-gcc-static'],
         'win64-gcc-static': all_targets['win64-gcc-static'],
-        'win32-gcc-shared': all_targets['win32-gcc-shared'],
+        # 'win32-gcc-shared': all_targets['win32-gcc-shared'],
+        # 'win64-gcc-shared': all_targets['win64-gcc-shared'],
     },
     'Linux': {
         # 'linux-x86-clang-static': all_targets['linux-x86-clang-static'],

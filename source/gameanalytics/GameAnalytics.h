@@ -5,7 +5,7 @@
 
 #pragma once
 
-#if GA_SHARED_LIB && defined(_WIN32)
+#if GA_SHARED_LIB && !USE_MINGW && defined(_WIN32)
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "crypt32.lib")
