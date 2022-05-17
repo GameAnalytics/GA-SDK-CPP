@@ -21,6 +21,7 @@ def is_os_64bit():
 
 if platform == 'win32':  # win32 and/or win64
     CMAKE_URL = 'https://github.com/Kitware/CMake/releases/download/v3.19.6/cmake-3.19.6-win64-x64.zip'
+    MINGW_URL = 'https://github.com/Kitware/CMake/releases/download/v3.19.6/cmake-3.19.6-win64-x64.zip'
     if is_os_64bit():
         TIZEN_URL = 'http://download.tizen.org/sdk/Installer/tizen-sdk-2.4-rev8/tizen-web-cli_TizenSDK_2.4.0_Rev8_windows-64.exe'
     else:

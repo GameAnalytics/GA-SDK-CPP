@@ -2,7 +2,7 @@
 // GA-SDK-CPP
 // Copyright 2018 GameAnalytics C++ SDK. All rights reserved.
 //
-#if !USE_UWP && !USE_TIZEN
+#if !USE_UWP && !USE_TIZEN && !USE_MINGW
 #include "GAUncaughtExceptionHandler.h"
 #include "GAState.h"
 #include "GAEvents.h"
