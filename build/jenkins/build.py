@@ -40,6 +40,10 @@ if os.name == "nt":
     os.symlink = symlink
 
 
+def cmd_exists(cmd):
+    return shutil.which(cmd) is not None
+
+
 def call_process(process_arguments, process_workingdir, silent=False, useOutput=False):
     print('Call process ' + str(process_arguments) + ' in workingdir ' + process_workingdir)
     current_workingdir = os.getcwd()
@@ -731,6 +735,215 @@ class TargetLinux(TargetCMake):
             )
 
 
+class TargetMingW(TargetCMake):
+    def __init__(self, name, generator, architecture):
+        super(TargetMingW, self).__init__(name, generator)
+        self.architecture = architecture
+
+    def create_project_file(self, noSqliteSrc="NO"):
+        print('Skip create_project_file for MingW')
+
+    def build(self, silent=False):
+        noSqliteSrc = "NO"
+        if "no-sqlite-src" in self.name:
+            noSqliteSrc = "YES"
+
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
+                '-DCMAKE_BUILD_TYPE=RELEASE',
+                '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                'make',
+                '-j4'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
+                '-DCMAKE_BUILD_TYPE=DEBUG',
+                '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                'make',
+                '-j4'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        libEnding = 'a'
+        if 'shared' in self.name:
+            libEnding = 'so'
+
+        debug_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Debug', 'libGameAnalytics.' + libEnding))
+        release_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'export', self.name, 'Release', 'libGameAnalytics.' + libEnding))
+
+        if not os.path.exists(os.path.dirname(debug_file)):
+            os.makedirs(os.path.dirname(debug_file))
+
+        if not os.path.exists(os.path.dirname(release_file)):
+            os.makedirs(os.path.dirname(release_file))
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
+            debug_file
+        )
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
+            release_file
+        )
+
+        if "no-sqlite-src" in self.name:
+            sqlite_debug_file = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Debug', 'libSqlite.' + libEnding))
+            sqlite_release_file = os.path.abspath(os.path.join(
+                __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Release', 'libSqlite.' + libEnding))
+
+            call_process(
+                [
+                    os.path.join(
+                        Config.CMAKE_ROOT,
+                        'bin',
+                        'cmake'
+                    ),
+                    '../../../../cmake/sqlite/',
+                    '-DPLATFORM:STRING=' + self.name,
+                    '-DCMAKE_BUILD_TYPE=RELEASE',
+                    '-DTARGET_ARCH:STRING=' + self.architecture,
+                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-G',
+                    self.generator
+                ],
+                self.sqlite_build_dir()
+            )
+
+            call_process(
+                [
+                    'make',
+                    'clean'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    'make',
+                    '-j4'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    os.path.join(
+                        Config.CMAKE_ROOT,
+                        'bin',
+                        'cmake'
+                    ),
+                    '../../../../cmake/sqlite/',
+                    '-DPLATFORM:STRING=' + self.name,
+                    '-DCMAKE_BUILD_TYPE=DEBUG',
+                    '-DTARGET_ARCH:STRING=' + self.architecture,
+                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
+                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-G',
+                    self.generator
+                ],
+                self.sqlite_build_dir()
+            )
+
+            call_process(
+                [
+                    'make',
+                    'clean'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            call_process(
+                [
+                    'make',
+                    '-j4'
+                ],
+                self.sqlite_build_dir(),
+                silent=silent
+            )
+
+            if not os.path.exists(os.path.dirname(sqlite_debug_file)):
+                os.makedirs(os.path.dirname(sqlite_debug_file))
+
+            if not os.path.exists(os.path.dirname(sqlite_release_file)):
+                os.makedirs(os.path.dirname(sqlite_release_file))
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(), 'Debug',
+                             'libSqlite.' + libEnding),
+                sqlite_debug_file
+            )
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(), 'Release',
+                             'libSqlite.' + libEnding),
+                sqlite_release_file
+            )
+
+
 all_targets = {
     'win32-vc141-static': TargetWin('win32-vc141-static', 'Visual Studio 15 2017'),
     'win32-vc141-mt-static': TargetWin('win32-vc141-mt-static', 'Visual Studio 15 2017'),
@@ -752,6 +965,7 @@ all_targets = {
     'uwp-x86-vc140-shared': TargetWin10('uwp-x86-vc140-shared', 'Visual Studio 16 2019', 'Win32'),
     'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 16 2019', 'x64'),
     'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 16 2019', 'ARM'),
+    'win32-gcc-static': TargetMingW('win32-gcc-static', 'MinGW Makefiles', '-m32'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-static-no-sqlite-src': TargetOSX('osx-static-no-sqlite-src', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
@@ -759,10 +973,10 @@ all_targets = {
     'tizen-arm-shared': TargetTizen('tizen-arm-shared', 'arm'),
     'tizen-x86-static': TargetTizen('tizen-x86-static', 'x86'),
     'tizen-x86-shared': TargetTizen('tizen-x86-shared', 'x86'),
-    #'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
-    #'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
-    #'linux-x86-clang-shared': TargetLinux('linux-x86-clang-shared', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
-    #'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    # 'linux-x86-clang-static': TargetLinux('linux-x86-clang-static', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    # 'linux-x86-gcc-static': TargetLinux('linux-x86-gcc-static', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
+    # 'linux-x86-clang-shared': TargetLinux('linux-x86-clang-shared', 'Unix Makefiles', '-m32', 'clang', 'clang++'),
+    # 'linux-x86-gcc-shared': TargetLinux('linux-x86-gcc-shared', 'Unix Makefiles', '-m32', 'gcc', 'g++'),
     'linux-x64-clang-static': TargetLinux('linux-x64-clang-static', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
     'linux-x64-clang-static-no-sqlite-src': TargetLinux('linux-x64-clang-static-no-sqlite-src', 'Unix Makefiles', '-m64', 'clang', 'clang++'),
     'linux-x64-gcc-static': TargetLinux('linux-x64-gcc-static', 'Unix Makefiles', '-m64', 'gcc', 'g++'),
@@ -781,6 +995,7 @@ available_targets = {
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
+        'win32-gcc-static': all_targets['win32-gcc-static'],
     },
     'Windows': {
         # 'win32-vc141-static': all_targets['win32-vc141-static'],
@@ -815,10 +1030,10 @@ available_targets = {
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
     },
     'Linux': {
-        #'linux-x86-clang-static': all_targets['linux-x86-clang-static'],
-        #'linux-x86-gcc-static': all_targets['linux-x86-gcc-static'],
-        #'linux-x86-clang-shared': all_targets['linux-x86-clang-shared'],
-        #'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
+        # 'linux-x86-clang-static': all_targets['linux-x86-clang-static'],
+        # 'linux-x86-gcc-static': all_targets['linux-x86-gcc-static'],
+        # 'linux-x86-clang-shared': all_targets['linux-x86-clang-shared'],
+        # 'linux-x86-gcc-shared': all_targets['linux-x86-gcc-shared'],
         'linux-x64-clang-static': all_targets['linux-x64-clang-static'],
         'linux-x64-clang-static-no-sqlite-src': all_targets['linux-x64-clang-static-no-sqlite-src'],
         'linux-x64-gcc-static': all_targets['linux-x64-gcc-static'],
