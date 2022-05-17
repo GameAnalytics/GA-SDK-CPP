@@ -748,80 +748,6 @@ class TargetMingW(TargetCMake):
         if "no-sqlite-src" in self.name:
             noSqliteSrc = "YES"
 
-        call_process(
-            [
-                os.path.join(
-                    Config.CMAKE_ROOT,
-                    'bin',
-                    'cmake'
-                ),
-                '../../../cmake/gameanalytics/',
-                '-DPLATFORM:STRING=' + self.name,
-                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
-                '-DCMAKE_BUILD_TYPE=RELEASE',
-                '-DTARGET_ARCH:STRING=' + self.architecture,
-                '-G',
-                self.generator
-            ],
-            self.build_dir()
-        )
-
-        call_process(
-            [
-                'make',
-                'clean'
-            ],
-            self.build_dir(),
-            silent=silent
-        )
-
-        call_process(
-            [
-                'make',
-                '-j4'
-            ],
-            self.build_dir(),
-            silent=silent
-        )
-
-        call_process(
-            [
-                os.path.join(
-                    Config.CMAKE_ROOT,
-                    'bin',
-                    'cmake'
-                ),
-                '../../../cmake/gameanalytics/',
-                '-DPLATFORM:STRING=' + self.name,
-                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
-                '-DCMAKE_BUILD_TYPE=DEBUG',
-                '-DTARGET_ARCH:STRING=' + self.architecture,
-                '-DCMAKE_C_COMPILER=' + self.ccompiler,
-                '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
-                '-G',
-                self.generator
-            ],
-            self.build_dir()
-        )
-
-        call_process(
-            [
-                'make',
-                'clean'
-            ],
-            self.build_dir(),
-            silent=silent
-        )
-
-        call_process(
-            [
-                'make',
-                '-j4'
-            ],
-            self.build_dir(),
-            silent=silent
-        )
-
         libEnding = 'a'
         if 'shared' in self.name:
             libEnding = 'so'
@@ -835,14 +761,86 @@ class TargetMingW(TargetCMake):
         if not os.path.exists(os.path.dirname(release_file)):
             os.makedirs(os.path.dirname(release_file))
 
-        shutil.move(
-            os.path.join(self.build_dir(), 'Debug', 'libGameAnalytics.' + libEnding),
-            debug_file
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
+                '-DCMAKE_BUILD_TYPE=RELEASE',
+                '-DCMAKE_CXX_FLAGS=' + self.architecture,
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'mingw32-make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                'mingw32-make',
+                '-j4'
+            ],
+            self.build_dir(),
+            silent=silent
         )
 
         shutil.move(
-            os.path.join(self.build_dir(), 'Release', 'libGameAnalytics.' + libEnding),
+            os.path.join(self.build_dir(), 'libGameAnalytics.' + libEnding),
             release_file
+        )
+
+        call_process(
+            [
+                os.path.join(
+                    Config.CMAKE_ROOT,
+                    'bin',
+                    'cmake'
+                ),
+                '../../../cmake/gameanalytics/',
+                '-DPLATFORM:STRING=' + self.name,
+                '-DNO_SQLITE_SRC:STRING=' + noSqliteSrc,
+                '-DCMAKE_BUILD_TYPE=DEBUG',
+                '-DCMAKE_CXX_FLAGS=' + self.architecture,
+                '-G',
+                self.generator
+            ],
+            self.build_dir()
+        )
+
+        call_process(
+            [
+                'mingw32-make',
+                'clean'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        call_process(
+            [
+                'mingw32-make',
+                '-j4'
+            ],
+            self.build_dir(),
+            silent=silent
+        )
+
+        shutil.move(
+            os.path.join(self.build_dir(), 'libGameAnalytics.' + libEnding),
+            debug_file
         )
 
         if "no-sqlite-src" in self.name:
@@ -850,6 +848,12 @@ class TargetMingW(TargetCMake):
                 __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Debug', 'libSqlite.' + libEnding))
             sqlite_release_file = os.path.abspath(os.path.join(
                 __file__, '..', '..', '..', 'export', 'sqlite', self.name, 'Release', 'libSqlite.' + libEnding))
+
+            if not os.path.exists(os.path.dirname(sqlite_debug_file)):
+                os.makedirs(os.path.dirname(sqlite_debug_file))
+
+            if not os.path.exists(os.path.dirname(sqlite_release_file)):
+                os.makedirs(os.path.dirname(sqlite_release_file))
 
             call_process(
                 [
@@ -861,9 +865,7 @@ class TargetMingW(TargetCMake):
                     '../../../../cmake/sqlite/',
                     '-DPLATFORM:STRING=' + self.name,
                     '-DCMAKE_BUILD_TYPE=RELEASE',
-                    '-DTARGET_ARCH:STRING=' + self.architecture,
-                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
-                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-DCMAKE_CXX_FLAGS=' + self.architecture,
                     '-G',
                     self.generator
                 ],
@@ -872,7 +874,7 @@ class TargetMingW(TargetCMake):
 
             call_process(
                 [
-                    'make',
+                    'mingw32-make',
                     'clean'
                 ],
                 self.sqlite_build_dir(),
@@ -881,11 +883,17 @@ class TargetMingW(TargetCMake):
 
             call_process(
                 [
-                    'make',
+                    'mingw32-make',
                     '-j4'
                 ],
                 self.sqlite_build_dir(),
                 silent=silent
+            )
+
+            shutil.move(
+                os.path.join(self.sqlite_build_dir(),
+                             'libSqlite.' + libEnding),
+                sqlite_release_file
             )
 
             call_process(
@@ -898,9 +906,7 @@ class TargetMingW(TargetCMake):
                     '../../../../cmake/sqlite/',
                     '-DPLATFORM:STRING=' + self.name,
                     '-DCMAKE_BUILD_TYPE=DEBUG',
-                    '-DTARGET_ARCH:STRING=' + self.architecture,
-                    '-DCMAKE_C_COMPILER=' + self.ccompiler,
-                    '-DCMAKE_CXX_COMPILER=' + self.cppcompiler,
+                    '-DCMAKE_CXX_FLAGS=' + self.architecture,
                     '-G',
                     self.generator
                 ],
@@ -909,7 +915,7 @@ class TargetMingW(TargetCMake):
 
             call_process(
                 [
-                    'make',
+                    'mingw32-make',
                     'clean'
                 ],
                 self.sqlite_build_dir(),
@@ -918,29 +924,17 @@ class TargetMingW(TargetCMake):
 
             call_process(
                 [
-                    'make',
+                    'mingw32-make',
                     '-j4'
                 ],
                 self.sqlite_build_dir(),
                 silent=silent
             )
 
-            if not os.path.exists(os.path.dirname(sqlite_debug_file)):
-                os.makedirs(os.path.dirname(sqlite_debug_file))
-
-            if not os.path.exists(os.path.dirname(sqlite_release_file)):
-                os.makedirs(os.path.dirname(sqlite_release_file))
-
             shutil.move(
-                os.path.join(self.sqlite_build_dir(), 'Debug',
+                os.path.join(self.sqlite_build_dir(),
                              'libSqlite.' + libEnding),
                 sqlite_debug_file
-            )
-
-            shutil.move(
-                os.path.join(self.sqlite_build_dir(), 'Release',
-                             'libSqlite.' + libEnding),
-                sqlite_release_file
             )
 
 
@@ -966,6 +960,8 @@ all_targets = {
     'uwp-x64-vc140-shared': TargetWin10('uwp-x64-vc140-shared', 'Visual Studio 16 2019', 'x64'),
     'uwp-arm-vc140-shared': TargetWin10('uwp-arm-vc140-shared', 'Visual Studio 16 2019', 'ARM'),
     'win32-gcc-static': TargetMingW('win32-gcc-static', 'MinGW Makefiles', '-m32'),
+    'win64-gcc-static': TargetMingW('win64-gcc-static', 'MinGW Makefiles', '-m64'),
+    'win32-gcc-shared': TargetMingW('win32-gcc-shared', 'MinGW Makefiles', '-m32'),
     'osx-static': TargetOSX('osx-static', 'Xcode'),
     'osx-static-no-sqlite-src': TargetOSX('osx-static-no-sqlite-src', 'Xcode'),
     'osx-shared': TargetOSX('osx-shared', 'Xcode'),
@@ -995,7 +991,6 @@ available_targets = {
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
-        'win32-gcc-static': all_targets['win32-gcc-static'],
     },
     'Windows': {
         # 'win32-vc141-static': all_targets['win32-vc141-static'],
@@ -1028,6 +1023,9 @@ available_targets = {
         'tizen-arm-shared': all_targets['tizen-arm-shared'],
         'tizen-x86-static': all_targets['tizen-x86-static'],
         'tizen-x86-shared': all_targets['tizen-x86-shared'],
+        'win32-gcc-static': all_targets['win32-gcc-static'],
+        'win64-gcc-static': all_targets['win64-gcc-static'],
+        'win32-gcc-shared': all_targets['win32-gcc-shared'],
     },
     'Linux': {
         # 'linux-x86-clang-static': all_targets['linux-x86-clang-static'],
@@ -1087,6 +1085,11 @@ def build(target_name, vs, silent=False):
     if platform.system() == 'Windows':
         if 'tizen' in target_name:
             target.build(silent=silent)
+        elif 'gcc' in target_name:
+            if cmd_exists("gcc"):
+                target.build(silent=silent)
+            else:
+                print("MingW is not installed. Skipping target: " + target_name)
         else:
             target.build(silent=silent, vs=vs)
     else:

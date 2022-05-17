@@ -58,6 +58,13 @@ EVAL_CONDITION(WIN64_VC141_STATIC "${PLATFORM}" STREQUAL "win64-vc141-static")
 EVAL_CONDITION(WIN64_VC141_MT_STATIC "${PLATFORM}" STREQUAL "win64-vc141-mt-static")
 EVAL_CONDITION(WIN64_VC141_SHARED "${PLATFORM}" STREQUAL "win64-vc141-shared")
 
+# MinGW
+EVAL_CONDITION(WIN32_GCC_STATIC "${PLATFORM}" STREQUAL "win32-gcc-static")
+EVAL_CONDITION(WIN64_GCC_STATIC "${PLATFORM}" STREQUAL "win64-gcc-static")
+EVAL_CONDITION(WIN32_GCC_SHARED "${PLATFORM}" STREQUAL "win32-gcc-shared")
+
+EVAL_CONDITION(MINGW_ALL "${WIN32_GCC_STATIC}" OR "${WIN64_GCC_STATIC}" OR "${WIN32_GCC_SHARED}")
+
 EVAL_CONDITION(WIN_STATIC "${WIN32_VC120_MT_STATIC}" OR "${WIN64_VC120_MT_STATIC}" OR "${WIN32_VC120_STATIC}" OR "${WIN64_VC120_STATIC}" OR "${WIN32_VC140_STATIC}" OR "${WIN32_VC140_STATIC_NO_SQLITE_SRC}" OR "${WIN32_VC140_MT_STATIC}" OR "${WIN64_VC140_STATIC}" OR "${WIN64_VC140_STATIC_NO_SQLITE_SRC}" OR "${WIN64_VC140_MT_STATIC}" OR "${WIN32_VC141_STATIC}" OR "${WIN32_VC141_MT_STATIC}" OR "${WIN64_VC141_STATIC}" OR "${WIN64_VC141_MT_STATIC}")
 EVAL_CONDITION(WIN_MT "${WIN32_VC120_MT_STATIC}" OR "${WIN64_VC120_MT_STATIC}" OR "${WIN32_VC140_MT_STATIC}" OR "${WIN64_VC140_MT_STATIC}" OR "${WIN32_VC141_MT_STATIC}" OR "${WIN64_VC141_MT_STATIC}")
 EVAL_CONDITION(UWP_STATIC "${UWP_X86_VC140_STATIC}" OR "${UWP_X64_VC140_STATIC}" OR "${UWP_ARM_VC140_STATIC}")
@@ -167,6 +174,10 @@ endif("${OSX_ALL}")
 if("${LINUX_ALL}")
     add_definitions("-DGUID_LIBUUID -DUSE_LINUX")
 endif("${LINUX_ALL}")
+
+if("${MINGW_ALL}")
+    add_definitions("-D__STDC_FORMAT_MACROS -DUSE_MINGW")
+endif("${MINGW_ALL}")
 
 message(STATUS "********************** DEPENDENCIES_DIR is ${DEPENDENCIES_DIR}")
 add_definitions("-DUSE_OPENSSL -DCURL_STATICLIB")
@@ -293,6 +304,53 @@ elseif("${LINUX_ALL}")
         "${DEPENDENCIES_DIR}/crossguid"
         "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/stacktrace"
+        "${DEPENDENCIES_DIR}/zf_log"
+        "${DEPENDENCIES_DIR}/sqlite"
+        "${DEPENDENCIES_DIR}/crypto"
+        "${DEPENDENCIES_DIR}/miniz"
+        "${DEPENDENCIES_DIR}/curl/include"
+    )
+elseif("${MINGW_ALL}")
+    # traverse all the subdirectories of the matched directory
+
+    if("${NO_SQLITE}")
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    else()
+        FILE(GLOB_RECURSE CPP_SOURCES
+            # Add GameAnalytics Sources
+            "${GA_SOURCE_DIR}/*.cpp"
+            "${GA_SOURCE_DIR}/*.h"
+
+            # Add dependencies
+            "${DEPENDENCIES_DIR}/crossguid/*.cpp"
+            "${DEPENDENCIES_DIR}/sqlite/*.c"
+            "${DEPENDENCIES_DIR}/sqlite/*.h"
+            "${DEPENDENCIES_DIR}/crypto/*.c"
+            "${DEPENDENCIES_DIR}/crypto/*.cpp"
+            "${DEPENDENCIES_DIR}/zf_log/*.c"
+            "${DEPENDENCIES_DIR}/zf_log/*.h"
+            "${DEPENDENCIES_DIR}/miniz/*.c"
+        )
+    endif("${NO_SQLITE}")
+
+    add_definitions("-DCRYPTOPP_DISABLE_ASM")
+
+    include_directories(
+        "${DEPENDENCIES_DIR}/crossguid"
+        "${DEPENDENCIES_DIR}/rapidjson"
         "${DEPENDENCIES_DIR}/zf_log"
         "${DEPENDENCIES_DIR}/sqlite"
         "${DEPENDENCIES_DIR}/crypto"

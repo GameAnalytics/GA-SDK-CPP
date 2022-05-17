@@ -58,7 +58,11 @@ namespace gameanalytics
 {
     namespace device
     {
+#if USE_MINGW
+        bool GADevice::_useDeviceInfo = false;
+#else
         bool GADevice::_useDeviceInfo = true;
+#endif
         char GADevice::_writablepath[MAX_PATH_LENGTH] = "";
         int GADevice::_writablepathStatus = 0;
         char GADevice::_buildPlatform[33] = "";
