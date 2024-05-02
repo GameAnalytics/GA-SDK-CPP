@@ -402,13 +402,17 @@ namespace gameanalytics
                         hResult = services->ExecQuery(L"WQL", L"SELECT * FROM Win32_ComputerSystem", WBEM_FLAG_FORWARD_ONLY |
                             WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &classObjectEnumerator);
                         if (!hasFailed()) {
-                            IWbemClassObject *classObject;
+                            IWbemClassObject *classObject{nullptr};
                             ULONG uReturn = 0;
                             hResult = classObjectEnumerator->Next(WBEM_INFINITE, 1, &classObject, &uReturn);
                             if (uReturn != 0) {
                                 manufacturer = getValue(classObject, (LPCWSTR)L"Manufacturer");
                             }
-                            classObject->Release();
+
+                            if(classObject)
+                            {
+                                classObject->Release();
+                            }
                         }
                         classObjectEnumerator->Release();
                     }
@@ -459,6 +463,41 @@ namespace gameanalytics
             }
 #else
 #if defined(_WIN32) && !GA_SHARED_LIB
+
+        try
+        {
+            constexpr const TCHAR* subkey = _T("SYSTEM\\CurrentControlSet\\Control\\SystemInformation");
+            constexpr const TCHAR* value  = _T("SystemProductName");
+    
+            constexpr DWORD maxBufSize = 128;
+            DWORD size = maxBufSize;
+            TCHAR buffer[maxBufSize] = _T("");
+            RegGetValue(HKEY_LOCAL_MACHINE, subkey, value, RRF_RT_REG_SZ, NULL, buffer, &size);
+            
+            if (!GetLastError() && size > 0)
+            {
+                std::string modelName;
+
+            #ifdef UNICODE
+                std::wstring wstr(buffer, buffer + size);
+                modelName = std::string(wstr.begin(), wstr.end());
+            #else
+                modelName = std::string(buffer, buffer + size);
+            #endif
+
+                snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", modelName.c_str());
+                return true;
+            }
+
+            std::cout << "Found device name:" << GADevice::_deviceModel;
+        }
+        catch(...)
+        {
+            std::cerr << "Failed to retrieve the device name";
+        }
+
+        #ifdef GA_USE_WBEM_SERVICES
+
             IWbemLocator *locator = nullptr;
             IWbemServices *services = nullptr;
             auto hResult = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -531,6 +570,10 @@ namespace gameanalytics
             CoUninitialize();
 
             snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", _com_util::ConvertBSTRToString(model));
+        #elif
+            return;
+        #endif // GA_USE_WBEM_SERVICES
+
 #elif IS_MAC
             size_t len = 0;
             sysctlbyname("hw.model", NULL, &len, NULL, 0);
