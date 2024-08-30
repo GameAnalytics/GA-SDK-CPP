@@ -570,7 +570,7 @@ namespace gameanalytics
             CoUninitialize();
 
             snprintf(GADevice::_deviceModel, sizeof(GADevice::_deviceModel), "%s", _com_util::ConvertBSTRToString(model));
-        #elif
+        #else
             return;
         #endif // GA_USE_WBEM_SERVICES
 
