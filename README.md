@@ -1,5 +1,5 @@
 > [!WARNING] 
-> This repository has been archived since 1st November 2024 and will not receive further updates. Please upgrade to the new GameAnalytics C++ SDK found here: [https://github.com/GameAnalytics/gameanalytics-sdk-cpp]()
+> This repository has been archived since 1st November 2024 and will not receive further updates. Please upgrade to the new GameAnalytics C++ SDK found here: [https://github.com/GameAnalytics/gameanalytics-sdk-cpp](https://github.com/GameAnalytics/gameanalytics-sdk-cpp)
 
 GA-SDK-CPP (legacy)
 ==========
