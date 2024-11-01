@@ -1,6 +1,7 @@
-[![Travis](https://img.shields.io/travis/GameAnalytics/GA-SDK-CPP/master.svg)](https://github.com/GameAnalytics/GA-SDK-CPP)
+> [!WARNING] 
+> This repository has been archived since 1st November 2024 and will not receive further updates. Please upgrade to the new GameAnalytics C++ SDK found here: [https://github.com/GameAnalytics/gameanalytics-sdk-cpp]()
 
-GA-SDK-CPP
+GA-SDK-CPP (legacy)
 ==========
 
 GameAnalytics C++ SDK
